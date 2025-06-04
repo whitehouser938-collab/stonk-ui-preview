@@ -1,42 +1,71 @@
-import { useState } from "react";
-import { Rocket, Upload, Calendar, DollarSign, Users, Lock } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { useState, useEffect } from "react";
+import { Rocket, Upload, Calendar, DollarSign, Users, Lock, Building, TrendingUp, Activity } from "lucide-react";
 
-interface TokenLaunchData {
-  name: string;
+interface IPOLaunchData {
+  companyName: string;
   symbol: string;
-  totalSupply: string;
-  initialPrice: string;
+  sharesOffered: string;
+  priceRange: string;
   description: string;
   website: string;
-  whitepaper: string;
+  prospectus: string;
   launchDate: string;
-  vestingPeriod: string;
-  liquidityLock: string;
+  lockupPeriod: string;
+  underwriters: string;
+  sector: string;
+  revenue: string;
+  employees: string;
 }
 
+const recentIPOs = [
+  { symbol: "RBLX", name: "Roblox Corp", price: 68.50, change: 15.2, volume: 45000000, date: "2024-01-15" },
+  { symbol: "COIN", name: "Coinbase Global", price: 245.30, change: -3.4, volume: 12000000, date: "2024-01-12" },
+  { symbol: "DASH", name: "DoorDash Inc", price: 142.75, change: 8.7, volume: 8500000, date: "2024-01-10" },
+  { symbol: "SNOW", name: "Snowflake Inc", price: 198.90, change: -2.1, volume: 6700000, date: "2024-01-08" },
+  { symbol: "PLTR", name: "Palantir Technologies", price: 16.45, change: 12.8, volume: 35000000, date: "2024-01-05" }
+];
+
+const upcomingIPOs = [
+  { company: "TechCorp Solutions", symbol: "TCHS", priceRange: "$18-22", date: "2024-02-15", shares: "25M" },
+  { company: "Green Energy Systems", symbol: "GREN", priceRange: "$12-16", date: "2024-02-20", shares: "30M" },
+  { company: "FinTech Innovations", symbol: "FTIN", priceRange: "$25-30", date: "2024-02-25", shares: "20M" },
+  { company: "BioMed Research Corp", symbol: "BMRC", priceRange: "$35-42", date: "2024-03-01", shares: "15M" }
+];
+
+const marketStats = {
+  totalIPOs: 156,
+  totalRaised: 42500000000,
+  avgReturn: 23.4,
+  successRate: 78.5
+};
+
 export function ICOLaunchpad() {
-  const [formData, setFormData] = useState<TokenLaunchData>({
-    name: "",
+  const [formData, setFormData] = useState<IPOLaunchData>({
+    companyName: "",
     symbol: "",
-    totalSupply: "",
-    initialPrice: "",
+    sharesOffered: "",
+    priceRange: "",
     description: "",
     website: "",
-    whitepaper: "",
+    prospectus: "",
     launchDate: "",
-    vestingPeriod: "",
-    liquidityLock: ""
+    lockupPeriod: "",
+    underwriters: "",
+    sector: "",
+    revenue: "",
+    employees: ""
   });
 
   const [currentStep, setCurrentStep] = useState(1);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const totalSteps = 3;
 
-  const handleInputChange = (key: keyof TokenLaunchData, value: string) => {
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleInputChange = (key: keyof IPOLaunchData, value: string) => {
     setFormData(prev => ({ ...prev, [key]: value }));
   };
 
@@ -53,210 +82,287 @@ export function ICOLaunchpad() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold text-orange-400 font-mono">TOKEN LAUNCHPAD</h2>
-        <div className="flex items-center space-x-2">
-          <Rocket className="w-6 h-6 text-cyan-400" />
-          <span className="text-gray-400">Launch Your Token</span>
+    <div className="h-screen overflow-auto bg-black text-gray-100 text-xs font-mono">
+      {/* Top Time Bar */}
+      <div className="bg-gray-900 border-b border-orange-500/30 p-1 flex justify-between items-center">
+        <div className="flex space-x-6">
+          <span className="text-orange-400">IPO LAUNCHPAD</span>
+          <span className="text-orange-400">EQUITY MARKETS</span>
+          <span className="text-orange-400">NYSE/NASDAQ</span>
+        </div>
+        <div className="flex items-center space-x-4">
+          <span className="text-orange-400">EST: {currentTime.toLocaleTimeString('en-US', { timeZone: 'America/New_York' })}</span>
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span className="text-green-400">LIVE</span>
+          </div>
         </div>
       </div>
 
-      {/* Progress Steps */}
-      <div className="flex items-center space-x-4 mb-8">
-        {[1, 2, 3].map((step) => (
-          <div key={step} className="flex items-center">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold border-2 ${
-              step <= currentStep 
-                ? 'bg-cyan-500 border-cyan-500 text-white' 
-                : 'border-gray-600 text-gray-400'
-            }`}>
-              {step}
-            </div>
-            {step < totalSteps && (
-              <div className={`w-16 h-0.5 mx-2 ${
-                step < currentStep ? 'bg-cyan-500' : 'bg-gray-600'
-              }`} />
-            )}
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-12 gap-6">
-        {/* Main Form */}
+      <div className="grid grid-cols-12 gap-1 p-1">
+        
+        {/* Left Column - IPO Form */}
         <div className="col-span-8">
-          <Card className="bg-gray-900/50 border-gray-700 p-8">
+          
+          {/* Progress Steps */}
+          <div className="bg-gray-900 border border-gray-700 p-2 mb-1">
+            <div className="flex items-center space-x-2">
+              {[1, 2, 3].map((step) => (
+                <div key={step} className="flex items-center">
+                  <div className={`w-6 h-6 rounded text-xs flex items-center justify-center font-bold border ${
+                    step <= currentStep 
+                      ? 'bg-orange-500 border-orange-500 text-black' 
+                      : 'border-gray-600 text-gray-400'
+                  }`}>
+                    {step}
+                  </div>
+                  {step < totalSteps && (
+                    <div className={`w-8 h-0.5 mx-1 ${
+                      step < currentStep ? 'bg-orange-500' : 'bg-gray-600'
+                    }`} />
+                  )}
+                </div>
+              ))}
+              <span className="ml-4 text-orange-400">
+                STEP {currentStep}: {
+                  currentStep === 1 ? "COMPANY INFO" : 
+                  currentStep === 2 ? "OFFERING DETAILS" : 
+                  "COMPLIANCE & REVIEW"
+                }
+              </span>
+            </div>
+          </div>
+
+          {/* Main Form */}
+          <div className="bg-gray-900 border border-gray-700 p-3">
             {currentStep === 1 && (
-              <div className="space-y-6">
-                <h3 className="text-2xl font-bold text-white mb-6">Basic Token Information</h3>
+              <div className="space-y-3">
+                <div className="text-orange-400 mb-3">COMPANY INFORMATION</div>
                 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-gray-200 mb-2 block">Token Name</Label>
-                    <Input
-                      placeholder="e.g., MyAwesome Token"
-                      value={formData.name}
-                      onChange={(e) => handleInputChange("name", e.target.value)}
-                      className="bg-gray-800 border-gray-600 text-white"
+                    <div className="text-gray-400 mb-1">Company Name</div>
+                    <input
+                      placeholder="e.g., TechCorp Inc"
+                      value={formData.companyName}
+                      onChange={(e) => handleInputChange("companyName", e.target.value)}
+                      className="w-full p-1 bg-black border border-gray-600 text-white text-xs font-mono"
                     />
                   </div>
                   <div>
-                    <Label className="text-gray-200 mb-2 block">Token Symbol</Label>
-                    <Input
-                      placeholder="e.g., MAT"
+                    <div className="text-gray-400 mb-1">Ticker Symbol</div>
+                    <input
+                      placeholder="e.g., TECH"
                       value={formData.symbol}
                       onChange={(e) => handleInputChange("symbol", e.target.value)}
-                      className="bg-gray-800 border-gray-600 text-white"
+                      className="w-full p-1 bg-black border border-gray-600 text-white text-xs font-mono"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <Label className="text-gray-200 mb-2 block">Total Supply</Label>
-                    <Input
-                      placeholder="e.g., 1000000000"
-                      value={formData.totalSupply}
-                      onChange={(e) => handleInputChange("totalSupply", e.target.value)}
-                      className="bg-gray-800 border-gray-600 text-white"
+                    <div className="text-gray-400 mb-1">Sector</div>
+                    <input
+                      placeholder="e.g., Technology"
+                      value={formData.sector}
+                      onChange={(e) => handleInputChange("sector", e.target.value)}
+                      className="w-full p-1 bg-black border border-gray-600 text-white text-xs font-mono"
                     />
                   </div>
                   <div>
-                    <Label className="text-gray-200 mb-2 block">Initial Price (USD)</Label>
-                    <Input
-                      placeholder="e.g., 0.01"
-                      value={formData.initialPrice}
-                      onChange={(e) => handleInputChange("initialPrice", e.target.value)}
-                      className="bg-gray-800 border-gray-600 text-white"
+                    <div className="text-gray-400 mb-1">Annual Revenue</div>
+                    <input
+                      placeholder="e.g., $250M"
+                      value={formData.revenue}
+                      onChange={(e) => handleInputChange("revenue", e.target.value)}
+                      className="w-full p-1 bg-black border border-gray-600 text-white text-xs font-mono"
+                    />
+                  </div>
+                  <div>
+                    <div className="text-gray-400 mb-1">Employees</div>
+                    <input
+                      placeholder="e.g., 1,500"
+                      value={formData.employees}
+                      onChange={(e) => handleInputChange("employees", e.target.value)}
+                      className="w-full p-1 bg-black border border-gray-600 text-white text-xs font-mono"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-gray-200 mb-2 block">Description</Label>
-                  <Textarea
-                    placeholder="Describe your token, its utility, and value proposition..."
+                  <div className="text-gray-400 mb-1">Company Description</div>
+                  <textarea
+                    placeholder="Describe your company's business model, competitive advantages, and market opportunity..."
                     value={formData.description}
                     onChange={(e) => handleInputChange("description", e.target.value)}
-                    className="bg-gray-800 border-gray-600 text-white min-h-32"
+                    className="w-full p-2 bg-black border border-gray-600 text-white text-xs font-mono h-20"
                   />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <div className="text-gray-400 mb-1">Website URL</div>
+                    <input
+                      placeholder="https://yourcompany.com"
+                      value={formData.website}
+                      onChange={(e) => handleInputChange("website", e.target.value)}
+                      className="w-full p-1 bg-black border border-gray-600 text-white text-xs font-mono"
+                    />
+                  </div>
+                  <div>
+                    <div className="text-gray-400 mb-1">Prospectus URL</div>
+                    <input
+                      placeholder="https://yourcompany.com/prospectus.pdf"
+                      value={formData.prospectus}
+                      onChange={(e) => handleInputChange("prospectus", e.target.value)}
+                      className="w-full p-1 bg-black border border-gray-600 text-white text-xs font-mono"
+                    />
+                  </div>
                 </div>
               </div>
             )}
 
             {currentStep === 2 && (
-              <div className="space-y-6">
-                <h3 className="text-2xl font-bold text-white mb-6">Project Details</h3>
+              <div className="space-y-3">
+                <div className="text-orange-400 mb-3">OFFERING DETAILS</div>
                 
-                <div>
-                  <Label className="text-gray-200 mb-2 block">Website URL</Label>
-                  <Input
-                    placeholder="https://yourproject.com"
-                    value={formData.website}
-                    onChange={(e) => handleInputChange("website", e.target.value)}
-                    className="bg-gray-800 border-gray-600 text-white"
-                  />
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <div className="text-gray-400 mb-1">Shares Offered</div>
+                    <input
+                      placeholder="e.g., 25,000,000"
+                      value={formData.sharesOffered}
+                      onChange={(e) => handleInputChange("sharesOffered", e.target.value)}
+                      className="w-full p-1 bg-black border border-gray-600 text-white text-xs font-mono"
+                    />
+                  </div>
+                  <div>
+                    <div className="text-gray-400 mb-1">Price Range (USD)</div>
+                    <input
+                      placeholder="e.g., $18-22"
+                      value={formData.priceRange}
+                      onChange={(e) => handleInputChange("priceRange", e.target.value)}
+                      className="w-full p-1 bg-black border border-gray-600 text-white text-xs font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <div className="text-gray-400 mb-1">Launch Date</div>
+                    <input
+                      type="date"
+                      value={formData.launchDate}
+                      onChange={(e) => handleInputChange("launchDate", e.target.value)}
+                      className="w-full p-1 bg-black border border-gray-600 text-white text-xs font-mono"
+                    />
+                  </div>
+                  <div>
+                    <div className="text-gray-400 mb-1">Lock-up Period (days)</div>
+                    <input
+                      placeholder="e.g., 180"
+                      value={formData.lockupPeriod}
+                      onChange={(e) => handleInputChange("lockupPeriod", e.target.value)}
+                      className="w-full p-1 bg-black border border-gray-600 text-white text-xs font-mono"
+                    />
+                  </div>
                 </div>
 
                 <div>
-                  <Label className="text-gray-200 mb-2 block">Whitepaper URL</Label>
-                  <Input
-                    placeholder="https://yourproject.com/whitepaper.pdf"
-                    value={formData.whitepaper}
-                    onChange={(e) => handleInputChange("whitepaper", e.target.value)}
-                    className="bg-gray-800 border-gray-600 text-white"
+                  <div className="text-gray-400 mb-1">Lead Underwriters</div>
+                  <input
+                    placeholder="e.g., Goldman Sachs, Morgan Stanley"
+                    value={formData.underwriters}
+                    onChange={(e) => handleInputChange("underwriters", e.target.value)}
+                    className="w-full p-1 bg-black border border-gray-600 text-white text-xs font-mono"
                   />
                 </div>
 
-                <div>
-                  <Label className="text-gray-200 mb-2 block">Launch Date</Label>
-                  <Input
-                    type="datetime-local"
-                    value={formData.launchDate}
-                    onChange={(e) => handleInputChange("launchDate", e.target.value)}
-                    className="bg-gray-800 border-gray-600 text-white"
-                  />
-                </div>
-
-                <div className="bg-gray-800/50 border border-gray-600 rounded-lg p-6">
-                  <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
-                    <Upload className="w-5 h-5 mr-2" />
-                    Token Logo
-                  </h4>
-                  <div className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center">
-                    <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-400">Click to upload or drag and drop</p>
-                    <p className="text-sm text-gray-500">PNG, JPG up to 2MB</p>
+                <div className="bg-orange-900/20 border border-orange-700 p-3">
+                  <div className="text-orange-400 font-bold mb-2">💰 ESTIMATED PROCEEDS</div>
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div>
+                      <span className="text-gray-400">Gross Proceeds:</span>
+                      <span className="text-white ml-2">$500M - $550M</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Net Proceeds:</span>
+                      <span className="text-white ml-2">$465M - $512M</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Underwriter Fees:</span>
+                      <span className="text-white ml-2">$35M - $38M</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Market Cap:</span>
+                      <span className="text-white ml-2">$2.3B - $2.8B</span>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
 
             {currentStep === 3 && (
-              <div className="space-y-6">
-                <h3 className="text-2xl font-bold text-white mb-6">Tokenomics & Security</h3>
+              <div className="space-y-3">
+                <div className="text-orange-400 mb-3">COMPLIANCE & REVIEW</div>
                 
-                <div className="grid grid-cols-2 gap-6">
-                  <div>
-                    <Label className="text-gray-200 mb-2 block">Vesting Period (months)</Label>
-                    <Input
-                      placeholder="e.g., 12"
-                      value={formData.vestingPeriod}
-                      onChange={(e) => handleInputChange("vestingPeriod", e.target.value)}
-                      className="bg-gray-800 border-gray-600 text-white"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-gray-200 mb-2 block">Liquidity Lock (months)</Label>
-                    <Input
-                      placeholder="e.g., 24"
-                      value={formData.liquidityLock}
-                      onChange={(e) => handleInputChange("liquidityLock", e.target.value)}
-                      className="bg-gray-800 border-gray-600 text-white"
-                    />
-                  </div>
-                </div>
-
-                <div className="bg-amber-900/20 border border-amber-700 rounded-lg p-6">
-                  <h4 className="text-lg font-semibold text-amber-400 mb-3">⚠️ Security Checklist</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center text-gray-300">
-                      <input type="checkbox" className="mr-3" />
-                      Smart contract has been audited by a reputable firm
+                <div className="bg-amber-900/20 border border-amber-700 p-3">
+                  <div className="text-amber-400 font-bold mb-2">⚠️ REGULATORY CHECKLIST</div>
+                  <div className="space-y-1 text-xs">
+                    <div className="flex items-center">
+                      <input type="checkbox" className="mr-2" />
+                      <span className="text-gray-300">SEC Form S-1 Registration Statement filed</span>
                     </div>
-                    <div className="flex items-center text-gray-300">
-                      <input type="checkbox" className="mr-3" />
-                      Multi-signature wallet setup for team funds
+                    <div className="flex items-center">
+                      <input type="checkbox" className="mr-2" />
+                      <span className="text-gray-300">Audited financials for last 3 years</span>
                     </div>
-                    <div className="flex items-center text-gray-300">
-                      <input type="checkbox" className="mr-3" />
-                      Liquidity will be locked for specified period
+                    <div className="flex items-center">
+                      <input type="checkbox" className="mr-2" />
+                      <span className="text-gray-300">Management roadshow scheduled</span>
                     </div>
-                    <div className="flex items-center text-gray-300">
-                      <input type="checkbox" className="mr-3" />
-                      Team tokens have vesting schedule
+                    <div className="flex items-center">
+                      <input type="checkbox" className="mr-2" />
+                      <span className="text-gray-300">Underwriter agreements executed</span>
+                    </div>
+                    <div className="flex items-center">
+                      <input type="checkbox" className="mr-2" />
+                      <span className="text-gray-300">Lock-up agreements with insiders</span>
+                    </div>
+                    <div className="flex items-center">
+                      <input type="checkbox" className="mr-2" />
+                      <span className="text-gray-300">Exchange listing requirements met</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-cyan-900/20 border border-cyan-700 rounded-lg p-6">
-                  <h4 className="text-lg font-semibold text-cyan-400 mb-3">Launch Summary</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="bg-orange-900/20 border border-orange-700 p-3">
+                  <div className="text-orange-400 font-bold mb-2">📊 IPO SUMMARY</div>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
-                      <span className="text-gray-400">Token:</span>
-                      <span className="text-white ml-2">{formData.name || "N/A"}</span>
+                      <span className="text-gray-400">Company:</span>
+                      <span className="text-white ml-2">{formData.companyName || "N/A"}</span>
                     </div>
                     <div>
                       <span className="text-gray-400">Symbol:</span>
                       <span className="text-white ml-2">{formData.symbol || "N/A"}</span>
                     </div>
                     <div>
-                      <span className="text-gray-400">Supply:</span>
-                      <span className="text-white ml-2">{formData.totalSupply || "N/A"}</span>
+                      <span className="text-gray-400">Shares:</span>
+                      <span className="text-white ml-2">{formData.sharesOffered || "N/A"}</span>
                     </div>
                     <div>
-                      <span className="text-gray-400">Price:</span>
-                      <span className="text-white ml-2">${formData.initialPrice || "N/A"}</span>
+                      <span className="text-gray-400">Price Range:</span>
+                      <span className="text-white ml-2">{formData.priceRange || "N/A"}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Sector:</span>
+                      <span className="text-white ml-2">{formData.sector || "N/A"}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Revenue:</span>
+                      <span className="text-white ml-2">{formData.revenue || "N/A"}</span>
                     </div>
                   </div>
                 </div>
@@ -264,89 +370,151 @@ export function ICOLaunchpad() {
             )}
 
             {/* Navigation Buttons */}
-            <div className="flex justify-between mt-8">
-              <Button
+            <div className="flex justify-between mt-4">
+              <button
                 onClick={prevStep}
                 disabled={currentStep === 1}
-                variant="outline"
-                className="border-gray-600 text-gray-400 hover:bg-gray-800"
+                className="px-3 py-1 border border-gray-600 text-gray-400 hover:bg-gray-800 disabled:opacity-50 text-xs"
               >
-                Previous
-              </Button>
+                PREVIOUS
+              </button>
               
               {currentStep < totalSteps ? (
-                <Button
+                <button
                   onClick={nextStep}
-                  className="bg-cyan-600 hover:bg-cyan-700 text-white"
+                  className="px-3 py-1 bg-orange-600 hover:bg-orange-700 text-black text-xs font-bold"
                 >
-                  Next Step
-                </Button>
+                  NEXT STEP
+                </button>
               ) : (
-                <Button className="bg-green-600 hover:bg-green-700 text-white">
-                  Launch Token
-                </Button>
+                <button className="px-3 py-1 bg-green-600 hover:bg-green-700 text-black text-xs font-bold">
+                  SUBMIT IPO
+                </button>
               )}
             </div>
-          </Card>
+          </div>
         </div>
 
-        {/* Sidebar */}
-        <div className="col-span-4 space-y-6">
-          <Card className="bg-gray-900/50 border-gray-700 p-6">
-            <h4 className="text-lg font-semibold text-gray-200 mb-4 flex items-center">
-              <DollarSign className="w-5 h-5 mr-2" />
-              Launch Costs
-            </h4>
-            <div className="space-y-3">
+        {/* Right Column - Market Data */}
+        <div className="col-span-4 space-y-1">
+          
+          {/* Market Stats */}
+          <div className="bg-gray-900 border border-gray-700 p-2">
+            <div className="text-orange-400 mb-2">IPO MARKET STATS (YTD)</div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="bg-black border border-gray-800 p-1">
+                <div className="text-gray-400">TOTAL IPOs</div>
+                <div className="text-white font-mono">{marketStats.totalIPOs}</div>
+              </div>
+              <div className="bg-black border border-gray-800 p-1">
+                <div className="text-gray-400">TOTAL RAISED</div>
+                <div className="text-white font-mono">${(marketStats.totalRaised / 1e9).toFixed(1)}B</div>
+              </div>
+              <div className="bg-black border border-gray-800 p-1">
+                <div className="text-gray-400">AVG RETURN</div>
+                <div className="text-green-400 font-mono">+{marketStats.avgReturn.toFixed(1)}%</div>
+              </div>
+              <div className="bg-black border border-gray-800 p-1">
+                <div className="text-gray-400">SUCCESS RATE</div>
+                <div className="text-green-400 font-mono">{marketStats.successRate.toFixed(1)}%</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Recent IPOs */}
+          <div className="bg-gray-900 border border-gray-700 p-2">
+            <div className="text-orange-400 mb-2">RECENT IPO PERFORMANCE</div>
+            <div className="space-y-1">
+              {recentIPOs.map((ipo, index) => (
+                <div key={index} className="bg-black border border-gray-800 p-1 text-xs">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="text-orange-400 font-bold">{ipo.symbol}</span>
+                      <span className="text-gray-400 ml-2">{ipo.name}</span>
+                    </div>
+                    <span className="text-gray-400">{ipo.date}</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-1">
+                    <span className="text-white font-mono">${ipo.price.toFixed(2)}</span>
+                    <span className={`font-mono ${ipo.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {ipo.change >= 0 ? '+' : ''}{ipo.change.toFixed(1)}%
+                    </span>
+                    <span className="text-gray-400 font-mono">Vol: {(ipo.volume / 1e6).toFixed(1)}M</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Upcoming IPOs */}
+          <div className="bg-gray-900 border border-gray-700 p-2">
+            <div className="text-orange-400 mb-2">UPCOMING IPOs</div>
+            <div className="space-y-1">
+              {upcomingIPOs.map((ipo, index) => (
+                <div key={index} className="bg-black border border-gray-800 p-1 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-orange-400 font-bold">{ipo.symbol}</span>
+                    <span className="text-gray-400">{ipo.date}</span>
+                  </div>
+                  <div className="text-white">{ipo.company}</div>
+                  <div className="flex justify-between mt-1">
+                    <span className="text-gray-400">Range: {ipo.priceRange}</span>
+                    <span className="text-gray-400">Shares: {ipo.shares}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Launch Costs */}
+          <div className="bg-gray-900 border border-gray-700 p-2">
+            <div className="text-orange-400 mb-2 flex items-center">
+              <DollarSign className="w-3 h-3 mr-1" />
+              IPO COSTS
+            </div>
+            <div className="space-y-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-gray-400">Platform Fee</span>
-                <span className="text-white">2 ETH</span>
+                <span className="text-gray-400">SEC Registration</span>
+                <span className="text-white">$250K</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-400">Smart Contract Deploy</span>
-                <span className="text-white">0.5 ETH</span>
+                <span className="text-gray-400">Legal Fees</span>
+                <span className="text-white">$1.5M</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-400">Marketing Package</span>
-                <span className="text-white">1 ETH</span>
+                <span className="text-gray-400">Accounting/Audit</span>
+                <span className="text-white">$800K</span>
               </div>
-              <div className="border-t border-gray-700 pt-3">
-                <div className="flex justify-between font-semibold">
-                  <span className="text-gray-200">Total</span>
-                  <span className="text-cyan-400">3.5 ETH</span>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Underwriter Fees</span>
+                <span className="text-white">7.0%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Printing/Marketing</span>
+                <span className="text-white">$500K</span>
+              </div>
+              <div className="border-t border-gray-700 pt-2">
+                <div className="flex justify-between font-bold">
+                  <span className="text-gray-200">Est. Total Cost</span>
+                  <span className="text-orange-400">$38M+</span>
                 </div>
               </div>
             </div>
-          </Card>
+          </div>
 
-          <Card className="bg-gray-900/50 border-gray-700 p-6">
-            <h4 className="text-lg font-semibold text-gray-200 mb-4 flex items-center">
-              <Users className="w-5 h-5 mr-2" />
-              Support
-            </h4>
-            <div className="space-y-3 text-sm">
-              <p className="text-gray-300">Need help with your token launch?</p>
-              <div className="space-y-2">
-                <div className="text-cyan-400 cursor-pointer hover:underline">📄 Documentation</div>
-                <div className="text-cyan-400 cursor-pointer hover:underline">💬 Discord Support</div>
-                <div className="text-cyan-400 cursor-pointer hover:underline">📧 Contact Team</div>
-              </div>
+          {/* Support */}
+          <div className="bg-gray-900 border border-gray-700 p-2">
+            <div className="text-orange-400 mb-2 flex items-center">
+              <Users className="w-3 h-3 mr-1" />
+              IPO SUPPORT
             </div>
-          </Card>
-
-          <Card className="bg-gray-900/50 border-gray-700 p-6">
-            <h4 className="text-lg font-semibold text-gray-200 mb-4 flex items-center">
-              <Lock className="w-5 h-5 mr-2" />
-              Security Features
-            </h4>
-            <div className="space-y-2 text-sm text-gray-300">
-              <div>✅ Anti-rug protection</div>
-              <div>✅ Automated liquidity lock</div>
-              <div>✅ Vesting contracts</div>
-              <div>✅ Multi-sig wallets</div>
-              <div>✅ Audit integration</div>
+            <div className="space-y-1 text-xs">
+              <div className="text-orange-400 cursor-pointer hover:underline">📋 SEC Filing Guide</div>
+              <div className="text-orange-400 cursor-pointer hover:underline">🏦 Underwriter Network</div>
+              <div className="text-orange-400 cursor-pointer hover:underline">⚖️ Legal Partner</div>
+              <div className="text-orange-400 cursor-pointer hover:underline">📞 Expert Consultation</div>
             </div>
-          </Card>
+          </div>
         </div>
       </div>
     </div>
