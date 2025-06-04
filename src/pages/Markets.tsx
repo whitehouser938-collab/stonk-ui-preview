@@ -1,7 +1,7 @@
 import { Layout } from "@/components/Layout";
 import { MarketsDashboard } from "@/components/MarketsDashboard";
 
-const Index = () => {
+const Markets = () => {
   return (
     <Layout>
       <MarketsDashboard />
@@ -9,4 +9,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Markets;
