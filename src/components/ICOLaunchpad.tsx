@@ -55,7 +55,7 @@ export function ICOLaunchpad() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold text-cyan-400 font-mono">TOKEN LAUNCHPAD</h2>
+        <h2 className="text-3xl font-bold text-orange-400 font-mono">TOKEN LAUNCHPAD</h2>
         <div className="flex items-center space-x-2">
           <Rocket className="w-6 h-6 text-cyan-400" />
           <span className="text-gray-400">Launch Your Token</span>

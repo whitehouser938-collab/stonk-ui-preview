@@ -135,10 +135,10 @@ export function TopPerformers() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-4">
-          <h2 className="text-xl font-bold text-cyan-400 font-mono">CRYPTO PERFORMANCE MONITOR</h2>
+          <h2 className="text-xl font-bold text-orange-400 font-mono">CRYPTO PERFORMANCE MONITOR</h2>
           <div className="flex items-center space-x-2 text-xs">
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="text-green-400 font-mono">LIVE</span>
+            <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+            <span className="text-orange-400 font-mono">LIVE</span>
           </div>
         </div>
         
@@ -169,24 +169,24 @@ export function TopPerformers() {
         <Table className="w-full text-xs font-mono">
           <TableHeader>
             <TableRow className="border-b border-gray-700 bg-gray-900">
-              <TableHead className="text-cyan-400 p-1 text-xs">RNK</TableHead>
-              <TableHead className="text-cyan-400 p-1 text-xs">SYMBOL</TableHead>
-              <TableHead className="text-cyan-400 p-1 text-xs">NAME</TableHead>
-              <TableHead className="text-cyan-400 p-1 text-xs text-right">PRICE</TableHead>
-              <TableHead className="text-cyan-400 p-1 text-xs text-right">1M</TableHead>
-              <TableHead className="text-cyan-400 p-1 text-xs text-right">5M</TableHead>
-              <TableHead className="text-cyan-400 p-1 text-xs text-right">15M</TableHead>
-              <TableHead className="text-cyan-400 p-1 text-xs text-right">1H</TableHead>
-              <TableHead className="text-cyan-400 p-1 text-xs text-right">4H</TableHead>
-              <TableHead className="text-cyan-400 p-1 text-xs text-right">24H</TableHead>
-              <TableHead className="text-cyan-400 p-1 text-xs text-right">7D</TableHead>
-              <TableHead className="text-cyan-400 p-1 text-xs text-right">30D</TableHead>
-              <TableHead className="text-cyan-400 p-1 text-xs text-right">VOLUME</TableHead>
-              <TableHead className="text-cyan-400 p-1 text-xs text-right">VOL%</TableHead>
-              <TableHead className="text-cyan-400 p-1 text-xs text-right">MCAP</TableHead>
-              <TableHead className="text-cyan-400 p-1 text-xs text-right">HIGH</TableHead>
-              <TableHead className="text-cyan-400 p-1 text-xs text-right">LOW</TableHead>
-              <TableHead className="text-cyan-400 p-1 text-xs text-right">SUPPLY</TableHead>
+              <TableHead className="text-orange-400 p-1 text-xs">RNK</TableHead>
+              <TableHead className="text-orange-400 p-1 text-xs">SYMBOL</TableHead>
+              <TableHead className="text-orange-400 p-1 text-xs">NAME</TableHead>
+              <TableHead className="text-orange-400 p-1 text-xs text-right">PRICE</TableHead>
+              <TableHead className="text-orange-400 p-1 text-xs text-right">1M</TableHead>
+              <TableHead className="text-orange-400 p-1 text-xs text-right">5M</TableHead>
+              <TableHead className="text-orange-400 p-1 text-xs text-right">15M</TableHead>
+              <TableHead className="text-orange-400 p-1 text-xs text-right">1H</TableHead>
+              <TableHead className="text-orange-400 p-1 text-xs text-right">4H</TableHead>
+              <TableHead className="text-orange-400 p-1 text-xs text-right">24H</TableHead>
+              <TableHead className="text-orange-400 p-1 text-xs text-right">7D</TableHead>
+              <TableHead className="text-orange-400 p-1 text-xs text-right">30D</TableHead>
+              <TableHead className="text-orange-400 p-1 text-xs text-right">VOLUME</TableHead>
+              <TableHead className="text-orange-400 p-1 text-xs text-right">VOL%</TableHead>
+              <TableHead className="text-orange-400 p-1 text-xs text-right">MCAP</TableHead>
+              <TableHead className="text-orange-400 p-1 text-xs text-right">HIGH</TableHead>
+              <TableHead className="text-orange-400 p-1 text-xs text-right">LOW</TableHead>
+              <TableHead className="text-orange-400 p-1 text-xs text-right">SUPPLY</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -258,7 +258,7 @@ export function TopPerformers() {
                 )}>
                   {formatChange(performer.change30d)}%
                 </TableCell>
-                <TableCell className="p-1 text-right text-cyan-400 text-xs">
+                <TableCell className="p-1 text-right text-orange-400 text-xs">
                   {formatNumber(performer.volume)}
                 </TableCell>
                 <TableCell className={cn(
@@ -288,13 +288,13 @@ export function TopPerformers() {
       {/* Bottom Stats Bar */}
       <div className="flex justify-between items-center bg-gray-900 p-2 text-xs font-mono border border-gray-700">
         <div className="flex space-x-6">
-          <span className="text-gray-400">TOTAL TRACKED: <span className="text-cyan-400">1,247</span></span>
+          <span className="text-gray-400">TOTAL TRACKED: <span className="text-orange-400">1,247</span></span>
           <span className="text-gray-400">AVG GAIN: <span className="text-green-400">+34.2%</span></span>
           <span className="text-gray-400">AVG LOSS: <span className="text-red-400">-18.7%</span></span>
         </div>
         <div className="flex space-x-6">
           <span className="text-gray-400">TOTAL VOL: <span className="text-yellow-400">$127.4B</span></span>
-          <span className="text-gray-400">LAST UPDATE: <span className="text-green-400">{new Date().toLocaleTimeString()}</span></span>
+          <span className="text-gray-400">LAST UPDATE: <span className="text-orange-400">{new Date().toLocaleTimeString()}</span></span>
         </div>
       </div>
     </div>

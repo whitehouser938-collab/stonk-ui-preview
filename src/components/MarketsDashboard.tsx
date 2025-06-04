@@ -114,10 +114,10 @@ export function MarketsDashboard() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold text-cyan-400 font-mono">MARKETS OVERVIEW</h2>
+        <h2 className="text-3xl font-bold text-orange-400 font-mono">MARKETS OVERVIEW</h2>
         <div className="text-sm text-gray-400">
           <span className="text-gray-500">Last Update:</span>{" "}
-          <span className="font-mono text-green-400">{new Date().toLocaleTimeString()}</span>
+          <span className="font-mono text-orange-400">{new Date().toLocaleTimeString()}</span>
         </div>
       </div>
 
@@ -199,7 +199,7 @@ export function MarketsDashboard() {
                 >
                   <td className="p-4">
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                      <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
                         {crypto.symbol.charAt(0)}
                       </div>
                       <div>

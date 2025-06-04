@@ -63,7 +63,7 @@ export function TokenResearch() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold text-cyan-400 font-mono">TOKEN RESEARCH</h2>
+        <h2 className="text-3xl font-bold text-orange-400 font-mono">TOKEN RESEARCH</h2>
         <div className="flex items-center space-x-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -74,7 +74,7 @@ export function TokenResearch() {
               className="pl-10 bg-gray-900 border-gray-700 text-white w-64"
             />
           </div>
-          <Button variant="outline" className="border-cyan-500 text-cyan-400 hover:bg-cyan-500/10">
+          <Button variant="outline" className="border-orange-500 text-orange-400 hover:bg-orange-500/10">
             Analyze
           </Button>
         </div>
