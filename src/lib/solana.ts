@@ -1,15 +1,18 @@
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base'
 import {
   PhantomWalletAdapter,
-  SolflareWalletAdapter
+  SolflareWalletAdapter,
+  CoinbaseWalletAdapter
 } from '@solana/wallet-adapter-wallets'
 import { clusterApiUrl } from '@solana/web3.js'
 
 export const network = WalletAdapterNetwork.Mainnet
 export const endpoint = clusterApiUrl(network)
 
-// Initialize wallets with network configuration
+// Core Solana wallets that users actually recognize and use
+// Note: MetaMask Solana support will be handled separately via Snaps
 export const wallets = [
   new PhantomWalletAdapter({ network }),
-  new SolflareWalletAdapter({ network })
+  new SolflareWalletAdapter({ network }),
+  new CoinbaseWalletAdapter({ network })
 ] 

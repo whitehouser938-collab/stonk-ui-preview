@@ -164,7 +164,7 @@ export function ConnectWallet() {
             )}
             
             {wallets
-              .filter((wallet) => ['Phantom', 'Solflare'].includes(wallet.adapter.name))
+              .filter((wallet) => ['Phantom', 'Solflare', 'Coinbase Wallet'].includes(wallet.adapter.name))
               .map((wallet) => {
                 const isActive = isSolConnected && connectedSolanaWallet?.adapter.name === wallet.adapter.name;
                 return (

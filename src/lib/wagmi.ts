@@ -1,6 +1,6 @@
 import { http, createConfig } from 'wagmi'
 import { mainnet, sepolia, polygon, arbitrum, base } from 'wagmi/chains'
-import { injected, metaMask, walletConnect } from 'wagmi/connectors'
+import { injected, metaMask, walletConnect, coinbaseWallet } from 'wagmi/connectors'
 // import { coinbaseWallet, safe } from 'wagmi/connectors' // if we want to expand connections
 
 const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || '' // for walletconnect
@@ -10,6 +10,7 @@ export const config = createConfig({
   connectors: [
     // Primary connectors
     metaMask(),
+    coinbaseWallet({ appName: 'Stonk Terminal' }),
     walletConnect({ projectId }),
     
     // Fallback
