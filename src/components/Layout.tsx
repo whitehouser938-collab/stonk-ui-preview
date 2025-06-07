@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { BarChart, Search, TrendingUp, Rocket, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ConnectWallet } from "./ConnectWallet";
 
 const navItems = [
   { path: "/", label: "Markets", icon: BarChart },
@@ -46,12 +47,13 @@ export function Layout({ children }: LayoutProps) {
               })}
             </nav>
           </div>
-          <div className="flex items-center space-x-4 text-sm">
-            <div className="text-gray-400">
-              <span className="text-gray-500">Server:</span>{" "}
-              <span className="text-orange-400 font-mono">ONLINE</span>
-            </div>
-            <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+            <div className="flex items-center space-x-4 text-sm">
+              <ConnectWallet />
+              <div className="text-gray-400">
+                <span className="text-gray-500">Server:</span>{" "}
+                <span className="text-orange-400 font-mono">ONLINE</span>
+              </div>
+              <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
           </div>
         </div>
       </header>
