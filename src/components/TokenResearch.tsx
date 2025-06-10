@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { Search, TrendingUp, TrendingDown, Users, Globe, Activity, BarChart3 } from "lucide-react";
+import { Search, TrendingUp, TrendingDown, Users, Globe, Activity, BarChart3, ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const stockData = {
   symbol: "AAPL",
@@ -17,13 +23,13 @@ const stockData = {
 };
 
 const chartData = [
-  { time: "09:30", price: 180.50 },
-  { time: "10:00", price: 181.25 },
-  { time: "10:30", price: 180.90 },
-  { time: "11:00", price: 182.15 },
-  { time: "11:30", price: 181.80 },
-  { time: "12:00", price: 182.60 },
-  { time: "12:30", price: 182.50 }
+  { time: "09:30", price: 180.50 }, { time: "09:45", price: 180.75 },
+  { time: "10:00", price: 181.25 }, { time: "10:15", price: 181.15 },
+  { time: "10:30", price: 180.90 }, { time: "10:45", price: 181.50 },
+  { time: "11:00", price: 182.15 }, { time: "11:15", price: 182.00 },
+  { time: "11:30", price: 181.80 }, { time: "11:45", price: 182.20 },
+  { time: "12:00", price: 182.60 }, { time: "12:15", price: 182.40 },
+  { time: "12:30", price: 182.50 }, { time: "12:45", price: 182.85 }
 ];
 
 const newsData = [
@@ -78,23 +84,50 @@ function formatNumber(num: number): string {
 export function TokenResearch() {
   const [searchTerm, setSearchTerm] = useState("AAPL");
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [selectedView, setSelectedView] = useState("EQUITY RESEARCH");
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
+  const dataMaxPrice = Math.max(...chartData.map(p => p.price));
+  const dataMinPrice = Math.min(...chartData.map(p => p.price));
+  const priceRange = dataMaxPrice - dataMinPrice;
+
+  // Add 10% padding to the top and bottom of the chart range
+  const yAxisPadding = priceRange > 0 ? priceRange * 0.1 : 1;
+  const chartMax = dataMaxPrice + yAxisPadding;
+  const chartMin = dataMinPrice - yAxisPadding;
+  const chartAvg = (chartMax + chartMin) / 2;
+
   return (
-    <div className="h-screen overflow-auto bg-black text-gray-100 text-xs font-mono">
+    <div className="bg-black text-gray-100 text-xs font-mono">
       {/* Top Time Bar */}
-      <div className="bg-gray-900 border-b border-orange-500/30 p-1 flex justify-between items-center">
-        <div className="flex space-x-6">
-          <span className="text-orange-400">EQUITY RESEARCH</span>
-          <span className="text-orange-400">FUNDAMENTAL ANALYSIS</span>
-          <span className="text-orange-400">NYSE/NASDAQ</span>
+      <div className="bg-gray-900 border-b border-orange-500/30 p-2 flex flex-wrap justify-between items-center gap-2">
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          {/* Desktop View */}
+          <span className="text-orange-400 font-bold whitespace-nowrap hidden md:inline">EQUITY RESEARCH</span>
+          <span className="text-orange-400 hidden md:inline whitespace-nowrap">FUNDAMENTAL ANALYSIS</span>
+          <span className="text-orange-400 hidden md:inline whitespace-nowrap">NYSE/NASDAQ</span>
+
+          {/* Mobile Dropdown View */}
+          <div className="md:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center space-x-1 text-orange-400 font-bold whitespace-nowrap">
+                <span>{selectedView}</span>
+                <ChevronDown className="w-4 h-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-gray-900 border-gray-700 text-gray-400">
+                <DropdownMenuItem onClick={() => setSelectedView("EQUITY RESEARCH")} className="cursor-pointer hover:!bg-orange-700/10 hover:!text-gray-100">EQUITY RESEARCH</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSelectedView("FUNDAMENTAL ANALYSIS")} className="cursor-pointer hover:!bg-orange-700/10 hover:!text-gray-100">FUNDAMENTAL ANALYSIS</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSelectedView("NYSE/NASDAQ")} className="cursor-pointer hover:!bg-orange-700/10 hover:!text-gray-100">NYSE/NASDAQ</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-        <div className="flex items-center space-x-4">
-          <span className="text-orange-400">EST: {currentTime.toLocaleTimeString('en-US', { timeZone: 'America/New_York' })}</span>
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <span className="text-orange-400 whitespace-nowrap">EST: {currentTime.toLocaleTimeString('en-US', { timeZone: 'America/New_York' })}</span>
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             <span className="text-green-400">LIVE</span>
@@ -105,7 +138,7 @@ export function TokenResearch() {
       {/* Search Bar */}
       <div className="bg-gray-900 border-b border-gray-700 p-2">
         <div className="flex items-center space-x-4">
-          <div className="relative flex-1 max-w-xs">
+          <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3" />
             <input
               placeholder="Search ticker..."
@@ -121,25 +154,25 @@ export function TokenResearch() {
       </div>
 
       {/* Main Layout */}
-      <div className="grid grid-cols-12 gap-1 p-1">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 p-1">
         
         {/* Left Column - Stock Overview */}
-        <div className="col-span-8 space-y-1">
+        <div className="col-span-12 lg:col-span-8 space-y-1">
           {/* Stock Header */}
           <div className="bg-gray-900 border border-gray-700 p-2">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded text-white font-bold text-sm flex items-center justify-center">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2">
+              <div className="flex items-center space-x-3 mb-2 sm:mb-0">
+                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded text-white font-bold text-sm flex items-center justify-center flex-shrink-0">
                   {stockData.symbol}
                 </div>
                 <div>
-                  <div className="text-orange-400 font-bold">{stockData.name}</div>
+                  <div className="text-orange-400 font-bold text-base sm:text-lg">{stockData.name}</div>
                   <div className="text-gray-400">{stockData.symbol} - NASDAQ</div>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-2xl font-mono text-white">${stockData.price.toFixed(2)}</div>
-                <div className={`text-lg font-mono ${stockData.change24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              <div className="text-left sm:text-right">
+                <div className="text-xl sm:text-2xl font-mono text-white">${stockData.price.toFixed(2)}</div>
+                <div className={`text-base sm:text-lg font-mono ${stockData.change24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                   {stockData.change24h >= 0 ? '+' : ''}{stockData.change24h.toFixed(2)}%
                 </div>
               </div>
@@ -149,60 +182,69 @@ export function TokenResearch() {
           {/* Price Chart */}
           <div className="bg-gray-900 border border-gray-700 p-2">
             <div className="text-orange-400 mb-2">INTRADAY CHART</div>
-            <div className="bg-black border border-gray-800 p-2 h-48 flex items-end space-x-1">
-              {chartData.map((point, index) => {
-                const maxPrice = Math.max(...chartData.map(p => p.price));
-                const minPrice = Math.min(...chartData.map(p => p.price));
-                const height = ((point.price - minPrice) / (maxPrice - minPrice)) * 160 + 20;
-                
-                return (
-                  <div key={index} className="flex-1 flex flex-col items-center">
-                    <div 
-                      className="bg-orange-500 w-full rounded-t"
-                      style={{ height: `${height}px` }}
-                    ></div>
-                    <div className="text-xs text-gray-400 mt-1">{point.time}</div>
-                  </div>
-                );
-              })}
+            <div className="bg-black border border-gray-800 p-2 h-48 flex">
+              <div className="flex flex-col justify-between h-full text-xs text-gray-500 pr-2 border-r border-gray-700 text-right">
+                <span>${chartMax.toFixed(2)}</span>
+                <span>${chartAvg.toFixed(2)}</span>
+                <span>${chartMin.toFixed(2)}</span>
+              </div>
+              <div className="flex-1 overflow-x-auto">
+                <div className="flex items-end gap-x-3 px-2 h-full">
+                  {chartData.map((point, index) => {
+                    const chartRange = chartMax - chartMin;
+                    const height = chartRange > 0 ? ((point.price - chartMin) / chartRange) * 158 + 2 : 80;
+                    
+                    return (
+                      <div key={index} className="flex-1 min-w-[2.5rem] flex flex-col justify-end items-center">
+                        <div 
+                          className="bg-orange-500 w-full rounded-t"
+                          style={{ height: `${height}px` }}
+                          title={`$${point.price.toFixed(2)}`}
+                        ></div>
+                        <div className="text-xs text-gray-400 mt-1 whitespace-nowrap">{point.time}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Financial Metrics */}
           <div className="bg-gray-900 border border-gray-700 p-2">
             <div className="text-orange-400 mb-2">FINANCIAL METRICS</div>
-            <div className="grid grid-cols-4 gap-4 text-xs">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 text-xs">
               <div className="bg-black border border-gray-800 p-2">
                 <div className="text-gray-400">REVENUE (TTM)</div>
-                <div className="text-white font-mono">${formatNumber(financialData.revenue)}</div>
+                <div className="text-white font-mono text-sm">${formatNumber(financialData.revenue)}</div>
               </div>
               <div className="bg-black border border-gray-800 p-2">
                 <div className="text-gray-400">NET INCOME</div>
-                <div className="text-white font-mono">${formatNumber(financialData.netIncome)}</div>
+                <div className="text-white font-mono text-sm">${formatNumber(financialData.netIncome)}</div>
               </div>
               <div className="bg-black border border-gray-800 p-2">
                 <div className="text-gray-400">GROSS MARGIN</div>
-                <div className="text-white font-mono">{financialData.grossMargin.toFixed(2)}%</div>
+                <div className="text-white font-mono text-sm">{financialData.grossMargin.toFixed(2)}%</div>
               </div>
               <div className="bg-black border border-gray-800 p-2">
                 <div className="text-gray-400">PROFIT MARGIN</div>
-                <div className="text-white font-mono">{financialData.profitMargin.toFixed(2)}%</div>
+                <div className="text-white font-mono text-sm">{financialData.profitMargin.toFixed(2)}%</div>
               </div>
               <div className="bg-black border border-gray-800 p-2">
                 <div className="text-gray-400">ROE</div>
-                <div className="text-white font-mono">{financialData.roe.toFixed(2)}%</div>
+                <div className="text-white font-mono text-sm">{financialData.roe.toFixed(2)}%</div>
               </div>
               <div className="bg-black border border-gray-800 p-2">
                 <div className="text-gray-400">ROA</div>
-                <div className="text-white font-mono">{financialData.roa.toFixed(2)}%</div>
+                <div className="text-white font-mono text-sm">{financialData.roa.toFixed(2)}%</div>
               </div>
               <div className="bg-black border border-gray-800 p-2">
                 <div className="text-gray-400">DEBT/EQUITY</div>
-                <div className="text-white font-mono">{financialData.debtToEquity.toFixed(2)}</div>
+                <div className="text-white font-mono text-sm">{financialData.debtToEquity.toFixed(2)}</div>
               </div>
               <div className="bg-black border border-gray-800 p-2">
                 <div className="text-gray-400">FREE CASH FLOW</div>
-                <div className="text-white font-mono">${formatNumber(financialData.freeCashFlow)}</div>
+                <div className="text-white font-mono text-sm">${formatNumber(financialData.freeCashFlow)}</div>
               </div>
             </div>
           </div>
@@ -210,8 +252,8 @@ export function TokenResearch() {
           {/* Analyst Ratings */}
           <div className="bg-gray-900 border border-gray-700 p-2">
             <div className="text-orange-400 mb-2">ANALYST RATINGS</div>
-            <div className="bg-black border border-gray-800 p-1">
-              <table className="w-full text-xs">
+            <div className="overflow-x-auto bg-black border border-gray-800 p-1">
+              <table className="w-full text-xs min-w-[400px]">
                 <thead>
                   <tr className="text-gray-400 border-b border-gray-700">
                     <th className="text-left p-1">FIRM</th>
@@ -242,38 +284,38 @@ export function TokenResearch() {
         </div>
 
         {/* Right Column - Market Data & News */}
-        <div className="col-span-4 space-y-1">
+        <div className="col-span-12 lg:col-span-4 space-y-1">
           {/* Market Data */}
           <div className="bg-gray-900 border border-gray-700 p-2">
             <div className="text-orange-400 mb-2">MARKET DATA</div>
             <div className="space-y-2 text-xs">
-              <div className="flex justify-between">
+              <div className="flex justify-between items-start gap-2">
                 <span className="text-gray-400">Market Cap</span>
-                <span className="font-mono text-white">${formatNumber(stockData.marketCap)}</span>
+                <span className="font-mono text-white text-right">${formatNumber(stockData.marketCap)}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-start gap-2">
                 <span className="text-gray-400">Volume</span>
-                <span className="font-mono text-white">{formatNumber(stockData.volume24h)}</span>
+                <span className="font-mono text-white text-right">{formatNumber(stockData.volume24h)}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-start gap-2">
                 <span className="text-gray-400">Shares Outstanding</span>
-                <span className="font-mono text-white">{formatNumber(stockData.outstandingShares)}</span>
+                <span className="font-mono text-white text-right">{formatNumber(stockData.outstandingShares)}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-start gap-2">
                 <span className="text-gray-400">Float</span>
-                <span className="font-mono text-white">{formatNumber(stockData.floatShares)}</span>
+                <span className="font-mono text-white text-right">{formatNumber(stockData.floatShares)}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-start gap-2">
                 <span className="text-gray-400">52W High</span>
-                <span className="font-mono text-white">${stockData.allTimeHigh.toFixed(2)}</span>
+                <span className="font-mono text-white text-right">${stockData.allTimeHigh.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-start gap-2">
                 <span className="text-gray-400">52W Low</span>
-                <span className="font-mono text-white">${stockData.allTimeLow.toFixed(2)}</span>
+                <span className="font-mono text-white text-right">${stockData.allTimeLow.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-start gap-2">
                 <span className="text-gray-400">Institutional</span>
-                <span className="font-mono text-white">{stockData.institutional.toFixed(1)}%</span>
+                <span className="font-mono text-white text-right">{stockData.institutional.toFixed(1)}%</span>
               </div>
             </div>
           </div>
@@ -306,11 +348,11 @@ export function TokenResearch() {
             <div className="space-y-2">
               {newsData.map((news, index) => (
                 <div key={index} className="bg-black border border-gray-800 p-1">
-                  <div className="flex items-start justify-between mb-1">
+                  <div className="flex flex-col sm:flex-row items-start justify-between mb-1 gap-1">
                     <div className="text-white text-xs font-medium hover:text-orange-400 cursor-pointer">
                       {news.title}
                     </div>
-                    <span className="text-xs text-gray-400 whitespace-nowrap ml-2">{news.time}</span>
+                    <span className="text-xs text-gray-400 whitespace-nowrap">{news.time}</span>
                   </div>
                   <div className="text-gray-300 text-xs mb-1">{news.summary}</div>
                   <div className="text-xs text-orange-400">{news.source}</div>

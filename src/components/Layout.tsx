@@ -1,7 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
-import { BarChart, Search, TrendingUp, Rocket, Trophy } from "lucide-react";
+import { useState } from "react";
+import { BarChart, Search, TrendingUp, Rocket, Trophy, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ConnectWallet } from "./ConnectWallet";
+import { MobileNav } from "./MobileNav";
 
 const navItems = [
   { path: "/", label: "Markets", icon: BarChart },
@@ -16,17 +18,26 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   const location = useLocation();
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
       {/* Header */}
-      <header className="border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm">
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center space-x-8">
-            <h1 className="text-2xl font-bold text-orange-400 font-mono tracking-tight">
+      <header className="border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm sticky top-0 z-40">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4">
+          <div className="flex items-center space-x-4 sm:space-x-8">
+            <div className="md:hidden">
+              <button
+                onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
+                className="p-2 rounded-md hover:bg-gray-800"
+              >
+                {isMobileNavOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-bold text-orange-400 font-mono tracking-tight">
               STONK EXCHANGE
             </h1>
-            <nav className="flex space-x-1">
+            <nav className="hidden md:flex space-x-1">
               {navItems.map((item) => {
                 const isActive = location.pathname === item.path;
                 return (
@@ -41,27 +52,31 @@ export function Layout({ children }: LayoutProps) {
                     )}
                   >
                     <item.icon className="w-4 h-4" />
-                    <span className="font-medium">{item.label}</span>
+                    <span className="font-medium hidden lg:inline">{item.label}</span>
                   </Link>
                 );
               })}
             </nav>
           </div>
-            <div className="flex items-center space-x-4 text-sm">
-              <ConnectWallet />
-              <div className="text-gray-400">
-                <span className="text-gray-500">Server:</span>{" "}
-                <span className="text-orange-400 font-mono">ONLINE</span>
-              </div>
-              <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+          <div className="hidden md:flex items-center space-x-2 sm:space-x-4 text-sm">
+            <ConnectWallet />
+            <div className="hidden sm:block text-gray-400">
+              <span className="text-gray-500">Server:</span>{" "}
+              <span className="text-orange-400 font-mono">ONLINE</span>
+            </div>
+            <div className="hidden sm:block w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
           </div>
         </div>
+        <MobileNav
+          isOpen={isMobileNavOpen}
+          navItems={navItems}
+          location={location}
+          onClose={() => setIsMobileNavOpen(false)}
+        />
       </header>
 
       {/* Main Content */}
-      <main className="p-6">
-        {children}
-      </main>
+      <main className="p-4 sm:p-6">{children}</main>
     </div>
   );
 }

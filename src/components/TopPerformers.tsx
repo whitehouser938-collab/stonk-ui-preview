@@ -1,8 +1,14 @@
 import { useState } from "react";
-import { Trophy, TrendingUp, TrendingDown, Star } from "lucide-react";
+import { Trophy, TrendingUp, TrendingDown, Star, ChevronDown } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils";
 
 interface PerformerData {
@@ -121,6 +127,7 @@ const formatChange = (value: number): string => {
 export function TopPerformers() {
   const [selectedTimeframe, setSelectedTimeframe] = useState("24h");
   const [viewMode, setViewMode] = useState<"gainers" | "losers">("gainers");
+  const [selectedView, setSelectedView] = useState("CRYPTO PERFORMANCE MONITOR");
 
   const currentField = timeframes.find(t => t.key === selectedTimeframe)?.field || "change24h";
   
@@ -131,170 +138,289 @@ export function TopPerformers() {
   });
 
   return (
-    <div className="space-y-2">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-4">
-          <h2 className="text-xl font-bold text-orange-400 font-mono">CRYPTO PERFORMANCE MONITOR</h2>
-          <div className="flex items-center space-x-2 text-xs">
-            <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
-            <span className="text-orange-400 font-mono">LIVE</span>
+    <div className="bg-black text-gray-100 text-xs font-mono">
+      {/* Top Time Bar */}
+      <div className="bg-gray-900 border-b border-orange-500/30 p-2 flex flex-wrap justify-between items-center gap-2">
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          {/* Desktop View */}
+          <span className="text-orange-400 font-bold whitespace-nowrap hidden md:inline">CRYPTO PERFORMANCE MONITOR</span>
+          <span className="text-orange-400 hidden md:inline whitespace-nowrap">TOP PERFORMERS</span>
+          <span className="text-orange-400 hidden md:inline whitespace-nowrap">REAL-TIME</span>
+
+          {/* Mobile Dropdown View */}
+          <div className="md:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center space-x-1 text-orange-400 font-bold whitespace-nowrap">
+                <span>{selectedView}</span>
+                <ChevronDown className="w-4 h-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-gray-900 border-gray-700 text-gray-400">
+                <DropdownMenuItem onClick={() => setSelectedView("CRYPTO PERFORMANCE MONITOR")} className="cursor-pointer hover:!bg-orange-700/10 hover:!text-gray-100">CRYPTO PERFORMANCE MONITOR</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSelectedView("TOP PERFORMERS")} className="cursor-pointer hover:!bg-orange-700/10 hover:!text-gray-100">TOP PERFORMERS</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSelectedView("REAL-TIME")} className="cursor-pointer hover:!bg-orange-700/10 hover:!text-gray-100">REAL-TIME</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
-        
-        <div className="flex items-center space-x-2 text-xs">
-          <Button
-            onClick={() => setViewMode("gainers")}
-            className={cn(
-              "px-2 py-1 text-xs",
-              viewMode === "gainers" ? "bg-green-600" : "bg-gray-700"
-            )}
-          >
-            GAINERS
-          </Button>
-          <Button
-            onClick={() => setViewMode("losers")}
-            className={cn(
-              "px-2 py-1 text-xs",
-              viewMode === "losers" ? "bg-red-600" : "bg-gray-700"
-            )}
-          >
-            LOSERS
-          </Button>
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <span className="text-orange-400 whitespace-nowrap">EST: {new Date().toLocaleTimeString('en-US', { timeZone: 'America/New_York' })}</span>
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span className="text-green-400">LIVE</span>
+          </div>
         </div>
       </div>
 
-      {/* Bloomberg-style Dense Table */}
-      <div className="bg-black border border-gray-700 overflow-hidden">
-        <Table className="w-full text-xs font-mono">
-          <TableHeader>
-            <TableRow className="border-b border-gray-700 bg-gray-900">
-              <TableHead className="text-orange-400 p-1 text-xs">RNK</TableHead>
-              <TableHead className="text-orange-400 p-1 text-xs">SYMBOL</TableHead>
-              <TableHead className="text-orange-400 p-1 text-xs">NAME</TableHead>
-              <TableHead className="text-orange-400 p-1 text-xs text-right">PRICE</TableHead>
-              <TableHead className="text-orange-400 p-1 text-xs text-right">1M</TableHead>
-              <TableHead className="text-orange-400 p-1 text-xs text-right">5M</TableHead>
-              <TableHead className="text-orange-400 p-1 text-xs text-right">15M</TableHead>
-              <TableHead className="text-orange-400 p-1 text-xs text-right">1H</TableHead>
-              <TableHead className="text-orange-400 p-1 text-xs text-right">4H</TableHead>
-              <TableHead className="text-orange-400 p-1 text-xs text-right">24H</TableHead>
-              <TableHead className="text-orange-400 p-1 text-xs text-right">7D</TableHead>
-              <TableHead className="text-orange-400 p-1 text-xs text-right">30D</TableHead>
-              <TableHead className="text-orange-400 p-1 text-xs text-right">VOLUME</TableHead>
-              <TableHead className="text-orange-400 p-1 text-xs text-right">VOL%</TableHead>
-              <TableHead className="text-orange-400 p-1 text-xs text-right">MCAP</TableHead>
-              <TableHead className="text-orange-400 p-1 text-xs text-right">HIGH</TableHead>
-              <TableHead className="text-orange-400 p-1 text-xs text-right">LOW</TableHead>
-              <TableHead className="text-orange-400 p-1 text-xs text-right">SUPPLY</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedPerformers.slice(0, 20).map((performer, index) => (
-              <TableRow 
-                key={performer.symbol} 
-                className="border-b border-gray-800 hover:bg-gray-900/30 transition-colors"
-              >
-                <TableCell className="p-1 text-yellow-400 font-bold">
-                  {index + 1}
-                </TableCell>
-                <TableCell className="p-1">
-                  <div className="flex items-center space-x-1">
-                    <span className="text-xs">{performer.icon}</span>
-                    <span className="text-white font-bold">{performer.symbol}</span>
+      <div className="space-y-2 p-1">
+        {/* Header Controls */}
+        <div className="bg-gray-900 border border-gray-700 p-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <h2 className="text-base sm:text-xl font-bold text-orange-400 font-mono">LEADERBOARD</h2>
+              <div className="flex items-center space-x-2 text-xs">
+                <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+                <span className="text-orange-400 font-mono">LIVE</span>
+              </div>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+              {/* Timeframe Selector */}
+              <div className="flex items-center space-x-1">
+                <span className="text-gray-400 text-xs whitespace-nowrap">TIMEFRAME:</span>
+                <div className="flex space-x-1">
+                  {timeframes.map((tf) => (
+                    <Button
+                      key={tf.key}
+                      onClick={() => setSelectedTimeframe(tf.key)}
+                      className={cn(
+                        "px-2 py-1 text-xs",
+                        selectedTimeframe === tf.key ? "bg-orange-600" : "bg-gray-700"
+                      )}
+                    >
+                      {tf.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Gainers/Losers Toggle */}
+              <div className="flex items-center space-x-1">
+                <span className="text-gray-400 text-xs whitespace-nowrap">VIEW:</span>
+                <div className="flex space-x-1">
+                  <Button
+                    onClick={() => setViewMode("gainers")}
+                    className={cn(
+                      "px-3 py-1 text-xs",
+                      viewMode === "gainers" ? "bg-green-600" : "bg-gray-700"
+                    )}
+                  >
+                    GAINERS
+                  </Button>
+                  <Button
+                    onClick={() => setViewMode("losers")}
+                    className={cn(
+                      "px-3 py-1 text-xs",
+                      viewMode === "losers" ? "bg-red-600" : "bg-gray-700"
+                    )}
+                  >
+                    LOSERS
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="block md:hidden space-y-1">
+          {sortedPerformers.slice(0, 20).map((performer, index) => (
+            <Card key={performer.symbol} className="bg-gray-900 border-gray-700 p-3">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <span className="text-yellow-400 font-bold text-sm">#{index + 1}</span>
+                  <span className="text-xs">{performer.icon}</span>
+                  <div>
+                    <div className="text-white font-bold text-sm">{performer.symbol}</div>
+                    <div className="text-gray-400 text-xs truncate">{performer.name}</div>
                   </div>
-                </TableCell>
-                <TableCell className="p-1 text-gray-400 text-xs max-w-[80px] truncate">
-                  {performer.name}
-                </TableCell>
-                <TableCell className="p-1 text-right text-white font-bold">
-                  ${formatPrice(performer.price)}
-                </TableCell>
-                <TableCell className={cn(
-                  "p-1 text-right font-bold text-xs",
-                  performer.change1m >= 0 ? "text-green-400" : "text-red-400"
-                )}>
-                  {formatChange(performer.change1m)}%
-                </TableCell>
-                <TableCell className={cn(
-                  "p-1 text-right font-bold text-xs",
-                  performer.change5m >= 0 ? "text-green-400" : "text-red-400"
-                )}>
-                  {formatChange(performer.change5m)}%
-                </TableCell>
-                <TableCell className={cn(
-                  "p-1 text-right font-bold text-xs",
-                  performer.change15m >= 0 ? "text-green-400" : "text-red-400"
-                )}>
-                  {formatChange(performer.change15m)}%
-                </TableCell>
-                <TableCell className={cn(
-                  "p-1 text-right font-bold text-xs",
-                  performer.change1h >= 0 ? "text-green-400" : "text-red-400"
-                )}>
-                  {formatChange(performer.change1h)}%
-                </TableCell>
-                <TableCell className={cn(
-                  "p-1 text-right font-bold text-xs",
-                  performer.change4h >= 0 ? "text-green-400" : "text-red-400"
-                )}>
-                  {formatChange(performer.change4h)}%
-                </TableCell>
-                <TableCell className={cn(
-                  "p-1 text-right font-bold",
-                  performer.change24h >= 0 ? "text-green-400" : "text-red-400"
-                )}>
-                  {formatChange(performer.change24h)}%
-                </TableCell>
-                <TableCell className={cn(
-                  "p-1 text-right font-bold",
-                  performer.change7d >= 0 ? "text-green-400" : "text-red-400"
-                )}>
-                  {formatChange(performer.change7d)}%
-                </TableCell>
-                <TableCell className={cn(
-                  "p-1 text-right font-bold text-xs",
-                  performer.change30d >= 0 ? "text-green-400" : "text-red-400"
-                )}>
-                  {formatChange(performer.change30d)}%
-                </TableCell>
-                <TableCell className="p-1 text-right text-orange-400 text-xs">
-                  {formatNumber(performer.volume)}
-                </TableCell>
-                <TableCell className={cn(
-                  "p-1 text-right text-xs",
-                  performer.volumeChange >= 0 ? "text-green-400" : "text-red-400"
-                )}>
-                  {formatChange(performer.volumeChange)}%
-                </TableCell>
-                <TableCell className="p-1 text-right text-white text-xs">
-                  {formatNumber(performer.marketCap)}
-                </TableCell>
-                <TableCell className="p-1 text-right text-gray-400 text-xs">
-                  ${formatPrice(performer.highDay)}
-                </TableCell>
-                <TableCell className="p-1 text-right text-gray-400 text-xs">
-                  ${formatPrice(performer.lowDay)}
-                </TableCell>
-                <TableCell className="p-1 text-right text-gray-400 text-xs">
-                  {formatNumber(performer.circulatingSupply)}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-
-      {/* Bottom Stats Bar */}
-      <div className="flex justify-between items-center bg-gray-900 p-2 text-xs font-mono border border-gray-700">
-        <div className="flex space-x-6">
-          <span className="text-gray-400">TOTAL TRACKED: <span className="text-orange-400">1,247</span></span>
-          <span className="text-gray-400">AVG GAIN: <span className="text-green-400">+34.2%</span></span>
-          <span className="text-gray-400">AVG LOSS: <span className="text-red-400">-18.7%</span></span>
+                </div>
+                <div className="text-right">
+                  <div className="text-white font-bold text-sm">${formatPrice(performer.price)}</div>
+                  <div className={cn(
+                    "text-xs font-bold",
+                    (performer[currentField] as number) >= 0 ? "text-green-400" : "text-red-400"
+                  )}>
+                    {formatChange(performer[currentField] as number)}%
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">24H:</span>
+                  <span className={cn(
+                    "font-bold",
+                    performer.change24h >= 0 ? "text-green-400" : "text-red-400"
+                  )}>
+                    {formatChange(performer.change24h)}%
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">7D:</span>
+                  <span className={cn(
+                    "font-bold",
+                    performer.change7d >= 0 ? "text-green-400" : "text-red-400"
+                  )}>
+                    {formatChange(performer.change7d)}%
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Vol:</span>
+                  <span className="text-orange-400">{formatNumber(performer.volume)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">MCap:</span>
+                  <span className="text-white">{formatNumber(performer.marketCap)}</span>
+                </div>
+              </div>
+            </Card>
+          ))}
         </div>
-        <div className="flex space-x-6">
-          <span className="text-gray-400">TOTAL VOL: <span className="text-yellow-400">$127.4B</span></span>
-          <span className="text-gray-400">LAST UPDATE: <span className="text-orange-400">{new Date().toLocaleTimeString()}</span></span>
+
+        {/* Desktop Table View */}
+        <div className="hidden md:block bg-black border border-gray-700 overflow-auto">
+          <Table className="w-full text-xs font-mono min-w-[1200px]">
+            <TableHeader>
+              <TableRow className="border-b border-gray-700 bg-gray-900">
+                <TableHead className="text-orange-400 p-1 text-xs">RNK</TableHead>
+                <TableHead className="text-orange-400 p-1 text-xs">SYMBOL</TableHead>
+                <TableHead className="text-orange-400 p-1 text-xs">NAME</TableHead>
+                <TableHead className="text-orange-400 p-1 text-xs text-right">PRICE</TableHead>
+                <TableHead className="text-orange-400 p-1 text-xs text-right">1M</TableHead>
+                <TableHead className="text-orange-400 p-1 text-xs text-right">5M</TableHead>
+                <TableHead className="text-orange-400 p-1 text-xs text-right">15M</TableHead>
+                <TableHead className="text-orange-400 p-1 text-xs text-right">1H</TableHead>
+                <TableHead className="text-orange-400 p-1 text-xs text-right">4H</TableHead>
+                <TableHead className="text-orange-400 p-1 text-xs text-right">24H</TableHead>
+                <TableHead className="text-orange-400 p-1 text-xs text-right">7D</TableHead>
+                <TableHead className="text-orange-400 p-1 text-xs text-right">30D</TableHead>
+                <TableHead className="text-orange-400 p-1 text-xs text-right">VOLUME</TableHead>
+                <TableHead className="text-orange-400 p-1 text-xs text-right">VOL%</TableHead>
+                <TableHead className="text-orange-400 p-1 text-xs text-right">MCAP</TableHead>
+                <TableHead className="text-orange-400 p-1 text-xs text-right">HIGH</TableHead>
+                <TableHead className="text-orange-400 p-1 text-xs text-right">LOW</TableHead>
+                <TableHead className="text-orange-400 p-1 text-xs text-right">SUPPLY</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sortedPerformers.slice(0, 20).map((performer, index) => (
+                <TableRow 
+                  key={performer.symbol} 
+                  className="border-b border-gray-800 hover:bg-gray-900/30 transition-colors"
+                >
+                  <TableCell className="p-1 text-yellow-400 font-bold">
+                    {index + 1}
+                  </TableCell>
+                  <TableCell className="p-1">
+                    <div className="flex items-center space-x-1">
+                      <span className="text-xs">{performer.icon}</span>
+                      <span className="text-white font-bold">{performer.symbol}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="p-1 text-gray-400 text-xs max-w-[80px] truncate">
+                    {performer.name}
+                  </TableCell>
+                  <TableCell className="p-1 text-right text-white font-bold">
+                    ${formatPrice(performer.price)}
+                  </TableCell>
+                  <TableCell className={cn(
+                    "p-1 text-right font-bold text-xs",
+                    performer.change1m >= 0 ? "text-green-400" : "text-red-400"
+                  )}>
+                    {formatChange(performer.change1m)}%
+                  </TableCell>
+                  <TableCell className={cn(
+                    "p-1 text-right font-bold text-xs",
+                    performer.change5m >= 0 ? "text-green-400" : "text-red-400"
+                  )}>
+                    {formatChange(performer.change5m)}%
+                  </TableCell>
+                  <TableCell className={cn(
+                    "p-1 text-right font-bold text-xs",
+                    performer.change15m >= 0 ? "text-green-400" : "text-red-400"
+                  )}>
+                    {formatChange(performer.change15m)}%
+                  </TableCell>
+                  <TableCell className={cn(
+                    "p-1 text-right font-bold text-xs",
+                    performer.change1h >= 0 ? "text-green-400" : "text-red-400"
+                  )}>
+                    {formatChange(performer.change1h)}%
+                  </TableCell>
+                  <TableCell className={cn(
+                    "p-1 text-right font-bold text-xs",
+                    performer.change4h >= 0 ? "text-green-400" : "text-red-400"
+                  )}>
+                    {formatChange(performer.change4h)}%
+                  </TableCell>
+                  <TableCell className={cn(
+                    "p-1 text-right font-bold",
+                    performer.change24h >= 0 ? "text-green-400" : "text-red-400"
+                  )}>
+                    {formatChange(performer.change24h)}%
+                  </TableCell>
+                  <TableCell className={cn(
+                    "p-1 text-right font-bold",
+                    performer.change7d >= 0 ? "text-green-400" : "text-red-400"
+                  )}>
+                    {formatChange(performer.change7d)}%
+                  </TableCell>
+                  <TableCell className={cn(
+                    "p-1 text-right font-bold text-xs",
+                    performer.change30d >= 0 ? "text-green-400" : "text-red-400"
+                  )}>
+                    {formatChange(performer.change30d)}%
+                  </TableCell>
+                  <TableCell className="p-1 text-right text-orange-400 text-xs">
+                    {formatNumber(performer.volume)}
+                  </TableCell>
+                  <TableCell className={cn(
+                    "p-1 text-right text-xs",
+                    performer.volumeChange >= 0 ? "text-green-400" : "text-red-400"
+                  )}>
+                    {formatChange(performer.volumeChange)}%
+                  </TableCell>
+                  <TableCell className="p-1 text-right text-white text-xs">
+                    {formatNumber(performer.marketCap)}
+                  </TableCell>
+                  <TableCell className="p-1 text-right text-gray-400 text-xs">
+                    ${formatPrice(performer.highDay)}
+                  </TableCell>
+                  <TableCell className="p-1 text-right text-gray-400 text-xs">
+                    ${formatPrice(performer.lowDay)}
+                  </TableCell>
+                  <TableCell className="p-1 text-right text-gray-400 text-xs">
+                    {formatNumber(performer.circulatingSupply)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Bottom Stats Bar */}
+        <div className="bg-gray-900 p-2 sm:p-3 text-xs font-mono border border-gray-700">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-6 text-xs sm:text-sm">
+              <span className="text-gray-400">TOTAL TRACKED: <span className="text-orange-400">1,247</span></span>
+              <span className="text-gray-400">AVG GAIN: <span className="text-green-400">+34.2%</span></span>
+              <span className="text-gray-400">AVG LOSS: <span className="text-red-400">-18.7%</span></span>
+            </div>
+            <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-6 text-xs sm:text-sm">
+              <span className="text-gray-400">TOTAL VOL: <span className="text-yellow-400">$127.4B</span></span>
+              <span className="text-gray-400">LAST UPDATE: <span className="text-orange-400">{new Date().toLocaleTimeString()}</span></span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

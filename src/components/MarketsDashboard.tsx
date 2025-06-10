@@ -95,10 +95,10 @@ export function MarketsDashboard() {
       </div>
 
       {/* Main Grid Layout */}
-      <div className="grid grid-cols-12 gap-1 p-1 h-full">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 p-1 h-full">
         
         {/* Left Column - Market Data */}
-        <div className="col-span-3 space-y-1">
+        <div className="lg:col-span-3 space-y-1">
           {/* Market Overview */}
           <div className="bg-gray-900 border border-gray-700 p-1">
             <div className="text-orange-400 text-xs mb-1">MARKET OVERVIEW</div>
@@ -158,19 +158,19 @@ export function MarketsDashboard() {
         </div>
 
         {/* Center Column - Main Trading Data */}
-        <div className="col-span-6 bg-gray-900 border border-gray-700">
+        <div className="lg:col-span-6 bg-gray-900 border border-gray-700">
           <div className="text-orange-400 text-xs p-1 border-b border-gray-700">ACTIVE TRADING PAIRS</div>
-          <div className="overflow-auto h-full">
-            <table className="w-full text-xs">
+          <div className="overflow-x-auto h-full">
+            <table className="w-full text-xs min-w-[640px]">
               <thead className="bg-gray-800 sticky top-0">
                 <tr className="text-gray-400">
                   <th className="text-left p-1">PAIR</th>
                   <th className="text-right p-1">PRICE</th>
                   <th className="text-right p-1">24H</th>
-                  <th className="text-right p-1">7D</th>
+                  <th className="text-right p-1 hidden sm:table-cell">7D</th>
                   <th className="text-right p-1">VOL</th>
-                  <th className="text-right p-1">MCAP</th>
-                  <th className="text-center p-1">CHART</th>
+                  <th className="text-right p-1 hidden md:table-cell">MCAP</th>
+                  <th className="text-center p-1 hidden sm:table-cell">CHART</th>
                 </tr>
               </thead>
               <tbody>
@@ -190,16 +190,16 @@ export function MarketsDashboard() {
                     <td className={`text-right p-1 ${stock.change24h >= 0 ? "text-green-400" : "text-red-400"}`}>
                       {stock.change24h >= 0 ? "+" : ""}{stock.change24h.toFixed(2)}%
                     </td>
-                    <td className={`text-right p-1 ${Math.random() > 0.5 ? "text-green-400" : "text-red-400"}`}>
+                    <td className={`text-right p-1 ${Math.random() > 0.5 ? "text-green-400" : "text-red-400"} hidden sm:table-cell`}>
                       {Math.random() > 0.5 ? "+" : "-"}{(Math.random() * 20).toFixed(2)}%
                     </td>
                     <td className="text-right p-1 text-gray-300">
                       ${formatNumber(stock.volume)}
                     </td>
-                    <td className="text-right p-1 text-gray-300">
+                    <td className="text-right p-1 text-gray-300 hidden md:table-cell">
                       ${formatNumber(stock.marketCap)}
                     </td>
-                    <td className="text-center p-1">
+                    <td className="text-center p-1 hidden sm:table-cell">
                       <Sparkline data={stock.sparkline} isPositive={stock.change24h >= 0} />
                     </td>
                   </tr>
@@ -210,7 +210,7 @@ export function MarketsDashboard() {
         </div>
 
         {/* Right Column - Additional Data */}
-        <div className="col-span-3 space-y-1">
+        <div className="lg:col-span-3 space-y-1">
           {/* Volume Leaders */}
           <div className="bg-gray-900 border border-gray-700 p-1">
             <div className="text-orange-400 text-xs mb-1">VOLUME LEADERS</div>
