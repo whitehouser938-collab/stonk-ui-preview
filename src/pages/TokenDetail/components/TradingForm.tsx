@@ -1,0 +1,182 @@
+import React, { useState } from "react";
+import { useAppKitAccount } from "@reown/appkit/react";
+import { useAppKitBalance } from "@reown/appkit/react";
+
+interface TradingFormProps {
+  chain?: string;
+  symbol?: string;
+  tokenAddress?: string;
+}
+
+export interface TokenTradeData {
+  chain: string;
+  symbol: string;
+  tokenAddress: string;
+  amount: string;
+  isBuy: boolean; // true for buy, false for sell
+  deadline?: number; // Optional deadline for the trade
+  minAmount?: number; // Optional minimum amount for the trade
+}
+
+const presetAmounts = [0.1, 0.5, 1]; // Preset amounts for quick selection
+
+const TradingForm = (props: TradingFormProps) => {
+  const [isBuy, setIsBuy] = useState(true); // "buy" or "sell"
+  const [selectedCurrency, setSelectedCurrency] = useState(props.symbol); // Default currency
+  const [amount, setAmount] = useState("");
+
+  const { isConnected: isEthConnected } = useAppKitAccount({
+    namespace: "eip155",
+  });
+  const { isConnected: isSolConnected } = useAppKitAccount({
+    namespace: "solana",
+  });
+
+  const isWalletConnected =
+    (props.chain === "BASE" && isEthConnected) ||
+    (props.chain === "SOL" && isSolConnected); // Check if any wallet is connected
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+      alert("Please enter a valid amount.");
+      return;
+    }
+
+    alert(
+      `You have successfully submitted a ${
+        isBuy ? "Buy" : "Sell"
+      } order for ${amount} tokens.`
+    );
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="p-2 bg-gray-900 border border-gray-700 space-y-6 text-gray-400"
+    >
+      {/* Buy and Sell Buttons */}
+      <div className="flex space-x-4">
+        {/* Buy Button */}
+        <button
+          type="button"
+          onClick={() => setIsBuy(true)}
+          className={`
+      w-full p-3 text-sm font-bold transition-all duration-200
+      ${
+        isBuy
+          ? "bg-orange-600 text-black"
+          : "bg-transparent border border-gray-700 text-gray-400 hover:bg-gray-800"
+      }
+    `}
+        >
+          Buy
+        </button>
+
+        {/* Sell Button */}
+        <button
+          type="button"
+          onClick={() => setIsBuy(false)}
+          className={`
+      w-full p-3  text-sm font-bold transition-all duration-200
+      ${
+        !isBuy
+          ? "bg-orange-600 text-black"
+          : "bg-transparent border border-gray-700 text-gray-400 hover:bg-gray-800"
+      }
+    `}
+        >
+          Sell
+        </button>
+      </div>
+
+      {/* Currency Selector */}
+      <div>
+        <label htmlFor="currency" className="block mb-2 text-sm text-gray-500">
+          Select Currency
+        </label>
+        <select
+          id="currency"
+          value={selectedCurrency}
+          onChange={(e) => setSelectedCurrency(e.target.value)}
+          className="w-full p-3 bg-gray-900 border border-gray-700  text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
+        >
+          <option value={props.symbol}>{props.symbol}</option>
+          <option value={props.chain}>{props.chain}</option>
+          {/* Add more options as needed */}
+        </select>
+      </div>
+
+      {/* Amount Input */}
+      <div>
+        <label htmlFor="amount" className="block mb-2 text-sm text-gray-500">
+          Amount
+        </label>
+        <input
+          id="amount"
+          type="number"
+          placeholder="Enter token amount"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          className="w-full p-3 bg-gray-900 border border-gray-700  text-sm text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-400"
+        />
+        {/* Preset Pills */}
+        <div className="flex space-x-2 mt-2">
+          <button
+            key="reset"
+            type="button"
+            onClick={() => setAmount("")}
+            className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-full text-xsm font-medium transition-all duration-200"
+          >
+            Reset
+          </button>
+
+          {presetAmounts.map((preset) => (
+            <button
+              key={preset}
+              type="button"
+              onClick={() => setAmount(preset.toString())}
+              className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-full text-xsm font-medium transition-all duration-200"
+            >
+              {preset} {selectedCurrency}
+            </button>
+          ))}
+
+          {/* TODO: implement this */}
+          <button
+            key="max"
+            type="button"
+            onClick={() => setAmount("")}
+            className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-full text-xsm font-medium transition-all duration-200"
+          >
+            Max
+          </button>
+        </div>
+      </div>
+
+      {/* Submit Button */}
+      {!isWalletConnected && (
+        <div className="text-red-500 text-sm">
+          Please connect your wallet to trade.
+        </div>
+      )}
+      <button
+        type="submit"
+        disabled={!isWalletConnected}
+        className={`
+    w-full p-3 text-sm font-bold transition-all duration-200
+    ${
+      isBuy
+        ? "bg-green-600 hover:bg-green-700 text-black"
+        : "bg-red-600 hover:bg-red-700 text-white"
+    }
+  `}
+      >
+        {isBuy ? "Submit Buy Order" : "Submit Sell Order"}
+      </button>
+    </form>
+  );
+};
+
+export default TradingForm;

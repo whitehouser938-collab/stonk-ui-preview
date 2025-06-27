@@ -1,9 +1,19 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { BarChart, Search, TrendingUp, Rocket, Trophy, Menu, X } from "lucide-react";
+import {
+  BarChart,
+  Search,
+  TrendingUp,
+  Rocket,
+  Trophy,
+  Menu,
+  X,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ConnectWallet } from "./ConnectWallet";
 import { MobileNav } from "./MobileNav";
+import SearchBar from "./SearchBar";
+import GlobalClock from "./GlobalClock";
 
 const navItems = [
   { path: "/", label: "Markets", icon: BarChart },
@@ -31,7 +41,11 @@ export function Layout({ children }: LayoutProps) {
                 onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
                 className="p-2 rounded-md hover:bg-gray-800"
               >
-                {isMobileNavOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                {isMobileNavOpen ? (
+                  <X className="w-6 h-6" />
+                ) : (
+                  <Menu className="w-6 h-6" />
+                )}
               </button>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-orange-400 font-mono tracking-tight">
@@ -52,7 +66,9 @@ export function Layout({ children }: LayoutProps) {
                     )}
                   >
                     <item.icon className="w-4 h-4" />
-                    <span className="font-medium hidden lg:inline">{item.label}</span>
+                    <span className="font-medium hidden lg:inline">
+                      {item.label}
+                    </span>
                   </Link>
                 );
               })}
@@ -73,6 +89,9 @@ export function Layout({ children }: LayoutProps) {
           location={location}
           onClose={() => setIsMobileNavOpen(false)}
         />
+        <GlobalClock />
+        {/* Search Bar */}
+        <SearchBar />
       </header>
 
       {/* Main Content */}
