@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useAppKitBalance } from "@reown/appkit/react";
+import LoadingScreen from "@/components/ui/loading";
+import { useLoading } from "@/hooks/use-loading";
+import { sellTokenETH } from "../utils/trade-token";
+import { useETHWalletSigner } from "@/hooks/signers/useWalletSigner";
+import { useToast } from "@/hooks/use-toast";
 
 interface TradingFormProps {
   chain?: string;
@@ -24,6 +29,9 @@ const TradingForm = (props: TradingFormProps) => {
   const [isBuy, setIsBuy] = useState(true); // "buy" or "sell"
   const [selectedCurrency, setSelectedCurrency] = useState(props.symbol); // Default currency
   const [amount, setAmount] = useState("");
+  const { isLoading, startLoading, stopLoading } = useLoading();
+  const { getETHSigner } = useETHWalletSigner();
+  const { toast } = useToast();
 
   const { isConnected: isEthConnected } = useAppKitAccount({
     namespace: "eip155",
@@ -36,19 +44,60 @@ const TradingForm = (props: TradingFormProps) => {
     (props.chain === "BASE" && isEthConnected) ||
     (props.chain === "SOL" && isSolConnected); // Check if any wallet is connected
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
       alert("Please enter a valid amount.");
       return;
     }
+    if (!isWalletConnected) {
+      alert("Please connect your wallet to trade.");
+      return;
+    }
+    startLoading();
+    try {
+      const tradeData: TokenTradeData = {
+        chain: props.chain,
+        symbol: props.symbol,
+        tokenAddress: props.tokenAddress,
+        amount: amount,
+        isBuy: isBuy,
+        deadline: Math.floor(Date.now() / 1000) + 60 * 20, // Default deadline of 20 minutes
+        minAmount: undefined, // Optional, can be set later
+      };
 
-    alert(
-      `You have successfully submitted a ${
-        isBuy ? "Buy" : "Sell"
-      } order for ${amount} tokens.`
-    );
+      if (props.chain === "BASE") {
+        // Call the trade function based on the selected action
+        let tradeResponse;
+        const signer = await getETHSigner();
+        if (isBuy) {
+          console.log("Submitting buy order:", tradeData);
+          tradeResponse = await sellTokenETH(tradeData, signer);
+        } else {
+          // Call sell function here
+          tradeResponse = await sellTokenETH(tradeData, signer);
+        }
+        if (tradeResponse.success) {
+          toast({
+            title: "Trade Successful",
+            description: `Transaction Hash: ${tradeResponse.transactionHash}`,
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Trade Failed",
+            description: "An error occurred while processing the trade.",
+            variant: "destructive",
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error submitting trade:", error);
+      alert("An error occurred while submitting the trade.");
+    } finally {
+      stopLoading();
+    }
   };
 
   return (
@@ -56,6 +105,7 @@ const TradingForm = (props: TradingFormProps) => {
       onSubmit={handleSubmit}
       className="p-2 bg-gray-900 border border-gray-700 space-y-6 text-gray-400"
     >
+      {isLoading && <LoadingScreen />}
       {/* Buy and Sell Buttons */}
       <div className="flex space-x-4">
         {/* Buy Button */}
@@ -90,7 +140,6 @@ const TradingForm = (props: TradingFormProps) => {
           Sell
         </button>
       </div>
-
       {/* Currency Selector */}
       <div>
         <label htmlFor="currency" className="block mb-2 text-sm text-gray-500">
@@ -107,7 +156,6 @@ const TradingForm = (props: TradingFormProps) => {
           {/* Add more options as needed */}
         </select>
       </div>
-
       {/* Amount Input */}
       <div>
         <label htmlFor="amount" className="block mb-2 text-sm text-gray-500">
@@ -118,6 +166,7 @@ const TradingForm = (props: TradingFormProps) => {
           type="number"
           placeholder="Enter token amount"
           value={amount}
+          required
           onChange={(e) => setAmount(e.target.value)}
           className="w-full p-3 bg-gray-900 border border-gray-700  text-sm text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-400"
         />
@@ -154,7 +203,6 @@ const TradingForm = (props: TradingFormProps) => {
           </button>
         </div>
       </div>
-
       {/* Submit Button */}
       {!isWalletConnected && (
         <div className="text-red-500 text-sm">

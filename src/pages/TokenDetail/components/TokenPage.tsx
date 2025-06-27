@@ -201,7 +201,7 @@ const TokenPage = () => {
 
   return (
     <div className="bg-black text-gray-100 text-xs font-mono">
-      {isLoading && <LoadingScreen />} {/* Top Time Bar */}
+      {isLoading && <LoadingScreen />}
       <div className="bg-gray-900 border-b border-orange-500/30 p-2 flex flex-wrap justify-between items-center gap-2">
         <div className="flex items-center space-x-2 sm:space-x-4">
           {/* Desktop View */}
