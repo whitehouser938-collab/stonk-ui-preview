@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import TradingForm from "./TradingForm";
 import BondingCurveProgress from "./BondingCurveProgress";
+import TradingViewChart from "@/components/TradingViewChart";
 
 export interface TokenDetails {
   name: string;
@@ -202,50 +203,7 @@ const TokenPage = () => {
   return (
     <div className="bg-black text-gray-100 text-xs font-mono">
       {isLoading && <LoadingScreen />}
-      <div className="bg-gray-900 border-b border-orange-500/30 p-2 flex flex-wrap justify-between items-center gap-2">
-        <div className="flex items-center space-x-2 sm:space-x-4">
-          {/* Desktop View */}
-          <span className="text-orange-400 font-bold whitespace-nowrap hidden md:inline">
-            EQUITY RESEARCH
-          </span>
-          <span className="text-orange-400 hidden md:inline whitespace-nowrap">
-            FUNDAMENTAL ANALYSIS
-          </span>
-          <span className="text-orange-400 hidden md:inline whitespace-nowrap">
-            NYSE/NASDAQ
-          </span>
 
-          {/* Mobile Dropdown View */}
-          <div className="md:hidden">
-            <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center space-x-1 text-orange-400 font-bold whitespace-nowrap">
-                <span>{selectedView}</span>
-                <ChevronDown className="w-4 h-4" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-gray-900 border-gray-700 text-gray-400">
-                <DropdownMenuItem
-                  onClick={() => setSelectedView("EQUITY RESEARCH")}
-                  className="cursor-pointer hover:!bg-orange-700/10 hover:!text-gray-100"
-                >
-                  EQUITY RESEARCH
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setSelectedView("FUNDAMENTAL ANALYSIS")}
-                  className="cursor-pointer hover:!bg-orange-700/10 hover:!text-gray-100"
-                >
-                  FUNDAMENTAL ANALYSIS
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setSelectedView("NYSE/NASDAQ")}
-                  className="cursor-pointer hover:!bg-orange-700/10 hover:!text-gray-100"
-                >
-                  NYSE/NASDAQ
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </div>
       {/* Main Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 p-1">
         {/* Left Column - Stock Overview */}
@@ -274,6 +232,26 @@ const TokenPage = () => {
                   <div className="text-gray-400">
                     {tokenData?.symbol} - {tokenData?.chain}
                   </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-gray-400 text-sm">
+                      {tokenData?.tokenAddress
+                        ? `${tokenData.tokenAddress.slice(
+                            0,
+                            4
+                          )}...${tokenData.tokenAddress.slice(-4)}`
+                        : "N/A"}
+                    </span>
+                    {tokenData?.tokenAddress && (
+                      <button
+                        onClick={() =>
+                          navigator.clipboard.writeText(tokenData.tokenAddress)
+                        }
+                        className="text-orange-400 hover:text-orange-300 text-sm font-medium"
+                      >
+                        Copy
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="text-left sm:text-right">
@@ -295,7 +273,8 @@ const TokenPage = () => {
           {/* Price Chart */}
           <div className="bg-gray-900 border border-gray-700 p-2">
             <div className="text-orange-400 mb-2">INTRADAY CHART</div>
-            <div className="bg-black border border-gray-800 p-2 h-48 flex">
+            <TradingViewChart height={300} />
+            {/* <div className="bg-black border border-gray-800 p-2 h-48 flex">
               <div className="flex flex-col justify-between h-full text-xs text-gray-500 pr-2 border-r border-gray-700 text-right">
                 <span>${chartMax.toFixed(2)}</span>
                 <span>${chartAvg.toFixed(2)}</span>
@@ -328,7 +307,7 @@ const TokenPage = () => {
                   })}
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Financial Metrics */}

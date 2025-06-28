@@ -9,16 +9,39 @@ const GlobalClock = () => {
   }, []);
 
   return (
-    <div className="flex justify-start items-center space-x-2 sm:space-x-4 pl-4">
-      <span className="text-orange-400 whitespace-nowrap">
-        EST:{" "}
-        {currentTime.toLocaleTimeString("en-US", {
-          timeZone: "America/New_York",
-        })}
-      </span>
-      <div className="flex items-center space-x-2">
-        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-        <span className="text-green-400">LIVE</span>
+    <div className="p-2 text-xs font-mono">
+      {/* Top Time Bar */}
+      <div className="bg-gray-900 border-b border-orange-500/30 p-1 flex justify-between items-center">
+        <div className="flex space-x-6">
+          <span className="text-orange-400">
+            NYC:{" "}
+            {currentTime.toLocaleTimeString("US", {
+              timeZone: "America/New_York",
+            })}
+          </span>
+          <span className="text-orange-400">
+            LON:{" "}
+            {currentTime.toLocaleTimeString("GB", {
+              timeZone: "Europe/London",
+            })}
+          </span>
+          <span className="text-orange-400">
+            TOK:{" "}
+            {currentTime.toLocaleTimeString("JP", {
+              timeZone: "Asia/Tokyo",
+            })}
+          </span>
+          <span className="text-orange-400">
+            SYD:{" "}
+            {currentTime.toLocaleTimeString("AU", {
+              timeZone: "Australia/Sydney",
+            })}
+          </span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+          <span className="text-green-400">LIVE</span>
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import Datafeed from "public/charting_library/datafeeds/finder/datafeed";
+import Datafeed from "../../public/charting_library/datafeeds/finder/datafeed";
 import { useEffect, useRef, useState } from "react";
 
 interface TradingViewChartProps {
@@ -25,7 +25,7 @@ function TradingViewChart({
     const initChart = async () => {
       // Dynamically load the Charting Library
       const TradingView = await import(
-        "public/charting_library/charting_library"
+        "../../public/charting_library/charting_library"
       );
 
       if (!TradingView || !TradingView.widget) {

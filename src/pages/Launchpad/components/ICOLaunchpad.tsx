@@ -242,63 +242,6 @@ export function ICOLaunchpad() {
     <div className="bg-black text-gray-100 text-xs font-mono">
       {isLoading && <LoadingScreen />}{" "}
       {/* Render LoadingScreen when isLoading is true */}
-      {/* Top Time Bar */}
-      <div className="bg-gray-900 border-b border-orange-500/30 p-2 flex flex-wrap justify-between items-center gap-2">
-        <div className="flex items-center space-x-2 sm:space-x-4">
-          {/* Desktop View */}
-          <span className="text-orange-400 font-bold whitespace-nowrap hidden md:inline">
-            ICO LAUNCHPAD
-          </span>
-          <span className="text-orange-400 hidden md:inline whitespace-nowrap">
-            EQUITY MARKETS
-          </span>
-          <span className="text-orange-400 hidden md:inline whitespace-nowrap">
-            NYSE/NASDAQ
-          </span>
-
-          {/* Mobile Dropdown View */}
-          <div className="md:hidden">
-            <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center space-x-1 text-orange-400 font-bold whitespace-nowrap">
-                <span>{selectedView}</span>
-                <ChevronDown className="w-4 h-4" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-gray-900 border-gray-700 text-gray-400">
-                <DropdownMenuItem
-                  onClick={() => setSelectedView("ICO LAUNCHPAD")}
-                  className="cursor-pointer hover:!bg-orange-700/10 hover:!text-gray-100"
-                >
-                  ICO LAUNCHPAD
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setSelectedView("EQUITY MARKETS")}
-                  className="cursor-pointer hover:!bg-orange-700/10 hover:!text-gray-100"
-                >
-                  EQUITY MARKETS
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setSelectedView("NYSE/NASDAQ")}
-                  className="cursor-pointer hover:!bg-orange-700/10 hover:!text-gray-100"
-                >
-                  NYSE/NASDAQ
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-        <div className="flex items-center space-x-2 sm:space-x-4">
-          <span className="text-orange-400 whitespace-nowrap">
-            EST:{" "}
-            {currentTime.toLocaleTimeString("en-US", {
-              timeZone: "America/New_York",
-            })}
-          </span>
-          <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="text-green-400">LIVE</span>
-          </div>
-        </div>
-      </div>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 p-1">
         {/* Left Column - IPO Form */}
         <div className="col-span-1 lg:col-span-8 space-y-3">
