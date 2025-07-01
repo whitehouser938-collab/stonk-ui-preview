@@ -1,16 +1,25 @@
 import { useState, useEffect } from "react";
-import { Search, TrendingUp, TrendingDown, Users, Globe, Activity, BarChart3, ChevronDown } from "lucide-react";
+import {
+  Search,
+  TrendingUp,
+  TrendingDown,
+  Users,
+  Globe,
+  Activity,
+  BarChart3,
+  ChevronDown,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
 const stockData = {
   symbol: "AAPL",
   name: "Apple Inc",
-  price: 182.50,
+  price: 182.5,
   change24h: 2.45,
   marketCap: 2850000000000,
   volume24h: 85000000,
@@ -19,17 +28,25 @@ const stockData = {
   allTimeHigh: 198.23,
   allTimeLow: 142.27,
   institutional: 59.8,
-  description: "Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories worldwide. The company serves consumers, and small and mid-sized businesses; and the education, enterprise, and government markets."
+  description:
+    "Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories worldwide. The company serves consumers, and small and mid-sized businesses; and the education, enterprise, and government markets.",
 };
 
 const chartData = [
-  { time: "09:30", price: 180.50 }, { time: "09:45", price: 180.75 },
-  { time: "10:00", price: 181.25 }, { time: "10:15", price: 181.15 },
-  { time: "10:30", price: 180.90 }, { time: "10:45", price: 181.50 },
-  { time: "11:00", price: 182.15 }, { time: "11:15", price: 182.00 },
-  { time: "11:30", price: 181.80 }, { time: "11:45", price: 182.20 },
-  { time: "12:00", price: 182.60 }, { time: "12:15", price: 182.40 },
-  { time: "12:30", price: 182.50 }, { time: "12:45", price: 182.85 }
+  { time: "09:30", price: 180.5 },
+  { time: "09:45", price: 180.75 },
+  { time: "10:00", price: 181.25 },
+  { time: "10:15", price: 181.15 },
+  { time: "10:30", price: 180.9 },
+  { time: "10:45", price: 181.5 },
+  { time: "11:00", price: 182.15 },
+  { time: "11:15", price: 182.0 },
+  { time: "11:30", price: 181.8 },
+  { time: "11:45", price: 182.2 },
+  { time: "12:00", price: 182.6 },
+  { time: "12:15", price: 182.4 },
+  { time: "12:30", price: 182.5 },
+  { time: "12:45", price: 182.85 },
 ];
 
 const newsData = [
@@ -37,28 +54,56 @@ const newsData = [
     title: "Apple Reports Record Q4 Revenue, Beats Estimates",
     source: "Reuters",
     time: "2 hours ago",
-    summary: "Apple Inc reported quarterly revenue that exceeded analyst expectations driven by strong iPhone sales."
+    summary:
+      "Apple Inc reported quarterly revenue that exceeded analyst expectations driven by strong iPhone sales.",
   },
   {
     title: "Apple Announces New AI Chip Partnership with TSMC",
-    source: "Bloomberg", 
+    source: "Bloomberg",
     time: "5 hours ago",
-    summary: "Strategic partnership aims to develop next-generation neural processing units for future devices."
+    summary:
+      "Strategic partnership aims to develop next-generation neural processing units for future devices.",
   },
   {
     title: "Institutional Ownership Increases to 59.8%",
     source: "MarketWatch",
-    time: "1 day ago", 
-    summary: "Major institutional investors continue to increase their positions in Apple stock."
-  }
+    time: "1 day ago",
+    summary:
+      "Major institutional investors continue to increase their positions in Apple stock.",
+  },
 ];
 
 const analystData = [
-  { firm: "Goldman Sachs", rating: "BUY", target: 210.00, updated: "2024-01-15" },
-  { firm: "Morgan Stanley", rating: "OVERWEIGHT", target: 205.00, updated: "2024-01-12" },
-  { firm: "JPMorgan", rating: "OVERWEIGHT", target: 200.00, updated: "2024-01-10" },
-  { firm: "Bank of America", rating: "BUY", target: 215.00, updated: "2024-01-08" },
-  { firm: "Wells Fargo", rating: "OVERWEIGHT", target: 195.00, updated: "2024-01-05" }
+  {
+    firm: "Goldman Sachs",
+    rating: "BUY",
+    target: 210.0,
+    updated: "2024-01-15",
+  },
+  {
+    firm: "Morgan Stanley",
+    rating: "OVERWEIGHT",
+    target: 205.0,
+    updated: "2024-01-12",
+  },
+  {
+    firm: "JPMorgan",
+    rating: "OVERWEIGHT",
+    target: 200.0,
+    updated: "2024-01-10",
+  },
+  {
+    firm: "Bank of America",
+    rating: "BUY",
+    target: 215.0,
+    updated: "2024-01-08",
+  },
+  {
+    firm: "Wells Fargo",
+    rating: "OVERWEIGHT",
+    target: 195.0,
+    updated: "2024-01-05",
+  },
 ];
 
 const financialData = {
@@ -71,7 +116,7 @@ const financialData = {
   roa: 28.09,
   currentRatio: 0.98,
   debtToEquity: 1.73,
-  freeCashFlow: 84726000000
+  freeCashFlow: 84726000000,
 };
 
 function formatNumber(num: number): string {
@@ -91,8 +136,8 @@ export function TokenResearch() {
     return () => clearInterval(timer);
   }, []);
 
-  const dataMaxPrice = Math.max(...chartData.map(p => p.price));
-  const dataMinPrice = Math.min(...chartData.map(p => p.price));
+  const dataMaxPrice = Math.max(...chartData.map((p) => p.price));
+  const dataMinPrice = Math.min(...chartData.map((p) => p.price));
   const priceRange = dataMaxPrice - dataMinPrice;
 
   // Add 10% padding to the top and bottom of the chart range
@@ -103,59 +148,8 @@ export function TokenResearch() {
 
   return (
     <div className="bg-black text-gray-100 text-xs font-mono">
-      {/* Top Time Bar */}
-      <div className="bg-gray-900 border-b border-orange-500/30 p-2 flex flex-wrap justify-between items-center gap-2">
-        <div className="flex items-center space-x-2 sm:space-x-4">
-          {/* Desktop View */}
-          <span className="text-orange-400 font-bold whitespace-nowrap hidden md:inline">EQUITY RESEARCH</span>
-          <span className="text-orange-400 hidden md:inline whitespace-nowrap">FUNDAMENTAL ANALYSIS</span>
-          <span className="text-orange-400 hidden md:inline whitespace-nowrap">NYSE/NASDAQ</span>
-
-          {/* Mobile Dropdown View */}
-          <div className="md:hidden">
-            <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center space-x-1 text-orange-400 font-bold whitespace-nowrap">
-                <span>{selectedView}</span>
-                <ChevronDown className="w-4 h-4" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-gray-900 border-gray-700 text-gray-400">
-                <DropdownMenuItem onClick={() => setSelectedView("EQUITY RESEARCH")} className="cursor-pointer hover:!bg-orange-700/10 hover:!text-gray-100">EQUITY RESEARCH</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSelectedView("FUNDAMENTAL ANALYSIS")} className="cursor-pointer hover:!bg-orange-700/10 hover:!text-gray-100">FUNDAMENTAL ANALYSIS</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSelectedView("NYSE/NASDAQ")} className="cursor-pointer hover:!bg-orange-700/10 hover:!text-gray-100">NYSE/NASDAQ</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-        <div className="flex items-center space-x-2 sm:space-x-4">
-          <span className="text-orange-400 whitespace-nowrap">EST: {currentTime.toLocaleTimeString('en-US', { timeZone: 'America/New_York' })}</span>
-          <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="text-green-400">LIVE</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Search Bar */}
-      <div className="bg-gray-900 border-b border-gray-700 p-2">
-        <div className="flex items-center space-x-4">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3" />
-            <input
-              placeholder="Search ticker..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-7 pr-3 py-1 bg-black border border-gray-700 text-white text-xs w-full font-mono"
-            />
-          </div>
-          <button className="px-3 py-1 bg-orange-600 text-black text-xs font-bold hover:bg-orange-500">
-            ANALYZE
-          </button>
-        </div>
-      </div>
-
       {/* Main Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 p-1">
-        
         {/* Left Column - Stock Overview */}
         <div className="col-span-12 lg:col-span-8 space-y-1">
           {/* Stock Header */}
@@ -166,14 +160,25 @@ export function TokenResearch() {
                   {stockData.symbol}
                 </div>
                 <div>
-                  <div className="text-orange-400 font-bold text-base sm:text-lg">{stockData.name}</div>
-                  <div className="text-gray-400">{stockData.symbol} - NASDAQ</div>
+                  <div className="text-orange-400 font-bold text-base sm:text-lg">
+                    {stockData.name}
+                  </div>
+                  <div className="text-gray-400">
+                    {stockData.symbol} - NASDAQ
+                  </div>
                 </div>
               </div>
               <div className="text-left sm:text-right">
-                <div className="text-xl sm:text-2xl font-mono text-white">${stockData.price.toFixed(2)}</div>
-                <div className={`text-base sm:text-lg font-mono ${stockData.change24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {stockData.change24h >= 0 ? '+' : ''}{stockData.change24h.toFixed(2)}%
+                <div className="text-xl sm:text-2xl font-mono text-white">
+                  ${stockData.price.toFixed(2)}
+                </div>
+                <div
+                  className={`text-base sm:text-lg font-mono ${
+                    stockData.change24h >= 0 ? "text-green-400" : "text-red-400"
+                  }`}
+                >
+                  {stockData.change24h >= 0 ? "+" : ""}
+                  {stockData.change24h.toFixed(2)}%
                 </div>
               </div>
             </div>
@@ -192,16 +197,24 @@ export function TokenResearch() {
                 <div className="flex items-end gap-x-3 px-2 h-full">
                   {chartData.map((point, index) => {
                     const chartRange = chartMax - chartMin;
-                    const height = chartRange > 0 ? ((point.price - chartMin) / chartRange) * 158 + 2 : 80;
-                    
+                    const height =
+                      chartRange > 0
+                        ? ((point.price - chartMin) / chartRange) * 158 + 2
+                        : 80;
+
                     return (
-                      <div key={index} className="flex-1 min-w-[2.5rem] flex flex-col justify-end items-center">
-                        <div 
+                      <div
+                        key={index}
+                        className="flex-1 min-w-[2.5rem] flex flex-col justify-end items-center"
+                      >
+                        <div
                           className="bg-orange-500 w-full rounded-t"
                           style={{ height: `${height}px` }}
                           title={`$${point.price.toFixed(2)}`}
                         ></div>
-                        <div className="text-xs text-gray-400 mt-1 whitespace-nowrap">{point.time}</div>
+                        <div className="text-xs text-gray-400 mt-1 whitespace-nowrap">
+                          {point.time}
+                        </div>
                       </div>
                     );
                   })}
@@ -216,35 +229,51 @@ export function TokenResearch() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 text-xs">
               <div className="bg-black border border-gray-800 p-2">
                 <div className="text-gray-400">REVENUE (TTM)</div>
-                <div className="text-white font-mono text-sm">${formatNumber(financialData.revenue)}</div>
+                <div className="text-white font-mono text-sm">
+                  ${formatNumber(financialData.revenue)}
+                </div>
               </div>
               <div className="bg-black border border-gray-800 p-2">
                 <div className="text-gray-400">NET INCOME</div>
-                <div className="text-white font-mono text-sm">${formatNumber(financialData.netIncome)}</div>
+                <div className="text-white font-mono text-sm">
+                  ${formatNumber(financialData.netIncome)}
+                </div>
               </div>
               <div className="bg-black border border-gray-800 p-2">
                 <div className="text-gray-400">GROSS MARGIN</div>
-                <div className="text-white font-mono text-sm">{financialData.grossMargin.toFixed(2)}%</div>
+                <div className="text-white font-mono text-sm">
+                  {financialData.grossMargin.toFixed(2)}%
+                </div>
               </div>
               <div className="bg-black border border-gray-800 p-2">
                 <div className="text-gray-400">PROFIT MARGIN</div>
-                <div className="text-white font-mono text-sm">{financialData.profitMargin.toFixed(2)}%</div>
+                <div className="text-white font-mono text-sm">
+                  {financialData.profitMargin.toFixed(2)}%
+                </div>
               </div>
               <div className="bg-black border border-gray-800 p-2">
                 <div className="text-gray-400">ROE</div>
-                <div className="text-white font-mono text-sm">{financialData.roe.toFixed(2)}%</div>
+                <div className="text-white font-mono text-sm">
+                  {financialData.roe.toFixed(2)}%
+                </div>
               </div>
               <div className="bg-black border border-gray-800 p-2">
                 <div className="text-gray-400">ROA</div>
-                <div className="text-white font-mono text-sm">{financialData.roa.toFixed(2)}%</div>
+                <div className="text-white font-mono text-sm">
+                  {financialData.roa.toFixed(2)}%
+                </div>
               </div>
               <div className="bg-black border border-gray-800 p-2">
                 <div className="text-gray-400">DEBT/EQUITY</div>
-                <div className="text-white font-mono text-sm">{financialData.debtToEquity.toFixed(2)}</div>
+                <div className="text-white font-mono text-sm">
+                  {financialData.debtToEquity.toFixed(2)}
+                </div>
               </div>
               <div className="bg-black border border-gray-800 p-2">
                 <div className="text-gray-400">FREE CASH FLOW</div>
-                <div className="text-white font-mono text-sm">${formatNumber(financialData.freeCashFlow)}</div>
+                <div className="text-white font-mono text-sm">
+                  ${formatNumber(financialData.freeCashFlow)}
+                </div>
               </div>
             </div>
           </div>
@@ -264,17 +293,27 @@ export function TokenResearch() {
                 </thead>
                 <tbody>
                   {analystData.map((analyst, index) => (
-                    <tr key={index} className="border-b border-gray-800 last:border-0">
+                    <tr
+                      key={index}
+                      className="border-b border-gray-800 last:border-0"
+                    >
                       <td className="p-1 text-white">{analyst.firm}</td>
-                      <td className={`p-1 text-center font-bold ${
-                        analyst.rating.includes('BUY') || analyst.rating.includes('OVERWEIGHT') 
-                          ? 'text-green-400' 
-                          : 'text-yellow-400'
-                      }`}>
+                      <td
+                        className={`p-1 text-center font-bold ${
+                          analyst.rating.includes("BUY") ||
+                          analyst.rating.includes("OVERWEIGHT")
+                            ? "text-green-400"
+                            : "text-yellow-400"
+                        }`}
+                      >
                         {analyst.rating}
                       </td>
-                      <td className="p-1 text-right text-white font-mono">${analyst.target.toFixed(2)}</td>
-                      <td className="p-1 text-right text-gray-400">{analyst.updated}</td>
+                      <td className="p-1 text-right text-white font-mono">
+                        ${analyst.target.toFixed(2)}
+                      </td>
+                      <td className="p-1 text-right text-gray-400">
+                        {analyst.updated}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -291,31 +330,45 @@ export function TokenResearch() {
             <div className="space-y-2 text-xs">
               <div className="flex justify-between items-start gap-2">
                 <span className="text-gray-400">Market Cap</span>
-                <span className="font-mono text-white text-right">${formatNumber(stockData.marketCap)}</span>
+                <span className="font-mono text-white text-right">
+                  ${formatNumber(stockData.marketCap)}
+                </span>
               </div>
               <div className="flex justify-between items-start gap-2">
                 <span className="text-gray-400">Volume</span>
-                <span className="font-mono text-white text-right">{formatNumber(stockData.volume24h)}</span>
+                <span className="font-mono text-white text-right">
+                  {formatNumber(stockData.volume24h)}
+                </span>
               </div>
               <div className="flex justify-between items-start gap-2">
                 <span className="text-gray-400">Shares Outstanding</span>
-                <span className="font-mono text-white text-right">{formatNumber(stockData.outstandingShares)}</span>
+                <span className="font-mono text-white text-right">
+                  {formatNumber(stockData.outstandingShares)}
+                </span>
               </div>
               <div className="flex justify-between items-start gap-2">
                 <span className="text-gray-400">Float</span>
-                <span className="font-mono text-white text-right">{formatNumber(stockData.floatShares)}</span>
+                <span className="font-mono text-white text-right">
+                  {formatNumber(stockData.floatShares)}
+                </span>
               </div>
               <div className="flex justify-between items-start gap-2">
                 <span className="text-gray-400">52W High</span>
-                <span className="font-mono text-white text-right">${stockData.allTimeHigh.toFixed(2)}</span>
+                <span className="font-mono text-white text-right">
+                  ${stockData.allTimeHigh.toFixed(2)}
+                </span>
               </div>
               <div className="flex justify-between items-start gap-2">
                 <span className="text-gray-400">52W Low</span>
-                <span className="font-mono text-white text-right">${stockData.allTimeLow.toFixed(2)}</span>
+                <span className="font-mono text-white text-right">
+                  ${stockData.allTimeLow.toFixed(2)}
+                </span>
               </div>
               <div className="flex justify-between items-start gap-2">
                 <span className="text-gray-400">Institutional</span>
-                <span className="font-mono text-white text-right">{stockData.institutional.toFixed(1)}%</span>
+                <span className="font-mono text-white text-right">
+                  {stockData.institutional.toFixed(1)}%
+                </span>
               </div>
             </div>
           </div>
@@ -347,14 +400,21 @@ export function TokenResearch() {
             <div className="text-orange-400 mb-2">RECENT NEWS</div>
             <div className="space-y-2">
               {newsData.map((news, index) => (
-                <div key={index} className="bg-black border border-gray-800 p-1">
+                <div
+                  key={index}
+                  className="bg-black border border-gray-800 p-1"
+                >
                   <div className="flex flex-col sm:flex-row items-start justify-between mb-1 gap-1">
                     <div className="text-white text-xs font-medium hover:text-orange-400 cursor-pointer">
                       {news.title}
                     </div>
-                    <span className="text-xs text-gray-400 whitespace-nowrap">{news.time}</span>
+                    <span className="text-xs text-gray-400 whitespace-nowrap">
+                      {news.time}
+                    </span>
                   </div>
-                  <div className="text-gray-300 text-xs mb-1">{news.summary}</div>
+                  <div className="text-gray-300 text-xs mb-1">
+                    {news.summary}
+                  </div>
                   <div className="text-xs text-orange-400">{news.source}</div>
                 </div>
               ))}
@@ -397,7 +457,9 @@ export function TokenResearch() {
       {/* Bottom Description */}
       <div className="bg-gray-900 border-t border-orange-500/30 p-2">
         <div className="text-orange-400 mb-1">COMPANY DESCRIPTION</div>
-        <div className="text-gray-300 text-xs leading-relaxed">{stockData.description}</div>
+        <div className="text-gray-300 text-xs leading-relaxed">
+          {stockData.description}
+        </div>
       </div>
     </div>
   );

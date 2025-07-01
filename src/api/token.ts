@@ -28,7 +28,7 @@ export const addToken = async (tokenData: any) => {
 export const getToken = async (chainId: string, tokenAddress: string) => {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/token?chain=${chainId}&address=${tokenAddress}`
+      `${API_BASE_URL}/token/search?chain=${chainId}&address=${tokenAddress}`
     );
 
     if (!response.ok) {
@@ -37,10 +37,10 @@ export const getToken = async (chainId: string, tokenAddress: string) => {
 
     const tokenData = await response.json();
     console.log("Fetched token data:", tokenData);
-    if (!tokenData || !tokenData.token) {
+    if (!tokenData || !tokenData.data) {
       throw new Error("Token not found or invalid response");
     }
-    return tokenData.token;
+    return tokenData.data;
   } catch (error) {
     console.error("Error fetching token:", error);
     throw error;

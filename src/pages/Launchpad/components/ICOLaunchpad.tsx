@@ -12,12 +12,6 @@ import {
   Activity,
   ChevronDown,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 import { deployTokenETH, DeployTokenResponse } from "../utils/deploy-token";
 import { addTokenToDb } from "../utils/add-token-to-db";
@@ -35,6 +29,7 @@ export interface ICOLaunchData {
   telegramUrl?: string;
   twitterUrl?: string;
   logoUrl?: string;
+  logoFile?: File;
   launchpad: string; // "BASE" or "SOL"
 }
 
@@ -134,6 +129,7 @@ export function ICOLaunchpad() {
     telegramUrl: "",
     twitterUrl: "",
     logoUrl: "",
+    logoFile: undefined,
     launchpad: "BASE", // Default launchpad
   });
 
@@ -152,6 +148,42 @@ export function ICOLaunchpad() {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
+  const handleFileChange = (file: File | null) => {
+    setFormData((prev) => ({
+      ...prev,
+      logoFile: file || undefined,
+      logoUrl: file ? URL.createObjectURL(file) : "",
+    }));
+  };
+
+  const uploadImageToServer = async (file: File): Promise<string> => {
+    const uploadFormData = new FormData();
+    uploadFormData.append("logo", file);
+    uploadFormData.append("tokenName", formData.name);
+    uploadFormData.append("tokenSymbol", formData.symbol);
+
+    try {
+      const response = await fetch(
+        "http://localhost:3000/api/upload/token-logo",
+        {
+          // Update with your server URL
+          method: "POST",
+          body: uploadFormData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to upload image");
+      }
+
+      const data = await response.json();
+      return data.logoUrl; // Server returns the GCS public URL
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw error;
+    }
+  };
+
   const resetFormData = () => {
     setFormData({
       name: "",
@@ -162,6 +194,7 @@ export function ICOLaunchpad() {
       telegramUrl: "",
       twitterUrl: "",
       logoUrl: "",
+      logoFile: undefined,
       launchpad: "BASE", // Reset to default launchpad
     });
   };
@@ -188,45 +221,74 @@ export function ICOLaunchpad() {
     console.log("Form Data:", formData); // Logs the form data to the console
     const valid = validateFormData(formData);
     if (valid) {
-      // Here you would typically send the data to your backend API
-      console.log("Form submitted successfully!");
-      //Create Token on Chain
-      if (formData.launchpad === "BASE") {
-        const signer = await getETHSigner();
-        const deployResponse: DeployTokenResponse = await deployTokenETH(
-          formData,
-          signer
-        );
-        // Add token to database
-        if (deployResponse.success === false) {
-          console.error("Token deployment failed:", deployResponse);
+      try {
+        // Upload logo image if a file is selected
+        let logoUrl = formData.logoUrl;
+        if (formData.logoFile) {
+          try {
+            logoUrl = await uploadImageToServer(formData.logoFile);
+            console.log("Logo uploaded successfully:", logoUrl);
+          } catch (uploadError) {
+            console.error("Failed to upload logo:", uploadError);
+            toast({
+              title: "Warning",
+              description: "Logo upload failed, proceeding without logo.",
+              variant: "destructive",
+            });
+          }
+        }
+
+        // Update formData with the uploaded logo URL
+        const updatedFormData = { ...formData, logoUrl };
+
+        // Here you would typically send the data to your backend API
+        console.log("Form submitted successfully!");
+        //Create Token on Chain
+        if (formData.launchpad === "BASE") {
+          const signer = await getETHSigner();
+          const deployResponse: DeployTokenResponse = await deployTokenETH(
+            updatedFormData,
+            signer
+          );
+          // Add token to database
+          if (deployResponse.success === false) {
+            console.error("Token deployment failed:", deployResponse);
+            toast({
+              title: "Error",
+              description: "Token deployment failed. Please try again.",
+              variant: "destructive",
+            });
+            stopLoading(); // Stop loading state
+            return;
+          }
+          console.log("Token deployed successfully:", deployResponse);
+          setLaunchConfirm(deployResponse);
+          // Add token to database
+          const addTokenResponse = await addTokenToDb(
+            updatedFormData,
+            deployResponse.deployerAddress,
+            deployResponse.tokenAddress,
+            deployResponse.bondingCurveAddress
+          );
           toast({
-            title: "Error",
-            description: "Token deployment failed. Please try again.",
+            title: "Success",
+            description: "Your ICO has been successfully launched!",
             variant: "destructive",
           });
-          stopLoading(); // Stop loading state
-          return;
         }
-        console.log("Token deployed successfully:", deployResponse);
-        setLaunchConfirm(deployResponse);
-        // Add token to database
-        const addTokenResponse = await addTokenToDb(
-          formData,
-          deployResponse.deployerAddress,
-          deployResponse.tokenAddress,
-          deployResponse.bondingCurveAddress
-        );
+        setView("confirmed"); // Switch to confirmed view
+        stopLoading(); // Stop loading state
+
+        resetFormData();
+      } catch (error) {
+        console.error("Error during form submission:", error);
         toast({
-          title: "Success",
-          description: "Your ICO has been successfully launched!",
+          title: "Error",
+          description: "An error occurred during submission. Please try again.",
           variant: "destructive",
         });
+        stopLoading();
       }
-      setView("confirmed"); // Switch to confirmed view
-      stopLoading(); // Stop loading state
-
-      resetFormData();
     } else {
       console.error("Form validation failed.");
       toast({
@@ -295,17 +357,39 @@ export function ICOLaunchpad() {
                     className="w-full p-2 bg-black border border-gray-600 text-white text-xs sm:text-sm font-mono h-20 sm:h-24"
                   />
                 </div>
-                {/* Logo URL and Social Links */}
+                {/* Logo Upload and Social Links */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
                   <div>
-                    <div className="text-gray-400 mb-1">Logo URL</div>
-                    <input
-                      value={formData.twitterUrl}
-                      onChange={(e) =>
-                        handleInputChange("twitterUrl", e.target.value)
-                      }
-                      className="w-full p-2 bg-black border border-gray-600 text-white text-xs sm:text-sm font-mono"
-                    />
+                    <div className="text-gray-400 mb-1">
+                      Logo Upload (Image/GIF)
+                    </div>
+                    <div className="space-y-2">
+                      <input
+                        type="file"
+                        accept="image/*,.gif"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          handleFileChange(file || null);
+                        }}
+                        className="w-full p-2 bg-black border border-gray-600 text-white text-xs sm:text-sm font-mono file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-orange-600 file:text-white hover:file:bg-orange-700"
+                      />
+                      {formData.logoFile && (
+                        <div className="relative">
+                          <img
+                            src={formData.logoUrl}
+                            alt="Logo preview"
+                            className="w-16 h-16 object-cover border border-gray-600 rounded"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleFileChange(null)}
+                            className="absolute -top-1 -right-1 bg-red-600 hover:bg-red-700 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <div className="text-gray-400 mb-1">Website URL</div>
