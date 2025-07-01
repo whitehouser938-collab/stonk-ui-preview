@@ -9,7 +9,6 @@ export const addTokenToDb = async (
   const tokenDataMap = {
     name: tokenData.name,
     symbol: tokenData.symbol,
-    totalSupply: tokenData.totalSupply,
     chain: tokenData.launchpad,
     description: tokenData.description,
     websiteUrl: tokenData.website,

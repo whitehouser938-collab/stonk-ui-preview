@@ -19,11 +19,11 @@ import { useETHWalletSigner } from "@/hooks/signers/useWalletSigner";
 import { useToast } from "@/hooks/use-toast";
 import { useLoading } from "@/hooks/use-loading";
 import LoadingScreen from "@/components/ui/loading";
+import { uploadTokenLogo } from "@/api/token";
 
 export interface ICOLaunchData {
   name: string;
   symbol: string;
-  totalSupply: string;
   description: string;
   website?: string;
   telegramUrl?: string;
@@ -123,7 +123,6 @@ export function ICOLaunchpad() {
   const [formData, setFormData] = useState<ICOLaunchData>({
     name: "",
     symbol: "",
-    totalSupply: "",
     description: "",
     website: "",
     telegramUrl: "",
@@ -156,39 +155,28 @@ export function ICOLaunchpad() {
     }));
   };
 
-  const uploadImageToServer = async (file: File): Promise<string> => {
-    const uploadFormData = new FormData();
-    uploadFormData.append("logo", file);
-    uploadFormData.append("tokenName", formData.name);
-    uploadFormData.append("tokenSymbol", formData.symbol);
+  // const uploadImageToServer = async (file: File): Promise<string> => {
+  //   try {
+  //     const response = await uploadTokenLogo(
+  //       formData.
+  //     );
 
-    try {
-      const response = await fetch(
-        "http://localhost:3000/api/upload/token-logo",
-        {
-          // Update with your server URL
-          method: "POST",
-          body: uploadFormData,
-        }
-      );
+  //     if (!response.ok) {
+  //       throw new Error("Failed to upload image");
+  //     }
 
-      if (!response.ok) {
-        throw new Error("Failed to upload image");
-      }
-
-      const data = await response.json();
-      return data.logoUrl; // Server returns the GCS public URL
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      throw error;
-    }
-  };
+  //     const data = await response.json();
+  //     return data.logoUrl; // Server returns the GCS public URL
+  //   } catch (error) {
+  //     console.error("Error uploading image:", error);
+  //     throw error;
+  //   }
+  // };
 
   const resetFormData = () => {
     setFormData({
       name: "",
       symbol: "",
-      totalSupply: "",
       description: "",
       website: "",
       telegramUrl: "",
@@ -207,7 +195,7 @@ export function ICOLaunchpad() {
 
   const validateFormData = (data: ICOLaunchData) => {
     // Basic validation to ensure required fields are filled
-    if (!data.name || !data.symbol || !data.totalSupply || !data.description) {
+    if (!data.name || !data.symbol || !data.description) {
       console.error("Please fill in all required fields.");
       return false;
     }
@@ -224,19 +212,19 @@ export function ICOLaunchpad() {
       try {
         // Upload logo image if a file is selected
         let logoUrl = formData.logoUrl;
-        if (formData.logoFile) {
-          try {
-            logoUrl = await uploadImageToServer(formData.logoFile);
-            console.log("Logo uploaded successfully:", logoUrl);
-          } catch (uploadError) {
-            console.error("Failed to upload logo:", uploadError);
-            toast({
-              title: "Warning",
-              description: "Logo upload failed, proceeding without logo.",
-              variant: "destructive",
-            });
-          }
-        }
+        // if (formData.logoFile) {
+        //   try {
+        //     logoUrl = await uploadImageToServer(formData.logoFile);
+        //     console.log("Logo uploaded successfully:", logoUrl);
+        //   } catch (uploadError) {
+        //     console.error("Failed to upload logo:", uploadError);
+        //     toast({
+        //       title: "Warning",
+        //       description: "Logo upload failed, proceeding without logo.",
+        //       variant: "destructive",
+        //     });
+        //   }
+        // }
 
         // Update formData with the uploaded logo URL
         const updatedFormData = { ...formData, logoUrl };
@@ -426,7 +414,7 @@ export function ICOLaunchpad() {
                   </div>
                 </div>
                 {/* Shares */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+                {/* <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
                   <div>
                     <div className="text-gray-400 mb-1">Shares Offered</div>
                     <input
@@ -442,7 +430,7 @@ export function ICOLaunchpad() {
                       className="w-full p-2 bg-black border border-gray-600 text-white text-xs sm:text-sm font-mono"
                     />
                   </div>
-                </div>
+                </div> */}
                 {/* Launchpad Section */}
                 <div className="mb-6">
                   <div className="text-gray-400 mb-1">Launchpad</div>

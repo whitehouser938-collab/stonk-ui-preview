@@ -24,22 +24,21 @@ export const buyTokenETH = async (
         signer // Use Reown's signer
       );
 
-      // Convert amount to uint256
-      const amountAsUint256 = ethers.parseUnits(tradeData.amount, 18);
-
-      const minAmountAsUint256 = ethers.parseUnits(
-        tradeData.minAmount?.toString() || "0",
-        18
+      let tokenAmount = ethers.parseEther(tradeData.amount);
+      let assetAmount = await router.calculateBuyPrice(
+        tradeData.tokenAddress,
+        tokenAmount
       );
+      const maxAssetAmount = assetAmount * (1 + tradeData.slippage); // Allow 5% slippage;
 
       //handle buy
       let tx;
       if (tradeData.isBuy) {
         tx = await router.buyTokens(
           tradeData.tokenAddress,
-          amountAsUint256,
-          minAmountAsUint256,
-          tradeData.deadline || Math.floor(Date.now() / 1000) + 60 * 20 // Default deadline of 20 minutes
+          tokenAmount,
+          maxAssetAmount,
+          tradeData.deadline
         );
       }
 
@@ -53,9 +52,9 @@ export const buyTokenETH = async (
       );
 
       let tokenAddress: string;
-      let tokensReceived: string;
+
       if (eventLog) {
-        [tokenAddress, tokensReceived] = eventLog.args;
+        [tokenAddress, tokenAmount, assetAmount] = eventLog.args;
       } else {
         throw new Error("TokensPurchased event not found");
       }
@@ -63,7 +62,8 @@ export const buyTokenETH = async (
       const response = {
         transactionHash: tx.hash,
         tokenAddress: tokenAddress,
-        tokensReceived: tokensReceived,
+        tokenAmount: tokenAmount,
+        assetAmount: assetAmount,
         success: true,
       };
       return response;
@@ -92,22 +92,21 @@ export const sellTokenETH = async (
         signer // Use Reown's signer
       );
 
-      // Convert amount to uint256
-      const amountAsUint256 = ethers.parseUnits(tradeData.amount, 18);
-
-      const minAmountAsUint256 = ethers.parseUnits(
-        tradeData.minAmount?.toString() || "0",
-        18
+      let tokenAmount = ethers.parseEther(tradeData.amount);
+      let assetAmount = await router.calculateBuyPrice(
+        tradeData.tokenAddress,
+        tokenAmount
       );
+      const minAssetAmount = assetAmount * (1 - tradeData.slippage); // Allow 5% slippage;
 
       //handle sell
       let tx;
       if (!tradeData.isBuy) {
         tx = await router.sellTokens(
           tradeData.tokenAddress,
-          amountAsUint256,
-          minAmountAsUint256,
-          tradeData.deadline || Math.floor(Date.now() / 1000) + 60 * 20 // Default deadline of 20 minutes
+          tokenAmount,
+          minAssetAmount,
+          tradeData.deadline
         );
       }
 
@@ -121,10 +120,8 @@ export const sellTokenETH = async (
       );
 
       let tokenAddress: string;
-      let tokenAmount: string;
-      let assetsReceived: string;
       if (eventLog) {
-        [tokenAddress, tokenAmount, assetsReceived] = eventLog.args;
+        [tokenAddress, tokenAmount, assetAmount] = eventLog.args;
       } else {
         throw new Error("TokensSold event not found");
       }
@@ -133,7 +130,7 @@ export const sellTokenETH = async (
         transactionHash: tx.hash,
         tokenAddress: tokenAddress,
         tokenAmount: tokenAmount,
-        assetsReceived: assetsReceived,
+        assetAmount: assetAmount,
         success: true,
       };
       return response;

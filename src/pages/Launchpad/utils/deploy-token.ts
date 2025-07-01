@@ -26,19 +26,17 @@ export const deployTokenETH = async (
       );
 
       // Convert totalSupply to uint256
-      const totalSupplyAsUint256 = ethers.parseUnits(tokenData.totalSupply, 18);
-      const fee = ethers.parseEther(import.meta.env.VITE_DEPLOYMENT_FEE_ETH);
+      const fee = tokenFactory.feePrice();
 
       // Deploy token transaction
       const tx = await tokenFactory.deployToken(
         tokenData.name,
         tokenData.symbol,
-        totalSupplyAsUint256,
         import.meta.env.VITE_BASE_VAULT_ADDRESS, // Vault address
         // TODO: Add Tax params here
-        0,
-        0,
-        0,
+        import.meta.env.VITE_EVM_PROJECT_BUY_TAX_BP || 0,
+        import.meta.env.VITE_EVM_PROJECT_SELL_TAX_BP || 0,
+        import.meta.env.VITE_EVM_PROJECT_TAX_SWAP_THRESHOLP_BP || 0,
         { value: fee }
       );
 

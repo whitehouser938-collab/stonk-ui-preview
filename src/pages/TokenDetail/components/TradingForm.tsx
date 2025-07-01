@@ -18,9 +18,10 @@ export interface TokenTradeData {
   symbol: string;
   tokenAddress: string;
   amount: string;
+  currency: string; // Optional currency for the trade
   isBuy: boolean; // true for buy, false for sell
   deadline?: number; // Optional deadline for the trade
-  minAmount?: number; // Optional minimum amount for the trade
+  slippage?: number; // Optional minimum amount for the trade
 }
 
 const presetAmounts = [0.1, 0.5, 1]; // Preset amounts for quick selection
@@ -62,9 +63,10 @@ const TradingForm = (props: TradingFormProps) => {
         symbol: props.symbol,
         tokenAddress: props.tokenAddress,
         amount: amount,
+        currency: selectedCurrency, // Use the selected currency
         isBuy: isBuy,
         deadline: Math.floor(Date.now() / 1000) + 60 * 20, // Default deadline of 20 minutes
-        minAmount: undefined, // Optional, can be set later
+        slippage: undefined, // Optional, can be set later
       };
 
       if (props.chain === "BASE") {
