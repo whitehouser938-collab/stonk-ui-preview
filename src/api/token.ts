@@ -46,3 +46,36 @@ export const getToken = async (chainId: string, tokenAddress: string) => {
     throw error;
   }
 };
+
+export const uploadTokenLogo = async (
+  tokenId: string,
+  file: File,
+  tokenName: string,
+  tokenSymbol: string
+) => {
+  const formData = new FormData();
+  formData.append("logo", file);
+  formData.append("tokenId", tokenId);
+  formData.append("tokenName", tokenName);
+  formData.append("tokenSymbol", tokenSymbol);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/upload/token-logo`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to upload token logo");
+    }
+
+    const resData = await response.json();
+    if (!resData || !resData.success) {
+      throw new Error("Logo upload unsuccessful");
+    }
+    return resData.url;
+  } catch (error) {
+    console.error("Error uploading token logo:", error);
+    throw error;
+  }
+};
