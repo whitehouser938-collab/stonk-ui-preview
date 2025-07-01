@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { getToken } from "@/api/token";
 import LoadingScreen from "@/components/ui/loading";
 import { useLoading } from "@/hooks/use-loading";
@@ -13,6 +13,8 @@ import {
   Activity,
   BarChart3,
   ChevronDown,
+  AlertTriangle,
+  Home,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -44,14 +46,17 @@ const TokenPage = () => {
     chainId: string;
     tokenAddress: string;
   }>();
+  const navigate = useNavigate();
   const [tokenData, setTokenData] = useState<any>(null);
   const [view, setView] = useState("details");
+  const [error, setError] = useState<string | null>(null);
 
   const { isLoading, startLoading, stopLoading } = useLoading();
 
   useEffect(() => {
     const fetchTokenData = async () => {
       startLoading(); // Start loading state
+      setError(null); // Reset error state
       try {
         if (!chainId || !tokenAddress) {
           throw new Error("Chain ID and token address are required");
@@ -59,9 +64,15 @@ const TokenPage = () => {
         const data = await getToken(chainId, tokenAddress);
         console.log("Fetched token data:", data);
 
-        setTokenData(data);
+        if (!data || !data.success) {
+          throw new Error("Token not found");
+        }
+
+        setTokenData(data.data);
       } catch (error) {
         console.error("Error fetching token data:", error);
+        setError(error instanceof Error ? error.message : "Failed to fetch token data");
+        setTokenData(null);
       } finally {
         stopLoading(); // Stop loading state
       }
@@ -204,7 +215,51 @@ const TokenPage = () => {
     <div className="bg-black text-gray-100 text-xs font-mono">
       {isLoading && <LoadingScreen />}
 
-      {/* Main Layout */}
+      {/* Error/Not Found Screen */}
+      {error && (
+        <div className="min-h-screen flex items-center justify-center p-4">
+          <div className="bg-gray-900 border border-gray-700 p-8 max-w-md w-full text-center">
+            <div className="mb-6">
+              <AlertTriangle className="w-16 h-16 text-orange-400 mx-auto mb-4" />
+              <h1 className="text-2xl font-bold text-orange-400 mb-2">
+                Token Not Found
+              </h1>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                {error === "Token not found" 
+                  ? `The token with address ${tokenAddress} on ${chainId?.toUpperCase()} could not be found.`
+                  : error
+                }
+              </p>
+            </div>
+            
+            <div className="space-y-3">
+              <button
+                onClick={() => navigate("/")}
+                className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-orange-600 hover:bg-orange-700 text-black font-bold text-sm transition-all duration-200"
+              >
+                <Home className="w-4 h-4" />
+                <span>Back to Homepage</span>
+              </button>
+              
+              <button
+                onClick={() => window.history.back()}
+                className="w-full px-4 py-3 bg-transparent border border-gray-600 hover:bg-gray-800 text-gray-300 font-bold text-sm transition-all duration-200"
+              >
+                Go Back
+              </button>
+            </div>
+            
+            <div className="mt-6 pt-4 border-t border-gray-700">
+              <p className="text-gray-500 text-xs">
+                Make sure the token address and chain are correct
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content - Only show if no error and token data exists */}
+      {!error && tokenData && (
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 p-1">
         {/* Left Column - Stock Overview */}
         <div className="col-span-12 lg:col-span-8 space-y-1">
@@ -428,6 +483,13 @@ const TokenPage = () => {
                 <span className="text-white">164,000</span>
               </div>
             </div>
+            {/* Bottom Description */}
+            <div className="bg-gray-900 border-t border-orange-500/30 p-2">
+              <div className="text-orange-400 mb-1">COMPANY DESCRIPTION</div>
+              <div className="text-gray-300 text-xs leading-relaxed">
+                {tokenData?.description}
+              </div>
+            </div>
           </div>
 
           {/* Recent News */}
@@ -546,13 +608,7 @@ const TokenPage = () => {
           <BondingCurveProgress progress={20} />
         </div>
       </div>
-      {/* Bottom Description */}
-      <div className="bg-gray-900 border-t border-orange-500/30 p-2">
-        <div className="text-orange-400 mb-1">COMPANY DESCRIPTION</div>
-        <div className="text-gray-300 text-xs leading-relaxed">
-          {tokenData?.description}
-        </div>
-      </div>
+      )}
     </div>
   );
 };

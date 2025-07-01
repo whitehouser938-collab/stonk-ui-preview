@@ -25,11 +25,14 @@ export interface TokenTradeData {
 }
 
 const presetAmounts = [0.1, 0.5, 1]; // Preset amounts for quick selection
+const slippageOptions = [0.5, 1, 2.5, 5]; // Slippage options in percentage
 
 const TradingForm = (props: TradingFormProps) => {
   const [isBuy, setIsBuy] = useState(true); // "buy" or "sell"
   const [selectedCurrency, setSelectedCurrency] = useState(props.symbol); // Default currency
   const [amount, setAmount] = useState("");
+  const [slippagePercent, setSlippagePercent] = useState(1); // Default 1% slippage
+  const [customSlippage, setCustomSlippage] = useState(""); // For custom slippage input
   const { isLoading, startLoading, stopLoading } = useLoading();
   const { getETHSigner } = useETHWalletSigner();
   const { toast } = useToast();
@@ -66,7 +69,7 @@ const TradingForm = (props: TradingFormProps) => {
         currency: selectedCurrency, // Use the selected currency
         isBuy: isBuy,
         deadline: Math.floor(Date.now() / 1000) + 60 * 20, // Default deadline of 20 minutes
-        slippage: undefined, // Optional, can be set later
+        slippage: slippagePercent / 100, // Convert percentage to decimal
       };
 
       if (props.chain === "BASE") {
@@ -158,6 +161,62 @@ const TradingForm = (props: TradingFormProps) => {
           {/* Add more options as needed */}
         </select>
       </div>
+
+      {/* Slippage Tolerance */}
+      <div>
+        <label htmlFor="slippage" className="block mb-2 text-sm text-gray-500">
+          Slippage Tolerance
+        </label>
+        <div className="space-y-3">
+          {/* Preset Slippage Buttons */}
+          <div className="flex space-x-2">
+            {slippageOptions.map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                onClick={() => {
+                  setSlippagePercent(preset);
+                  setCustomSlippage("");
+                }}
+                className={`px-3 py-2 text-xs font-medium transition-all duration-200 ${
+                  slippagePercent === preset && !customSlippage
+                    ? "bg-orange-600 text-black"
+                    : "bg-gray-800 hover:bg-gray-700 text-gray-300"
+                }`}
+              >
+                {preset}%
+              </button>
+            ))}
+            <div className="flex items-center space-x-1">
+              <input
+                type="number"
+                placeholder="Custom"
+                value={customSlippage}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setCustomSlippage(value);
+                  if (value && !isNaN(Number(value))) {
+                    setSlippagePercent(Number(value));
+                  }
+                }}
+                className="w-16 px-2 py-1 bg-gray-800 border border-gray-700 text-xs text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-orange-400"
+                min="0"
+                max="50"
+                step="0.1"
+              />
+              <span className="text-xs text-gray-400">%</span>
+            </div>
+          </div>
+          {/* Current Slippage Display */}
+          <div className="text-xs text-gray-400">
+            Current slippage: <span className="text-orange-400">{slippagePercent}%</span>
+            {slippagePercent > 5 && (
+              <span className="text-yellow-400 ml-2">⚠️ High slippage warning</span>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Amount Input */}
       <div>
         <label htmlFor="amount" className="block mb-2 text-sm text-gray-500">
