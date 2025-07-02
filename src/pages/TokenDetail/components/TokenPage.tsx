@@ -25,6 +25,7 @@ import {
 import TradingForm from "./TradingForm";
 import BondingCurveProgress from "./BondingCurveProgress";
 import TradingViewChart from "@/components/TradingViewChart";
+import OrderBook from "./OrderBook";
 
 export interface TokenDetails {
   name: string;
@@ -611,6 +612,11 @@ const TokenPage = () => {
               tokenAddress={tokenData?.tokenAddress}
             />
             <BondingCurveProgress progress={20} />
+            <OrderBook
+              tokenAddress={tokenData?.tokenAddress}
+              chain={tokenData?.chain}
+              currentPrice={stockData.price}
+            />
           </div>
         </div>
       )}
