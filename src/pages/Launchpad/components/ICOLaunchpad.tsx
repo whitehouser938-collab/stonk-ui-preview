@@ -251,6 +251,7 @@ export function ICOLaunchpad() {
           }
           console.log("Token deployed successfully:", deployResponse);
           setLaunchConfirm(deployResponse);
+
           // Add token to database
           const addTokenResponse = await addTokenToDb(
             updatedFormData,
@@ -258,6 +259,33 @@ export function ICOLaunchpad() {
             deployResponse.tokenAddress,
             deployResponse.bondingCurveAddress
           );
+
+          //Upload token logo to server
+          let logoUrl;
+          if (formData.logoFile) {
+            try {
+              const logoUploadResponse = await uploadTokenLogo(
+                addTokenResponse.tokenAddress,
+                formData.logoFile,
+                addTokenResponse.name,
+                addTokenResponse.symbol
+              );
+              logoUrl = logoUploadResponse;
+              console.log("Logo uploaded successfully:", logoUploadResponse);
+            } catch (uploadError) {
+              console.error("Failed to upload logo:", uploadError);
+              toast({
+                title: "Warning",
+                description: "Logo upload failed, proceeding without logo.",
+                variant: "destructive",
+              });
+            }
+          }
+          // Update the token data with the logo URL if it was successfully uploaded
+          if (logoUrl) {
+            await updateTokenLogo(addTokenResponse.id, logoUrl);
+          }
+
           toast({
             title: "Success",
             description: "Your ICO has been successfully launched!",

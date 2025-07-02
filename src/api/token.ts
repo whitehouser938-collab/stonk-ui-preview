@@ -80,6 +80,29 @@ export const uploadTokenLogo = async (
   }
 };
 
+export const updateTokenLogoUrl = async (tokenId: string, logoUrl: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/token/${tokenId}/logo`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ tokenId, logoUrl }),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to update token logo URL");
+    }
+    const resData = await response.json();
+    if (!resData || !resData.success) {
+      throw new Error("Logo URL update unsuccessful");
+    }
+    return resData.data;
+  } catch (error) {
+    console.error("Error updating token logo URL:", error);
+    throw error;
+  }
+};
+
 // Types for search functionality
 export interface SearchTokensParams {
   q: string; // Search query
