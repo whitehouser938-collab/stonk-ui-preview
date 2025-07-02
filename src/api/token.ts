@@ -28,7 +28,7 @@ export const addToken = async (tokenData: any) => {
 export const getToken = async (chainId: string, tokenAddress: string) => {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/token/search?chain=${chainId}&address=${tokenAddress}`
+      `${API_BASE_URL}/token/find?chain=${chainId}&address=${tokenAddress}`
     );
 
     if (!response.ok) {
@@ -76,6 +76,52 @@ export const uploadTokenLogo = async (
     return resData.url;
   } catch (error) {
     console.error("Error uploading token logo:", error);
+    throw error;
+  }
+};
+
+// Types for search functionality
+export interface SearchTokensParams {
+  q: string; // Search query
+  limit?: number; // Optional limit (default: 10, max: 50)
+}
+
+export interface SearchTokensResponse {
+  success: boolean;
+  message: string;
+  data: {
+    tokens: any[]; // Array of token objects
+    query: string;
+    totalCount: number;
+    limit: number;
+    hasMore: boolean;
+  };
+}
+
+export const searchTokens = async (
+  params: SearchTokensParams
+): Promise<SearchTokensResponse> => {
+  try {
+    const searchParams = new URLSearchParams({
+      q: params.q,
+      ...(params.limit && { limit: params.limit.toString() }),
+    });
+
+    const response = await fetch(
+      `${API_BASE_URL}/token/search?${searchParams.toString()}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to search tokens");
+    }
+
+    const searchData = await response.json();
+    if (!searchData || !searchData.success) {
+      throw new Error("Token search unsuccessful");
+    }
+    return searchData;
+  } catch (error) {
+    console.error("Error searching tokens:", error);
     throw error;
   }
 };

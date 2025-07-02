@@ -64,14 +64,16 @@ const TokenPage = () => {
         const data = await getToken(chainId, tokenAddress);
         console.log("Fetched token data:", data);
 
-        if (!data || !data.success) {
+        if (!data) {
           throw new Error("Token not found");
         }
 
-        setTokenData(data.data);
+        setTokenData(data);
       } catch (error) {
         console.error("Error fetching token data:", error);
-        setError(error instanceof Error ? error.message : "Failed to fetch token data");
+        setError(
+          error instanceof Error ? error.message : "Failed to fetch token data"
+        );
         setTokenData(null);
       } finally {
         stopLoading(); // Stop loading state
@@ -225,13 +227,12 @@ const TokenPage = () => {
                 Token Not Found
               </h1>
               <p className="text-gray-400 text-sm leading-relaxed">
-                {error === "Token not found" 
+                {error === "Token not found"
                   ? `The token with address ${tokenAddress} on ${chainId?.toUpperCase()} could not be found.`
-                  : error
-                }
+                  : error}
               </p>
             </div>
-            
+
             <div className="space-y-3">
               <button
                 onClick={() => navigate("/")}
@@ -240,7 +241,7 @@ const TokenPage = () => {
                 <Home className="w-4 h-4" />
                 <span>Back to Homepage</span>
               </button>
-              
+
               <button
                 onClick={() => window.history.back()}
                 className="w-full px-4 py-3 bg-transparent border border-gray-600 hover:bg-gray-800 text-gray-300 font-bold text-sm transition-all duration-200"
@@ -248,7 +249,7 @@ const TokenPage = () => {
                 Go Back
               </button>
             </div>
-            
+
             <div className="mt-6 pt-4 border-t border-gray-700">
               <p className="text-gray-500 text-xs">
                 Make sure the token address and chain are correct
@@ -260,76 +261,80 @@ const TokenPage = () => {
 
       {/* Main Content - Only show if no error and token data exists */}
       {!error && tokenData && (
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 p-1">
-        {/* Left Column - Stock Overview */}
-        <div className="col-span-12 lg:col-span-8 space-y-1">
-          {/* Stock Header */}
-          <div className="bg-gray-900 border border-gray-700 p-2">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2">
-              <div className="flex items-center space-x-3 mb-2 sm:mb-0">
-                {/* Token Logo */}
-                {tokenData?.logoUrl ? (
-                  <img
-                    src={tokenData.logoUrl}
-                    alt={`${tokenData.name} logo`}
-                    className="w-8 h-8 rounded-full"
-                  />
-                ) : (
-                  <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded text-white font-bold text-sm flex items-center justify-center flex-shrink-0">
-                    {tokenData?.symbol}
-                  </div>
-                )}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 p-1">
+          {/* Left Column - Stock Overview */}
+          <div className="col-span-12 lg:col-span-8 space-y-1">
+            {/* Stock Header */}
+            <div className="bg-gray-900 border border-gray-700 p-2">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2">
+                <div className="flex items-center space-x-3 mb-2 sm:mb-0">
+                  {/* Token Logo */}
+                  {tokenData?.logoUrl ? (
+                    <img
+                      src={tokenData.logoUrl}
+                      alt={`${tokenData.name} logo`}
+                      className="w-8 h-8 rounded-full"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded text-white font-bold text-sm flex items-center justify-center flex-shrink-0">
+                      {tokenData?.symbol}
+                    </div>
+                  )}
 
-                <div>
-                  <div className="text-orange-400 font-bold text-base sm:text-lg">
-                    {tokenData?.name}
-                  </div>
-                  <div className="text-gray-400">
-                    {tokenData?.symbol} - {tokenData?.chain}
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-gray-400 text-sm">
-                      {tokenData?.tokenAddress
-                        ? `${tokenData.tokenAddress.slice(
-                            0,
-                            4
-                          )}...${tokenData.tokenAddress.slice(-4)}`
-                        : "N/A"}
-                    </span>
-                    {tokenData?.tokenAddress && (
-                      <button
-                        onClick={() =>
-                          navigator.clipboard.writeText(tokenData.tokenAddress)
-                        }
-                        className="text-orange-400 hover:text-orange-300 text-sm font-medium"
-                      >
-                        Copy
-                      </button>
-                    )}
+                  <div>
+                    <div className="text-orange-400 font-bold text-base sm:text-lg">
+                      {tokenData?.name}
+                    </div>
+                    <div className="text-gray-400">
+                      {tokenData?.symbol} - {tokenData?.chain}
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-gray-400 text-sm">
+                        {tokenData?.tokenAddress
+                          ? `${tokenData.tokenAddress.slice(
+                              0,
+                              4
+                            )}...${tokenData.tokenAddress.slice(-4)}`
+                          : "N/A"}
+                      </span>
+                      {tokenData?.tokenAddress && (
+                        <button
+                          onClick={() =>
+                            navigator.clipboard.writeText(
+                              tokenData.tokenAddress
+                            )
+                          }
+                          className="text-orange-400 hover:text-orange-300 text-sm font-medium"
+                        >
+                          Copy
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="text-left sm:text-right">
-                <div className="text-xl sm:text-2xl font-mono text-white">
-                  ${stockData.price.toFixed(2)}
-                </div>
-                <div
-                  className={`text-base sm:text-lg font-mono ${
-                    stockData.change24h >= 0 ? "text-green-400" : "text-red-400"
-                  }`}
-                >
-                  {stockData.change24h >= 0 ? "+" : ""}
-                  {stockData.change24h.toFixed(2)}%
+                <div className="text-left sm:text-right">
+                  <div className="text-xl sm:text-2xl font-mono text-white">
+                    ${stockData.price.toFixed(2)}
+                  </div>
+                  <div
+                    className={`text-base sm:text-lg font-mono ${
+                      stockData.change24h >= 0
+                        ? "text-green-400"
+                        : "text-red-400"
+                    }`}
+                  >
+                    {stockData.change24h >= 0 ? "+" : ""}
+                    {stockData.change24h.toFixed(2)}%
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Price Chart */}
-          <div className="bg-gray-900 border border-gray-700 p-2">
-            <div className="text-orange-400 mb-2">INTRADAY CHART</div>
-            <TradingViewChart height={300} />
-            {/* <div className="bg-black border border-gray-800 p-2 h-48 flex">
+            {/* Price Chart */}
+            <div className="bg-gray-900 border border-gray-700 p-2">
+              <div className="text-orange-400 mb-2">INTRADAY CHART</div>
+              <TradingViewChart height={300} />
+              {/* <div className="bg-black border border-gray-800 p-2 h-48 flex">
               <div className="flex flex-col justify-between h-full text-xs text-gray-500 pr-2 border-r border-gray-700 text-right">
                 <span>${chartMax.toFixed(2)}</span>
                 <span>${chartAvg.toFixed(2)}</span>
@@ -363,251 +368,251 @@ const TokenPage = () => {
                 </div>
               </div>
             </div> */}
-          </div>
+            </div>
 
-          {/* Financial Metrics */}
-          <div className="bg-gray-900 border border-gray-700 p-2">
-            <div className="text-orange-400 mb-2">FINANCIAL METRICS</div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 text-xs">
-              <div className="bg-black border border-gray-800 p-2">
-                <div className="text-gray-400">REVENUE (TTM)</div>
-                <div className="text-white font-mono text-sm">
-                  ${formatNumber(financialData.revenue)}
+            {/* Financial Metrics */}
+            <div className="bg-gray-900 border border-gray-700 p-2">
+              <div className="text-orange-400 mb-2">FINANCIAL METRICS</div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 text-xs">
+                <div className="bg-black border border-gray-800 p-2">
+                  <div className="text-gray-400">REVENUE (TTM)</div>
+                  <div className="text-white font-mono text-sm">
+                    ${formatNumber(financialData.revenue)}
+                  </div>
                 </div>
-              </div>
-              <div className="bg-black border border-gray-800 p-2">
-                <div className="text-gray-400">NET INCOME</div>
-                <div className="text-white font-mono text-sm">
-                  ${formatNumber(financialData.netIncome)}
+                <div className="bg-black border border-gray-800 p-2">
+                  <div className="text-gray-400">NET INCOME</div>
+                  <div className="text-white font-mono text-sm">
+                    ${formatNumber(financialData.netIncome)}
+                  </div>
                 </div>
-              </div>
-              <div className="bg-black border border-gray-800 p-2">
-                <div className="text-gray-400">GROSS MARGIN</div>
-                <div className="text-white font-mono text-sm">
-                  {financialData.grossMargin.toFixed(2)}%
+                <div className="bg-black border border-gray-800 p-2">
+                  <div className="text-gray-400">GROSS MARGIN</div>
+                  <div className="text-white font-mono text-sm">
+                    {financialData.grossMargin.toFixed(2)}%
+                  </div>
                 </div>
-              </div>
-              <div className="bg-black border border-gray-800 p-2">
-                <div className="text-gray-400">PROFIT MARGIN</div>
-                <div className="text-white font-mono text-sm">
-                  {financialData.profitMargin.toFixed(2)}%
+                <div className="bg-black border border-gray-800 p-2">
+                  <div className="text-gray-400">PROFIT MARGIN</div>
+                  <div className="text-white font-mono text-sm">
+                    {financialData.profitMargin.toFixed(2)}%
+                  </div>
                 </div>
-              </div>
-              <div className="bg-black border border-gray-800 p-2">
-                <div className="text-gray-400">ROE</div>
-                <div className="text-white font-mono text-sm">
-                  {financialData.roe.toFixed(2)}%
+                <div className="bg-black border border-gray-800 p-2">
+                  <div className="text-gray-400">ROE</div>
+                  <div className="text-white font-mono text-sm">
+                    {financialData.roe.toFixed(2)}%
+                  </div>
                 </div>
-              </div>
-              <div className="bg-black border border-gray-800 p-2">
-                <div className="text-gray-400">ROA</div>
-                <div className="text-white font-mono text-sm">
-                  {financialData.roa.toFixed(2)}%
+                <div className="bg-black border border-gray-800 p-2">
+                  <div className="text-gray-400">ROA</div>
+                  <div className="text-white font-mono text-sm">
+                    {financialData.roa.toFixed(2)}%
+                  </div>
                 </div>
-              </div>
-              <div className="bg-black border border-gray-800 p-2">
-                <div className="text-gray-400">DEBT/EQUITY</div>
-                <div className="text-white font-mono text-sm">
-                  {financialData.debtToEquity.toFixed(2)}
+                <div className="bg-black border border-gray-800 p-2">
+                  <div className="text-gray-400">DEBT/EQUITY</div>
+                  <div className="text-white font-mono text-sm">
+                    {financialData.debtToEquity.toFixed(2)}
+                  </div>
                 </div>
-              </div>
-              <div className="bg-black border border-gray-800 p-2">
-                <div className="text-gray-400">FREE CASH FLOW</div>
-                <div className="text-white font-mono text-sm">
-                  ${formatNumber(financialData.freeCashFlow)}
+                <div className="bg-black border border-gray-800 p-2">
+                  <div className="text-gray-400">FREE CASH FLOW</div>
+                  <div className="text-white font-mono text-sm">
+                    ${formatNumber(financialData.freeCashFlow)}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Analyst Ratings */}
-          <div className="bg-gray-900 border border-gray-700 p-2">
-            <div className="text-orange-400 mb-2">ANALYST RATINGS</div>
-            <div className="overflow-x-auto bg-black border border-gray-800 p-1">
-              <table className="w-full text-xs min-w-[400px]">
-                <thead>
-                  <tr className="text-gray-400 border-b border-gray-700">
-                    <th className="text-left p-1">FIRM</th>
-                    <th className="text-center p-1">RATING</th>
-                    <th className="text-right p-1">TARGET</th>
-                    <th className="text-right p-1">UPDATED</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {analystData.map((analyst, index) => (
-                    <tr
-                      key={index}
-                      className="border-b border-gray-800 last:border-0"
-                    >
-                      <td className="p-1 text-white">{analyst.firm}</td>
-                      <td
-                        className={`p-1 text-center font-bold ${
-                          analyst.rating.includes("BUY") ||
-                          analyst.rating.includes("OVERWEIGHT")
-                            ? "text-green-400"
-                            : "text-yellow-400"
-                        }`}
-                      >
-                        {analyst.rating}
-                      </td>
-                      <td className="p-1 text-right text-white font-mono">
-                        ${analyst.target.toFixed(2)}
-                      </td>
-                      <td className="p-1 text-right text-gray-400">
-                        {analyst.updated}
-                      </td>
+            {/* Analyst Ratings */}
+            <div className="bg-gray-900 border border-gray-700 p-2">
+              <div className="text-orange-400 mb-2">ANALYST RATINGS</div>
+              <div className="overflow-x-auto bg-black border border-gray-800 p-1">
+                <table className="w-full text-xs min-w-[400px]">
+                  <thead>
+                    <tr className="text-gray-400 border-b border-gray-700">
+                      <th className="text-left p-1">FIRM</th>
+                      <th className="text-center p-1">RATING</th>
+                      <th className="text-right p-1">TARGET</th>
+                      <th className="text-right p-1">UPDATED</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {analystData.map((analyst, index) => (
+                      <tr
+                        key={index}
+                        className="border-b border-gray-800 last:border-0"
+                      >
+                        <td className="p-1 text-white">{analyst.firm}</td>
+                        <td
+                          className={`p-1 text-center font-bold ${
+                            analyst.rating.includes("BUY") ||
+                            analyst.rating.includes("OVERWEIGHT")
+                              ? "text-green-400"
+                              : "text-yellow-400"
+                          }`}
+                        >
+                          {analyst.rating}
+                        </td>
+                        <td className="p-1 text-right text-white font-mono">
+                          ${analyst.target.toFixed(2)}
+                        </td>
+                        <td className="p-1 text-right text-gray-400">
+                          {analyst.updated}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
 
-          {/* Company Info */}
-          <div className="bg-gray-900 border border-gray-700 p-2">
-            <div className="text-orange-400 mb-2">COMPANY INFO</div>
-            <div className="space-y-2 text-xs">
-              <div className="flex items-center space-x-2">
-                <Globe className="w-3 h-3 text-gray-400" />
-                <span className="text-gray-400">Sector</span>
-                <span className="text-white">Technology</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Activity className="w-3 h-3 text-gray-400" />
-                <span className="text-gray-400">Industry</span>
-                <span className="text-white">Consumer Electronics</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Users className="w-3 h-3 text-gray-400" />
-                <span className="text-gray-400">Employees</span>
-                <span className="text-white">164,000</span>
-              </div>
-            </div>
-            {/* Bottom Description */}
-            <div className="bg-gray-900 border-t border-orange-500/30 p-2">
-              <div className="text-orange-400 mb-1">COMPANY DESCRIPTION</div>
-              <div className="text-gray-300 text-xs leading-relaxed">
-                {tokenData?.description}
-              </div>
-            </div>
-          </div>
-
-          {/* Recent News */}
-          <div className="bg-gray-900 border border-gray-700 p-2">
-            <div className="text-orange-400 mb-2">RECENT NEWS</div>
-            <div className="space-y-2">
-              {newsData.map((news, index) => (
-                <div
-                  key={index}
-                  className="bg-black border border-gray-800 p-1"
-                >
-                  <div className="flex flex-col sm:flex-row items-start justify-between mb-1 gap-1">
-                    <div className="text-white text-xs font-medium hover:text-orange-400 cursor-pointer">
-                      {news.title}
-                    </div>
-                    <span className="text-xs text-gray-400 whitespace-nowrap">
-                      {news.time}
-                    </span>
-                  </div>
-                  <div className="text-gray-300 text-xs mb-1">
-                    {news.summary}
-                  </div>
-                  <div className="text-xs text-orange-400">{news.source}</div>
+            {/* Company Info */}
+            <div className="bg-gray-900 border border-gray-700 p-2">
+              <div className="text-orange-400 mb-2">COMPANY INFO</div>
+              <div className="space-y-2 text-xs">
+                <div className="flex items-center space-x-2">
+                  <Globe className="w-3 h-3 text-gray-400" />
+                  <span className="text-gray-400">Sector</span>
+                  <span className="text-white">Technology</span>
                 </div>
-              ))}
+                <div className="flex items-center space-x-2">
+                  <Activity className="w-3 h-3 text-gray-400" />
+                  <span className="text-gray-400">Industry</span>
+                  <span className="text-white">Consumer Electronics</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Users className="w-3 h-3 text-gray-400" />
+                  <span className="text-gray-400">Employees</span>
+                  <span className="text-white">164,000</span>
+                </div>
+              </div>
+              {/* Bottom Description */}
+              <div className="bg-gray-900 border-t border-orange-500/30 p-2">
+                <div className="text-orange-400 mb-1">COMPANY DESCRIPTION</div>
+                <div className="text-gray-300 text-xs leading-relaxed">
+                  {tokenData?.description}
+                </div>
+              </div>
+            </div>
+
+            {/* Recent News */}
+            <div className="bg-gray-900 border border-gray-700 p-2">
+              <div className="text-orange-400 mb-2">RECENT NEWS</div>
+              <div className="space-y-2">
+                {newsData.map((news, index) => (
+                  <div
+                    key={index}
+                    className="bg-black border border-gray-800 p-1"
+                  >
+                    <div className="flex flex-col sm:flex-row items-start justify-between mb-1 gap-1">
+                      <div className="text-white text-xs font-medium hover:text-orange-400 cursor-pointer">
+                        {news.title}
+                      </div>
+                      <span className="text-xs text-gray-400 whitespace-nowrap">
+                        {news.time}
+                      </span>
+                    </div>
+                    <div className="text-gray-300 text-xs mb-1">
+                      {news.summary}
+                    </div>
+                    <div className="text-xs text-orange-400">{news.source}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Technical Indicators */}
+            <div className="bg-gray-900 border border-gray-700 p-2">
+              <div className="text-orange-400 mb-2">TECHNICAL INDICATORS</div>
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">RSI (14)</span>
+                  <span className="text-yellow-400 font-mono">65.3</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">MACD</span>
+                  <span className="text-green-400 font-mono">+2.45</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">SMA (20)</span>
+                  <span className="text-white font-mono">$178.90</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">SMA (50)</span>
+                  <span className="text-white font-mono">$175.60</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Bollinger Upper</span>
+                  <span className="text-white font-mono">$185.20</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Bollinger Lower</span>
+                  <span className="text-white font-mono">$172.40</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Technical Indicators */}
-          <div className="bg-gray-900 border border-gray-700 p-2">
-            <div className="text-orange-400 mb-2">TECHNICAL INDICATORS</div>
-            <div className="space-y-1 text-xs">
-              <div className="flex justify-between">
-                <span className="text-gray-400">RSI (14)</span>
-                <span className="text-yellow-400 font-mono">65.3</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">MACD</span>
-                <span className="text-green-400 font-mono">+2.45</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">SMA (20)</span>
-                <span className="text-white font-mono">$178.90</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">SMA (50)</span>
-                <span className="text-white font-mono">$175.60</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Bollinger Upper</span>
-                <span className="text-white font-mono">$185.20</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Bollinger Lower</span>
-                <span className="text-white font-mono">$172.40</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column - Market Data & Trading */}
-        <div className="col-span-12 lg:col-span-4 space-y-1">
-          {/* Market Data */}
-          <div className="bg-gray-900 border border-gray-700 p-2">
-            <div className="text-orange-400 mb-2">MARKET DATA</div>
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between items-start gap-2">
-                <span className="text-gray-400">Market Cap</span>
-                <span className="font-mono text-white text-right">
-                  ${formatNumber(stockData.marketCap)}
-                </span>
-              </div>
-              <div className="flex justify-between items-start gap-2">
-                <span className="text-gray-400">Volume</span>
-                <span className="font-mono text-white text-right">
-                  {formatNumber(stockData.volume24h)}
-                </span>
-              </div>
-              <div className="flex justify-between items-start gap-2">
-                <span className="text-gray-400">Shares Outstanding</span>
-                <span className="font-mono text-white text-right">
-                  {formatNumber(stockData.outstandingShares)}
-                </span>
-              </div>
-              <div className="flex justify-between items-start gap-2">
-                <span className="text-gray-400">Float</span>
-                <span className="font-mono text-white text-right">
-                  {formatNumber(stockData.floatShares)}
-                </span>
-              </div>
-              <div className="flex justify-between items-start gap-2">
-                <span className="text-gray-400">52W High</span>
-                <span className="font-mono text-white text-right">
-                  ${stockData.allTimeHigh.toFixed(2)}
-                </span>
-              </div>
-              <div className="flex justify-between items-start gap-2">
-                <span className="text-gray-400">52W Low</span>
-                <span className="font-mono text-white text-right">
-                  ${stockData.allTimeLow.toFixed(2)}
-                </span>
-              </div>
-              <div className="flex justify-between items-start gap-2">
-                <span className="text-gray-400">Institutional</span>
-                <span className="font-mono text-white text-right">
-                  {stockData.institutional.toFixed(1)}%
-                </span>
+          {/* Right Column - Market Data & Trading */}
+          <div className="col-span-12 lg:col-span-4 space-y-1">
+            {/* Market Data */}
+            <div className="bg-gray-900 border border-gray-700 p-2">
+              <div className="text-orange-400 mb-2">MARKET DATA</div>
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-gray-400">Market Cap</span>
+                  <span className="font-mono text-white text-right">
+                    ${formatNumber(stockData.marketCap)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-gray-400">Volume</span>
+                  <span className="font-mono text-white text-right">
+                    {formatNumber(stockData.volume24h)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-gray-400">Shares Outstanding</span>
+                  <span className="font-mono text-white text-right">
+                    {formatNumber(stockData.outstandingShares)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-gray-400">Float</span>
+                  <span className="font-mono text-white text-right">
+                    {formatNumber(stockData.floatShares)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-gray-400">52W High</span>
+                  <span className="font-mono text-white text-right">
+                    ${stockData.allTimeHigh.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-gray-400">52W Low</span>
+                  <span className="font-mono text-white text-right">
+                    ${stockData.allTimeLow.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-gray-400">Institutional</span>
+                  <span className="font-mono text-white text-right">
+                    {stockData.institutional.toFixed(1)}%
+                  </span>
+                </div>
               </div>
             </div>
+            <TradingForm
+              chain={tokenData?.chain}
+              symbol={tokenData?.symbol}
+              tokenAddress={tokenData?.tokenAddress}
+            />
+            <BondingCurveProgress progress={20} />
           </div>
-          <TradingForm
-            chain={tokenData?.chain}
-            symbol={tokenData?.symbol}
-            tokenAddress={tokenData?.tokenAddress}
-          />
-          <BondingCurveProgress progress={20} />
         </div>
-      </div>
       )}
     </div>
   );
