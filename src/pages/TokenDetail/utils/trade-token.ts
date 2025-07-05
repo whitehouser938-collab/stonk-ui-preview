@@ -15,7 +15,7 @@ export const buyTokenETH = async (
   tradeData: TokenTradeData,
   signer: ethers.Signer
 ) => {
-  if (tradeData.chain === "BASE") {
+  if (tradeData.chain === "sepolia") {
     try {
       const routerAddress = import.meta.env.VITE_EVM_ROUTER_ADDRESS;
       const router = new Contract(
@@ -25,21 +25,45 @@ export const buyTokenETH = async (
       );
 
       let tokenAmount = ethers.parseEther(tradeData.amount);
-      let assetAmount = await router.calculateBuyPrice(
-        tradeData.tokenAddress,
-        tokenAmount
-      );
-      const maxAssetAmount = assetAmount * (1 + tradeData.slippage); // Allow 5% slippage;
+      let assetAmount: bigint;
+
+      // Use the pre-calculated maxAssetAmount from the frontend instead of recalculating
+      let maxAssetAmount = tradeData.maxAssetAmount
+        ? BigInt(tradeData.maxAssetAmount)
+        : null;
+
+      // Only recalculate if not provided (fallback)
+      if (!maxAssetAmount) {
+        assetAmount = await router.calculateBuyPrice(
+          tradeData.tokenAddress,
+          tokenAmount
+        );
+        const slippageBps = Math.floor(tradeData.slippage * 10000);
+        maxAssetAmount =
+          (assetAmount * BigInt(10000 + slippageBps)) / BigInt(10000);
+      } else {
+        // Still need assetAmount for event parsing, so calculate it
+        assetAmount = await router.calculateBuyPrice(
+          tradeData.tokenAddress,
+          tokenAmount
+        );
+      }
 
       //handle buy
       let tx;
       if (tradeData.isBuy) {
+        console.log("Buying tokens");
+        console.log("Token address:", tradeData.tokenAddress);
+        console.log("Token amount:", tokenAmount);
+        console.log("Max asset amount:", maxAssetAmount);
+        console.log("Deadline:", tradeData.deadline);
         tx = await router.buyTokens(
           tradeData.tokenAddress,
           tokenAmount,
           maxAssetAmount,
           tradeData.deadline
         );
+        console.log("Transaction sent:", tx);
       }
 
       const receipt = await tx.wait(); // Wait for the transaction to be mined
@@ -74,6 +98,7 @@ export const buyTokenETH = async (
       );
       return {
         success: false,
+        error: error?.message || JSON.stringify(error),
       };
     }
   }
@@ -83,7 +108,7 @@ export const sellTokenETH = async (
   tradeData: TokenTradeData,
   signer: ethers.Signer
 ) => {
-  if (tradeData.chain === "BASE") {
+  if (tradeData.chain === "sepolia") {
     try {
       const routerAddress = import.meta.env.VITE_EVM_ROUTER_ADDRESS;
       const router = new Contract(
@@ -97,7 +122,10 @@ export const sellTokenETH = async (
         tradeData.tokenAddress,
         tokenAmount
       );
-      const minAssetAmount = assetAmount * (1 - tradeData.slippage); // Allow 5% slippage;
+      // Fix BigInt math for slippage
+      const slippageBps = Math.floor(tradeData.slippage * 10000); // e.g., 500 for 5%
+      const minAssetAmount =
+        (assetAmount * BigInt(10000 - slippageBps)) / BigInt(10000);
 
       //handle sell
       let tx;
@@ -141,6 +169,7 @@ export const sellTokenETH = async (
       );
       return {
         success: false,
+        error: error?.message || JSON.stringify(error),
       };
     }
   }

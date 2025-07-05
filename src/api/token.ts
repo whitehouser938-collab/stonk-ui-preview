@@ -27,17 +27,15 @@ export const addToken = async (tokenData: any) => {
 
 export const getToken = async (chainId: string, tokenAddress: string) => {
   try {
+    // Use the new merged endpoint that combines Graph + Postgres data
     const response = await fetch(
-      `${API_BASE_URL}/token/find?chain=${chainId}&address=${tokenAddress}`
+      `${API_BASE_URL}/token/${tokenAddress}?chain=${chainId}`
     );
-
     if (!response.ok) {
       throw new Error("Failed to fetch token data");
     }
-
     const tokenData = await response.json();
-    console.log("Fetched token data:", tokenData);
-    if (!tokenData || !tokenData.data) {
+    if (!tokenData || !tokenData.success) {
       throw new Error("Token not found or invalid response");
     }
     return tokenData.data;
@@ -107,6 +105,7 @@ export const updateTokenLogoUrl = async (tokenId: string, logoUrl: string) => {
 export interface SearchTokensParams {
   q: string; // Search query
   limit?: number; // Optional limit (default: 10, max: 50)
+  chain?: string; // Optional chain
 }
 
 export interface SearchTokensResponse {
@@ -128,16 +127,14 @@ export const searchTokens = async (
     const searchParams = new URLSearchParams({
       q: params.q,
       ...(params.limit && { limit: params.limit.toString() }),
+      ...(params.chain && { chain: params.chain }),
     });
-
     const response = await fetch(
       `${API_BASE_URL}/token/search?${searchParams.toString()}`
     );
-
     if (!response.ok) {
       throw new Error("Failed to search tokens");
     }
-
     const searchData = await response.json();
     if (!searchData || !searchData.success) {
       throw new Error("Token search unsuccessful");
@@ -146,5 +143,28 @@ export const searchTokens = async (
   } catch (error) {
     console.error("Error searching tokens:", error);
     throw error;
+  }
+};
+
+export const getTokenTrades = async (
+  chainId: string,
+  tokenAddress: string,
+  limit: number = 10
+): Promise<any[]> => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/token/trades/${tokenAddress}?chain=${chainId}&limit=${limit}`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch token trades");
+    }
+    const data = await response.json();
+    if (!data || !data.success || !data.data.trades) {
+      return [];
+    }
+    return data.data.trades;
+  } catch (error) {
+    console.error("Error fetching token trades:", error);
+    return [];
   }
 };
