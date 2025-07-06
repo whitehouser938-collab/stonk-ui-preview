@@ -54,7 +54,7 @@ export const uploadTokenLogo = async (
   tokenSymbol: string
 ) => {
   const formData = new FormData();
-  formData.append("logo", file);
+  formData.append("file", file);
   formData.append("tokenId", tokenId);
   formData.append("tokenName", tokenName);
   formData.append("tokenSymbol", tokenSymbol);

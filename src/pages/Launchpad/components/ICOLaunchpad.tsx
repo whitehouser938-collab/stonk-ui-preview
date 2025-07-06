@@ -19,7 +19,7 @@ import { useETHWalletSigner } from "@/hooks/signers/useWalletSigner";
 import { useToast } from "@/hooks/use-toast";
 import { useLoading } from "@/hooks/use-loading";
 import LoadingScreen from "@/components/ui/loading";
-import { uploadTokenLogo } from "@/api/token";
+import { updateTokenLogoUrl, uploadTokenLogo } from "@/api/token";
 
 export interface ICOLaunchData {
   name: string;
@@ -233,24 +233,31 @@ export function ICOLaunchpad() {
         console.log("Form submitted successfully!");
         //Create Token on Chain
         if (formData.launchpad === "BASE") {
-          const signer = await getETHSigner();
-          const deployResponse: DeployTokenResponse = await deployTokenETH(
-            updatedFormData,
-            signer
-          );
-          // Add token to database
-          if (deployResponse.success === false) {
-            console.error("Token deployment failed:", deployResponse);
-            toast({
-              title: "Error",
-              description: "Token deployment failed. Please try again.",
-              variant: "destructive",
-            });
-            stopLoading(); // Stop loading state
-            return;
-          }
-          console.log("Token deployed successfully:", deployResponse);
-          setLaunchConfirm(deployResponse);
+          // const signer = await getETHSigner();
+          // const deployResponse: DeployTokenResponse = await deployTokenETH(
+          //   updatedFormData,
+          //   signer
+          // );
+          // // Add token to database
+          // if (deployResponse.success === false) {
+          //   console.error("Token deployment failed:", deployResponse);
+          //   toast({
+          //     title: "Error",
+          //     description: "Token deployment failed. Please try again.",
+          //     variant: "destructive",
+          //   });
+          //   stopLoading(); // Stop loading state
+          //   return;
+          // }
+          // console.log("Token deployed successfully:", deployResponse);
+          // setLaunchConfirm(deployResponse);
+          const deployResponse: DeployTokenResponse = {
+            success: true,
+            deployerAddress: "0x1234567890abcdef1234567890abcdef12345678",
+            tokenAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+            bondingCurveAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+            transactionHash: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+          };
 
           // Add token to database
           const addTokenResponse = await addTokenToDb(
@@ -259,6 +266,8 @@ export function ICOLaunchpad() {
             deployResponse.tokenAddress,
             deployResponse.bondingCurveAddress
           );
+
+          console.log("Token added to database:", addTokenResponse);
 
           //Upload token logo to server
           let logoUrl;
@@ -283,7 +292,7 @@ export function ICOLaunchpad() {
           }
           // Update the token data with the logo URL if it was successfully uploaded
           if (logoUrl) {
-            await updateTokenLogo(addTokenResponse.id, logoUrl);
+            await updateTokenLogoUrl(addTokenResponse.id, logoUrl);
           }
 
           toast({
