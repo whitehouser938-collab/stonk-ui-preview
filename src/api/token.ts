@@ -2,8 +2,8 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export const addToken = async (tokenData: any) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/token/create`, {
-      method: "POST",
+    const response = await fetch(`${API_BASE_URL}/token`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
@@ -18,7 +18,8 @@ export const addToken = async (tokenData: any) => {
     if (!resData || !resData.success) {
       throw new Error("Token addition unsuccessful");
     }
-    return resData.token;
+    console.log("Token added successfully:", resData);
+    return resData.data;
   } catch (error) {
     console.error("Error adding token:", error);
     throw error;

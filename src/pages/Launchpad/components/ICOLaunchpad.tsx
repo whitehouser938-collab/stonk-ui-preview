@@ -28,7 +28,6 @@ export interface ICOLaunchData {
   website?: string;
   telegramUrl?: string;
   twitterUrl?: string;
-  logoUrl?: string;
   logoFile?: File;
   launchpad: string; // "BASE" or "SOL"
 }
@@ -127,13 +126,13 @@ export function ICOLaunchpad() {
     website: "",
     telegramUrl: "",
     twitterUrl: "",
-    logoUrl: "",
     logoFile: undefined,
     launchpad: "BASE", // Default launchpad
   });
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedView, setSelectedView] = useState("ICO LAUNCHPAD");
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
   const [launchConfirm, setLaunchConfirm] = useState<
     DeployTokenResponse | undefined
   >(undefined);
@@ -151,27 +150,8 @@ export function ICOLaunchpad() {
     setFormData((prev) => ({
       ...prev,
       logoFile: file || undefined,
-      logoUrl: file ? URL.createObjectURL(file) : "",
     }));
   };
-
-  // const uploadImageToServer = async (file: File): Promise<string> => {
-  //   try {
-  //     const response = await uploadTokenLogo(
-  //       formData.
-  //     );
-
-  //     if (!response.ok) {
-  //       throw new Error("Failed to upload image");
-  //     }
-
-  //     const data = await response.json();
-  //     return data.logoUrl; // Server returns the GCS public URL
-  //   } catch (error) {
-  //     console.error("Error uploading image:", error);
-  //     throw error;
-  //   }
-  // };
 
   const resetFormData = () => {
     setFormData({
@@ -181,7 +161,6 @@ export function ICOLaunchpad() {
       website: "",
       telegramUrl: "",
       twitterUrl: "",
-      logoUrl: "",
       logoFile: undefined,
       launchpad: "BASE", // Reset to default launchpad
     });
@@ -210,61 +189,40 @@ export function ICOLaunchpad() {
     const valid = validateFormData(formData);
     if (valid) {
       try {
-        // Upload logo image if a file is selected
-        let logoUrl = formData.logoUrl;
-        // if (formData.logoFile) {
-        //   try {
-        //     logoUrl = await uploadImageToServer(formData.logoFile);
-        //     console.log("Logo uploaded successfully:", logoUrl);
-        //   } catch (uploadError) {
-        //     console.error("Failed to upload logo:", uploadError);
-        //     toast({
-        //       title: "Warning",
-        //       description: "Logo upload failed, proceeding without logo.",
-        //       variant: "destructive",
-        //     });
-        //   }
-        // }
-
         // Update formData with the uploaded logo URL
-        const updatedFormData = { ...formData, logoUrl };
+        const updatedFormData = { ...formData };
 
         // Here you would typically send the data to your backend API
         console.log("Form submitted successfully!");
         //Create Token on Chain
         if (formData.launchpad === "BASE") {
-          // const signer = await getETHSigner();
-          // const deployResponse: DeployTokenResponse = await deployTokenETH(
-          //   updatedFormData,
-          //   signer
-          // );
-          // // Add token to database
-          // if (deployResponse.success === false) {
-          //   console.error("Token deployment failed:", deployResponse);
-          //   toast({
-          //     title: "Error",
-          //     description: "Token deployment failed. Please try again.",
-          //     variant: "destructive",
-          //   });
-          //   stopLoading(); // Stop loading state
-          //   return;
-          // }
-          // console.log("Token deployed successfully:", deployResponse);
-          // setLaunchConfirm(deployResponse);
-          const deployResponse: DeployTokenResponse = {
-            success: true,
-            deployerAddress: "0x1234567890abcdef1234567890abcdef12345678",
-            tokenAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
-            bondingCurveAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
-            transactionHash: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
-          };
+          const signer = await getETHSigner();
+          const deployResponse: DeployTokenResponse = await deployTokenETH(
+            updatedFormData,
+            signer
+          );
+          // Add token to database
+          if (deployResponse.success === false) {
+            console.error("Token deployment failed:", deployResponse);
+            toast({
+              title: "Error",
+              description: "Token deployment failed. Please try again.",
+              variant: "destructive",
+            });
+            stopLoading(); // Stop loading state
+            return;
+          }
+          console.log("Token deployed successfully:", deployResponse);
+          setLaunchConfirm(deployResponse);
 
           // Add token to database
           const addTokenResponse = await addTokenToDb(
             updatedFormData,
             deployResponse.deployerAddress,
             deployResponse.tokenAddress,
-            deployResponse.bondingCurveAddress
+            deployResponse.bondingCurveAddress,
+            deployResponse.deploymentTimestamp,
+            deployResponse.deploymentBlock
           );
 
           console.log("Token added to database:", addTokenResponse);
@@ -401,7 +359,10 @@ export function ICOLaunchpad() {
                       {formData.logoFile && (
                         <div className="relative">
                           <img
-                            src={formData.logoUrl}
+                            src={
+                              logoPreviewUrl ||
+                              URL.createObjectURL(formData.logoFile)
+                            }
                             alt="Logo preview"
                             className="w-16 h-16 object-cover border border-gray-600 rounded"
                           />

@@ -8,6 +8,8 @@ export interface DeployTokenResponse {
   tokenAddress: string;
   bondingCurveAddress: string;
   deployerAddress: string;
+  deploymentTimestamp: string;
+  deploymentBlock: string;
   success: boolean;
 }
 
@@ -62,6 +64,8 @@ export const deployTokenETH = async (
         tokenAddress: tokenAddress,
         bondingCurveAddress: bondingCurveAddress,
         deployerAddress: await signer.getAddress(),
+        deploymentTimestamp: new Date().toISOString(),
+        deploymentBlock: receipt.blockNumber.toString(),
         success: true,
       };
       return response;
@@ -72,6 +76,8 @@ export const deployTokenETH = async (
         tokenAddress: "",
         bondingCurveAddress: "",
         deployerAddress: "",
+        deploymentTimestamp: "",
+        deploymentBlock: "",
         success: false,
       };
     }
