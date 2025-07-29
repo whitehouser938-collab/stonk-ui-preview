@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getToken, getTokenTrades } from "@/api/token";
+import { getToken } from "@/api/token";
 import LoadingScreen from "@/components/ui/loading";
 import { useLoading } from "@/hooks/use-loading";
 
@@ -15,10 +15,6 @@ import {
   ChevronDown,
   AlertTriangle,
   Home,
-  Link as LinkIcon,
-  Twitter as TwitterIcon,
-  Send as TelegramIcon,
-  ArrowUpRight,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -44,9 +40,6 @@ export interface TokenDetails {
   deployerAddress: string;
   tokenAddress: string;
   bondingCurveAddress: string;
-  isGraduated: boolean;
-  assetBalance: string;
-  graduationThreshold: string;
 }
 
 const TokenPage = () => {
@@ -61,46 +54,36 @@ const TokenPage = () => {
 
   const { isLoading, startLoading, stopLoading } = useLoading();
 
-  const [trades, setTrades] = useState<any[]>([]);
-  const [showNews, setShowNews] = useState(true);
-  const [showAnalyst, setShowAnalyst] = useState(true);
-  const [showCompanyInfo, setShowCompanyInfo] = useState(true);
-  const [showFinancial, setShowFinancial] = useState(true);
-
   useEffect(() => {
     const fetchTokenData = async () => {
-      startLoading();
-      setError(null);
+      startLoading(); // Start loading state
+      setError(null); // Reset error state
       try {
         if (!chainId || !tokenAddress) {
           throw new Error("Chain ID and token address are required");
         }
         const data = await getToken(chainId, tokenAddress);
+        console.log("Fetched token data:", data);
+
         if (!data) {
           throw new Error("Token not found");
         }
+
         setTokenData(data);
       } catch (error) {
+        console.error("Error fetching token data:", error);
         setError(
           error instanceof Error ? error.message : "Failed to fetch token data"
         );
         setTokenData(null);
       } finally {
-        stopLoading();
+        stopLoading(); // Stop loading state
       }
     };
+
     if (chainId && tokenAddress) {
       fetchTokenData();
     }
-  }, [chainId, tokenAddress]);
-
-  useEffect(() => {
-    const fetchTrades = async () => {
-      if (!chainId || !tokenAddress) return;
-      const tradesArr = await getTokenTrades(chainId, tokenAddress, 10);
-      setTrades(tradesArr);
-    };
-    fetchTrades();
   }, [chainId, tokenAddress]);
 
   const stockData = {
@@ -231,41 +214,6 @@ const TokenPage = () => {
   const chartMin = dataMinPrice - yAxisPadding;
   const chartAvg = (chartMax + chartMin) / 2;
 
-  function abbreviateNumber(num: string | number): string {
-    const n = typeof num === "string" ? parseFloat(num) : num;
-    if (n >= 1e9) return (n / 1e9).toFixed(2) + "B";
-    if (n >= 1e6) return (n / 1e6).toFixed(2) + "M";
-    if (n >= 1e3) return (n / 1e3).toFixed(2) + "k";
-    return n.toString();
-  }
-
-  function abbreviateAddress(addr: string): string {
-    if (!addr) return "";
-    return addr.slice(0, 4) + "..." + addr.slice(-3);
-  }
-
-  function formatTimeAgo(timestamp: string | number): string {
-    const ts = typeof timestamp === "string" ? parseInt(timestamp) : timestamp;
-    const now = Date.now() / 1000;
-    const diff = now - ts;
-    if (diff < 60) return `${Math.floor(diff)}s ago`;
-    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-    const d = new Date(ts * 1000);
-    return d.toLocaleString();
-  }
-
-  function abbreviateTokenAmount(raw: string | number, decimals = 18): string {
-    const n = typeof raw === "string" ? parseFloat(raw) : raw;
-    const value = n / Math.pow(10, decimals);
-    if (value >= 1e9) return (value / 1e9).toFixed(2) + "B";
-    if (value >= 1e6) return (value / 1e6).toFixed(2) + "M";
-    if (value >= 1e3) return (value / 1e3).toFixed(2) + "k";
-    if (value >= 1) return value.toFixed(2);
-    if (value > 0) return value.toPrecision(2);
-    return "0";
-  }
-
   return (
     <div className="bg-black text-gray-100 text-xs font-mono">
       {isLoading && <LoadingScreen />}
@@ -365,6 +313,21 @@ const TokenPage = () => {
                     </div>
                   </div>
                 </div>
+                <div className="text-left sm:text-right">
+                  <div className="text-xl sm:text-2xl font-mono text-white">
+                    ${stockData.price.toFixed(2)}
+                  </div>
+                  <div
+                    className={`text-base sm:text-lg font-mono ${
+                      stockData.change24h >= 0
+                        ? "text-green-400"
+                        : "text-red-400"
+                    }`}
+                  >
+                    {stockData.change24h >= 0 ? "+" : ""}
+                    {stockData.change24h.toFixed(2)}%
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -372,261 +335,224 @@ const TokenPage = () => {
             <div className="bg-gray-900 border border-gray-700 p-2">
               <div className="text-orange-400 mb-2">INTRADAY CHART</div>
               <TradingViewChart height={300} />
+              {/* <div className="bg-black border border-gray-800 p-2 h-48 flex">
+              <div className="flex flex-col justify-between h-full text-xs text-gray-500 pr-2 border-r border-gray-700 text-right">
+                <span>${chartMax.toFixed(2)}</span>
+                <span>${chartAvg.toFixed(2)}</span>
+                <span>${chartMin.toFixed(2)}</span>
+              </div>
+              <div className="flex-1 overflow-x-auto">
+                <div className="flex items-end gap-x-3 px-2 h-full">
+                  {chartData.map((point, index) => {
+                    const chartRange = chartMax - chartMin;
+                    const height =
+                      chartRange > 0
+                        ? ((point.price - chartMin) / chartRange) * 158 + 2
+                        : 80;
+
+                    return (
+                      <div
+                        key={index}
+                        className="flex-1 min-w-[2.5rem] flex flex-col justify-end items-center"
+                      >
+                        <div
+                          className="bg-orange-500 w-full rounded-t"
+                          style={{ height: `${height}px` }}
+                          title={`$${point.price.toFixed(2)}`}
+                        ></div>
+                        <div className="text-xs text-gray-400 mt-1 whitespace-nowrap">
+                          {point.time}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div> */}
             </div>
 
-            {/* Company Info - COLLAPSIBLE, now above all other sections */}
+            {/* Financial Metrics */}
             <div className="bg-gray-900 border border-gray-700 p-2">
-              <div
-                className="flex items-center justify-between cursor-pointer"
-                onClick={() => setShowCompanyInfo((v) => !v)}
-              >
-                <div className="text-orange-400 mb-2">COMPANY INFO</div>
-                <ChevronDown
-                  className={`w-4 h-4 transition-transform ${
-                    showCompanyInfo ? "" : "rotate-180"
-                  }`}
-                />
-              </div>
-              {showCompanyInfo && (
-                <div className="space-y-2 text-xs">
-                  <div>
-                    <span className="text-gray-400">Symbol:</span>{" "}
-                    <span className="text-white">{tokenData?.symbol}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400">Name:</span>{" "}
-                    <span className="text-white">{tokenData?.name}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-gray-400">Website:</span>{" "}
-                    <a
-                      href={tokenData?.websiteUrl}
-                      className="text-orange-400 underline flex items-center gap-1"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <LinkIcon className="w-4 h-4 inline" />
-                      {tokenData?.websiteUrl}
-                    </a>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-gray-400">Twitter:</span>{" "}
-                    <a
-                      href={tokenData?.twitterUrl}
-                      className="text-orange-400 underline flex items-center gap-1"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <TwitterIcon className="w-4 h-4 inline" />
-                      {tokenData?.twitterUrl}
-                    </a>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-gray-400">Telegram:</span>{" "}
-                    <a
-                      href={tokenData?.telegramUrl}
-                      className="text-orange-400 underline flex items-center gap-1"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <TelegramIcon className="w-4 h-4 inline" />
-                      {tokenData?.telegramUrl}
-                    </a>
-                  </div>
-                  <div>
-                    <span className="text-gray-400">Tags:</span>{" "}
-                    <span className="flex flex-wrap gap-1">
-                      {tokenData?.customTags
-                        ?.split(",")
-                        .map((tag: string, i: number) => (
-                          <span
-                            key={i}
-                            className="bg-orange-600/80 text-black px-2 py-0.5 rounded-full text-xs font-bold shadow-sm"
-                          >
-                            {tag.trim()}
-                          </span>
-                        ))}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400">Curation Notes:</span>{" "}
-                    <span className="text-white">
-                      {tokenData?.curationNotes}
-                    </span>
-                  </div>
-                  {/* Company Description moved here */}
-                  <div className="bg-gray-900 border-t border-orange-500/30 p-2">
-                    <div className="text-orange-400 mb-1">
-                      COMPANY DESCRIPTION
-                    </div>
-                    <div className="text-gray-300 text-xs leading-relaxed">
-                      {tokenData?.description}
-                    </div>
+              <div className="text-orange-400 mb-2">FINANCIAL METRICS</div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 text-xs">
+                <div className="bg-black border border-gray-800 p-2">
+                  <div className="text-gray-400">REVENUE (TTM)</div>
+                  <div className="text-white font-mono text-sm">
+                    ${formatNumber(financialData.revenue)}
                   </div>
                 </div>
-              )}
-            </div>
-
-            {/* Financial Metrics - COLLAPSIBLE */}
-            <div className="bg-gray-900 border border-gray-700 p-2">
-              <div
-                className="flex items-center justify-between cursor-pointer"
-                onClick={() => setShowFinancial((v) => !v)}
-              >
-                <div className="text-orange-400 mb-2">FINANCIAL METRICS</div>
-                <ChevronDown
-                  className={`w-4 h-4 transition-transform ${
-                    showFinancial ? "" : "rotate-180"
-                  }`}
-                />
-              </div>
-              {showFinancial && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 text-xs">
-                  <div className="bg-black border border-gray-800 p-2">
-                    <div className="text-gray-400">REVENUE (TTM)</div>
-                    <div className="text-white font-mono text-sm">
-                      ${formatNumber(financialData.revenue)}
-                    </div>
-                  </div>
-                  <div className="bg-black border border-gray-800 p-2">
-                    <div className="text-gray-400">NET INCOME</div>
-                    <div className="text-white font-mono text-sm">
-                      ${formatNumber(financialData.netIncome)}
-                    </div>
-                  </div>
-                  <div className="bg-black border border-gray-800 p-2">
-                    <div className="text-gray-400">GROSS MARGIN</div>
-                    <div className="text-white font-mono text-sm">
-                      {financialData.grossMargin.toFixed(2)}%
-                    </div>
-                  </div>
-                  <div className="bg-black border border-gray-800 p-2">
-                    <div className="text-gray-400">PROFIT MARGIN</div>
-                    <div className="text-white font-mono text-sm">
-                      {financialData.profitMargin.toFixed(2)}%
-                    </div>
-                  </div>
-                  <div className="bg-black border border-gray-800 p-2">
-                    <div className="text-gray-400">ROE</div>
-                    <div className="text-white font-mono text-sm">
-                      {financialData.roe.toFixed(2)}%
-                    </div>
-                  </div>
-                  <div className="bg-black border border-gray-800 p-2">
-                    <div className="text-gray-400">ROA</div>
-                    <div className="text-white font-mono text-sm">
-                      {financialData.roa.toFixed(2)}%
-                    </div>
-                  </div>
-                  <div className="bg-black border border-gray-800 p-2">
-                    <div className="text-gray-400">DEBT/EQUITY</div>
-                    <div className="text-white font-mono text-sm">
-                      {financialData.debtToEquity.toFixed(2)}
-                    </div>
-                  </div>
-                  <div className="bg-black border border-gray-800 p-2">
-                    <div className="text-gray-400">FREE CASH FLOW</div>
-                    <div className="text-white font-mono text-sm">
-                      ${formatNumber(financialData.freeCashFlow)}
-                    </div>
+                <div className="bg-black border border-gray-800 p-2">
+                  <div className="text-gray-400">NET INCOME</div>
+                  <div className="text-white font-mono text-sm">
+                    ${formatNumber(financialData.netIncome)}
                   </div>
                 </div>
-              )}
+                <div className="bg-black border border-gray-800 p-2">
+                  <div className="text-gray-400">GROSS MARGIN</div>
+                  <div className="text-white font-mono text-sm">
+                    {financialData.grossMargin.toFixed(2)}%
+                  </div>
+                </div>
+                <div className="bg-black border border-gray-800 p-2">
+                  <div className="text-gray-400">PROFIT MARGIN</div>
+                  <div className="text-white font-mono text-sm">
+                    {financialData.profitMargin.toFixed(2)}%
+                  </div>
+                </div>
+                <div className="bg-black border border-gray-800 p-2">
+                  <div className="text-gray-400">ROE</div>
+                  <div className="text-white font-mono text-sm">
+                    {financialData.roe.toFixed(2)}%
+                  </div>
+                </div>
+                <div className="bg-black border border-gray-800 p-2">
+                  <div className="text-gray-400">ROA</div>
+                  <div className="text-white font-mono text-sm">
+                    {financialData.roa.toFixed(2)}%
+                  </div>
+                </div>
+                <div className="bg-black border border-gray-800 p-2">
+                  <div className="text-gray-400">DEBT/EQUITY</div>
+                  <div className="text-white font-mono text-sm">
+                    {financialData.debtToEquity.toFixed(2)}
+                  </div>
+                </div>
+                <div className="bg-black border border-gray-800 p-2">
+                  <div className="text-gray-400">FREE CASH FLOW</div>
+                  <div className="text-white font-mono text-sm">
+                    ${formatNumber(financialData.freeCashFlow)}
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Analyst Ratings */}
             <div className="bg-gray-900 border border-gray-700 p-2">
-              <div
-                className="flex items-center justify-between cursor-pointer"
-                onClick={() => setShowAnalyst((v) => !v)}
-              >
-                <div className="text-orange-400 mb-2">ANALYST RATINGS</div>
-                <ChevronDown
-                  className={`w-4 h-4 transition-transform ${
-                    showAnalyst ? "" : "rotate-180"
-                  }`}
-                />
-              </div>
-              {showAnalyst && (
-                <div className="overflow-x-auto bg-black border border-gray-800 p-1">
-                  <table className="w-full text-xs min-w-[400px]">
-                    <thead>
-                      <tr className="text-gray-400 border-b border-gray-700">
-                        <th className="text-left p-1">FIRM</th>
-                        <th className="text-center p-1">RATING</th>
-                        <th className="text-right p-1">TARGET</th>
-                        <th className="text-right p-1">UPDATED</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {analystData.map((analyst, index) => (
-                        <tr
-                          key={index}
-                          className="border-b border-gray-800 last:border-0"
+              <div className="text-orange-400 mb-2">ANALYST RATINGS</div>
+              <div className="overflow-x-auto bg-black border border-gray-800 p-1">
+                <table className="w-full text-xs min-w-[400px]">
+                  <thead>
+                    <tr className="text-gray-400 border-b border-gray-700">
+                      <th className="text-left p-1">FIRM</th>
+                      <th className="text-center p-1">RATING</th>
+                      <th className="text-right p-1">TARGET</th>
+                      <th className="text-right p-1">UPDATED</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {analystData.map((analyst, index) => (
+                      <tr
+                        key={index}
+                        className="border-b border-gray-800 last:border-0"
+                      >
+                        <td className="p-1 text-white">{analyst.firm}</td>
+                        <td
+                          className={`p-1 text-center font-bold ${
+                            analyst.rating.includes("BUY") ||
+                            analyst.rating.includes("OVERWEIGHT")
+                              ? "text-green-400"
+                              : "text-yellow-400"
+                          }`}
                         >
-                          <td className="p-1 text-white">{analyst.firm}</td>
-                          <td
-                            className={`p-1 text-center font-bold ${
-                              analyst.rating.includes("BUY") ||
-                              analyst.rating.includes("OVERWEIGHT")
-                                ? "text-green-400"
-                                : "text-yellow-400"
-                            }`}
-                          >
-                            {analyst.rating}
-                          </td>
-                          <td className="p-1 text-right text-white font-mono">
-                            ${analyst.target.toFixed(2)}
-                          </td>
-                          <td className="p-1 text-right text-gray-400">
-                            {analyst.updated}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                          {analyst.rating}
+                        </td>
+                        <td className="p-1 text-right text-white font-mono">
+                          ${analyst.target.toFixed(2)}
+                        </td>
+                        <td className="p-1 text-right text-gray-400">
+                          {analyst.updated}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Company Info */}
+            <div className="bg-gray-900 border border-gray-700 p-2">
+              <div className="text-orange-400 mb-2">COMPANY INFO</div>
+              <div className="space-y-2 text-xs">
+                <div className="flex items-center space-x-2">
+                  <Globe className="w-3 h-3 text-gray-400" />
+                  <span className="text-gray-400">Sector</span>
+                  <span className="text-white">Technology</span>
                 </div>
-              )}
+                <div className="flex items-center space-x-2">
+                  <Activity className="w-3 h-3 text-gray-400" />
+                  <span className="text-gray-400">Industry</span>
+                  <span className="text-white">Consumer Electronics</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Users className="w-3 h-3 text-gray-400" />
+                  <span className="text-gray-400">Employees</span>
+                  <span className="text-white">164,000</span>
+                </div>
+              </div>
+              {/* Bottom Description */}
+              <div className="bg-gray-900 border-t border-orange-500/30 p-2">
+                <div className="text-orange-400 mb-1">COMPANY DESCRIPTION</div>
+                <div className="text-gray-300 text-xs leading-relaxed">
+                  {tokenData?.description}
+                </div>
+              </div>
             </div>
 
             {/* Recent News */}
             <div className="bg-gray-900 border border-gray-700 p-2">
-              <div
-                className="flex items-center justify-between cursor-pointer"
-                onClick={() => setShowNews((v) => !v)}
-              >
-                <div className="text-orange-400 mb-2">RECENT NEWS</div>
-                <ChevronDown
-                  className={`w-4 h-4 transition-transform ${
-                    showNews ? "" : "rotate-180"
-                  }`}
-                />
-              </div>
-              {showNews && (
-                <div className="space-y-2">
-                  {newsData.map((news, index) => (
-                    <div
-                      key={index}
-                      className="bg-black border border-gray-800 p-1"
-                    >
-                      <div className="flex flex-col sm:flex-row items-start justify-between mb-1 gap-1">
-                        <div className="text-white text-xs font-medium hover:text-orange-400 cursor-pointer">
-                          {news.title}
-                        </div>
-                        <span className="text-xs text-gray-400 whitespace-nowrap">
-                          {news.time}
-                        </span>
+              <div className="text-orange-400 mb-2">RECENT NEWS</div>
+              <div className="space-y-2">
+                {newsData.map((news, index) => (
+                  <div
+                    key={index}
+                    className="bg-black border border-gray-800 p-1"
+                  >
+                    <div className="flex flex-col sm:flex-row items-start justify-between mb-1 gap-1">
+                      <div className="text-white text-xs font-medium hover:text-orange-400 cursor-pointer">
+                        {news.title}
                       </div>
-                      <div className="text-gray-300 text-xs mb-1">
-                        {news.summary}
-                      </div>
-                      <div className="text-xs text-orange-400">
-                        {news.source}
-                      </div>
+                      <span className="text-xs text-gray-400 whitespace-nowrap">
+                        {news.time}
+                      </span>
                     </div>
-                  ))}
+                    <div className="text-gray-300 text-xs mb-1">
+                      {news.summary}
+                    </div>
+                    <div className="text-xs text-orange-400">{news.source}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Technical Indicators */}
+            <div className="bg-gray-900 border border-gray-700 p-2">
+              <div className="text-orange-400 mb-2">TECHNICAL INDICATORS</div>
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">RSI (14)</span>
+                  <span className="text-yellow-400 font-mono">65.3</span>
                 </div>
-              )}
+                <div className="flex justify-between">
+                  <span className="text-gray-400">MACD</span>
+                  <span className="text-green-400 font-mono">+2.45</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">SMA (20)</span>
+                  <span className="text-white font-mono">$178.90</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">SMA (50)</span>
+                  <span className="text-white font-mono">$175.60</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Bollinger Upper</span>
+                  <span className="text-white font-mono">$185.20</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Bollinger Lower</span>
+                  <span className="text-white font-mono">$172.40</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -639,17 +565,43 @@ const TokenPage = () => {
                 <div className="flex justify-between items-start gap-2">
                   <span className="text-gray-400">Market Cap</span>
                   <span className="font-mono text-white text-right">
-                    {tokenData?.curveStatus?.marketCap
-                      ? `$${formatNumber(
-                          Number(tokenData.curveStatus.marketCap)
-                        )}`
-                      : "$0"}
+                    ${formatNumber(stockData.marketCap)}
                   </span>
                 </div>
                 <div className="flex justify-between items-start gap-2">
                   <span className="text-gray-400">Volume</span>
                   <span className="font-mono text-white text-right">
                     {formatNumber(stockData.volume24h)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-gray-400">Shares Outstanding</span>
+                  <span className="font-mono text-white text-right">
+                    {formatNumber(stockData.outstandingShares)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-gray-400">Float</span>
+                  <span className="font-mono text-white text-right">
+                    {formatNumber(stockData.floatShares)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-gray-400">52W High</span>
+                  <span className="font-mono text-white text-right">
+                    ${stockData.allTimeHigh.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-gray-400">52W Low</span>
+                  <span className="font-mono text-white text-right">
+                    ${stockData.allTimeLow.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-gray-400">Institutional</span>
+                  <span className="font-mono text-white text-right">
+                    {stockData.institutional.toFixed(1)}%
                   </span>
                 </div>
               </div>
@@ -659,97 +611,12 @@ const TokenPage = () => {
               symbol={tokenData?.symbol}
               tokenAddress={tokenData?.tokenAddress}
             />
-            {/* Bonding Curve Progress & Graduation Badge */}
-            {tokenData?.isGraduated ? (
-              <div className="flex items-center gap-2 mb-2">
-                <BondingCurveProgress progress={100} />
-                <span className="bg-green-600 text-white px-2 py-1 rounded text-xs font-bold">
-                  Graduated
-                </span>
-              </div>
-            ) : (
-              <BondingCurveProgress
-                progress={
-                  tokenData?.curveStatus?.progress !== undefined
-                    ? Math.min(100, Math.max(0, tokenData.curveStatus.progress))
-                    : 0
-                }
-              />
-            )}
-            {/* Recent Trades */}
-            <div className="bg-gray-900 border border-gray-700 p-2">
-              <div className="text-orange-400 mb-2">RECENT TRADES</div>
-              {trades.length === 0 ? (
-                <div className="text-gray-400 text-xs">
-                  No recent trades found.
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs min-w-[400px]">
-                    <thead>
-                      <tr className="text-gray-400 border-b border-gray-700">
-                        <th className="text-left p-1">TRADER</th>
-                        <th className="text-right p-1">TOKEN AMOUNT</th>
-                        <th className="text-right p-1">ASSET AMOUNT</th>
-                        <th className="text-center p-1">TYPE</th>
-                        <th className="text-right p-1">TIME</th>
-                        <th className="text-center p-1"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {trades.map((trade, idx) => (
-                        <tr
-                          key={idx}
-                          className="border-b border-gray-800 last:border-0"
-                        >
-                          <td className="p-1 text-white font-mono">
-                            <a
-                              href={`https://sepolia.etherscan.io/address/${trade.trader}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="hover:text-orange-400 underline"
-                            >
-                              {abbreviateAddress(trade.trader)}
-                            </a>
-                          </td>
-                          <td className="p-1 text-right text-white font-mono">
-                            {abbreviateTokenAmount(trade.tokenAmount)}
-                          </td>
-                          <td className="p-1 text-right text-white font-mono">
-                            {abbreviateTokenAmount(trade.assetAmount, 6)}
-                          </td>
-                          <td className="p-1 text-center">
-                            <span
-                              className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                                trade.tradeType === "BUY"
-                                  ? "bg-green-600/80 text-white"
-                                  : "bg-red-600/80 text-white"
-                              }`}
-                            >
-                              {trade.tradeType}
-                            </span>
-                          </td>
-                          <td className="p-1 text-right text-gray-400">
-                            {formatTimeAgo(trade.blockTimestamp)}
-                          </td>
-                          <td className="p-1 text-center">
-                            <a
-                              href={`https://sepolia.etherscan.io/tx/${trade.transactionHash}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="hover:text-orange-400"
-                              title="View on Etherscan"
-                            >
-                              <ArrowUpRight className="w-4 h-4 inline" />
-                            </a>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
+            <BondingCurveProgress progress={20} />
+            <OrderBook
+              tokenAddress={tokenData?.tokenAddress}
+              chain={tokenData?.chain}
+              currentPrice={stockData.price}
+            />
           </div>
         </div>
       )}
