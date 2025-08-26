@@ -6,8 +6,17 @@ import {
   DollarSign,
   BarChart3,
   Clock,
+  Circle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  getAllTokens,
+  getBondingCurveVolumeData,
+  getMarketOverview,
+  getVolumeLeaders,
+  getVolumeWithIntervals,
+} from "@/api/token";
+import { useNavigate } from "react-router-dom";
 
 interface StockData {
   symbol: string;
@@ -17,6 +26,51 @@ interface StockData {
   volume: number;
   marketCap: number;
   sparkline: number[];
+}
+
+interface TokenData {
+  symbol: string;
+  name: string;
+  tokenAddress: string;
+  chain: string;
+  isGraduated: boolean;
+  logoUrl?: string;
+  curveStatus?: {
+    progress: number;
+    marketCap: string;
+  };
+  currentPrice?: string;
+  volume24h?: string;
+  volume6h?: string;
+  volume1h?: string;
+  volume5m?: string;
+  totalVolume?: string;
+  tradeCount?: string;
+  deploymentTimestamp?: string;
+  createdAt?: string;
+}
+
+interface MarketOverviewData {
+  totalMarketVolume: string;
+  highestTradedToken: {
+    symbol: string;
+    name: string;
+    volume: string;
+  } | null;
+  totalCurveVolume: string;
+  activeTokens: number;
+  bondingCurveTokens: number;
+  graduatedTokens: number;
+}
+
+interface VolumeLeaderData {
+  tokenAddress: string;
+  symbol: string;
+  name: string;
+  volume24h: string;
+  totalVolume: string;
+  tradeCount: string;
+  isGraduated: boolean;
 }
 
 const extendedMockData: StockData[] = [
@@ -197,6 +251,28 @@ function formatNumber(num: number): string {
   return num.toFixed(2);
 }
 
+function formatTokenAge(timestamp: string): string {
+  if (!timestamp) return "N/A";
+
+  const deploymentTime = parseInt(timestamp) * 1000; // Convert to milliseconds
+  const now = Date.now();
+  const ageInMs = now - deploymentTime;
+
+  const days = Math.floor(ageInMs / (1000 * 60 * 60 * 24));
+  const hours = Math.floor(ageInMs / (1000 * 60 * 60));
+  const minutes = Math.floor(ageInMs / (1000 * 60));
+
+  if (days > 0) {
+    return `${days}d ago`;
+  } else if (hours > 0) {
+    return `${hours}h ago`;
+  } else if (minutes > 0) {
+    return `${minutes}m ago`;
+  } else {
+    return "<1m ago";
+  }
+}
+
 function Sparkline({
   data,
   isPositive,
@@ -231,11 +307,47 @@ function Sparkline({
 
 export function MarketsDashboard() {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [tokens, setTokens] = useState<TokenData[]>([]);
+  const [bondingCurveVolumeData, setBondingCurveVolumeData] = useState<any[]>(
+    []
+  );
+  const [marketOverview, setMarketOverview] =
+    useState<MarketOverviewData | null>(null);
+  const [volumeLeaders, setVolumeLeaders] = useState<VolumeLeaderData[]>([]);
+  const [volumeData24h, setVolumeData24h] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    const fetchTokens = async () => {
+      try {
+        setIsLoading(true);
+        const [tokenData, volumeData] = await Promise.all([
+          getAllTokens(),
+          getBondingCurveVolumeData(),
+        ]);
+        setTokens(tokenData);
+        setBondingCurveVolumeData(volumeData);
+      } catch (error) {
+        console.error("Error fetching tokens:", error);
+        setTokens([]);
+        setBondingCurveVolumeData([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTokens();
+  }, []);
+
+  const handleTokenClick = (token: TokenData) => {
+    navigate(`/token/${token.chain}/${token.tokenAddress}`);
+  };
 
   return (
     <div className="h-screen overflow-auto bg-black text-gray-100 text-xs font-mono">
@@ -332,67 +444,118 @@ export function MarketsDashboard() {
             <table className="w-full text-xs min-w-[640px]">
               <thead className="bg-gray-800 sticky top-0">
                 <tr className="text-gray-400">
-                  <th className="text-left p-1">PAIR</th>
+                  <th className="text-left p-1">Symbol</th>
+                  <th className="text-left p-1">Name</th>
                   <th className="text-right p-1">PRICE</th>
                   <th className="text-right p-1">24H</th>
-                  <th className="text-right p-1 hidden sm:table-cell">7D</th>
+                  <th className="text-right p-1">6H</th>
+                  <th className="text-right p-1">1H</th>
+                  <th className="text-right p-1">5M</th>
                   <th className="text-right p-1">VOL</th>
                   <th className="text-right p-1 hidden md:table-cell">MCAP</th>
-                  <th className="text-center p-1 hidden sm:table-cell">
-                    CHART
-                  </th>
+                  <th className="text-right p-1 hidden md:table-cell">AGE</th>
                 </tr>
               </thead>
               <tbody>
-                {extendedMockData.map((stock, index) => (
-                  <tr
-                    key={stock.symbol}
-                    className="border-b border-gray-800 hover:bg-gray-800/50"
-                  >
-                    <td className="p-1">
-                      <div className="flex items-center space-x-1">
-                        <div className="w-3 h-3 bg-orange-500 rounded-full text-white text-xs flex items-center justify-center">
-                          {stock.symbol.charAt(0)}
-                        </div>
-                        <span className="text-white">{stock.symbol}</span>
-                      </div>
-                    </td>
-                    <td className="text-right p-1 text-white">
-                      $
-                      {stock.price < 1
-                        ? stock.price.toFixed(4)
-                        : stock.price.toLocaleString()}
-                    </td>
-                    <td
-                      className={`text-right p-1 ${
-                        stock.change24h >= 0 ? "text-green-400" : "text-red-400"
-                      }`}
-                    >
-                      {stock.change24h >= 0 ? "+" : ""}
-                      {stock.change24h.toFixed(2)}%
-                    </td>
-                    <td
-                      className={`text-right p-1 ${
-                        Math.random() > 0.5 ? "text-green-400" : "text-red-400"
-                      } hidden sm:table-cell`}
-                    >
-                      {Math.random() > 0.5 ? "+" : "-"}
-                      {(Math.random() * 20).toFixed(2)}%
-                    </td>
-                    <td className="text-right p-1 text-gray-300">
-                      ${formatNumber(stock.volume)}
-                    </td>
-                    <td className="text-right p-1 text-gray-300 hidden md:table-cell">
-                      ${formatNumber(stock.marketCap)}
-                    </td>
-                    <td className="text-center p-1 hidden sm:table-cell">
-                      <Sparkline
-                        data={stock.sparkline}
-                        isPositive={stock.change24h >= 0}
-                      />
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={10} className="text-center p-4 text-gray-400">
+                      Loading tokens...
                     </td>
                   </tr>
-                ))}
+                ) : tokens.length === 0 ? (
+                  <tr>
+                    <td colSpan={10} className="text-center p-4 text-gray-400">
+                      No tokens found
+                    </td>
+                  </tr>
+                ) : (
+                  tokens.map((token) => (
+                    <tr
+                      key={token.tokenAddress}
+                      className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors cursor-pointer"
+                      onClick={() => handleTokenClick(token)}
+                    >
+                      <td className="p-1">
+                        <div className="flex items-center space-x-2">
+                          {token.logoUrl ? (
+                            <img
+                              src={token.logoUrl}
+                              alt={`${token.symbol} logo`}
+                              className="w-4 h-4 rounded-full object-cover"
+                              onError={(e) => {
+                                // Fallback to circle if image fails to load
+                                e.currentTarget.style.display = "none";
+                                e.currentTarget.nextElementSibling?.classList.remove(
+                                  "hidden"
+                                );
+                              }}
+                            />
+                          ) : null}
+                          <Circle
+                            className={`w-4 h-4 text-blue-400 ${
+                              token.logoUrl ? "hidden" : ""
+                            }`}
+                          />
+                          <span className="text-white font-bold">
+                            {token.symbol}
+                          </span>
+                          <span className="text-gray-400 text-xs">
+                            {token.chain}
+                          </span>
+                          {token.isGraduated && (
+                            <span className="bg-green-600 text-white px-1 py-0.5 rounded text-xs">
+                              GRAD
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="p-1 text-gray-400 text-xs">
+                        {token.name}
+                      </td>
+                      <td className="p-1 text-right text-white font-mono">
+                        {token.currentPrice
+                          ? `$${Number(token.currentPrice).toFixed(6)}`
+                          : "N/A"}
+                      </td>
+                      <td className="p-1 text-right text-gray-400">
+                        {token.isGraduated
+                          ? "N/A"
+                          : `${token.curveStatus?.progress?.toFixed(2) || 0}%`}
+                      </td>
+                      <td className="p-1 text-right text-gray-400">
+                        {token.volume6h
+                          ? formatNumber(Number(token.volume6h))
+                          : "N/A"}
+                      </td>
+                      <td className="p-1 text-right text-gray-400">
+                        {token.volume1h
+                          ? formatNumber(Number(token.volume1h))
+                          : "N/A"}
+                      </td>
+                      <td className="p-1 text-right text-gray-400">
+                        {token.volume5m
+                          ? formatNumber(Number(token.volume5m))
+                          : "N/A"}
+                      </td>
+                      <td className="p-1 text-right text-gray-400">
+                        {token.volume24h
+                          ? formatNumber(Number(token.volume24h))
+                          : "N/A"}
+                      </td>
+                      <td className="p-1 text-right text-gray-400 hidden md:table-cell">
+                        {token.curveStatus?.marketCap
+                          ? `$${formatNumber(
+                              Number(token.curveStatus.marketCap)
+                            )}`
+                          : "N/A"}
+                      </td>
+                      <td className="p-1 text-right text-gray-400 hidden md:table-cell">
+                        {formatTokenAge(token.deploymentTimestamp || "")}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -403,57 +566,61 @@ export function MarketsDashboard() {
           {/* Volume Leaders */}
           <div className="bg-gray-900 border border-gray-700 p-1">
             <div className="text-orange-400 text-xs mb-1">VOLUME LEADERS</div>
-            {extendedMockData.slice(0, 6).map((stock) => (
+            {tokens.slice(0, 6).map((token) => (
               <div
-                key={stock.symbol}
+                key={token.tokenAddress}
                 className="flex justify-between text-xs py-0.5 border-b border-gray-800 last:border-0"
               >
-                <span className="text-white">{stock.symbol}</span>
+                <span className="text-white">{token.symbol}</span>
                 <span className="text-gray-400">
-                  ${formatNumber(stock.volume)}
+                  {token.volume24h
+                    ? formatNumber(Number(token.volume24h))
+                    : "N/A"}
                 </span>
               </div>
             ))}
           </div>
 
-          {/* Orderbook Simulator */}
+          {/* Bonding Curve Progress */}
           <div className="bg-gray-900 border border-gray-700 p-1">
-            <div className="text-orange-400 text-xs mb-1">ORDERBOOK - AAPL</div>
-            <div className="grid grid-cols-3 gap-1 text-xs">
-              <div className="text-gray-400">PRICE</div>
-              <div className="text-gray-400">SIZE</div>
-              <div className="text-gray-400">TOTAL</div>
+            <div className="text-orange-400 text-xs mb-1">
+              BONDING CURVE PROGRESS
+            </div>
+            <div className="grid grid-cols-4 gap-1 text-xs">
+              <div className="text-gray-400">TOKEN</div>
+              <div className="text-gray-400">PROGRESS</div>
+              <div className="text-gray-400">VOLUME</div>
+              <div className="text-gray-400">MCAP</div>
 
-              {/* Sell Orders */}
-              {[183.55, 183.54, 183.53, 183.52, 183.51].map((price, idx) => (
-                <Fragment key={price}>
-                  <div className="text-red-400">{price.toLocaleString()}</div>
-                  <div className="text-white">
-                    {(Math.random() * 5).toFixed(3)}
+              {/* Bonding Curve Tokens */}
+              {bondingCurveVolumeData.slice(0, 6).map((token) => (
+                <div key={token.tokenAddress} className="contents">
+                  <div className="text-white flex items-center space-x-1">
+                    <Circle className="w-3 h-3 text-blue-400" />
+                    <span>{token.symbol}</span>
+                  </div>
+                  <div className="text-green-400">
+                    {/* Progress would need to be calculated from bonding curve data */}
+                    N/A
                   </div>
                   <div className="text-gray-400">
-                    {(price * Math.random() * 5).toFixed(0)}
-                  </div>
-                </Fragment>
-              ))}
-
-              {/* Spread */}
-              <div className="col-span-3 text-center text-orange-400 border-y border-orange-500/30 py-0.5">
-                SPREAD: $0.05
-              </div>
-
-              {/* Buy Orders */}
-              {[182.5, 182.49, 182.48, 182.47, 182.46].map((price, idx) => (
-                <Fragment key={price}>
-                  <div className="text-green-400">{price.toLocaleString()}</div>
-                  <div className="text-white">
-                    {(Math.random() * 5).toFixed(3)}
+                    {token.volume24h
+                      ? formatNumber(Number(token.volume24h))
+                      : "N/A"}
                   </div>
                   <div className="text-gray-400">
-                    {(price * Math.random() * 5).toFixed(0)}
+                    {/* Market cap would need to be calculated from bonding curve data */}
+                    N/A
                   </div>
-                </Fragment>
+                </div>
               ))}
+
+              {/* Show message if no bonding curve tokens */}
+              {bondingCurveVolumeData.length === 0 && (
+                <div className="col-span-4 text-center text-gray-400 py-2">
+                  No bonding curve tokens found
+                </div>
+              )}
             </div>
           </div>
 

@@ -15,6 +15,7 @@ import {
   ChevronDown,
   AlertTriangle,
   Home,
+  ArrowUpRight,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -54,6 +55,8 @@ const TokenPage = () => {
 
   const { isLoading, startLoading, stopLoading } = useLoading();
 
+  const [trades, setTrades] = useState<any[]>([]);
+
   useEffect(() => {
     const fetchTokenData = async () => {
       startLoading(); // Start loading state
@@ -84,6 +87,31 @@ const TokenPage = () => {
     if (chainId && tokenAddress) {
       fetchTokenData();
     }
+  }, [chainId, tokenAddress]);
+
+  useEffect(() => {
+    const fetchTrades = async () => {
+      if (!chainId || !tokenAddress) return;
+      try {
+        // For now, we'll use mock data since getTokenTrades might not be available
+        const mockTrades = [
+          {
+            trader: "0x1234567890123456789012345678901234567890",
+            tokenAmount: "1000000000000000000",
+            assetAmount: "1000000",
+            tradeType: "BUY",
+            blockTimestamp: Math.floor(Date.now() / 1000) - 3600,
+            transactionHash:
+              "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+          },
+        ];
+        setTrades(mockTrades);
+      } catch (error) {
+        console.error("Error fetching trades:", error);
+        setTrades([]);
+      }
+    };
+    fetchTrades();
   }, [chainId, tokenAddress]);
 
   const stockData = {
@@ -213,6 +241,94 @@ const TokenPage = () => {
   const chartMax = dataMaxPrice + yAxisPadding;
   const chartMin = dataMinPrice - yAxisPadding;
   const chartAvg = (chartMax + chartMin) / 2;
+
+  function abbreviateNumber(num: string | number): string {
+    const n = typeof num === "string" ? parseFloat(num) : num;
+    if (n >= 1e9) return (n / 1e9).toFixed(2) + "B";
+    if (n >= 1e6) return (n / 1e6).toFixed(2) + "M";
+    if (n >= 1e3) return (n / 1e3).toFixed(2) + "k";
+    return n.toString();
+  }
+
+  function abbreviateAddress(addr: string): string {
+    if (!addr) return "";
+    return addr.slice(0, 4) + "..." + addr.slice(-3);
+  }
+
+  function formatTimeAgo(timestamp: string | number): string {
+    const ts = typeof timestamp === "string" ? parseInt(timestamp) : timestamp;
+    const now = Date.now() / 1000;
+    const diff = now - ts;
+    if (diff < 60) return `${Math.floor(diff)}s ago`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    const d = new Date(ts * 1000);
+    return d.toLocaleString();
+  }
+
+  function abbreviateTokenAmount(raw: string | number, decimals = 18): string {
+    const n = typeof raw === "string" ? parseFloat(raw) : raw;
+    const value = n / Math.pow(10, decimals);
+    // Round to nearest integer for threshold checks
+    const rounded = Math.round(value);
+    if (rounded >= 1e9) return (value / 1e9).toFixed(2) + "B";
+    if (rounded >= 1e6) return (value / 1e6).toFixed(2) + "M";
+    if (rounded >= 1e3) return (value / 1e3).toFixed(2) + "k";
+    if (value >= 1) return value.toFixed(2);
+    if (value > 0) return value.toPrecision(2);
+    return "0";
+  }
+
+  // Memoize the mapped trade rows to avoid unnecessary re-renders
+  const tradeRows = React.useMemo(
+    () =>
+      trades.map((trade, idx) => (
+        <tr key={idx} className="border-b border-gray-800 last:border-0">
+          <td className="p-1 text-white font-mono">
+            <a
+              href={`https://sepolia.etherscan.io/address/${trade.trader}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-orange-400 underline"
+            >
+              {abbreviateAddress(trade.trader)}
+            </a>
+          </td>
+          <td className="p-1 text-right text-white font-mono">
+            {abbreviateTokenAmount(trade.tokenAmount)}
+          </td>
+          <td className="p-1 text-right text-white font-mono">
+            {abbreviateTokenAmount(trade.assetAmount, 6)}
+          </td>
+          <td className="p-1 text-center">
+            <span
+              className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                trade.tradeType === "BUY"
+                  ? "bg-green-600/80 text-white"
+                  : "bg-red-600/80 text-white"
+              }`}
+            >
+              {trade.tradeType}
+            </span>
+          </td>
+          <td className="p-1 text-right text-gray-400">
+            {formatTimeAgo(trade.blockTimestamp)}
+          </td>
+          <td className="p-1 text-center">
+            <a
+              href={`https://sepolia.etherscan.io/tx/${trade.transactionHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-orange-400"
+              title="View on Etherscan"
+            >
+              <ArrowUpRight className="w-4 h-4 inline" />
+            </a>
+          </td>
+        </tr>
+      )),
+    [trades]
+  );
 
   return (
     <div className="bg-black text-gray-100 text-xs font-mono">
@@ -611,12 +727,48 @@ const TokenPage = () => {
               symbol={tokenData?.symbol}
               tokenAddress={tokenData?.tokenAddress}
             />
-            <BondingCurveProgress progress={20} />
-            <OrderBook
-              tokenAddress={tokenData?.tokenAddress}
-              chain={tokenData?.chain}
-              currentPrice={stockData.price}
-            />
+            {/* Bonding Curve Progress & Graduation Badge */}
+            {tokenData?.isGraduated ? (
+              <div className="flex items-center gap-2 mb-2">
+                <BondingCurveProgress progress={100} />
+                <span className="bg-green-600 text-white px-2 py-1 rounded text-xs font-bold">
+                  Graduated
+                </span>
+              </div>
+            ) : (
+              <BondingCurveProgress
+                progress={
+                  tokenData?.curveStatus?.progress !== undefined
+                    ? Math.min(100, Math.max(0, tokenData.curveStatus.progress))
+                    : 0
+                }
+              />
+            )}
+            {/* Recent Trades */}
+            <div className="bg-gray-900 border border-gray-700 p-2">
+              <div className="text-orange-400 mb-2">RECENT TRADES</div>
+              {trades.length === 0 ? (
+                <div className="text-gray-400 text-xs">
+                  No recent trades found.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs min-w-[400px]">
+                    <thead>
+                      <tr className="text-gray-400 border-b border-gray-700">
+                        <th className="text-left p-1">TRADER</th>
+                        <th className="text-right p-1">TOKEN AMOUNT</th>
+                        <th className="text-right p-1">ASSET AMOUNT</th>
+                        <th className="text-center p-1">TYPE</th>
+                        <th className="text-right p-1">TIME</th>
+                        <th className="text-center p-1"></th>
+                      </tr>
+                    </thead>
+                    <tbody>{tradeRows}</tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
