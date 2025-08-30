@@ -1,92 +1,39 @@
-import { parseFullSymbol } from "./helpers";
+import { wsManager } from "@/services/websocket";
+import { resolutionMap } from "./datafeed";
+import { BarData, BarUpdateMessage } from "@/types";
 
-const socket = new WebSocket(
-  process.env.NEXT_PUBLIC_WEBSOCKET_URL || "wss://localhost:3000",
-);
+interface SubscriptionItem {
+  subscriberUID: string;
+  channel: string;
+  lastDailyBar: BarData;
+  handlers: any[];
+}
 
-const channelToSubscription = new Map();
+const channelToSubscription: Map<string, SubscriptionItem> = new Map();
 
-socket.addEventListener("open", () => {
-  console.log("[socket] Connected");
-});
-
-socket.addEventListener("close", (reason) => {
-  console.log("[socket] Disconnected:", reason);
-});
-
-socket.addEventListener("error", (error) => {
-  console.log("[socket] Error:", error);
-});
-
-socket.addEventListener("message", (event) => {
-  const data = JSON.parse(event.data);
-  console.log("[socket] Message:", data);
-  const {
-    TYPE: eventTypeStr,
-    M: exchange,
-    FSYM: fromSymbol,
-    TSYM: toSymbol,
-    TS: tradeTimeStr,
-    P: tradePriceStr,
-  } = data;
-
-  if (parseInt(eventTypeStr) !== 0) {
-    // Skip all non-trading events
-    return;
-  }
-  const tradePrice = parseFloat(tradePriceStr);
-  const tradeTime = parseInt(tradeTimeStr);
-  const channelString = `0~${exchange}~${fromSymbol}~${toSymbol}`;
-  const subscriptionItem = channelToSubscription.get(channelString);
+const handleBarUpdate = (data: BarUpdateMessage)=>{
+  const subscriptionItem = channelToSubscription.get(data.channel);
   if (subscriptionItem === undefined) {
     return;
   }
-  const lastDailyBar = subscriptionItem.lastDailyBar;
-  const nextDailyBarTime = getNextDailyBarTime(lastDailyBar.time);
-
-  let bar;
-  if (tradeTime >= nextDailyBarTime) {
-    bar = {
-      time: nextDailyBarTime,
-      open: tradePrice,
-      high: tradePrice,
-      low: tradePrice,
-      close: tradePrice,
-    };
-    console.log("[socket] Generate new bar", bar);
-  } else {
-    bar = {
-      ...lastDailyBar,
-      high: Math.max(lastDailyBar.high, tradePrice),
-      low: Math.min(lastDailyBar.low, tradePrice),
-      close: tradePrice,
-    };
-    console.log("[socket] Update the latest bar by price", tradePrice);
-  }
+  const bar = data.bar;
   subscriptionItem.lastDailyBar = bar;
 
   // Send data to every subscriber of that symbol
   subscriptionItem.handlers.forEach(
     (handler: { callback: (arg0: any) => any }) => handler.callback(bar),
   );
-});
-
-function getNextDailyBarTime(barTime: number) {
-  const date = new Date(barTime * 1000);
-  date.setDate(date.getDate() + 1);
-  return date.getTime() / 1000;
 }
 
 export function subscribeOnStream(
-  symbolInfo: { full_name: string },
-  resolution: String,
+  symbolInfo: { chain: string, symbol: string, address: string },
+  resolution: string,
   onRealtimeCallback: (bar: any) => void,
   subscriberUID: string,
   onResetCacheNeededCallback: () => void,
   lastDailyBar: any,
 ) {
-  const parsedSymbol = parseFullSymbol(symbolInfo.full_name);
-  const channelString = `0~${parsedSymbol?.chain}~${parsedSymbol?.symbol}~${parsedSymbol?.address}`;
+  const channelString = `token_bars:${symbolInfo.chain}:${symbolInfo.address}:${resolutionMap[resolution]}`;
   const handler = {
     id: subscriberUID,
     callback: onRealtimeCallback,
@@ -99,7 +46,7 @@ export function subscribeOnStream(
   }
   subscriptionItem = {
     subscriberUID,
-    resolution,
+    channel: channelString,
     lastDailyBar,
     handlers: [handler],
   };
@@ -108,11 +55,7 @@ export function subscribeOnStream(
     "[subscribeBars]: Subscribe to streaming. Channel:",
     channelString,
   );
-  const subRequest = {
-    action: "SubAdd",
-    subs: [channelString],
-  };
-  socket.send(JSON.stringify(subRequest));
+  wsManager.subscribeBars(channelString, handleBarUpdate)
 }
 
 export function unsubscribeFromStream(subscriberUID: string) {
@@ -133,11 +76,7 @@ export function unsubscribeFromStream(subscriberUID: string) {
           "[unsubscribeBars]: Unsubscribe from streaming. Channel:",
           channelString,
         );
-        const subRequest = {
-          action: "SubRemove",
-          subs: [channelString],
-        };
-        socket.send(JSON.stringify(subRequest));
+        wsManager.unsubscribeBars(subscriptionItem.channel);
         channelToSubscription.delete(channelString);
         break;
       }

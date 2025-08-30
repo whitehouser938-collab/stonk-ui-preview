@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getToken } from "@/api/token";
+import { getExplorer, getToken, getTokenTrades } from "@/api/token";
 import LoadingScreen from "@/components/ui/loading";
 import { useLoading } from "@/hooks/use-loading";
 
@@ -27,35 +27,50 @@ import TradingForm from "./TradingForm";
 import BondingCurveProgress from "./BondingCurveProgress";
 import TradingViewChart from "@/components/TradingViewChart";
 import OrderBook from "./OrderBook";
-
-export interface TokenDetails {
-  name: string;
-  symbol: string;
-  totalSupply: number;
-  chain: string;
-  description: string;
-  websiteUrl: string;
-  logoUrl: string;
-  twitterUrl: string;
-  telegramUrl: string;
-  deployerAddress: string;
-  tokenAddress: string;
-  bondingCurveAddress: string;
-}
+import { useTradeUpdates } from "@/hooks/useTradeUpdates";
+import { Chain, TokenDetails, TradeData } from "@/types";
 
 const TokenPage = () => {
   const { chainId, tokenAddress } = useParams<{
-    chainId: string;
+    chainId: Chain;
     tokenAddress: string;
   }>();
   const navigate = useNavigate();
-  const [tokenData, setTokenData] = useState<any>(null);
+  const [tokenData, setTokenData] = useState<TokenDetails>(null);
   const [view, setView] = useState("details");
   const [error, setError] = useState<string | null>(null);
 
   const { isLoading, startLoading, stopLoading } = useLoading();
 
-  const [trades, setTrades] = useState<any[]>([]);
+  const TRADE_PAGE_SIZE = 20
+  const [trades, setTrades] = useState<TradeData[]>([]);
+  const [lastTrade, setLastTrade] = useState<TradeData>(null);
+  const [hasMoreTrades, setHasMoreTrades] = useState(true);
+  const [isFetchingMoreTrades, setIsFetchingMoreTrades] = useState(false);
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleTradeUpdate = useCallback((newTrades: TradeData[]) => {
+    // There are no trades before a trade message from websocket
+    if (trades.length <= 0 && newTrades.length > 0) setLastTrade(newTrades[newTrades.length-1])
+
+    setTrades(prevTrades => {
+      // Add new trades to the beginning and remove duplicates (Probably no need to remove duplicates because theres a high chance there won't be any)
+      const combinedTrades = [...newTrades, ...prevTrades];
+      const uniqueTrades = combinedTrades.filter((trade, index, arr) => 
+        arr.findIndex(t => 
+          t.transactionHash === trade.transactionHash && 
+          t.logIndex === trade.logIndex
+        ) === index
+      );
+      
+      // Keep only the most recent 1000 trades for performance
+      return uniqueTrades.slice(0, 1000);
+    });
+  }, []);
+
+  // Subscribe to real-time trade updates
+  useTradeUpdates(chainId, tokenAddress, handleTradeUpdate);
 
   useEffect(() => {
     const fetchTokenData = async () => {
@@ -93,19 +108,11 @@ const TokenPage = () => {
     const fetchTrades = async () => {
       if (!chainId || !tokenAddress) return;
       try {
-        // For now, we'll use mock data since getTokenTrades might not be available
-        const mockTrades = [
-          {
-            trader: "0x1234567890123456789012345678901234567890",
-            tokenAmount: "1000000000000000000",
-            assetAmount: "1000000",
-            tradeType: "BUY",
-            blockTimestamp: Math.floor(Date.now() / 1000) - 3600,
-            transactionHash:
-              "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-          },
-        ];
-        setTrades(mockTrades);
+        const initialTrades = await getTokenTrades(chainId, tokenAddress, TRADE_PAGE_SIZE);
+
+        if (initialTrades.length < TRADE_PAGE_SIZE) setHasMoreTrades(false);
+        if (initialTrades.length > 0) setLastTrade(initialTrades[initialTrades.length-1])
+        setTrades(initialTrades);
       } catch (error) {
         console.error("Error fetching trades:", error);
         setTrades([]);
@@ -113,6 +120,41 @@ const TokenPage = () => {
     };
     fetchTrades();
   }, [chainId, tokenAddress]);
+
+  // --- Infinite Scroll Handler ---
+  const handleScroll = useCallback(async() => {
+    const container = scrollContainerRef.current;
+
+    if (!container || !hasMoreTrades || isFetchingMoreTrades) return;
+
+    const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
+    if (isAtBottom) {
+      try{
+        console.log(`[Scroll] Reached bottom. Fetching trades after ${lastTrade.transactionHash}...`);
+        setIsFetchingMoreTrades(true);
+        const cursorId = `${lastTrade.transactionHash}:${lastTrade.logIndex}`
+        const moreTrades = await getTokenTrades(chainId, tokenAddress, TRADE_PAGE_SIZE, cursorId);
+
+        if (moreTrades.length < TRADE_PAGE_SIZE) setHasMoreTrades(false);
+        if (moreTrades.length > 0) setLastTrade(moreTrades[moreTrades.length-1]);
+        setTrades(prev => prev.concat(moreTrades));
+      }catch(error){
+        console.error("Error fetching more trades:", error);
+      }finally{
+        setIsFetchingMoreTrades(false);
+      }
+    }
+  }, [chainId, tokenAddress, hasMoreTrades, isFetchingMoreTrades, lastTrade]);
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    container.addEventListener('scroll', handleScroll);
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+    };
+  }, [handleScroll]);
 
   const stockData = {
     symbol: "AAPL",
@@ -256,7 +298,7 @@ const TokenPage = () => {
   }
 
   function formatTimeAgo(timestamp: string | number): string {
-    const ts = typeof timestamp === "string" ? parseInt(timestamp) : timestamp;
+    const ts = typeof timestamp === "string" ? parseInt(timestamp)/1000 : timestamp/1000;
     const now = Date.now() / 1000;
     const diff = now - ts;
     if (diff < 60) return `${Math.floor(diff)}s ago`;
@@ -286,19 +328,19 @@ const TokenPage = () => {
         <tr key={idx} className="border-b border-gray-800 last:border-0">
           <td className="p-1 text-white font-mono">
             <a
-              href={`https://sepolia.etherscan.io/address/${trade.trader}`}
+              href={`${getExplorer(chainId)}/address/${trade.maker}`}
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-orange-400 underline"
             >
-              {abbreviateAddress(trade.trader)}
+              {abbreviateAddress(trade.maker)}
             </a>
           </td>
           <td className="p-1 text-right text-white font-mono">
-            {abbreviateTokenAmount(trade.tokenAmount)}
+            {abbreviateTokenAmount(trade.baseAmount)}
           </td>
           <td className="p-1 text-right text-white font-mono">
-            {abbreviateTokenAmount(trade.assetAmount, 6)}
+            {abbreviateTokenAmount(trade.quoteAmount)}
           </td>
           <td className="p-1 text-center">
             <span
@@ -312,11 +354,11 @@ const TokenPage = () => {
             </span>
           </td>
           <td className="p-1 text-right text-gray-400">
-            {formatTimeAgo(trade.blockTimestamp)}
+            {formatTimeAgo(trade.timestamp)}
           </td>
           <td className="p-1 text-center">
             <a
-              href={`https://sepolia.etherscan.io/tx/${trade.transactionHash}`}
+              href={`${getExplorer(chainId)}/tx/${trade.transactionHash}`}
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-orange-400"
@@ -450,7 +492,7 @@ const TokenPage = () => {
             {/* Price Chart */}
             <div className="bg-gray-900 border border-gray-700 p-2">
               <div className="text-orange-400 mb-2">INTRADAY CHART</div>
-              <TradingViewChart height={300} />
+              <TradingViewChart symbol={`${tokenData?.symbol}:${chainId}:${tokenAddress}`} height={300} />
               {/* <div className="bg-black border border-gray-800 p-2 h-48 flex">
               <div className="flex flex-col justify-between h-full text-xs text-gray-500 pr-2 border-r border-gray-700 text-right">
                 <span>${chartMax.toFixed(2)}</span>
@@ -752,7 +794,10 @@ const TokenPage = () => {
                   No recent trades found.
                 </div>
               ) : (
-                <div className="overflow-x-auto">
+                <div 
+                  ref={scrollContainerRef}
+                  className="overflow-x-auto h-96 custom-scrollbar"
+                >
                   <table className="w-full text-xs min-w-[400px]">
                     <thead>
                       <tr className="text-gray-400 border-b border-gray-700">

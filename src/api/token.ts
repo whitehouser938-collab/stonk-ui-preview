@@ -1,4 +1,19 @@
+import { Chain } from "@/types";
+
 const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+export const getExplorer = (chain: Chain)=>{
+  switch (chain){
+    case "SEP":
+      return "https://sepolia.etherscan.io"
+    case "BASE":
+      return "https://basescan.org"
+    case "SOL":
+      return "https://solscan.io"
+    default:
+      return "https://basescan.org"
+  }
+}
 
 export const addToken = async (tokenData: any) => {
   try {
@@ -30,8 +45,10 @@ export const getToken = async (chainId: string, tokenAddress: string) => {
   try {
     // Use the new merged endpoint that combines Graph + Postgres data
     const response = await fetch(
-      `${API_BASE_URL}/token/${tokenAddress}?chain=${chainId}`
+      // `${API_BASE_URL}/token/${tokenAddress}?chain=${chainId}`
+      `${API_BASE_URL}/token/find?address=${tokenAddress}&chain=${chainId}`
     );
+    console.log(response)
     if (!response.ok) {
       throw new Error("Failed to fetch token data");
     }
@@ -150,11 +167,13 @@ export const searchTokens = async (
 export const getTokenTrades = async (
   chainId: string,
   tokenAddress: string,
-  limit: number = 10
+  limit: number = 20,
+  cursorId?: string
 ): Promise<any[]> => {
   try {
+    const cursorIdQuery = cursorId ? `&cursorId=${cursorId}` : "";
     const response = await fetch(
-      `${API_BASE_URL}/token/trades/${tokenAddress}?chain=${chainId}&limit=${limit}`
+      `${API_BASE_URL}/token/trades/${tokenAddress}?chain=${chainId}&limit=${limit}${cursorIdQuery}`
     );
     if (!response.ok) {
       throw new Error("Failed to fetch token trades");

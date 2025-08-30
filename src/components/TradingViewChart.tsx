@@ -37,14 +37,19 @@ function TradingViewChart({
       widget = new TradingView.widget({
         container: chartContainerRef.current,
         autosize: true,
-        symbol, // e.g., "CRYPTOCAP:BTC"
+        symbol, // e.g., "CRYPTOCAP:BTC:0x12323232323232321231"
         interval: "60" as ResolutionString,
         timezone: "exchange",
         theme: "dark",
         // style: "1",
         locale: "en",
         enabled_features: [],
-        disabled_features: ["header_compare", "header_symbol_search"],
+        disabled_features: [
+          "header_compare", 
+          "header_symbol_search", 
+          "header_quick_search", 
+          "edit_buttons_in_legend",
+        ],
         time_frames: [
           {
             text: "1M",
@@ -68,7 +73,7 @@ function TradingViewChart({
           },
         ],
         datafeed: Datafeed,
-        library_path: "charting_library/charting_library/",
+        library_path: "/charting_library/charting_library/",
       });
     };
 
