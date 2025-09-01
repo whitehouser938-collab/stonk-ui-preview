@@ -3,7 +3,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
 export const addToken = async (tokenData: any) => {
   try {
     const response = await fetch(`${API_BASE_URL}/token`, {
-      method: "PUT",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },

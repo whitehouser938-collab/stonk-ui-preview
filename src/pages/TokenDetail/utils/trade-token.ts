@@ -24,49 +24,39 @@ export const buyTokenETH = async (
         signer // Use Reown's signer
       );
 
-      // User input is EVILUSDC (asset token) amount
-      const assetAmount = ethers.parseUnits(tradeData.amount, 6); // 6 decimals for EVILUSDC
-      // Binary search for max token amount that can be bought for assetAmount
-      let low = BigInt(0);
-      let high = ethers.parseEther("1000000"); // Arbitrary high value
-      let result = BigInt(0);
-      for (let i = 0; i < 32; i++) {
-        let mid = (low + high) / BigInt(2);
-        const price = await router.calculateBuyPrice(
-          tradeData.tokenAddress,
-          mid
-        );
-        if (price > assetAmount) {
-          high = mid - BigInt(1);
-        } else {
-          result = mid;
-          low = mid + BigInt(1);
-        }
-      }
-      let tokenAmount = result;
-      // Ensure tokenAmount is not too high (overshoot fix)
-      while (tokenAmount > 0n) {
-        const price = await router.calculateBuyPrice(
-          tradeData.tokenAddress,
-          tokenAmount
-        );
-        if (price <= assetAmount) break;
-        tokenAmount--;
-      }
-      if (tokenAmount === 0n) {
+      // User input is payment method amount (ETH or WETH)
+      const assetAmount = ethers.parseUnits(tradeData.amount, 18); // 18 decimals for ETH/WETH
+      // Calculate expected token amount for the asset amount (like the working script)
+      const expectedTokenAmount = await router.calculateBuyPrice(
+        tradeData.tokenAddress,
+        assetAmount
+      );
+
+      if (expectedTokenAmount === 0n) {
         return {
           success: false,
-          error: "Input EVILUSDC amount is too low to buy any tokens.",
+          error: `Input ${tradeData.currency} amount is too low to buy any tokens.`,
         };
       }
-      // Use fixed 5% slippage like the working script
-      const maxAssetAmount = (assetAmount * 105n) / 100n; // 5% slippage tolerance
+
+      // Use the expected token amount directly
+      const tokenAmount = expectedTokenAmount;
+      // Calculate maximum asset amount to spend and minimum tokens to receive (like the working script)
+      const slippageBps = Math.floor((tradeData.slippage || 0.05) * 100);
+      const maxAssetAmount =
+        (assetAmount * BigInt(100 + slippageBps)) / BigInt(100);
+      const minTokenAmount =
+        (tokenAmount * BigInt(100 - slippageBps)) / BigInt(100);
 
       console.log("[BUY UTIL PARAMS]", {
         tokenAddress: tradeData.tokenAddress,
+        paymentMethod: tradeData.currency,
         assetAmount: assetAmount.toString(),
+        expectedTokenAmount: expectedTokenAmount.toString(),
         tokenAmount: tokenAmount.toString(),
         maxAssetAmount: maxAssetAmount.toString(),
+        minTokenAmount: minTokenAmount.toString(),
+        slippage: tradeData.slippage,
         deadline: tradeData.deadline,
       });
 
@@ -75,13 +65,21 @@ export const buyTokenETH = async (
       if (tradeData.isBuy) {
         console.log("Buying tokens");
         console.log("Token address:", tradeData.tokenAddress);
-        console.log("Token amount:", tokenAmount);
-        console.log("Max asset amount:", maxAssetAmount);
+        console.log("Asset amount to spend:", assetAmount.toString());
+        console.log(
+          "Max asset amount (with slippage):",
+          maxAssetAmount.toString()
+        );
+        console.log("Expected tokens:", tokenAmount.toString());
+        console.log(
+          "Minimum tokens (with slippage):",
+          minTokenAmount.toString()
+        );
         console.log("Deadline:", tradeData.deadline);
         tx = await router.buyTokens(
           tradeData.tokenAddress,
-          tokenAmount,
-          maxAssetAmount,
+          maxAssetAmount, // Maximum asset amount to spend (with slippage)
+          minTokenAmount, // Minimum tokens to receive (with slippage)
           tradeData.deadline
         );
         console.log("Transaction sent:", tx);
@@ -138,14 +136,35 @@ export const sellTokenETH = async (
         signer // Use Reown's signer
       );
 
-      let tokenAmount = ethers.parseEther(tradeData.amount);
-      // Use calculateSellProceeds for sell
+      // Parse token amount (like the working script)
+      let tokenAmount;
+      try {
+        tokenAmount = ethers.parseEther(tradeData.amount);
+      } catch (error) {
+        return {
+          success: false,
+          error: `Invalid token amount: ${tradeData.amount}. Please enter a valid number.`,
+        };
+      }
+
+      // Use calculateSellProceeds for sell (like the working script)
       let assetAmount = await router.calculateSellProceeds(
         tradeData.tokenAddress,
         tokenAmount
       );
+
+      // Validate that we got a reasonable asset amount
+      if (assetAmount === 0n) {
+        return {
+          success: false,
+          error: `Token amount ${ethers.formatEther(
+            tokenAmount
+          )} is too low to sell.`,
+        };
+      }
+
       // Use fixed 5% slippage like the working script
-      const minAssetAmount = (assetAmount * 95n) / 100n; // 5% slippage tolerance
+      const minAssetAmount = (assetAmount * 95n) / 100n;
 
       console.log("[SELL UTIL PARAMS]", {
         tokenAddress: tradeData.tokenAddress,
@@ -179,7 +198,9 @@ export const sellTokenETH = async (
       if (eventLog) {
         [tokenAddress, tokenAmount, assetAmount] = eventLog.args;
       } else {
-        throw new Error("TokensSold event not found");
+        // If no event found, use the values we already have
+        tokenAddress = tradeData.tokenAddress;
+        // assetAmount and tokenAmount are already set above
       }
 
       const response = {
