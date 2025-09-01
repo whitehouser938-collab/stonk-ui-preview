@@ -1,4 +1,4 @@
-import { makeApiRequest, generateSymbol, parseFullSymbol } from "./helpers";
+import { makeApiRequest } from "./helpers";
 import { subscribeOnStream, unsubscribeFromStream } from "./streaming";
 
 const lastBarsCache = new Map();
@@ -16,7 +16,7 @@ interface Symbol {
 
 type ResolutionString = TradingView.ResolutionString;
 
-const resolutionMap = {
+export const resolutionMap = {
   "1": "1m",
   "15": "15m",
   "30": "30m",
@@ -47,31 +47,9 @@ const configurationData: ConfigurationData = {
     "1W" as ResolutionString,
     "1M" as ResolutionString,
   ],
-  exchanges: [{ value: "finder", name: "finder", desc: "finder" }],
+  exchanges: [{ value: "stonk", name: "stonk", desc: "stonk" }],
   symbols_types: [{ name: "crypto", value: "crypto" }],
 };
-
-// Fetch all symbols for all exchanges supported by the Finder API
-async function getAllSymbols(): Promise<Symbol[]> {
-  //TODO: Implement the getAllSymbols function
-  const data = await makeApiRequest("chart/all-symbols");
-  const allSymbols: Symbol[] = [];
-
-  const symbols = data.symbols;
-  for (const symbol of symbols) {
-    const symbolItem = {
-      symbol: symbol.symbol,
-      ticker: symbol.symbol,
-      address: symbol.address,
-      chain: symbol.chain || "solana",
-      description: symbol.description,
-      type: "crypto",
-      exchange: "finder",
-    };
-    allSymbols.push(symbolItem);
-  }
-  return allSymbols;
-}
 
 // Datafeed implementation
 const Datafeed = {
@@ -85,16 +63,8 @@ const Datafeed = {
     symbolType: string,
     onResultReadyCallback: (symbols: Symbol[]) => void,
   ): Promise<void> => {
-    const symbols = await getAllSymbols();
-    const filteredSymbols = symbols.filter((symbol) => {
-      //   const isExchangeValid = exchange === "" || symbol.exchange === exchange;
-      const fullName = `${symbol.chain}:${symbol.ticker}:${symbol.address}`;
-      const isFullSymbolContainsInput = fullName
-        .toLowerCase()
-        .includes(userInput.toLowerCase());
-      return isFullSymbolContainsInput;
-    });
-    onResultReadyCallback(filteredSymbols);
+    // Not needed
+    onResultReadyCallback([]);
   },
 
   resolveSymbol: async (
@@ -102,26 +72,24 @@ const Datafeed = {
     onSymbolResolvedCallback: (symbolInfo: any) => void,
     onResolveErrorCallback: (error: string) => void,
   ): Promise<void> => {
-    console.log("[resolveSymbol]: Method call", symbolName);
-    const symbols = await getAllSymbols();
-    const symbolItem = symbols.find(({ ticker }) => ticker === symbolName);
-
-    if (!symbolItem) {
+    const [ symbol, chain, address ] = symbolName.split(":");
+    if (!symbol || !chain || !address){
       console.log("[resolveSymbol]: Cannot resolve symbol", symbolName);
       onResolveErrorCallback("Cannot resolve symbol");
       return;
     }
 
     const symbolInfo = {
-      ticker: symbolItem.ticker,
-      address: symbolItem.address,
-      symbol: symbolItem.symbol,
-      name: symbolItem.symbol,
-      description: symbolItem.description,
-      type: symbolItem.type,
+      ticker: symbol,
+      address: address,
+      symbol: symbol,
+      name: symbol,
+      chain: chain,
+      description: `${symbol}/USD`,   // Dynamically change this can be <symbol>/USD or <symbol>/<asset> like DOGE/WETH
+      type: "crypto",
       session: "24x7",
       timezone: "Etc/UTC",
-      exchange: "Finder",
+      exchange: "Stonk Market",
       minmov: 1,
       pricescale: 100,
       has_intraday: true,
@@ -132,7 +100,10 @@ const Datafeed = {
       data_status: "streaming",
     };
     console.log("[resolveSymbol]: Symbol resolved", symbolName);
-    onSymbolResolvedCallback(symbolInfo);
+
+    setTimeout(() => {
+      onSymbolResolvedCallback(symbolInfo);
+    }, 0);
   },
 
   getBars: async (
@@ -145,7 +116,6 @@ const Datafeed = {
     const { from, to } = periodParams;
 
     const urlParameters = {
-      address: symbolInfo.address,
       time_to: to,
       time_from: from,
       chain: symbolInfo.chain,
@@ -159,21 +129,14 @@ const Datafeed = {
       .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
       .join("&");
     try {
-      const data = await makeApiRequest(`chart/price-data?${query}`);
-      if (!data.bars || data.bars.length === 0) {
+      const data = await makeApiRequest(`token/bars/${symbolInfo.address}?${query}`);
+      if (!data.bars || data.end) {
         onHistoryCallback([], { noData: true });
         return;
       }
 
-      //To and From need to be in unix seconds
-      const bars = data.bars.map((bar: any) => ({
-        time: bar.unixTime * 1000,
-        low: bar.l,
-        high: bar.h,
-        open: bar.o,
-        close: bar.c,
-      }));
-      onHistoryCallback(bars, { noData: false });
+      console.log(`Returning ${data.bars.length} bar(s) for the requested period.`);
+      onHistoryCallback(data.bars, { noData: false });
     } catch (error) {
       onErrorCallback(error);
     }
@@ -181,7 +144,7 @@ const Datafeed = {
 
   subscribeBars: (
     symbolInfo: any,
-    resolution: String,
+    resolution: string,
     onRealtimeCallback: (bar: any) => void,
     subscriberUID: string,
     onResetCacheNeededCallback: () => void,
@@ -190,14 +153,14 @@ const Datafeed = {
       "[subscribeBars]: Method call with subscriberUID:",
       subscriberUID,
     );
-    // subscribeOnStream(
-    //   symbolInfo,
-    //   resolution,
-    //   onRealtimeCallback,
-    //   subscriberUID,
-    //   onResetCacheNeededCallback,
-    //   lastBarsCache.get(symbolInfo.full_name),
-    // );
+    subscribeOnStream(
+      symbolInfo,
+      resolution,
+      onRealtimeCallback,
+      subscriberUID,
+      onResetCacheNeededCallback,
+      lastBarsCache.get(symbolInfo.full_name),
+    );
   },
 
   unsubscribeBars: (subscriberUID: string) => {
@@ -205,7 +168,7 @@ const Datafeed = {
       "[unsubscribeBars]: Method call with subscriberUID:",
       subscriberUID,
     );
-    // unsubscribeFromStream(subscriberUID);
+    unsubscribeFromStream(subscriberUID);
   },
 };
 
