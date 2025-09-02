@@ -17,28 +17,25 @@ export const deployTokenETH = async (
   tokenData: ICOLaunchData,
   signer: ethers.Signer
 ) => {
-  if (tokenData.launchpad === "BASE") {
+  if (tokenData.launchpad === "SEP") {
     try {
       const tokenFactoryAddress = import.meta.env
         .VITE_EVM_TOKEN_FACTORY_ADDRESS;
       const tokenFactory = new Contract(
         tokenFactoryAddress,
         TokenFactory.abi,
-        signer // Use Reown's signer
+        signer
       );
 
-      // Convert totalSupply to uint256
-      const fee = tokenFactory.feePrice();
+      // Get the fee price and log it
+      const fee = await tokenFactory.feePrice();
+      console.log("Deployment fee:", ethers.formatEther(fee), "ETH");
+      console.log("Fee in wei:", fee.toString());
 
       // Deploy token transaction
       const tx = await tokenFactory.deployToken(
         tokenData.name,
         tokenData.symbol,
-        import.meta.env.VITE_BASE_VAULT_ADDRESS, // Vault address
-        // TODO: Add Tax params here
-        import.meta.env.VITE_EVM_PROJECT_BUY_TAX_BP || 0,
-        import.meta.env.VITE_EVM_PROJECT_SELL_TAX_BP || 0,
-        import.meta.env.VITE_EVM_PROJECT_TAX_SWAP_THRESHOLP_BP || 0,
         { value: fee }
       );
 

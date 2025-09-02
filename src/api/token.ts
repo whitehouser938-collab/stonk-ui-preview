@@ -18,7 +18,7 @@ export const getExplorer = (chain: Chain)=>{
 export const addToken = async (tokenData: any) => {
   try {
     const response = await fetch(`${API_BASE_URL}/token`, {
-      method: "PUT",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },

@@ -3,9 +3,12 @@ import { useAppKitAccount } from "@reown/appkit/react";
 import { useAppKitBalance } from "@reown/appkit/react";
 import LoadingScreen from "@/components/ui/loading";
 import { useLoading } from "@/hooks/use-loading";
-import { sellTokenETH } from "../utils/trade-token";
+import { sellTokenETH, buyTokenETH } from "../utils/trade-token";
 import { useETHWalletSigner } from "@/hooks/signers/useWalletSigner";
 import { useToast } from "@/hooks/use-toast";
+import { ethers } from "ethers";
+
+const MaxUint256 = ethers.MaxUint256;
 
 interface TradingFormProps {
   chain?: string;
@@ -27,7 +30,7 @@ export interface TokenTradeData {
 const presetAmounts = [0.1, 0.5, 1]; // Preset amounts for quick selection
 const slippageOptions = [0.5, 1, 2.5, 5]; // Slippage options in percentage
 
-const EVILUSDC_ADDRESS = import.meta.env.VITE_EVILUSDC_ADDRESS;
+const EVILWETH_ADDRESS = import.meta.env.VITE_EVILWETH_ADDRESS;
 const ROUTER_ADDRESS = import.meta.env.VITE_EVM_ROUTER_ADDRESS;
 const RPC_URL = import.meta.env.VITE_RPC_URL;
 
@@ -82,7 +85,7 @@ function abbreviateTokenAmount(raw: string | number, decimals = 18): string {
 
 const TradingForm = (props: TradingFormProps) => {
   const [isBuy, setIsBuy] = useState(true); // "buy" or "sell"
-  const [selectedCurrency, setSelectedCurrency] = useState(props.symbol); // Default currency
+  const [paymentMethod, setPaymentMethod] = useState<"ETH" | "WETH">("ETH"); // Payment method for buy
   const [amount, setAmount] = useState("");
   const [slippagePercent, setSlippagePercent] = useState(1); // Default 1% slippage
   const [customSlippage, setCustomSlippage] = useState(""); // For custom slippage input
@@ -92,10 +95,11 @@ const TradingForm = (props: TradingFormProps) => {
   const { isConnected: isEthConnected, address: userAddress } =
     useAppKitAccount({ namespace: "eip155" });
 
-  const [evilUSDCBalance, setEvilUSDCBalance] = useState("0");
+  const [evilWETHBalance, setEvilWETHBalance] = useState("0");
+  const [ethBalance, setEthBalance] = useState("0");
   const [tokenBalance, setTokenBalance] = useState("0");
   const [isApproving, setIsApproving] = useState(false);
-  const [allowance, setAllowance] = useState("0");
+  const [wethAllowance, setWethAllowance] = useState("0");
   const [tokenAllowance, setTokenAllowance] = useState("0");
   const [isTokenApproving, setIsTokenApproving] = useState(false);
 
@@ -106,8 +110,8 @@ const TradingForm = (props: TradingFormProps) => {
     const fetchBalances = async () => {
       try {
         const provider = getReadProvider();
-        const evilUSDC = new ethers.Contract(
-          EVILUSDC_ADDRESS,
+        const evilWETH = new ethers.Contract(
+          EVILWETH_ADDRESS,
           [
             "function balanceOf(address) view returns (uint256)",
             "function allowance(address,address) view returns (uint256)",
@@ -124,24 +128,32 @@ const TradingForm = (props: TradingFormProps) => {
         );
 
         // Fetch balances
-        const [evilUSDCBal, tokenBal, evilUSDCAllowance, tokenAllowance] =
-          await Promise.all([
-            evilUSDC.balanceOf(userAddress),
-            token.balanceOf(userAddress),
-            evilUSDC.allowance(userAddress, ROUTER_ADDRESS),
-            token.allowance(userAddress, ROUTER_ADDRESS),
-          ]);
+        const [
+          evilWETHBal,
+          tokenBal,
+          ethBal,
+          evilWETHAllowance,
+          tokenAllowance,
+        ] = await Promise.all([
+          evilWETH.balanceOf(userAddress),
+          token.balanceOf(userAddress),
+          provider.getBalance(userAddress),
+          evilWETH.allowance(userAddress, ROUTER_ADDRESS),
+          token.allowance(userAddress, ROUTER_ADDRESS),
+        ]);
 
-        setEvilUSDCBalance(evilUSDCBal.toString());
+        setEvilWETHBalance(evilWETHBal.toString());
         setTokenBalance(tokenBal.toString());
-        setAllowance(evilUSDCAllowance.toString());
+        setEthBalance(ethBal.toString());
+        setWethAllowance(evilWETHAllowance.toString());
         setTokenAllowance(tokenAllowance.toString());
 
-        console.log("EVILUSDC Balance:", evilUSDCBal.toString());
+        console.log("EVILWETH Balance:", evilWETHBal.toString());
+        console.log("ETH Balance:", ethers.formatEther(ethBal));
         console.log(`${props.symbol} Balance:`, tokenBal.toString());
         console.log(
-          "EVILUSDC Allowance for router:",
-          evilUSDCAllowance.toString()
+          "EVILWETH Allowance for router:",
+          evilWETHAllowance.toString()
         );
         console.log(
           `${props.symbol} Allowance for router:`,
@@ -150,9 +162,10 @@ const TradingForm = (props: TradingFormProps) => {
       } catch (error) {
         console.error("Error fetching balances:", error);
         // Set default values on error
-        setEvilUSDCBalance("0");
+        setEvilWETHBalance("0");
+        setEthBalance("0");
         setTokenBalance("0");
-        setAllowance("0");
+        setWethAllowance("0");
         setTokenAllowance("0");
       }
     };
@@ -211,16 +224,16 @@ const TradingForm = (props: TradingFormProps) => {
     setIsApproving(true);
     try {
       const signer = await getETHSigner();
-      const evilUSDC = new ethers.Contract(
-        EVILUSDC_ADDRESS,
+      const evilWETH = new ethers.Contract(
+        EVILWETH_ADDRESS,
         ["function approve(address,uint256) returns (bool)"],
         signer
       );
-      const tx = await evilUSDC.approve(ROUTER_ADDRESS, MaxUint256);
+      const tx = await evilWETH.approve(ROUTER_ADDRESS, MaxUint256);
       await tx.wait();
       toast({
         title: "Approval Successful",
-        description: "You can now buy tokens.",
+        description: "You can now buy tokens with WETH.",
         variant: "default",
       });
       setIsApproving(false);
@@ -283,7 +296,14 @@ const TradingForm = (props: TradingFormProps) => {
 
   const handleMax = async () => {
     if (isBuy) {
-      setAmount(ethers.formatUnits(evilUSDCBalance, 6));
+      if (paymentMethod === "ETH") {
+        // Convert ETH balance to a reasonable amount (leave some for gas)
+        const ethBalanceNum = parseFloat(ethers.formatEther(ethBalance));
+        const maxAmount = Math.max(0, ethBalanceNum - 0.01); // Leave 0.01 ETH for gas
+        setAmount(maxAmount.toString());
+      } else if (paymentMethod === "WETH") {
+        setAmount(ethers.formatUnits(evilWETHBalance, 18));
+      }
     } else {
       setAmount(ethers.formatUnits(tokenBalance, 18));
     }
@@ -305,13 +325,13 @@ const TradingForm = (props: TradingFormProps) => {
       const signer = await getETHSigner();
       let tradeResponse;
       if (isBuy) {
-        // User input is EVILUSDC (asset token) amount, pass directly to util
+        // User input is payment method amount (ETH or WETH), pass directly to util
         const tradeData = {
           chain: "sepolia",
           symbol: props.symbol,
           tokenAddress: props.tokenAddress!,
-          amount: amount, // asset amount (EVILUSDC) as string
-          currency: "EVILUSDC",
+          amount: amount, // payment method amount (ETH or WETH) as string
+          currency: paymentMethod,
           isBuy: true,
           deadline: Math.floor(Date.now() / 1000) + 300, // 5 minutes
           slippage: slippagePercent / 100,
@@ -323,7 +343,7 @@ const TradingForm = (props: TradingFormProps) => {
           chain: "sepolia",
           symbol: props.symbol,
           tokenAddress: props.tokenAddress!,
-          amount: amount, // pass user input string, not parsed wei
+          amount: amount, // pass user input string (e.g., "1.5" for 1.5 tokens)
           currency: props.symbol,
           isBuy: false,
           deadline: Math.floor(Date.now() / 1000) + 300, // 5 minutes like the script
@@ -418,22 +438,62 @@ const TradingForm = (props: TradingFormProps) => {
           Sell
         </button>
       </div>
-      {/* Currency Selector */}
-      <div>
-        <label htmlFor="currency" className="block mb-2 text-sm text-gray-500">
-          Select Currency
-        </label>
-        <select
-          id="currency"
-          value={selectedCurrency}
-          onChange={(e) => setSelectedCurrency(e.target.value)}
-          className="w-full p-3 bg-gray-900 border border-gray-700  text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
-        >
-          <option value={props.symbol}>{props.symbol}</option>
-          <option value={props.chain}>{props.chain}</option>
-          {/* Add more options as needed */}
-        </select>
-      </div>
+
+      {/* Payment Method Selector (only for buy mode) */}
+      {isBuy && (
+        <div>
+          <label
+            htmlFor="paymentMethod"
+            className="block mb-2 text-sm text-gray-500"
+          >
+            Payment Method
+          </label>
+          <div className="flex space-x-2">
+            <button
+              type="button"
+              onClick={() => setPaymentMethod("ETH")}
+              className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                paymentMethod === "ETH"
+                  ? "bg-orange-600 text-black"
+                  : "bg-gray-800 hover:bg-gray-700 text-gray-300"
+              }`}
+            >
+              ETH
+            </button>
+            <button
+              type="button"
+              onClick={() => setPaymentMethod("WETH")}
+              className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                paymentMethod === "WETH"
+                  ? "bg-orange-600 text-black"
+                  : "bg-gray-800 hover:bg-gray-700 text-gray-300"
+              }`}
+            >
+              WETH
+            </button>
+          </div>
+          {/* Show current balance for selected payment method */}
+          <div className="text-xs text-gray-400 mt-2">
+            {paymentMethod === "ETH" ? (
+              <>
+                ETH Balance:{" "}
+                <span className="font-mono text-white">
+                  {parseFloat(ethers.formatEther(ethBalance)).toFixed(4)}
+                </span>{" "}
+                ETH
+              </>
+            ) : (
+              <>
+                WETH Balance:{" "}
+                <span className="font-mono text-white">
+                  {abbreviateTokenAmount(evilWETHBalance, 18)}
+                </span>{" "}
+                WETH
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Slippage Tolerance */}
       <div>
@@ -496,7 +556,7 @@ const TradingForm = (props: TradingFormProps) => {
       {/* Amount Input */}
       <div className="mb-2">
         <label htmlFor="amount" className="block text-xs text-gray-400 mb-1">
-          Amount ({isBuy ? "EVILUSDC" : props.symbol})
+          Amount ({isBuy ? paymentMethod : props.symbol})
         </label>
         <input
           id="amount"
@@ -505,7 +565,9 @@ const TradingForm = (props: TradingFormProps) => {
           step="any"
           className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
           placeholder={
-            isBuy ? "Enter EVILUSDC to spend" : `Enter ${props.symbol} to sell`
+            isBuy
+              ? `Enter ${paymentMethod} to spend`
+              : `Enter ${props.symbol} to sell`
           }
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
@@ -520,6 +582,17 @@ const TradingForm = (props: TradingFormProps) => {
           </div>
         )}
       </div>
+
+      {/* Max Button */}
+      <button
+        key="max"
+        type="button"
+        onClick={handleMax}
+        className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-full text-xsm font-medium transition-all duration-200"
+      >
+        Max
+      </button>
+
       {/* Submit Button */}
       {!isWalletConnected && (
         <div className="text-red-500 text-sm">
@@ -527,14 +600,16 @@ const TradingForm = (props: TradingFormProps) => {
         </div>
       )}
       {/* Approve button for buy mode if allowance is insufficient */}
-      {isBuy && BigInt(allowance) < BigInt(maxAssetAmount || "0") ? (
+      {isBuy &&
+      paymentMethod === "WETH" &&
+      BigInt(wethAllowance) < BigInt(amount || "0") ? (
         <button
           type="button"
           disabled={isApproving || !isWalletConnected || !amount}
           onClick={handleApprove}
           className="w-full p-3 text-sm font-bold transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white"
         >
-          {isApproving ? "Approving..." : "Approve EVILUSDC"}
+          {isApproving ? "Approving..." : "Approve WETH"}
         </button>
       ) : !isBuy && BigInt(tokenAllowance) < BigInt(sellTokenAmount || "0") ? (
         <button
@@ -564,14 +639,6 @@ const TradingForm = (props: TradingFormProps) => {
             : "Submit Sell Order"}
         </button>
       )}
-      <button
-        key="max"
-        type="button"
-        onClick={handleMax}
-        className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-full text-xsm font-medium transition-all duration-200"
-      >
-        Max
-      </button>
     </form>
   );
 };

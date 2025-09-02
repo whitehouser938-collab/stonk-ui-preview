@@ -29,7 +29,7 @@ export interface ICOLaunchData {
   telegramUrl?: string;
   twitterUrl?: string;
   logoFile?: File;
-  launchpad: string; // "BASE" or "SOL"
+  launchpad: string; // "SEPOLIA" only
 }
 
 const recentIPOs = [
@@ -127,7 +127,7 @@ export function ICOLaunchpad() {
     telegramUrl: "",
     twitterUrl: "",
     logoFile: undefined,
-    launchpad: "BASE", // Default launchpad
+    launchpad: "SEP", // Default to Sepolia
   });
 
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -162,7 +162,7 @@ export function ICOLaunchpad() {
       telegramUrl: "",
       twitterUrl: "",
       logoFile: undefined,
-      launchpad: "BASE", // Reset to default launchpad
+      launchpad: "SEP", // Reset to Sepolia
     });
   };
 
@@ -195,7 +195,7 @@ export function ICOLaunchpad() {
         // Here you would typically send the data to your backend API
         console.log("Form submitted successfully!");
         //Create Token on Chain
-        if (formData.launchpad === "BASE") {
+        if (formData.launchpad === "SEP") {
           const signer = await getETHSigner();
           const deployResponse: DeployTokenResponse = await deployTokenETH(
             updatedFormData,
@@ -438,25 +438,16 @@ export function ICOLaunchpad() {
                         required
                         type="radio"
                         name="launchpad"
-                        value="BASE"
+                        value="SEP"
+                        checked={formData.launchpad === "SEP"}
                         onChange={(e) =>
                           handleInputChange("launchpad", e.target.value)
                         }
                         className="form-radio text-blue-500"
                       />
-                      <span className="text-white text-sm">Base</span>
-                    </label>
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        name="launchpad"
-                        value="SOL"
-                        onChange={(e) =>
-                          handleInputChange("launchpad", e.target.value)
-                        }
-                        className="form-radio text-blue-500"
-                      />
-                      <span className="text-white text-sm">Solana</span>
+                      <span className="text-white text-sm">
+                        Sepolia Testnet
+                      </span>
                     </label>
                   </div>
                 </div>
