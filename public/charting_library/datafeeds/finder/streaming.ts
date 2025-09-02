@@ -5,7 +5,7 @@ import { BarData, BarUpdateMessage } from "@/types";
 interface SubscriptionItem {
   subscriberUID: string;
   channel: string;
-  lastDailyBar: BarData;
+  lastBar: BarData | null;
   handlers: any[];
 }
 
@@ -16,8 +16,13 @@ const handleBarUpdate = (data: BarUpdateMessage)=>{
   if (subscriptionItem === undefined) {
     return;
   }
-  const bar = data.bar;
-  subscriptionItem.lastDailyBar = bar;
+
+  const bar = !subscriptionItem.lastBar ? data.bar : 
+                  data.bar.time === subscriptionItem.lastBar.time ? 
+                      { ...data.bar, ...{ open: subscriptionItem.lastBar.open} } : 
+                      { ...data.bar, ...{ open: subscriptionItem.lastBar.close} };
+
+  subscriptionItem.lastBar = {...bar};
 
   // Send data to every subscriber of that symbol
   subscriptionItem.handlers.forEach(
@@ -31,7 +36,7 @@ export function subscribeOnStream(
   onRealtimeCallback: (bar: any) => void,
   subscriberUID: string,
   onResetCacheNeededCallback: () => void,
-  lastDailyBar: any,
+  lastBar: BarData | null,
 ) {
   const channelString = `token_bars:${symbolInfo.chain}:${symbolInfo.address}:${resolutionMap[resolution]}`;
   const handler = {
@@ -47,7 +52,7 @@ export function subscribeOnStream(
   subscriptionItem = {
     subscriberUID,
     channel: channelString,
-    lastDailyBar,
+    lastBar,
     handlers: [handler],
   };
   channelToSubscription.set(channelString, subscriptionItem);

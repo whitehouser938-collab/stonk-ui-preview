@@ -50,6 +50,10 @@ function TradingViewChart({
           "header_quick_search", 
           "edit_buttons_in_legend",
         ],
+        overrides: {
+          "mainSeriesProperties.precision": 4,
+          "paneProperties.background": "#1e293b"
+        },
         time_frames: [
           {
             text: "1M",

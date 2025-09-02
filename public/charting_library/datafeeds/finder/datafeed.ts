@@ -1,7 +1,8 @@
+import { BarData } from "@/types";
 import { makeApiRequest } from "./helpers";
 import { subscribeOnStream, unsubscribeFromStream } from "./streaming";
 
-const lastBarsCache = new Map();
+const lastBarsCache: Map<string, BarData> = new Map();
 
 // Define the types for symbols and configuration
 interface Symbol {
@@ -113,7 +114,7 @@ const Datafeed = {
     onHistoryCallback: (bars: any[], meta: { noData: boolean }) => void,
     onErrorCallback: (error: any) => void,
   ): Promise<void> => {
-    const { from, to } = periodParams;
+    const { from, to, firstDataRequest } = periodParams;
 
     const urlParameters = {
       time_to: to,
@@ -135,6 +136,8 @@ const Datafeed = {
         return;
       }
 
+      if (data.bars.length > 0) lastBarsCache.set(symbolInfo.full_name, data.bars[data.bars.length - 1]);
+      
       console.log(`Returning ${data.bars.length} bar(s) for the requested period.`);
       onHistoryCallback(data.bars, { noData: false });
     } catch (error) {
@@ -159,7 +162,7 @@ const Datafeed = {
       onRealtimeCallback,
       subscriberUID,
       onResetCacheNeededCallback,
-      lastBarsCache.get(symbolInfo.full_name),
+      lastBarsCache.get(symbolInfo.full_name) ?? null,
     );
   },
 
