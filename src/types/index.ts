@@ -31,7 +31,7 @@ export interface TradeData {
 }
 
 export interface BarData {
-    timestamp: number;
+    time: number;
     open: number;
     close: number;
     high: number;

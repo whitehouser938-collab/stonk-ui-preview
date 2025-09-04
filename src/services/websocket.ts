@@ -56,7 +56,7 @@ class WebSocketManager {
   }
 
   private handleMessage(message: any) {
-    const handler = this.messageHandlers.get(message.type);
+    const handler = this.messageHandlers.get(message.channel);
     if (handler) {
       handler(message);
     }
@@ -108,7 +108,7 @@ class WebSocketManager {
       ws.send(JSON.stringify(subRequest));
 
       this.subscriptions.add(channel);
-      this.messageHandlers.set('bar', onUpdate);
+      this.messageHandlers.set(channel, onUpdate);
       
       console.log(`Subscribed to bars on channel ${channel}`);
     }).catch(console.error);
@@ -125,7 +125,7 @@ class WebSocketManager {
     }
 
     this.subscriptions.delete(channel);
-    this.messageHandlers.delete('bar');
+    this.messageHandlers.delete(channel);
     
     console.log(`Unsubscribed from bars on channel: ${channel}`);
   }
@@ -140,7 +140,7 @@ class WebSocketManager {
       }));
 
       this.subscriptions.add(channel);
-      this.messageHandlers.set('trades', onUpdate);
+      this.messageHandlers.set(channel, onUpdate);
       
       console.log(`Subscribed to trades on channel: ${channel}`);
     }).catch(console.error);
@@ -159,7 +159,7 @@ class WebSocketManager {
     }
 
     this.subscriptions.delete(channel);
-    this.messageHandlers.delete('trades');
+    this.messageHandlers.delete(channel);
     
     console.log(`Unsubscribed from trades on channel: ${channel}`);
   }
