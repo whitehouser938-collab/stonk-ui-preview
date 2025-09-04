@@ -6,220 +6,309 @@ import { Contract, EventLog } from "ethers";
 export interface TradeTokenResponse {
   transactionHash: string;
   tokenAddress: string;
-  bondingCurveAddress: string;
-  deployerAddress: string;
+  tokenAmount: string;
+  assetAmount: string;
   success: boolean;
+  error?: string;
 }
 
-export const buyTokenETH = async (
+/**
+ * Unified function to buy tokens with either ETH or WETH
+ */
+export const buyTokens = async (
   tradeData: TokenTradeData,
   signer: ethers.Signer
-) => {
-  if (tradeData.chain === "sepolia") {
-    try {
-      const routerAddress = import.meta.env.VITE_EVM_ROUTER_ADDRESS;
-      const router = new Contract(
-        routerAddress,
-        Router.abi,
-        signer // Use Reown's signer
-      );
+): Promise<TradeTokenResponse> => {
+  if (tradeData.chain !== "sepolia") {
+    return {
+      success: false,
+      error: "Unsupported chain",
+      transactionHash: "",
+      tokenAddress: "",
+      tokenAmount: "0",
+      assetAmount: "0",
+    };
+  }
 
-      // User input is payment method amount (ETH or WETH)
-      const assetAmount = ethers.parseUnits(tradeData.amount, 18); // 18 decimals for ETH/WETH
-      // Calculate expected token amount for the asset amount (like the working script)
-      const expectedTokenAmount = await router.calculateBuyPrice(
-        tradeData.tokenAddress,
-        assetAmount
-      );
+  try {
+    const routerAddress = import.meta.env.VITE_EVM_ROUTER_ADDRESS;
+    const router = new Contract(routerAddress, Router.abi, signer);
 
-      if (expectedTokenAmount === 0n) {
-        return {
-          success: false,
-          error: `Input ${tradeData.currency} amount is too low to buy any tokens.`,
-        };
-      }
-
-      // Use the expected token amount directly
-      const tokenAmount = expectedTokenAmount;
-      // Calculate maximum asset amount to spend and minimum tokens to receive (like the working script)
-      const slippageBps = Math.floor((tradeData.slippage || 0.05) * 100);
-      const maxAssetAmount =
-        (assetAmount * BigInt(100 + slippageBps)) / BigInt(100);
-      const minTokenAmount =
-        (tokenAmount * BigInt(100 - slippageBps)) / BigInt(100);
-
-      console.log("[BUY UTIL PARAMS]", {
-        tokenAddress: tradeData.tokenAddress,
-        paymentMethod: tradeData.currency,
-        assetAmount: assetAmount.toString(),
-        expectedTokenAmount: expectedTokenAmount.toString(),
-        tokenAmount: tokenAmount.toString(),
-        maxAssetAmount: maxAssetAmount.toString(),
-        minTokenAmount: minTokenAmount.toString(),
-        slippage: tradeData.slippage,
-        deadline: tradeData.deadline,
-      });
-
-      //handle buy
-      let tx;
-      if (tradeData.isBuy) {
-        console.log("Buying tokens");
-        console.log("Token address:", tradeData.tokenAddress);
-        console.log("Asset amount to spend:", assetAmount.toString());
-        console.log(
-          "Max asset amount (with slippage):",
-          maxAssetAmount.toString()
-        );
-        console.log("Expected tokens:", tokenAmount.toString());
-        console.log(
-          "Minimum tokens (with slippage):",
-          minTokenAmount.toString()
-        );
-        console.log("Deadline:", tradeData.deadline);
-        tx = await router.buyTokens(
-          tradeData.tokenAddress,
-          maxAssetAmount, // Maximum asset amount to spend (with slippage)
-          minTokenAmount, // Minimum tokens to receive (with slippage)
-          tradeData.deadline
-        );
-        console.log("Transaction sent:", tx);
-      }
-
-      const receipt = await tx.wait(); // Wait for the transaction to be mined
-      console.log("Transaction mined:", tx);
-
-      if (!receipt) throw new Error("Transaction receipt is null");
-      const eventLog = receipt.logs.find(
-        (log): log is EventLog =>
-          log instanceof EventLog && log.fragment?.name === "TokensPurchased"
-      );
-
-      let tokenAddress: string;
-
-      if (eventLog) {
-        [tokenAddress] = eventLog.args;
-      } else {
-        throw new Error("TokensPurchased event not found");
-      }
-
-      const response = {
-        transactionHash: tx.hash,
-        tokenAddress: tokenAddress,
-        tokenAmount: tokenAmount,
-        assetAmount: assetAmount,
-        success: true,
-      };
-      return response;
-    } catch (error) {
-      console.error(
-        `Error purchasing ${tradeData.symbol} on ${tradeData.chain}`,
-        error
-      );
+    // Validate amount before parsing
+    const numAmount = parseFloat(tradeData.amount);
+    if (isNaN(numAmount) || numAmount <= 0) {
       return {
         success: false,
-        error: error?.message || JSON.stringify(error),
+        error: `Invalid amount: ${tradeData.amount}. Please enter a valid positive number.`,
+        transactionHash: "",
+        tokenAddress: "",
+        tokenAmount: "0",
+        assetAmount: "0",
       };
     }
+
+    // Check for very small amounts that might cause issues
+    if (numAmount < 0.000001) {
+      return {
+        success: false,
+        error: `Amount too small: ${tradeData.amount}. Minimum amount is 0.000001 ${tradeData.currency}.`,
+        transactionHash: "",
+        tokenAddress: "",
+        tokenAmount: "0",
+        assetAmount: "0",
+      };
+    }
+
+    // Parse the input amount (ETH or WETH amount)
+    const assetAmount = ethers.parseEther(tradeData.amount);
+
+    // Calculate expected token amount for the asset amount
+    const expectedTokenAmount = await router.calculateBuyPrice(
+      tradeData.tokenAddress,
+      assetAmount
+    );
+
+    if (expectedTokenAmount === 0n) {
+      return {
+        success: false,
+        error: `Input ${tradeData.currency} amount is too low to buy any tokens.`,
+        transactionHash: "",
+        tokenAddress: "",
+        tokenAmount: "0",
+        assetAmount: "0",
+      };
+    }
+
+    // Calculate slippage-adjusted amounts
+    const slippageBps = Math.floor((tradeData.slippage || 0.05) * 10000);
+    const minTokenAmount =
+      (expectedTokenAmount * BigInt(10000 - slippageBps)) / BigInt(10000);
+
+    console.log("[BUY PARAMS]", {
+      tokenAddress: tradeData.tokenAddress,
+      paymentMethod: tradeData.currency,
+      assetAmount: assetAmount.toString(),
+      expectedTokenAmount: expectedTokenAmount.toString(),
+      minTokenAmount: minTokenAmount.toString(),
+      slippage: tradeData.slippage,
+      slippageBps,
+      deadline: tradeData.deadline,
+    });
+
+    let tx;
+
+    if (tradeData.currency === "ETH") {
+      // Use buyTokensWithETH for ETH payments (payable function)
+      // Parameters: tokenAddress, minTokenAmount, deadline, {value: ethAmount}
+      tx = await router.buyTokensWithETH(
+        tradeData.tokenAddress,
+        minTokenAmount,
+        tradeData.deadline,
+        { value: assetAmount } // Send ETH with the transaction
+      );
+    } else {
+      // Use buyTokens for WETH payments (nonpayable function)
+      // Parameters: tokenAddress, maxAssetAmount, minTokenAmount, deadline
+      // For WETH, we use the exact asset amount as maxAssetAmount (user specifies exact WETH to spend)
+      tx = await router.buyTokens(
+        tradeData.tokenAddress,
+        assetAmount, // Use exact amount user wants to spend
+        minTokenAmount,
+        tradeData.deadline
+      );
+    }
+
+    console.log("Transaction sent:", tx.hash);
+
+    const receipt = await tx.wait();
+    console.log("Transaction mined:", receipt);
+
+    if (!receipt) {
+      throw new Error("Transaction receipt is null");
+    }
+
+    // Find the TokensPurchased event
+    const eventLog = receipt.logs.find(
+      (log): log is EventLog =>
+        log instanceof EventLog && log.fragment?.name === "TokensPurchased"
+    );
+
+    if (!eventLog) {
+      throw new Error("TokensPurchased event not found");
+    }
+
+    const [tokenAddress] = eventLog.args;
+
+    return {
+      transactionHash: tx.hash,
+      tokenAddress: tokenAddress,
+      tokenAmount: expectedTokenAmount.toString(),
+      assetAmount: assetAmount.toString(),
+      success: true,
+    };
+  } catch (error) {
+    console.error(
+      `Error purchasing ${tradeData.symbol} on ${tradeData.chain}`,
+      error
+    );
+    return {
+      success: false,
+      error: error?.message || JSON.stringify(error),
+      transactionHash: "",
+      tokenAddress: "",
+      tokenAmount: "0",
+      assetAmount: "0",
+    };
   }
 };
 
-export const sellTokenETH = async (
+/**
+ * Unified function to sell tokens for either ETH or WETH
+ */
+export const sellTokens = async (
   tradeData: TokenTradeData,
   signer: ethers.Signer
-) => {
-  if (tradeData.chain === "sepolia") {
-    try {
-      const routerAddress = import.meta.env.VITE_EVM_ROUTER_ADDRESS;
-      const router = new Contract(
-        routerAddress,
-        Router.abi,
-        signer // Use Reown's signer
-      );
+): Promise<TradeTokenResponse> => {
+  if (tradeData.chain !== "sepolia") {
+    return {
+      success: false,
+      error: "Unsupported chain",
+      transactionHash: "",
+      tokenAddress: "",
+      tokenAmount: "0",
+      assetAmount: "0",
+    };
+  }
 
-      // Parse token amount (like the working script)
-      let tokenAmount;
-      try {
-        tokenAmount = ethers.parseEther(tradeData.amount);
-      } catch (error) {
-        return {
-          success: false,
-          error: `Invalid token amount: ${tradeData.amount}. Please enter a valid number.`,
-        };
-      }
+  try {
+    const routerAddress = import.meta.env.VITE_EVM_ROUTER_ADDRESS;
+    const router = new Contract(routerAddress, Router.abi, signer);
 
-      // Use calculateSellProceeds for sell (like the working script)
-      let assetAmount = await router.calculateSellProceeds(
-        tradeData.tokenAddress,
-        tokenAmount
-      );
-
-      // Validate that we got a reasonable asset amount
-      if (assetAmount === 0n) {
-        return {
-          success: false,
-          error: `Token amount ${ethers.formatEther(
-            tokenAmount
-          )} is too low to sell.`,
-        };
-      }
-
-      // Use fixed 5% slippage like the working script
-      const minAssetAmount = (assetAmount * 95n) / 100n;
-
-      console.log("[SELL UTIL PARAMS]", {
-        tokenAddress: tradeData.tokenAddress,
-        tokenAmount: tokenAmount.toString(),
-        assetAmount: assetAmount.toString(),
-        minAssetAmount: minAssetAmount.toString(),
-        deadline: tradeData.deadline,
-      });
-
-      //handle sell
-      let tx;
-      if (!tradeData.isBuy) {
-        tx = await router.sellTokens(
-          tradeData.tokenAddress,
-          tokenAmount,
-          minAssetAmount,
-          tradeData.deadline
-        );
-      }
-
-      const receipt = await tx.wait(); // Wait for the transaction to be mined
-      console.log("Transaction mined:", tx);
-
-      if (!receipt) throw new Error("Transaction receipt is null");
-      const eventLog = receipt.logs.find(
-        (log): log is EventLog =>
-          log instanceof EventLog && log.fragment?.name === "TokensSold"
-      );
-
-      let tokenAddress: string;
-      if (eventLog) {
-        [tokenAddress, tokenAmount, assetAmount] = eventLog.args;
-      } else {
-        // If no event found, use the values we already have
-        tokenAddress = tradeData.tokenAddress;
-        // assetAmount and tokenAmount are already set above
-      }
-
-      const response = {
-        transactionHash: tx.hash,
-        tokenAddress: tokenAddress,
-        tokenAmount: tokenAmount,
-        assetAmount: assetAmount,
-        success: true,
-      };
-      return response;
-    } catch (error) {
-      console.error(
-        `Error selling ${tradeData.symbol} on ${tradeData.chain}`,
-        error
-      );
+    // Validate amount before parsing
+    const numAmount = parseFloat(tradeData.amount);
+    if (isNaN(numAmount) || numAmount <= 0) {
       return {
         success: false,
-        error: error?.message || JSON.stringify(error),
+        error: `Invalid amount: ${tradeData.amount}. Please enter a valid positive number.`,
+        transactionHash: "",
+        tokenAddress: "",
+        tokenAmount: "0",
+        assetAmount: "0",
       };
     }
+
+    // Check for very small amounts that might cause issues
+    if (numAmount < 0.000001) {
+      return {
+        success: false,
+        error: `Amount too small: ${tradeData.amount}. Minimum amount is 0.000001 tokens.`,
+        transactionHash: "",
+        tokenAddress: "",
+        tokenAmount: "0",
+        assetAmount: "0",
+      };
+    }
+
+    // Parse token amount to sell
+    const tokenAmount = ethers.parseEther(tradeData.amount);
+
+    // Calculate expected asset amount (ETH or WETH) from selling tokens
+    const expectedAssetAmount = await router.calculateSellProceeds(
+      tradeData.tokenAddress,
+      tokenAmount
+    );
+
+    if (expectedAssetAmount === 0n) {
+      return {
+        success: false,
+        error: `Token amount ${tradeData.amount} is too low to sell.`,
+        transactionHash: "",
+        tokenAddress: "",
+        tokenAmount: "0",
+        assetAmount: "0",
+      };
+    }
+
+    // Calculate slippage-adjusted minimum amount
+    const slippageBps = Math.floor((tradeData.slippage || 0.05) * 10000);
+    const minAssetAmount =
+      (expectedAssetAmount * BigInt(10000 - slippageBps)) / BigInt(10000);
+
+    console.log("[SELL PARAMS]", {
+      tokenAddress: tradeData.tokenAddress,
+      tokenAmount: tokenAmount.toString(),
+      expectedAssetAmount: expectedAssetAmount.toString(),
+      minAssetAmount: minAssetAmount.toString(),
+      slippage: tradeData.slippage,
+      deadline: tradeData.deadline,
+    });
+
+    let tx;
+
+    if (tradeData.currency === "ETH") {
+      // Use sellTokensForETH for ETH output
+      tx = await router.sellTokensForETH(
+        tradeData.tokenAddress,
+        tokenAmount,
+        minAssetAmount,
+        tradeData.deadline
+      );
+    } else {
+      // Use sellTokens for WETH output
+      tx = await router.sellTokens(
+        tradeData.tokenAddress,
+        tokenAmount,
+        minAssetAmount,
+        tradeData.deadline
+      );
+    }
+
+    console.log("Transaction sent:", tx.hash);
+
+    const receipt = await tx.wait();
+    console.log("Transaction mined:", receipt);
+
+    if (!receipt) {
+      throw new Error("Transaction receipt is null");
+    }
+
+    // Find the TokensSold event
+    const eventLog = receipt.logs.find(
+      (log): log is EventLog =>
+        log instanceof EventLog && log.fragment?.name === "TokensSold"
+    );
+
+    let finalTokenAddress = tradeData.tokenAddress;
+    let finalTokenAmount = tokenAmount;
+    let finalAssetAmount = expectedAssetAmount;
+
+    if (eventLog) {
+      [finalTokenAddress, finalTokenAmount, finalAssetAmount] = eventLog.args;
+    }
+
+    return {
+      transactionHash: tx.hash,
+      tokenAddress: finalTokenAddress,
+      tokenAmount: finalTokenAmount.toString(),
+      assetAmount: finalAssetAmount.toString(),
+      success: true,
+    };
+  } catch (error) {
+    console.error(
+      `Error selling ${tradeData.symbol} on ${tradeData.chain}`,
+      error
+    );
+    return {
+      success: false,
+      error: error?.message || JSON.stringify(error),
+      transactionHash: "",
+      tokenAddress: "",
+      tokenAmount: "0",
+      assetAmount: "0",
+    };
   }
 };
+
+// Legacy function names for backward compatibility
+export const buyTokenETH = buyTokens;
+export const sellTokenETH = sellTokens;
