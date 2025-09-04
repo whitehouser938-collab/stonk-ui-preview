@@ -179,12 +179,19 @@ const TradingForm = (props: TradingFormProps) => {
     isTokenApproving,
   ]);
 
-  // Calculate maxAssetAmount for buy
-  const [maxAssetAmount, setMaxAssetAmount] = useState("0");
+  // Calculate expected token amount for buy (when user enters asset amount)
+  const [expectedTokenAmount, setExpectedTokenAmount] = useState("0");
   React.useEffect(() => {
     const calc = async () => {
-      if (!isBuy || !amount || !props.tokenAddress)
-        return setMaxAssetAmount("0");
+      if (!isBuy || !amount || !props.tokenAddress) {
+        return setExpectedTokenAmount("0");
+      }
+
+      // Validate amount is a valid positive number
+      const numAmount = parseFloat(amount);
+      if (isNaN(numAmount) || numAmount <= 0) {
+        return setExpectedTokenAmount("0");
+      }
 
       try {
         const provider = getReadProvider();
@@ -196,18 +203,17 @@ const TradingForm = (props: TradingFormProps) => {
           ],
           provider
         );
-        const tokenAmount = ethers.parseEther(amount);
-        const assetAmount = await router.calculateBuyPrice(
+
+        // User enters asset amount (ETH/WETH), we calculate expected token amount
+        const assetAmount = ethers.parseEther(amount);
+        const tokenAmount = await router.calculateBuyPrice(
           props.tokenAddress,
-          tokenAmount
+          assetAmount
         );
-        const slippageBps = Math.floor((slippagePercent / 100) * 10000);
-        const maxAsset =
-          (assetAmount * BigInt(10000 + slippageBps)) / BigInt(10000);
-        setMaxAssetAmount(maxAsset.toString());
+        setExpectedTokenAmount(tokenAmount.toString());
       } catch (error) {
-        console.error("Error calculating max asset amount:", error);
-        setMaxAssetAmount("0");
+        console.error("Error calculating expected token amount:", error);
+        setExpectedTokenAmount("0");
       }
     };
     calc();
@@ -312,12 +318,30 @@ const TradingForm = (props: TradingFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
-      alert("Please enter a valid amount.");
+    // Validate amount more thoroughly
+    const numAmount = parseFloat(amount);
+    if (!amount || amount.trim() === "" || isNaN(numAmount) || numAmount <= 0) {
+      toast({
+        title: "Invalid Amount",
+        description: "Please enter a valid amount greater than 0.",
+        variant: "destructive",
+      });
       return;
     }
     if (!isWalletConnected) {
-      alert("Please connect your wallet to trade.");
+      toast({
+        title: "Wallet Not Connected",
+        description: "Please connect your wallet to trade.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!props.tokenAddress) {
+      toast({
+        title: "Token Not Found",
+        description: "Token address is missing.",
+        variant: "destructive",
+      });
       return;
     }
     startLoading();
@@ -344,7 +368,7 @@ const TradingForm = (props: TradingFormProps) => {
           symbol: props.symbol,
           tokenAddress: props.tokenAddress!,
           amount: amount, // pass user input string (e.g., "1.5" for 1.5 tokens)
-          currency: props.symbol,
+          currency: "ETH", // Default to ETH for selling (could be made configurable later)
           isBuy: false,
           deadline: Math.floor(Date.now() / 1000) + 300, // 5 minutes like the script
           slippage: 0.05, // Fixed 5% slippage like the script
@@ -393,7 +417,22 @@ const TradingForm = (props: TradingFormProps) => {
       }
     } catch (error) {
       console.error("Error submitting trade:", error);
-      alert("An error occurred while submitting the trade.");
+
+      // Check if user rejected the transaction
+      if (isUserRejectedError(error)) {
+        toast({
+          title: "Trade Cancelled",
+          description: "You rejected the transaction.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Trade Failed",
+          description:
+            error?.message || "An error occurred while submitting the trade.",
+          variant: "destructive",
+        });
+      }
     } finally {
       stopLoading();
     }
@@ -602,7 +641,9 @@ const TradingForm = (props: TradingFormProps) => {
       {/* Approve button for buy mode if allowance is insufficient */}
       {isBuy &&
       paymentMethod === "WETH" &&
-      BigInt(wethAllowance) < BigInt(amount || "0") ? (
+      amount &&
+      parseFloat(amount) > 0 &&
+      BigInt(wethAllowance) < ethers.parseEther(amount) ? (
         <button
           type="button"
           disabled={isApproving || !isWalletConnected || !amount}
