@@ -1,8 +1,9 @@
-import { BarData } from "@/types";
+import { BarData, Chain } from "@/types";
 import { makeApiRequest } from "./helpers";
 import { subscribeOnStream, unsubscribeFromStream } from "./streaming";
 
 const lastBarsCache: Map<string, BarData> = new Map();
+const prevBarsCache: Map<string, BarData> = new Map();
 
 // Define the types for symbols and configuration
 interface Symbol {
@@ -135,11 +136,31 @@ const Datafeed = {
         onHistoryCallback([], { noData: true });
         return;
       }
+      const cacheKey = `${symbolInfo.address}:${symbolInfo.chain}:${resolution}`;
 
-      if (data.bars.length > 0) lastBarsCache.set(symbolInfo.full_name, data.bars[data.bars.length - 1]);
-      
-      console.log(`Returning ${data.bars.length} bar(s) for the requested period.`);
-      onHistoryCallback(data.bars, { noData: false });
+      if (firstDataRequest) {
+        prevBarsCache.delete(cacheKey);
+        lastBarsCache.delete(cacheKey);
+      }
+
+      const newBars = [...data.bars];
+      if (data.bars.length > 0) {
+        const prevBar = prevBarsCache.get(cacheKey);
+
+        // This whole block basically tries to fix chart discontinuity by bridging a gap if there are any between bars (Probably won't be an issue in prod, it's here as a fail safe)
+        if (prevBar && prevBar.close !== data.bars[data.bars.length - 1].close) {
+          const connectingBar = {
+            ...data.bars[data.bars.length - 1],
+            close: prevBar.open,
+          };
+          newBars.push(connectingBar);
+        }
+        if (!lastBarsCache.has(cacheKey)) lastBarsCache.set(cacheKey, data.bars[data.bars.length - 1]);
+        prevBarsCache.set(cacheKey, data.bars[0]);
+      }
+
+      console.log(`Returning ${newBars.length} bar(s) for the requested period.`);
+      onHistoryCallback(newBars, { noData: false });
     } catch (error) {
       onErrorCallback(error);
     }
@@ -162,7 +183,7 @@ const Datafeed = {
       onRealtimeCallback,
       subscriberUID,
       onResetCacheNeededCallback,
-      lastBarsCache.get(symbolInfo.full_name) ?? null,
+      lastBarsCache.get(`${symbolInfo.address}:${symbolInfo.chain}:${resolution}`) ?? null,
     );
   },
 
