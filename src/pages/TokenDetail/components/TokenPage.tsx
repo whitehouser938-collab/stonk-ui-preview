@@ -42,7 +42,7 @@ const TokenPage = () => {
 
   const { isLoading, startLoading, stopLoading } = useLoading();
 
-  const TRADE_PAGE_SIZE = 20
+  const TRADE_PAGE_SIZE = 20;
   const [trades, setTrades] = useState<TradeData[]>([]);
   const [lastTrade, setLastTrade] = useState<TradeData>(null);
   const [hasMoreTrades, setHasMoreTrades] = useState(true);
@@ -52,18 +52,21 @@ const TokenPage = () => {
 
   const handleTradeUpdate = useCallback((newTrades: TradeData[]) => {
     // There are no trades before a trade message from websocket
-    if (trades.length <= 0 && newTrades.length > 0) setLastTrade(newTrades[newTrades.length-1])
+    if (trades.length <= 0 && newTrades.length > 0)
+      setLastTrade(newTrades[newTrades.length - 1]);
 
-    setTrades(prevTrades => {
+    setTrades((prevTrades) => {
       // Add new trades to the beginning and remove duplicates (Probably no need to remove duplicates because theres a high chance there won't be any)
       const combinedTrades = [...newTrades, ...prevTrades];
-      const uniqueTrades = combinedTrades.filter((trade, index, arr) => 
-        arr.findIndex(t => 
-          t.transactionHash === trade.transactionHash && 
-          t.logIndex === trade.logIndex
-        ) === index
+      const uniqueTrades = combinedTrades.filter(
+        (trade, index, arr) =>
+          arr.findIndex(
+            (t) =>
+              t.transactionHash === trade.transactionHash &&
+              t.logIndex === trade.logIndex
+          ) === index
       );
-      
+
       // Keep only the most recent 1000 trades for performance
       return uniqueTrades.slice(0, 1000);
     });
@@ -108,10 +111,15 @@ const TokenPage = () => {
     const fetchTrades = async () => {
       if (!chainId || !tokenAddress) return;
       try {
-        const initialTrades = await getTokenTrades(chainId, tokenAddress, TRADE_PAGE_SIZE);
+        const initialTrades = await getTokenTrades(
+          chainId,
+          tokenAddress,
+          TRADE_PAGE_SIZE
+        );
 
         if (initialTrades.length < TRADE_PAGE_SIZE) setHasMoreTrades(false);
-        if (initialTrades.length > 0) setLastTrade(initialTrades[initialTrades.length-1])
+        if (initialTrades.length > 0)
+          setLastTrade(initialTrades[initialTrades.length - 1]);
         setTrades(initialTrades);
       } catch (error) {
         console.error("Error fetching trades:", error);
@@ -122,25 +130,35 @@ const TokenPage = () => {
   }, [chainId, tokenAddress]);
 
   // --- Infinite Scroll Handler ---
-  const handleScroll = useCallback(async() => {
+  const handleScroll = useCallback(async () => {
     const container = scrollContainerRef.current;
 
     if (!container || !hasMoreTrades || isFetchingMoreTrades) return;
 
-    const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
+    const isAtBottom =
+      container.scrollHeight - container.scrollTop <=
+      container.clientHeight + 100;
     if (isAtBottom) {
-      try{
-        console.log(`[Scroll] Reached bottom. Fetching trades after ${lastTrade.transactionHash}...`);
+      try {
+        console.log(
+          `[Scroll] Reached bottom. Fetching trades after ${lastTrade.transactionHash}...`
+        );
         setIsFetchingMoreTrades(true);
-        const cursorId = `${lastTrade.transactionHash}:${lastTrade.logIndex}`
-        const moreTrades = await getTokenTrades(chainId, tokenAddress, TRADE_PAGE_SIZE, cursorId);
+        const cursorId = `${lastTrade.transactionHash}:${lastTrade.logIndex}`;
+        const moreTrades = await getTokenTrades(
+          chainId,
+          tokenAddress,
+          TRADE_PAGE_SIZE,
+          cursorId
+        );
 
         if (moreTrades.length < TRADE_PAGE_SIZE) setHasMoreTrades(false);
-        if (moreTrades.length > 0) setLastTrade(moreTrades[moreTrades.length-1]);
-        setTrades(prev => prev.concat(moreTrades));
-      }catch(error){
+        if (moreTrades.length > 0)
+          setLastTrade(moreTrades[moreTrades.length - 1]);
+        setTrades((prev) => prev.concat(moreTrades));
+      } catch (error) {
         console.error("Error fetching more trades:", error);
-      }finally{
+      } finally {
         setIsFetchingMoreTrades(false);
       }
     }
@@ -150,9 +168,9 @@ const TokenPage = () => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    container.addEventListener('scroll', handleScroll);
+    container.addEventListener("scroll", handleScroll);
     return () => {
-      container.removeEventListener('scroll', handleScroll);
+      container.removeEventListener("scroll", handleScroll);
     };
   }, [handleScroll]);
 
@@ -298,7 +316,10 @@ const TokenPage = () => {
   }
 
   function formatTimeAgo(timestamp: string | number): string {
-    const ts = typeof timestamp === "string" ? parseInt(timestamp)/1000 : timestamp/1000;
+    const ts =
+      typeof timestamp === "string"
+        ? parseInt(timestamp) / 1000
+        : timestamp / 1000;
     const now = Date.now() / 1000;
     const diff = now - ts;
     if (diff < 60) return `${Math.floor(diff)}s ago`;
@@ -492,7 +513,10 @@ const TokenPage = () => {
             {/* Price Chart */}
             <div className="bg-gray-900 border border-gray-700 p-2">
               <div className="text-orange-400 mb-2">INTRADAY CHART</div>
-              <TradingViewChart symbol={`${tokenData?.symbol}:${chainId}:${tokenAddress}`} height={300} />
+              <TradingViewChart
+                symbol={`${tokenData?.symbol}:${chainId}:${tokenAddress}`}
+                height={300}
+              />
               {/* <div className="bg-black border border-gray-800 p-2 h-48 flex">
               <div className="flex flex-col justify-between h-full text-xs text-gray-500 pr-2 border-r border-gray-700 text-right">
                 <span>${chartMax.toFixed(2)}</span>
@@ -770,22 +794,15 @@ const TokenPage = () => {
               tokenAddress={tokenData?.tokenAddress}
             />
             {/* Bonding Curve Progress & Graduation Badge */}
-            {tokenData?.isGraduated ? (
-              <div className="flex items-center gap-2 mb-2">
-                <BondingCurveProgress progress={100} />
-                <span className="bg-green-600 text-white px-2 py-1 rounded text-xs font-bold">
-                  Graduated
-                </span>
-              </div>
-            ) : (
-              <BondingCurveProgress
-                progress={
-                  tokenData?.curveStatus?.progress !== undefined
-                    ? Math.min(100, Math.max(0, tokenData.curveStatus.progress))
-                    : 0
-                }
-              />
-            )}
+            <BondingCurveProgress
+              progress={
+                tokenData?.curveStatus?.progress !== undefined
+                  ? Math.min(100, Math.max(0, tokenData.curveStatus.progress))
+                  : 0
+              }
+              graduated={tokenData?.isGraduated || !!tokenData?.uniswapPair}
+              uniswapPair={tokenData?.uniswapPair}
+            />
             {/* Recent Trades */}
             <div className="bg-gray-900 border border-gray-700 p-2">
               <div className="text-orange-400 mb-2">RECENT TRADES</div>
@@ -794,7 +811,7 @@ const TokenPage = () => {
                   No recent trades found.
                 </div>
               ) : (
-                <div 
+                <div
                   ref={scrollContainerRef}
                   className="overflow-x-auto h-96 custom-scrollbar"
                 >
