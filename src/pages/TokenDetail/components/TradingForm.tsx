@@ -371,7 +371,7 @@ const TradingForm = (props: TradingFormProps) => {
           currency: "ETH", // Default to ETH for selling (could be made configurable later)
           isBuy: false,
           deadline: Math.floor(Date.now() / 1000) + 300, // 5 minutes like the script
-          slippage: 0.05, // Fixed 5% slippage like the script
+          slippage: slippagePercent / 100, // Use actual slippage from form
         };
 
         console.log("[UI SELL PARAMS]", {
@@ -631,6 +631,31 @@ const TradingForm = (props: TradingFormProps) => {
       >
         Max
       </button>
+
+      {/* Percentage Sell Buttons (only for sell mode) */}
+      {!isBuy && (
+        <div>
+          <label className="block mb-2 text-sm text-gray-500">Quick Sell</label>
+          <div className="flex space-x-2">
+            {[10, 25, 50, 75, 100].map((percentage) => (
+              <button
+                key={percentage}
+                type="button"
+                onClick={() => {
+                  const tokenBalanceNum = parseFloat(
+                    ethers.formatUnits(tokenBalance, 18)
+                  );
+                  const sellAmount = (tokenBalanceNum * percentage) / 100;
+                  setAmount(sellAmount.toString());
+                }}
+                className="px-3 py-2 text-xs font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300"
+              >
+                {percentage}%
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Submit Button */}
       {!isWalletConnected && (
