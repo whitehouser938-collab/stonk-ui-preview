@@ -1,8 +1,9 @@
-import { BarData } from "@/types";
+import { BarData, Chain } from "@/types";
 import { makeApiRequest } from "./helpers";
 import { subscribeOnStream, unsubscribeFromStream } from "./streaming";
 
 const lastBarsCache: Map<string, BarData> = new Map();
+const prevBarsCache: Map<string, BarData> = new Map();
 
 // Define the types for symbols and configuration
 interface Symbol {
@@ -62,7 +63,7 @@ const Datafeed = {
     userInput: string,
     exchange: string,
     symbolType: string,
-    onResultReadyCallback: (symbols: Symbol[]) => void,
+    onResultReadyCallback: (symbols: Symbol[]) => void
   ): Promise<void> => {
     // Not needed
     onResultReadyCallback([]);
@@ -71,10 +72,10 @@ const Datafeed = {
   resolveSymbol: async (
     symbolName: string,
     onSymbolResolvedCallback: (symbolInfo: any) => void,
-    onResolveErrorCallback: (error: string) => void,
+    onResolveErrorCallback: (error: string) => void
   ): Promise<void> => {
-    const [ symbol, chain, address ] = symbolName.split(":");
-    if (!symbol || !chain || !address){
+    const [symbol, chain, address] = symbolName.split(":");
+    if (!symbol || !chain || !address) {
       console.log("[resolveSymbol]: Cannot resolve symbol", symbolName);
       onResolveErrorCallback("Cannot resolve symbol");
       return;
@@ -86,7 +87,7 @@ const Datafeed = {
       symbol: symbol,
       name: symbol,
       chain: chain,
-      description: `${symbol}/USD`,   // Dynamically change this can be <symbol>/USD or <symbol>/<asset> like DOGE/WETH
+      description: `${symbol}/USD`, // Dynamically change this can be <symbol>/USD or <symbol>/<asset> like DOGE/WETH
       type: "crypto",
       session: "24x7",
       timezone: "Etc/UTC",
@@ -112,7 +113,7 @@ const Datafeed = {
     resolution: string,
     periodParams: { from: number; to: number; firstDataRequest: boolean },
     onHistoryCallback: (bars: any[], meta: { noData: boolean }) => void,
-    onErrorCallback: (error: any) => void,
+    onErrorCallback: (error: any) => void
   ): Promise<void> => {
     const { from, to, firstDataRequest } = periodParams;
 
@@ -130,16 +131,44 @@ const Datafeed = {
       .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
       .join("&");
     try {
-      const data = await makeApiRequest(`token/bars/${symbolInfo.address}?${query}`);
+      const data = await makeApiRequest(
+        `token/bars/${symbolInfo.address}?${query}`
+      );
       if (!data.bars || data.end) {
         onHistoryCallback([], { noData: true });
         return;
       }
+      const cacheKey = `${symbolInfo.address}:${symbolInfo.chain}:${resolution}`;
 
-      if (data.bars.length > 0) lastBarsCache.set(symbolInfo.full_name, data.bars[data.bars.length - 1]);
-      
-      console.log(`Returning ${data.bars.length} bar(s) for the requested period.`);
-      onHistoryCallback(data.bars, { noData: false });
+      if (firstDataRequest) {
+        prevBarsCache.delete(cacheKey);
+        lastBarsCache.delete(cacheKey);
+      }
+
+      const newBars = [...data.bars];
+      if (data.bars.length > 0) {
+        const prevBar = prevBarsCache.get(cacheKey);
+
+        // This whole block basically tries to fix chart discontinuity by bridging a gap if there are any between bars (Probably won't be an issue in prod, it's here as a fail safe)
+        if (
+          prevBar &&
+          prevBar.close !== data.bars[data.bars.length - 1].close
+        ) {
+          const connectingBar = {
+            ...data.bars[data.bars.length - 1],
+            close: prevBar.open,
+          };
+          newBars.push(connectingBar);
+        }
+        if (!lastBarsCache.has(cacheKey))
+          lastBarsCache.set(cacheKey, data.bars[data.bars.length - 1]);
+        prevBarsCache.set(cacheKey, data.bars[0]);
+      }
+
+      console.log(
+        `Returning ${newBars.length} bar(s) for the requested period.`
+      );
+      onHistoryCallback(newBars, { noData: false });
     } catch (error) {
       onErrorCallback(error);
     }
@@ -150,11 +179,11 @@ const Datafeed = {
     resolution: string,
     onRealtimeCallback: (bar: any) => void,
     subscriberUID: string,
-    onResetCacheNeededCallback: () => void,
+    onResetCacheNeededCallback: () => void
   ) => {
     console.log(
       "[subscribeBars]: Method call with subscriberUID:",
-      subscriberUID,
+      subscriberUID
     );
     subscribeOnStream(
       symbolInfo,
@@ -162,14 +191,16 @@ const Datafeed = {
       onRealtimeCallback,
       subscriberUID,
       onResetCacheNeededCallback,
-      lastBarsCache.get(symbolInfo.full_name) ?? null,
+      lastBarsCache.get(
+        `${symbolInfo.address}:${symbolInfo.chain}:${resolution}`
+      ) ?? null
     );
   },
 
   unsubscribeBars: (subscriberUID: string) => {
     console.log(
       "[unsubscribeBars]: Method call with subscriberUID:",
-      subscriberUID,
+      subscriberUID
     );
     unsubscribeFromStream(subscriberUID);
   },
