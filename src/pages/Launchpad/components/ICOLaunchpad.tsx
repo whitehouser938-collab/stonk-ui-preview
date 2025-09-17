@@ -136,6 +136,10 @@ export function ICOLaunchpad() {
   const [launchConfirm, setLaunchConfirm] = useState<
     DeployTokenResponse | undefined
   >(undefined);
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
+  const [isValidating, setIsValidating] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -144,12 +148,26 @@ export function ICOLaunchpad() {
 
   const handleInputChange = (key: keyof ICOLaunchData, value: string) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
+
+    // Validate the field and update errors
+    const error = validateField(key, value);
+    setValidationErrors((prev) => ({
+      ...prev,
+      [key]: error,
+    }));
   };
 
   const handleFileChange = (file: File | null) => {
     setFormData((prev) => ({
       ...prev,
       logoFile: file || undefined,
+    }));
+
+    // Validate the file and update errors
+    const error = validateField("logoFile", file || undefined);
+    setValidationErrors((prev) => ({
+      ...prev,
+      logoFile: error,
     }));
   };
 
@@ -170,116 +188,241 @@ export function ICOLaunchpad() {
     setView("launch");
     resetFormData();
     setLaunchConfirm(undefined);
+    setValidationErrors({});
+  };
+
+  // URL validation function
+  const isValidUrl = (url: string): boolean => {
+    if (!url.trim()) return true; // Empty URLs are valid (optional fields)
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  // Validate individual field
+  const validateField = (
+    key: keyof ICOLaunchData,
+    value: string | File | undefined
+  ): string => {
+    switch (key) {
+      case "name":
+        if (!value || (typeof value === "string" && !value.trim())) {
+          return "Name is required";
+        }
+        if (typeof value === "string" && value.length < 2) {
+          return "Name must be at least 2 characters";
+        }
+        return "";
+
+      case "symbol":
+        if (!value || (typeof value === "string" && !value.trim())) {
+          return "Ticker symbol is required";
+        }
+        if (typeof value === "string" && value.length < 1) {
+          return "Ticker symbol must be at least 1 character";
+        }
+        if (typeof value === "string" && value.length > 10) {
+          return "Ticker symbol must be 10 characters or less";
+        }
+        return "";
+
+      case "description":
+        if (!value || (typeof value === "string" && !value.trim())) {
+          return "Description is required";
+        }
+        if (typeof value === "string" && value.length < 10) {
+          return "Description must be at least 10 characters";
+        }
+        return "";
+
+      case "website":
+        if (value && typeof value === "string" && !isValidUrl(value)) {
+          return "Please enter a valid website URL";
+        }
+        return "";
+
+      case "telegramUrl":
+        if (value && typeof value === "string" && !isValidUrl(value)) {
+          return "Please enter a valid Telegram URL";
+        }
+        return "";
+
+      case "twitterUrl":
+        if (value && typeof value === "string" && !isValidUrl(value)) {
+          return "Please enter a valid Twitter URL";
+        }
+        return "";
+
+      case "logoFile":
+        if (!value) {
+          return "Logo image is required";
+        }
+        if (value instanceof File) {
+          const maxSize = 5 * 1024 * 1024; // 5MB
+          if (value.size > maxSize) {
+            return "Image size must be less than 5MB";
+          }
+          const allowedTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/gif",
+            "image/webp",
+          ];
+          if (!allowedTypes.includes(value.type)) {
+            return "Please upload a valid image file (JPEG, PNG, GIF, or WebP)";
+          }
+        }
+        return "";
+
+      default:
+        return "";
+    }
   };
 
   const validateFormData = (data: ICOLaunchData) => {
-    // Basic validation to ensure required fields are filled
-    if (!data.name || !data.symbol || !data.description) {
-      console.error("Please fill in all required fields.");
-      return false;
-    }
-    // Additional validation can be added here as needed
-    return true;
+    const errors: Record<string, string> = {};
+    let isValid = true;
+
+    // Validate all required fields
+    const requiredFields: (keyof ICOLaunchData)[] = [
+      "name",
+      "symbol",
+      "description",
+      "logoFile",
+    ];
+    const optionalFields: (keyof ICOLaunchData)[] = [
+      "website",
+      "telegramUrl",
+      "twitterUrl",
+    ];
+
+    // Check required fields
+    requiredFields.forEach((field) => {
+      const error = validateField(field, data[field]);
+      if (error) {
+        errors[field] = error;
+        isValid = false;
+      }
+    });
+
+    // Check optional fields
+    optionalFields.forEach((field) => {
+      const error = validateField(field, data[field]);
+      if (error) {
+        errors[field] = error;
+        isValid = false;
+      }
+    });
+
+    setValidationErrors(errors);
+    return isValid;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevents the default form submission behavior
-    startLoading(); // Start loading state
-    console.log("Form Data:", formData); // Logs the form data to the console
+    e.preventDefault();
+    setIsValidating(true);
+
+    // Validate form data first
     const valid = validateFormData(formData);
-    if (valid) {
-      try {
-        // Update formData with the uploaded logo URL
-        const updatedFormData = { ...formData };
-
-        // Here you would typically send the data to your backend API
-        console.log("Form submitted successfully!");
-        //Create Token on Chain
-        if (formData.launchpad === "SEP") {
-          const signer = await getETHSigner();
-          const deployResponse: DeployTokenResponse = await deployTokenETH(
-            updatedFormData,
-            signer
-          );
-          // Add token to database
-          if (deployResponse.success === false) {
-            console.error("Token deployment failed:", deployResponse);
-            toast({
-              title: "Error",
-              description: "Token deployment failed. Please try again.",
-              variant: "destructive",
-            });
-            stopLoading(); // Stop loading state
-            return;
-          }
-          console.log("Token deployed successfully:", deployResponse);
-          setLaunchConfirm(deployResponse);
-
-          // Add token to database
-          const addTokenResponse = await addTokenToDb(
-            updatedFormData,
-            deployResponse.deployerAddress,
-            deployResponse.tokenAddress,
-            deployResponse.bondingCurveAddress,
-            deployResponse.deploymentTimestamp,
-            deployResponse.deploymentBlock
-          );
-
-          console.log("Token added to database:", addTokenResponse);
-
-          //Upload token logo to server
-          let logoUrl;
-          if (formData.logoFile) {
-            try {
-              const logoUploadResponse = await uploadTokenLogo(
-                addTokenResponse.tokenAddress,
-                formData.logoFile,
-                addTokenResponse.name,
-                addTokenResponse.symbol
-              );
-              logoUrl = logoUploadResponse;
-              console.log("Logo uploaded successfully:", logoUploadResponse);
-            } catch (uploadError) {
-              console.error("Failed to upload logo:", uploadError);
-              toast({
-                title: "Warning",
-                description: "Logo upload failed, proceeding without logo.",
-                variant: "destructive",
-              });
-            }
-          }
-          // Update the token data with the logo URL if it was successfully uploaded
-          if (logoUrl) {
-            await updateTokenLogoUrl(addTokenResponse.id, logoUrl);
-          }
-
-          toast({
-            title: "Success",
-            description: "Your ICO has been successfully launched!",
-            variant: "destructive",
-          });
-        }
-        setView("confirmed"); // Switch to confirmed view
-        stopLoading(); // Stop loading state
-
-        resetFormData();
-      } catch (error) {
-        console.error("Error during form submission:", error);
-        toast({
-          title: "Error",
-          description: "An error occurred during submission. Please try again.",
-          variant: "destructive",
-        });
-        stopLoading();
-      }
-    } else {
-      console.error("Form validation failed.");
+    if (!valid) {
       toast({
-        title: "Error",
-        description: "Please fill in all required fields.",
+        title: "Validation Error",
+        description: "Please fix all validation errors before submitting.",
         variant: "destructive",
       });
-      stopLoading(); // Stop loading state
+      setIsValidating(false);
+      return;
+    }
+
+    setIsValidating(false);
+    startLoading();
+
+    try {
+      console.log("Form Data:", formData);
+
+      // Step 1: Create token on blockchain first
+      if (formData.launchpad === "SEP") {
+        const signer = await getETHSigner();
+        const deployResponse: DeployTokenResponse = await deployTokenETH(
+          formData,
+          signer
+        );
+
+        if (deployResponse.success === false) {
+          console.error("Token deployment failed:", deployResponse);
+          toast({
+            title: "Error",
+            description: "Token deployment failed. Please try again.",
+            variant: "destructive",
+          });
+          stopLoading();
+          return;
+        }
+
+        console.log("Token deployed successfully:", deployResponse);
+        setLaunchConfirm(deployResponse);
+
+        // Step 2: Add token to database (after successful blockchain transaction)
+        const addTokenResponse = await addTokenToDb(
+          formData,
+          deployResponse.deployerAddress,
+          deployResponse.tokenAddress,
+          deployResponse.bondingCurveAddress,
+          deployResponse.deploymentTimestamp,
+          deployResponse.deploymentBlock
+        );
+
+        console.log("Token added to database:", addTokenResponse);
+
+        // Step 3: Upload image only after successful blockchain transaction and database entry
+        if (formData.logoFile) {
+          try {
+            console.log(
+              "Uploading logo after successful blockchain transaction..."
+            );
+            const logoUrl = await uploadTokenLogo(
+              addTokenResponse.tokenAddress,
+              formData.logoFile,
+              addTokenResponse.name,
+              addTokenResponse.symbol
+            );
+            console.log("Logo uploaded successfully:", logoUrl);
+
+            // Step 4: Update token with logo URL
+            await updateTokenLogoUrl(addTokenResponse.id, logoUrl);
+            console.log("Logo URL updated successfully");
+          } catch (uploadError) {
+            console.error("Failed to upload logo:", uploadError);
+            toast({
+              title: "Warning",
+              description:
+                "Token created successfully but logo upload failed. You can update the logo later.",
+              variant: "destructive",
+            });
+          }
+        }
+
+        toast({
+          title: "Success",
+          description: "Your ICO has been successfully launched!",
+          variant: "default",
+        });
+      }
+
+      setView("confirmed");
+      stopLoading();
+      resetFormData();
+    } catch (error) {
+      console.error("Error during form submission:", error);
+      toast({
+        title: "Error",
+        description: "An error occurred during submission. Please try again.",
+        variant: "destructive",
+      });
+      stopLoading();
     }
   };
 
@@ -302,7 +445,7 @@ export function ICOLaunchpad() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <div className="text-gray-400 mb-1">Name</div>
+                      <div className="text-gray-400 mb-1">Name *</div>
                       <input
                         placeholder="e.g., TechCorp Inc"
                         value={formData.name}
@@ -310,11 +453,20 @@ export function ICOLaunchpad() {
                         onChange={(e) =>
                           handleInputChange("name", e.target.value)
                         }
-                        className="w-full p-2 bg-black border border-gray-600 text-white text-xs sm:text-sm font-mono"
+                        className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono ${
+                          validationErrors.name
+                            ? "border-red-500"
+                            : "border-gray-600"
+                        }`}
                       />
+                      {validationErrors.name && (
+                        <div className="text-red-400 text-xs mt-1">
+                          {validationErrors.name}
+                        </div>
+                      )}
                     </div>
                     <div className="mb-6">
-                      <div className="text-gray-400 mb-1">Ticker Symbol</div>
+                      <div className="text-gray-400 mb-1">Ticker Symbol *</div>
                       <input
                         placeholder="e.g., TECH"
                         value={formData.symbol}
@@ -322,14 +474,25 @@ export function ICOLaunchpad() {
                         onChange={(e) =>
                           handleInputChange("symbol", e.target.value)
                         }
-                        className="w-full p-2 bg-black border border-gray-600 text-white text-xs sm:text-sm font-mono"
+                        className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono ${
+                          validationErrors.symbol
+                            ? "border-red-500"
+                            : "border-gray-600"
+                        }`}
                       />
+                      {validationErrors.symbol && (
+                        <div className="text-red-400 text-xs mt-1">
+                          {validationErrors.symbol}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
                 {/* Description*/}
                 <div className="mb-6">
-                  <div className="text-gray-400 mb-1">Company Description</div>
+                  <div className="text-gray-400 mb-1">
+                    Company Description *
+                  </div>
                   <textarea
                     required
                     placeholder="Describe your company's business model, competitive advantages, and market opportunity..."
@@ -337,14 +500,23 @@ export function ICOLaunchpad() {
                     onChange={(e) =>
                       handleInputChange("description", e.target.value)
                     }
-                    className="w-full p-2 bg-black border border-gray-600 text-white text-xs sm:text-sm font-mono h-20 sm:h-24"
+                    className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono h-20 sm:h-24 ${
+                      validationErrors.description
+                        ? "border-red-500"
+                        : "border-gray-600"
+                    }`}
                   />
+                  {validationErrors.description && (
+                    <div className="text-red-400 text-xs mt-1">
+                      {validationErrors.description}
+                    </div>
+                  )}
                 </div>
                 {/* Logo Upload and Social Links */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
                   <div>
                     <div className="text-gray-400 mb-1">
-                      Logo Upload (Image/GIF)
+                      Logo Upload (Image/GIF) *
                     </div>
                     <div className="space-y-2">
                       <input
@@ -354,8 +526,17 @@ export function ICOLaunchpad() {
                           const file = e.target.files?.[0];
                           handleFileChange(file || null);
                         }}
-                        className="w-full p-2 bg-black border border-gray-600 text-white text-xs sm:text-sm font-mono file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-orange-600 file:text-white hover:file:bg-orange-700"
+                        className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-orange-600 file:text-white hover:file:bg-orange-700 ${
+                          validationErrors.logoFile
+                            ? "border-red-500"
+                            : "border-gray-600"
+                        }`}
                       />
+                      {validationErrors.logoFile && (
+                        <div className="text-red-400 text-xs mt-1">
+                          {validationErrors.logoFile}
+                        </div>
+                      )}
                       {formData.logoFile && (
                         <div className="relative">
                           <img
@@ -385,8 +566,17 @@ export function ICOLaunchpad() {
                       onChange={(e) =>
                         handleInputChange("website", e.target.value)
                       }
-                      className="w-full p-2 bg-black border border-gray-600 text-white text-xs sm:text-sm font-mono"
+                      className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono ${
+                        validationErrors.website
+                          ? "border-red-500"
+                          : "border-gray-600"
+                      }`}
                     />
+                    {validationErrors.website && (
+                      <div className="text-red-400 text-xs mt-1">
+                        {validationErrors.website}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <div className="text-gray-400 mb-1">Twitter URL</div>
@@ -396,8 +586,17 @@ export function ICOLaunchpad() {
                       onChange={(e) =>
                         handleInputChange("twitterUrl", e.target.value)
                       }
-                      className="w-full p-2 bg-black border border-gray-600 text-white text-xs sm:text-sm font-mono"
+                      className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono ${
+                        validationErrors.twitterUrl
+                          ? "border-red-500"
+                          : "border-gray-600"
+                      }`}
                     />
+                    {validationErrors.twitterUrl && (
+                      <div className="text-red-400 text-xs mt-1">
+                        {validationErrors.twitterUrl}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <div className="text-gray-400 mb-1">Telegram URL</div>
@@ -407,8 +606,17 @@ export function ICOLaunchpad() {
                       onChange={(e) =>
                         handleInputChange("telegramUrl", e.target.value)
                       }
-                      className="w-full p-2 bg-black border border-gray-600 text-white text-xs sm:text-sm font-mono"
+                      className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono ${
+                        validationErrors.telegramUrl
+                          ? "border-red-500"
+                          : "border-gray-600"
+                      }`}
                     />
+                    {validationErrors.telegramUrl && (
+                      <div className="text-red-400 text-xs mt-1">
+                        {validationErrors.telegramUrl}
+                      </div>
+                    )}
                   </div>
                 </div>
                 {/* Shares */}
@@ -452,8 +660,20 @@ export function ICOLaunchpad() {
                   </div>
                 </div>
                 <div className="flex flex-col sm:flex-row justify-between mt-4 gap-2">
-                  <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-black text-xs sm:text-sm font-bold order-1 sm:order-2">
-                    SUBMIT ICO
+                  <button
+                    type="submit"
+                    disabled={isValidating || isLoading}
+                    className={`px-4 py-2 text-black text-xs sm:text-sm font-bold order-1 sm:order-2 ${
+                      isValidating || isLoading
+                        ? "bg-gray-600 cursor-not-allowed"
+                        : "bg-green-600 hover:bg-green-700"
+                    }`}
+                  >
+                    {isValidating
+                      ? "VALIDATING..."
+                      : isLoading
+                      ? "PROCESSING..."
+                      : "SUBMIT ICO"}
                   </button>
                 </div>
               </form>

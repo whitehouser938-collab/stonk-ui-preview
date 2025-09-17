@@ -25,6 +25,7 @@ export interface TokenTradeData {
   isBuy: boolean; // true for buy, false for sell
   deadline?: number; // Optional deadline for the trade
   slippage?: number; // Optional minimum amount for the trade
+  decimals?: number; // Token decimals
 }
 
 const presetAmounts = [0.1, 0.5, 1]; // Preset amounts for quick selection
@@ -71,16 +72,22 @@ const getReadProvider = () => {
 
 // Add abbreviateTokenAmount utility
 function abbreviateTokenAmount(raw: string | number, decimals = 18): string {
-  const n = typeof raw === "string" ? parseFloat(raw) : raw;
-  const value = n / Math.pow(10, decimals);
-  // Round to nearest integer for threshold checks
-  const rounded = Math.round(value);
-  if (rounded >= 1e9) return (value / 1e9).toFixed(2) + "B";
-  if (rounded >= 1e6) return (value / 1e6).toFixed(2) + "M";
-  if (rounded >= 1e3) return (value / 1e3).toFixed(2) + "k";
-  if (value >= 1) return value.toFixed(2);
-  if (value > 0) return value.toPrecision(2);
-  return "0";
+  try {
+    // Use ethers to properly handle BigInt values
+    const value = parseFloat(ethers.formatUnits(raw, decimals));
+
+    // Round to nearest integer for threshold checks
+    const rounded = Math.round(value);
+    if (rounded >= 1e9) return (value / 1e9).toFixed(2) + "B";
+    if (rounded >= 1e6) return (value / 1e6).toFixed(2) + "M";
+    if (rounded >= 1e3) return (value / 1e3).toFixed(2) + "k";
+    if (value >= 1) return value.toFixed(2);
+    if (value > 0) return value.toPrecision(2);
+    return "0";
+  } catch (error) {
+    console.error("Error formatting token amount:", error);
+    return "0";
+  }
 }
 
 const TradingForm = (props: TradingFormProps) => {
@@ -100,8 +107,8 @@ const TradingForm = (props: TradingFormProps) => {
   const [tokenBalance, setTokenBalance] = useState("0");
   const [isApproving, setIsApproving] = useState(false);
   const [wethAllowance, setWethAllowance] = useState("0");
-  const [tokenAllowance, setTokenAllowance] = useState("0");
-  const [isTokenApproving, setIsTokenApproving] = useState(false);
+  const [tokenAllowance, setTokenAllowance] = useState("0"); // Still needed for display
+  const [tokenDecimals, setTokenDecimals] = useState(18); // Default to 18 decimals
 
   // Fetch balances
   React.useEffect(() => {
@@ -123,23 +130,26 @@ const TradingForm = (props: TradingFormProps) => {
           [
             "function balanceOf(address) view returns (uint256)",
             "function allowance(address,address) view returns (uint256)",
+            "function decimals() view returns (uint8)",
           ],
           provider
         );
 
-        // Fetch balances
+        // Fetch balances and token info
         const [
           evilWETHBal,
           tokenBal,
           ethBal,
           evilWETHAllowance,
           tokenAllowance,
+          decimals,
         ] = await Promise.all([
           evilWETH.balanceOf(userAddress),
           token.balanceOf(userAddress),
           provider.getBalance(userAddress),
           evilWETH.allowance(userAddress, ROUTER_ADDRESS),
           token.allowance(userAddress, ROUTER_ADDRESS),
+          token.decimals(),
         ]);
 
         setEvilWETHBalance(evilWETHBal.toString());
@@ -147,6 +157,7 @@ const TradingForm = (props: TradingFormProps) => {
         setEthBalance(ethBal.toString());
         setWethAllowance(evilWETHAllowance.toString());
         setTokenAllowance(tokenAllowance.toString());
+        setTokenDecimals(decimals);
 
         console.log("EVILWETH Balance:", evilWETHBal.toString());
         console.log("ETH Balance:", ethers.formatEther(ethBal));
@@ -171,13 +182,7 @@ const TradingForm = (props: TradingFormProps) => {
     };
 
     fetchBalances();
-  }, [
-    isEthConnected,
-    userAddress,
-    props.tokenAddress,
-    isApproving,
-    isTokenApproving,
-  ]);
+  }, [isEthConnected, userAddress, props.tokenAddress, isApproving]);
 
   // Calculate expected token amount for buy (when user enters asset amount)
   const [expectedTokenAmount, setExpectedTokenAmount] = useState("0");
@@ -219,12 +224,7 @@ const TradingForm = (props: TradingFormProps) => {
     calc();
   }, [isBuy, amount, props.tokenAddress, slippagePercent]);
 
-  // Calculate sell token amount in wei for allowance check
-  const [sellTokenAmount, setSellTokenAmount] = useState("0");
-  React.useEffect(() => {
-    if (!amount || !props.tokenAddress || isBuy) return setSellTokenAmount("0");
-    setSellTokenAmount(ethers.parseEther(amount).toString());
-  }, [amount, props.tokenAddress, isBuy]);
+  // Note: sellTokenAmount calculation removed - approval is now handled automatically in sellTokens function
 
   const handleApprove = async () => {
     setIsApproving(true);
@@ -262,41 +262,7 @@ const TradingForm = (props: TradingFormProps) => {
     }
   };
 
-  const handleTokenApprove = async () => {
-    setIsTokenApproving(true);
-    try {
-      const signer = await getETHSigner();
-      const token = new ethers.Contract(
-        props.tokenAddress!,
-        ["function approve(address,uint256) returns (bool)"],
-        signer
-      );
-      const tx = await token.approve(ROUTER_ADDRESS, MaxUint256);
-      await tx.wait();
-      toast({
-        title: `Approval Successful`,
-        description: `You can now sell ${props.symbol}.`,
-        variant: "default",
-      });
-      setIsTokenApproving(false);
-    } catch (error) {
-      // Check if user rejected the transaction
-      if (isUserRejectedError(error)) {
-        toast({
-          title: "Trade Cancelled",
-          description: "You rejected the transaction.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Trade Failed",
-          description: error?.message || JSON.stringify(error),
-          variant: "destructive",
-        });
-      }
-      setIsTokenApproving(false);
-    }
-  };
+  // Note: handleTokenApprove removed - token approval for selling is now handled automatically in sellTokens function
 
   const isWalletConnected = isEthConnected;
 
@@ -308,10 +274,26 @@ const TradingForm = (props: TradingFormProps) => {
         const maxAmount = Math.max(0, ethBalanceNum - 0.01); // Leave 0.01 ETH for gas
         setAmount(maxAmount.toString());
       } else if (paymentMethod === "WETH") {
-        setAmount(ethers.formatUnits(evilWETHBalance, 18));
+        // Format with limited precision to avoid ethers parsing issues
+        const wethBalanceFormatted = ethers.formatUnits(evilWETHBalance, 18);
+        const limitedPrecision = parseFloat(wethBalanceFormatted).toFixed(6);
+        setAmount(limitedPrecision);
       }
     } else {
-      setAmount(ethers.formatUnits(tokenBalance, 18));
+      // Format with limited precision to avoid ethers parsing issues
+      const tokenBalanceFormatted = ethers.formatUnits(
+        tokenBalance,
+        tokenDecimals
+      );
+      const limitedPrecision = parseFloat(tokenBalanceFormatted).toFixed(6); // Limit to 6 decimal places
+      setAmount(limitedPrecision);
+
+      console.log("[MAX BUTTON DEBUG]", {
+        tokenBalance,
+        tokenDecimals,
+        tokenBalanceFormatted,
+        limitedPrecision,
+      });
     }
   };
 
@@ -362,25 +344,40 @@ const TradingForm = (props: TradingFormProps) => {
         };
         tradeResponse = await buyTokenETH(tradeData, signer);
       } else {
-        // Create tradeData for sell orders - let the util handle all calculations
+        // Create tradeData for sell orders - match working script exactly
         const tradeData = {
           chain: "sepolia",
           symbol: props.symbol,
           tokenAddress: props.tokenAddress!,
-          amount: amount, // pass user input string (e.g., "1.5" for 1.5 tokens)
-          currency: "ETH", // Default to ETH for selling (could be made configurable later)
+          amount: amount, // Use actual user input amount
+          currency: "WETH", // Always returns WETH from selling (consistent with working script)
           isBuy: false,
           deadline: Math.floor(Date.now() / 1000) + 300, // 5 minutes like the script
-          slippage: slippagePercent / 100, // Use actual slippage from form
+          slippage: 0.05, // FIXED: Use 5% slippage like working script (hardcoded for reliability)
+          // Note: slippage is now hardcoded to match working script's 5% tolerance
         };
 
         console.log("[UI SELL PARAMS]", {
           tokenAddress: props.tokenAddress,
           amount: amount,
+          actualAmountUsed: tradeData.amount,
+          slippage: tradeData.slippage,
           deadline: tradeData.deadline,
           from: userAddress,
           isBuy: false,
           tradeData,
+        });
+
+        // Debug the current balance and decimals state
+        console.log("[FORM STATE DEBUG]", {
+          tokenBalance,
+          tokenDecimals,
+          tokenBalanceFormatted: ethers.formatUnits(
+            tokenBalance,
+            tokenDecimals
+          ),
+          userInputAmount: amount,
+          amountAsNumber: parseFloat(amount),
         });
         try {
           tradeResponse = await sellTokenETH(tradeData, signer);
@@ -615,7 +612,7 @@ const TradingForm = (props: TradingFormProps) => {
           <div className="text-xs text-gray-400 mt-1">
             Balance:{" "}
             <span className="font-mono text-white">
-              {abbreviateTokenAmount(tokenBalance, 18)}
+              {abbreviateTokenAmount(tokenBalance, tokenDecimals)}
             </span>{" "}
             {props.symbol}
           </div>
@@ -642,11 +639,29 @@ const TradingForm = (props: TradingFormProps) => {
                 key={percentage}
                 type="button"
                 onClick={() => {
+                  console.log("[PERCENTAGE SELL DEBUG]", {
+                    percentage,
+                    tokenBalance,
+                    tokenDecimals,
+                    tokenBalanceFormatted: ethers.formatUnits(
+                      tokenBalance,
+                      tokenDecimals
+                    ),
+                  });
+
                   const tokenBalanceNum = parseFloat(
-                    ethers.formatUnits(tokenBalance, 18)
+                    ethers.formatUnits(tokenBalance, tokenDecimals)
                   );
                   const sellAmount = (tokenBalanceNum * percentage) / 100;
-                  setAmount(sellAmount.toString());
+
+                  console.log("[PERCENTAGE SELL CALCULATION]", {
+                    tokenBalanceNum,
+                    sellAmount,
+                    sellAmountFixed: sellAmount.toFixed(6),
+                  });
+
+                  // Limit precision to avoid ethers parsing issues
+                  setAmount(sellAmount.toFixed(6));
                 }}
                 className="px-3 py-2 text-xs font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300"
               >
@@ -677,16 +692,8 @@ const TradingForm = (props: TradingFormProps) => {
         >
           {isApproving ? "Approving..." : "Approve WETH"}
         </button>
-      ) : !isBuy && BigInt(tokenAllowance) < BigInt(sellTokenAmount || "0") ? (
-        <button
-          type="button"
-          disabled={isTokenApproving || !isWalletConnected || !amount}
-          onClick={handleTokenApprove}
-          className="w-full p-3 text-sm font-bold transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white"
-        >
-          {isTokenApproving ? `Approving...` : `Approve ${props.symbol}`}
-        </button>
       ) : (
+        // Note: Token approval for selling is now handled automatically in sellTokens function
         <button
           type="submit"
           disabled={!isWalletConnected || isLoading}

@@ -1,6 +1,7 @@
 import { TokenTradeData } from "../components/TradingForm";
 import { ethers } from "ethers";
 import Router from "@/abi/evm/Router.json";
+import Token from "@/abi/evm/Token.json";
 import { Contract, EventLog } from "ethers";
 
 export interface TradeTokenResponse {
@@ -209,8 +210,13 @@ export const sellTokens = async (
       };
     }
 
-    // Parse token amount to sell
-    const tokenAmount = ethers.parseEther(tradeData.amount);
+    // Parse token amount to sell - use the correct token decimals
+    // Get token decimals first to parse amount correctly
+    const token = new Contract(tradeData.tokenAddress, Token.abi, signer);
+    const tokenDecimals = await token.decimals();
+
+    // Parse with the correct decimals (most tokens are 18, but some might be different)
+    const tokenAmount = ethers.parseUnits(tradeData.amount, tokenDecimals);
 
     // Calculate expected asset amount (ETH or WETH) from selling tokens
     const expectedAssetAmount = await router.calculateSellProceeds(
@@ -229,10 +235,13 @@ export const sellTokens = async (
       };
     }
 
-    // Calculate slippage-adjusted minimum amount
-    const slippageBps = Math.floor((tradeData.slippage || 0.05) * 10000);
-    const minAssetAmount =
-      (expectedAssetAmount * BigInt(10000 - slippageBps)) / BigInt(10000);
+    // Calculate slippage-adjusted minimum amount - match working script exactly
+    // Working script uses: const minAssetAmount = (assetAmount * 95n) / 100n; // 5% slippage tolerance
+    // Use exactly the same calculation as the working script
+    const minAssetAmount = (expectedAssetAmount * 95n) / 100n; // Fixed 5% slippage like working script
+
+    // Use the same deadline calculation as the working script
+    const deadline = Math.floor(Date.now() / 1000) + 300; // 5 minutes
 
     console.log("[SELL PARAMS]", {
       tokenAddress: tradeData.tokenAddress,
@@ -240,28 +249,40 @@ export const sellTokens = async (
       expectedAssetAmount: expectedAssetAmount.toString(),
       minAssetAmount: minAssetAmount.toString(),
       slippage: tradeData.slippage,
-      deadline: tradeData.deadline,
+      deadline: deadline,
     });
+
+    // Check and handle token approval - this is the missing piece!
+    // (token contract already created above for getting decimals)
+    const userAddress = await signer.getAddress();
+    const allowance = await token.allowance(userAddress, routerAddress);
+
+    console.log("[APPROVAL CHECK]", {
+      userAddress,
+      routerAddress,
+      tokenAmount: tokenAmount.toString(),
+      currentAllowance: allowance.toString(),
+      needsApproval: allowance < tokenAmount,
+    });
+
+    // Approve tokens if needed - EXACTLY like the working hardhat script
+    if (allowance < tokenAmount) {
+      console.log("🔑 Approving tokens...");
+      const approveTx = await token.approve(routerAddress, tokenAmount);
+      await approveTx.wait();
+      console.log("✅ Approval successful");
+    }
 
     let tx;
 
-    if (tradeData.currency === "ETH") {
-      // Use sellTokensForETH for ETH output
-      tx = await router.sellTokensForETH(
-        tradeData.tokenAddress,
-        tokenAmount,
-        minAssetAmount,
-        tradeData.deadline
-      );
-    } else {
-      // Use sellTokens for WETH output
-      tx = await router.sellTokens(
-        tradeData.tokenAddress,
-        tokenAmount,
-        minAssetAmount,
-        tradeData.deadline
-      );
-    }
+    // Always use sellTokens (returns WETH) - consistent with working script
+    // The router handles the internal conversion logic
+    tx = await router.sellTokens(
+      tradeData.tokenAddress,
+      tokenAmount,
+      minAssetAmount,
+      deadline
+    );
 
     console.log("Transaction sent:", tx.hash);
 

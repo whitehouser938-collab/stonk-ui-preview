@@ -2,18 +2,18 @@ import { Chain } from "@/types";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-export const getExplorer = (chain: Chain)=>{
-  switch (chain){
+export const getExplorer = (chain: Chain) => {
+  switch (chain) {
     case "SEP":
-      return "https://sepolia.etherscan.io"
+      return "https://sepolia.etherscan.io";
     case "BASE":
-      return "https://basescan.org"
+      return "https://basescan.org";
     case "SOL":
-      return "https://solscan.io"
+      return "https://solscan.io";
     default:
-      return "https://basescan.org"
+      return "https://basescan.org";
   }
-}
+};
 
 export const addToken = async (tokenData: any) => {
   try {
@@ -48,7 +48,7 @@ export const getToken = async (chainId: string, tokenAddress: string) => {
       // `${API_BASE_URL}/token/${tokenAddress}?chain=${chainId}`
       `${API_BASE_URL}/token/find?address=${tokenAddress}&chain=${chainId}`
     );
-    console.log(response)
+    console.log(response);
     if (!response.ok) {
       throw new Error("Failed to fetch token data");
     }
@@ -74,6 +74,9 @@ export const uploadTokenLogo = async (
   formData.append("tokenId", tokenId);
   formData.append("tokenName", tokenName);
   formData.append("tokenSymbol", tokenSymbol);
+  console.log("++++++");
+  console.log(formData);
+  console.log("++++++");
 
   try {
     const response = await fetch(`${API_BASE_URL}/upload/token-logo`, {
