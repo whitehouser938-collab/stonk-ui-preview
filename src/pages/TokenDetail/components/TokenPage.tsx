@@ -5,17 +5,13 @@ import LoadingScreen from "@/components/ui/loading";
 import { useLoading } from "@/hooks/use-loading";
 
 import {
-  Search,
-  TrendingUp,
-  TrendingDown,
-  Users,
   Globe,
   Activity,
-  BarChart3,
-  ChevronDown,
   AlertTriangle,
   Home,
   ArrowUpRight,
+  ExternalLink,
+  Clock,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -28,6 +24,7 @@ import BondingCurveProgress from "./BondingCurveProgress";
 import TradingViewChart from "@/components/TradingViewChart";
 import OrderBook from "./OrderBook";
 import { useTradeUpdates } from "@/hooks/useTradeUpdates";
+import { useToast } from "@/hooks/use-toast";
 import { Chain, TokenDetails, TradeData } from "@/types";
 
 const TokenPage = () => {
@@ -41,6 +38,7 @@ const TokenPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   const { isLoading, startLoading, stopLoading } = useLoading();
+  const { toast } = useToast();
 
   const TRADE_PAGE_SIZE = 20;
   const [trades, setTrades] = useState<TradeData[]>([]);
@@ -272,6 +270,20 @@ const TokenPage = () => {
     return d.toLocaleString();
   }
 
+  function formatTokenAge(deploymentTimestamp: string): string {
+    const deploymentTime = new Date(deploymentTimestamp).getTime();
+    const now = Date.now();
+    const diffMs = now - deploymentTime;
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffMinutes < 1) return "<1m";
+    if (diffMinutes < 60) return `${diffMinutes}m`;
+    if (diffHours < 24) return `${diffHours}h`;
+    return `${diffDays}d`;
+  }
+
   function abbreviateTokenAmount(raw: string | number, decimals = 18): string {
     const n = typeof raw === "string" ? parseFloat(raw) : raw;
     const value = n / Math.pow(10, decimals);
@@ -440,33 +452,119 @@ const TokenPage = () => {
                   )}
 
                   <div>
-                    <div className="text-orange-400 font-bold text-base sm:text-lg">
-                      {tokenData?.name}
-                    </div>
-                    <div className="text-gray-400">
-                      {tokenData?.symbol} - {tokenData?.chain}
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-gray-400 text-sm">
+                    <div className="flex items-center space-x-3">
+                      <div className="text-orange-400 font-bold text-2xl sm:text-3xl">
+                        {tokenData?.symbol}
+                      </div>
+                      <div className="text-gray-300 text-sm sm:text-base">
+                        {tokenData?.name}
+                      </div>
+                      <span
+                        className="text-gray-400 text-xs cursor-pointer hover:text-orange-400 transition-colors"
+                        onClick={async () => {
+                          if (tokenData?.tokenAddress) {
+                            await navigator.clipboard.writeText(
+                              tokenData.tokenAddress
+                            );
+                            toast({
+                              title: "Address Copied",
+                              description: "Token address copied to clipboard",
+                              variant: "default",
+                            });
+                          }
+                        }}
+                        title="Click to copy address"
+                      >
                         {tokenData?.tokenAddress
                           ? `${tokenData.tokenAddress.slice(
                               0,
-                              4
+                              6
                             )}...${tokenData.tokenAddress.slice(-4)}`
                           : "N/A"}
                       </span>
-                      {tokenData?.tokenAddress && (
-                        <button
-                          onClick={() =>
-                            navigator.clipboard.writeText(
-                              tokenData.tokenAddress
-                            )
-                          }
-                          className="text-orange-400 hover:text-orange-300 text-sm font-medium"
+                    </div>
+                    {/* Social Links */}
+
+                    <div className="flex items-center space-x-2 mt-2">
+                      <span className="text-white">
+                        {tokenData?.deploymentTimestamp
+                          ? formatTokenAge(tokenData.deploymentTimestamp)
+                          : "Unknown"}
+                      </span>
+                      {tokenData?.websiteUrl && (
+                        <a
+                          href={tokenData.websiteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-orange-400 hover:text-orange-300 transition-colors"
+                          title="Website"
                         >
-                          Copy
-                        </button>
+                          <Globe className="w-4 h-4" />
+                        </a>
                       )}
+                      {tokenData?.twitterUrl && (
+                        <a
+                          href={tokenData.twitterUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-orange-400 hover:text-orange-300 transition-colors"
+                          title="X (Twitter)"
+                        >
+                          <svg
+                            className="w-4 h-4"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                          </svg>
+                        </a>
+                      )}
+                      {tokenData?.telegramUrl && (
+                        <a
+                          href={tokenData.telegramUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-orange-400 hover:text-orange-300 transition-colors"
+                          title="Telegram"
+                        >
+                          <svg
+                            className="w-4 h-4"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              clipRule="evenodd"
+                              d="M23.1117 4.49449C23.4296 2.94472 21.9074 1.65683 20.4317 2.227L2.3425 9.21601C0.694517 9.85273 0.621087 12.1572 2.22518 12.8975L6.1645 14.7157L8.03849 21.2746C8.13583 21.6153 8.40618 21.8791 8.74917 21.968C9.09216 22.0568 9.45658 21.9576 9.70712 21.707L12.5938 18.8203L16.6375 21.8531C17.8113 22.7334 19.5019 22.0922 19.7967 20.6549L23.1117 4.49449ZM3.0633 11.0816L21.1525 4.0926L17.8375 20.2531L13.1 16.6999C12.7019 16.4013 12.1448 16.4409 11.7929 16.7928L10.5565 18.0292L10.928 15.9861L18.2071 8.70703C18.5614 8.35278 18.5988 7.79106 18.2947 7.39293C17.9906 6.99479 17.4389 6.88312 17.0039 7.13168L6.95124 12.876L3.0633 11.0816ZM8.17695 14.4791L8.78333 16.6015L9.01614 15.321C9.05253 15.1209 9.14908 14.9366 9.29291 14.7928L11.5128 12.573L8.17695 14.4791Z"
+                            />
+                          </svg>
+                        </a>
+                      )}
+                      {!tokenData?.websiteUrl &&
+                        !tokenData?.twitterUrl &&
+                        !tokenData?.telegramUrl && (
+                          <div className="flex items-center space-x-2">
+                            <Globe className="w-4 h-4 text-gray-600" />
+                            <svg
+                              className="w-4 h-4 text-gray-600"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                            >
+                              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                            </svg>
+                            <svg
+                              className="w-4 h-4 text-gray-600"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                clipRule="evenodd"
+                                d="M23.1117 4.49449C23.4296 2.94472 21.9074 1.65683 20.4317 2.227L2.3425 9.21601C0.694517 9.85273 0.621087 12.1572 2.22518 12.8975L6.1645 14.7157L8.03849 21.2746C8.13583 21.6153 8.40618 21.8791 8.74917 21.968C9.09216 22.0568 9.45658 21.9576 9.70712 21.707L12.5938 18.8203L16.6375 21.8531C17.8113 22.7334 19.5019 22.0922 19.7967 20.6549L23.1117 4.49449ZM3.0633 11.0816L21.1525 4.0926L17.8375 20.2531L13.1 16.6999C12.7019 16.4013 12.1448 16.4409 11.7929 16.7928L10.5565 18.0292L10.928 15.9861L18.2071 8.70703C18.5614 8.35278 18.5988 7.79106 18.2947 7.39293C17.9906 6.99479 17.4389 6.88312 17.0039 7.13168L6.95124 12.876L3.0633 11.0816ZM8.17695 14.4791L8.78333 16.6015L9.01614 15.321C9.05253 15.1209 9.14908 14.9366 9.29291 14.7928L11.5128 12.573L8.17695 14.4791Z"
+                              />
+                            </svg>
+                          </div>
+                        )}
                     </div>
                   </div>
                 </div>
@@ -591,19 +689,106 @@ const TokenPage = () => {
               <div className="text-orange-400 mb-2">COMPANY INFO</div>
               <div className="space-y-2 text-xs">
                 <div className="flex items-center space-x-2">
-                  <Globe className="w-3 h-3 text-gray-400" />
-                  <span className="text-gray-400">Sector</span>
-                  <span className="text-white">Technology</span>
+                  <Clock
+                    className={`w-3 h-3 ${
+                      tokenData?.deploymentTimestamp
+                        ? "text-orange-400"
+                        : "text-gray-600"
+                    }`}
+                  />
+                  <span className="text-gray-400">Age</span>
+                  <span className="text-white">
+                    {tokenData?.deploymentTimestamp
+                      ? formatTokenAge(tokenData.deploymentTimestamp)
+                      : "Unknown"}
+                  </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Activity className="w-3 h-3 text-gray-400" />
-                  <span className="text-gray-400">Industry</span>
-                  <span className="text-white">Consumer Electronics</span>
+                  <Globe
+                    className={`w-3 h-3 ${
+                      tokenData?.websiteUrl
+                        ? "text-orange-400"
+                        : "text-gray-600"
+                    }`}
+                  />
+                  <span className="text-gray-400">Website</span>
+                  {tokenData?.websiteUrl ? (
+                    <a
+                      href={tokenData.websiteUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-orange-400 hover:text-orange-300 transition-colors flex items-center space-x-1"
+                    >
+                      <span className="truncate max-w-32">
+                        {tokenData.websiteUrl}
+                      </span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  ) : (
+                    <span className="text-gray-600">Not available</span>
+                  )}
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Users className="w-3 h-3 text-gray-400" />
-                  <span className="text-gray-400">Employees</span>
-                  <span className="text-white">164,000</span>
+                  <svg
+                    className={`w-3 h-3 ${
+                      tokenData?.twitterUrl
+                        ? "text-orange-400"
+                        : "text-gray-600"
+                    }`}
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                  </svg>
+                  <span className="text-gray-400">X (Twitter)</span>
+                  {tokenData?.twitterUrl ? (
+                    <a
+                      href={tokenData.twitterUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-orange-400 hover:text-orange-300 transition-colors flex items-center space-x-1"
+                    >
+                      <span className="truncate max-w-32">
+                        {tokenData.twitterUrl}
+                      </span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  ) : (
+                    <span className="text-gray-600">Not available</span>
+                  )}
+                </div>
+                <div className="flex items-center space-x-2">
+                  <svg
+                    className={`w-3 h-3 ${
+                      tokenData?.telegramUrl
+                        ? "text-orange-400"
+                        : "text-gray-600"
+                    }`}
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                      d="M23.1117 4.49449C23.4296 2.94472 21.9074 1.65683 20.4317 2.227L2.3425 9.21601C0.694517 9.85273 0.621087 12.1572 2.22518 12.8975L6.1645 14.7157L8.03849 21.2746C8.13583 21.6153 8.40618 21.8791 8.74917 21.968C9.09216 22.0568 9.45658 21.9576 9.70712 21.707L12.5938 18.8203L16.6375 21.8531C17.8113 22.7334 19.5019 22.0922 19.7967 20.6549L23.1117 4.49449ZM3.0633 11.0816L21.1525 4.0926L17.8375 20.2531L13.1 16.6999C12.7019 16.4013 12.1448 16.4409 11.7929 16.7928L10.5565 18.0292L10.928 15.9861L18.2071 8.70703C18.5614 8.35278 18.5988 7.79106 18.2947 7.39293C17.9906 6.99479 17.4389 6.88312 17.0039 7.13168L6.95124 12.876L3.0633 11.0816ZM8.17695 14.4791L8.78333 16.6015L9.01614 15.321C9.05253 15.1209 9.14908 14.9366 9.29291 14.7928L11.5128 12.573L8.17695 14.4791Z"
+                    />
+                  </svg>
+                  <span className="text-gray-400">Telegram</span>
+                  {tokenData?.telegramUrl ? (
+                    <a
+                      href={tokenData.telegramUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-orange-400 hover:text-orange-300 transition-colors flex items-center space-x-1"
+                    >
+                      <span className="truncate max-w-32">
+                        {tokenData.telegramUrl}
+                      </span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  ) : (
+                    <span className="text-gray-600">Not available</span>
+                  )}
                 </div>
               </div>
               {/* Bottom Description */}

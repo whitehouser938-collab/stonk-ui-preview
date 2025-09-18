@@ -11,6 +11,7 @@ export interface TokenDetails {
   deployerAddress: string;
   tokenAddress: string;
   bondingCurveAddress: string;
+  deploymentTimestamp?: string;
   isGraduated?: boolean;
   uniswapPair?: string;
   curveStatus?: {
