@@ -1,21 +1,6 @@
 import React, { useState, useEffect, Fragment } from "react";
-import {
-  TrendingUp,
-  TrendingDown,
-  Activity,
-  DollarSign,
-  BarChart3,
-  Clock,
-  Circle,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import {
-  getAllTokens,
-  getBondingCurveVolumeData,
-  getMarketOverview,
-  getVolumeLeaders,
-  getVolumeWithIntervals,
-} from "@/api/token";
+import { Circle } from "lucide-react";
+import { getAllTokens, getBondingCurveVolumeData } from "@/api/token";
 import { useNavigate } from "react-router-dom";
 
 interface StockData {
@@ -48,19 +33,6 @@ interface TokenData {
   tradeCount?: string;
   deploymentTimestamp?: string;
   createdAt?: string;
-}
-
-interface MarketOverviewData {
-  totalMarketVolume: string;
-  highestTradedToken: {
-    symbol: string;
-    name: string;
-    volume: string;
-  } | null;
-  totalCurveVolume: string;
-  activeTokens: number;
-  bondingCurveTokens: number;
-  graduatedTokens: number;
 }
 
 interface VolumeLeaderData {
@@ -211,39 +183,6 @@ const extendedMockData: StockData[] = [
   },
 ];
 
-const newsData = [
-  {
-    time: "14:23:45",
-    title: "Apple announces new AI chip partnership",
-    sentiment: "positive",
-  },
-  {
-    time: "14:19:12",
-    title: "Fed signals potential rate cut in Q2",
-    sentiment: "positive",
-  },
-  {
-    time: "14:15:33",
-    title: "Tech stocks face regulatory scrutiny",
-    sentiment: "negative",
-  },
-  {
-    time: "14:12:07",
-    title: "NVIDIA earnings beat estimates by 15%",
-    sentiment: "positive",
-  },
-  {
-    time: "14:08:21",
-    title: "Banking sector sees $2B outflow",
-    sentiment: "negative",
-  },
-  {
-    time: "14:05:18",
-    title: "S&P 500 hits new record high",
-    sentiment: "positive",
-  },
-];
-
 function formatNumber(num: number): string {
   if (num >= 1e9) return (num / 1e9).toFixed(2) + "B";
   if (num >= 1e6) return (num / 1e6).toFixed(2) + "M";
@@ -311,10 +250,7 @@ export function MarketsDashboard() {
   const [bondingCurveVolumeData, setBondingCurveVolumeData] = useState<any[]>(
     []
   );
-  const [marketOverview, setMarketOverview] =
-    useState<MarketOverviewData | null>(null);
-  const [volumeLeaders, setVolumeLeaders] = useState<VolumeLeaderData[]>([]);
-  const [volumeData24h, setVolumeData24h] = useState<any[]>([]);
+
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -353,35 +289,8 @@ export function MarketsDashboard() {
     <div className="h-screen overflow-auto bg-black text-gray-100 text-xs font-mono">
       {/* Main Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 p-1 h-full">
-        {/* Left Column - Market Data */}
+        {/* Left Column */}
         <div className="lg:col-span-3 space-y-1">
-          {/* Market Overview */}
-          <div className="bg-gray-900 border border-gray-700 p-1">
-            <div className="text-orange-400 text-xs mb-1">MARKET OVERVIEW</div>
-            <div className="grid grid-cols-2 gap-1 text-xs">
-              <div className="bg-black p-1">
-                <div className="text-gray-400">TOTAL CAP</div>
-                <div className="text-green-400">$1.68T</div>
-                <div className="text-green-400">+2.4%</div>
-              </div>
-              <div className="bg-black p-1">
-                <div className="text-gray-400">24H VOL</div>
-                <div className="text-red-400">$89.2B</div>
-                <div className="text-red-400">-5.1%</div>
-              </div>
-              <div className="bg-black p-1">
-                <div className="text-gray-400">SP500</div>
-                <div className="text-orange-400">4,890</div>
-                <div className="text-green-400">+0.3%</div>
-              </div>
-              <div className="bg-black p-1">
-                <div className="text-gray-400">VIX</div>
-                <div className="text-yellow-400">18.2</div>
-                <div className="text-yellow-400">MODERATE</div>
-              </div>
-            </div>
-          </div>
-
           {/* Top Movers */}
           <div className="bg-gray-900 border border-gray-700 p-1">
             <div className="text-orange-400 text-xs mb-1">TOP MOVERS</div>
@@ -405,31 +314,6 @@ export function MarketsDashboard() {
                   {stock.change24h >= 0 ? "+" : ""}
                   {stock.change24h.toFixed(2)}%
                 </span>
-              </div>
-            ))}
-          </div>
-
-          {/* News Feed */}
-          <div className="bg-gray-900 border border-gray-700 p-1">
-            <div className="text-orange-400 text-xs mb-1">LIVE NEWS</div>
-            {newsData.map((news, idx) => (
-              <div
-                key={idx}
-                className="mb-1 text-xs border-b border-gray-800 pb-1 last:border-0"
-              >
-                <div className="flex justify-between">
-                  <span className="text-orange-400">{news.time}</span>
-                  <span
-                    className={
-                      news.sentiment === "positive"
-                        ? "text-green-400"
-                        : "text-red-400"
-                    }
-                  >
-                    {news.sentiment === "positive" ? "↑" : "↓"}
-                  </span>
-                </div>
-                <div className="text-gray-300">{news.title}</div>
               </div>
             ))}
           </div>

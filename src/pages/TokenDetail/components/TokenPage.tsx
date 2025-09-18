@@ -207,63 +207,6 @@ const TokenPage = () => {
     { time: "12:45", price: 182.85 },
   ];
 
-  const newsData = [
-    {
-      title: "Apple Reports Record Q4 Revenue, Beats Estimates",
-      source: "Reuters",
-      time: "2 hours ago",
-      summary:
-        "Apple Inc reported quarterly revenue that exceeded analyst expectations driven by strong iPhone sales.",
-    },
-    {
-      title: "Apple Announces New AI Chip Partnership with TSMC",
-      source: "Bloomberg",
-      time: "5 hours ago",
-      summary:
-        "Strategic partnership aims to develop next-generation neural processing units for future devices.",
-    },
-    {
-      title: "Institutional Ownership Increases to 59.8%",
-      source: "MarketWatch",
-      time: "1 day ago",
-      summary:
-        "Major institutional investors continue to increase their positions in Apple stock.",
-    },
-  ];
-
-  const analystData = [
-    {
-      firm: "Goldman Sachs",
-      rating: "BUY",
-      target: 210.0,
-      updated: "2024-01-15",
-    },
-    {
-      firm: "Morgan Stanley",
-      rating: "OVERWEIGHT",
-      target: 205.0,
-      updated: "2024-01-12",
-    },
-    {
-      firm: "JPMorgan",
-      rating: "OVERWEIGHT",
-      target: 200.0,
-      updated: "2024-01-10",
-    },
-    {
-      firm: "Bank of America",
-      rating: "BUY",
-      target: 215.0,
-      updated: "2024-01-08",
-    },
-    {
-      firm: "Wells Fargo",
-      rating: "OVERWEIGHT",
-      target: 195.0,
-      updated: "2024-01-05",
-    },
-  ];
-
   const financialData = {
     revenue: 394328000000,
     netIncome: 99803000000,
@@ -391,6 +334,41 @@ const TokenPage = () => {
         </tr>
       )),
     [trades]
+  );
+
+  // --- Bonding Curve Progress from Trades (dynamic, client-side) ---
+  const GRADUATION_ASSET_THRESHOLD_WEI = React.useMemo(() => {
+    // 20 asset tokens, assuming 18 decimals
+    const twenty = 20n;
+    const wei = 10n ** 18n;
+    return twenty * wei;
+  }, []);
+
+  const netAssetInCurveWei = React.useMemo(() => {
+    // Aggregate BUY quoteAmount (asset in) minus SELL quoteAmount (asset out)
+    return trades.reduce((acc, trade) => {
+      try {
+        const amt = BigInt(trade.quoteAmount || "0");
+        return trade.tradeType === "BUY" ? acc + amt : acc - amt;
+      } catch {
+        return acc;
+      }
+    }, 0n);
+  }, [trades]);
+
+  const progressFromTrades = React.useMemo(() => {
+    if (GRADUATION_ASSET_THRESHOLD_WEI <= 0n) return 0;
+    const numerator = Number(netAssetInCurveWei);
+    const denominator = Number(GRADUATION_ASSET_THRESHOLD_WEI);
+    if (!isFinite(numerator) || !isFinite(denominator) || denominator === 0)
+      return 0;
+    const pct = (numerator / denominator) * 100;
+    return Math.max(0, Math.min(100, Math.floor(pct)));
+  }, [netAssetInCurveWei, GRADUATION_ASSET_THRESHOLD_WEI]);
+
+  const isGraduatedFromTrades = React.useMemo(
+    () => netAssetInCurveWei >= GRADUATION_ASSET_THRESHOLD_WEI,
+    [netAssetInCurveWei, GRADUATION_ASSET_THRESHOLD_WEI]
   );
 
   return (
@@ -608,49 +586,6 @@ const TokenPage = () => {
               </div>
             </div>
 
-            {/* Analyst Ratings */}
-            <div className="bg-gray-900 border border-gray-700 p-2">
-              <div className="text-orange-400 mb-2">ANALYST RATINGS</div>
-              <div className="overflow-x-auto bg-black border border-gray-800 p-1">
-                <table className="w-full text-xs min-w-[400px]">
-                  <thead>
-                    <tr className="text-gray-400 border-b border-gray-700">
-                      <th className="text-left p-1">FIRM</th>
-                      <th className="text-center p-1">RATING</th>
-                      <th className="text-right p-1">TARGET</th>
-                      <th className="text-right p-1">UPDATED</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {analystData.map((analyst, index) => (
-                      <tr
-                        key={index}
-                        className="border-b border-gray-800 last:border-0"
-                      >
-                        <td className="p-1 text-white">{analyst.firm}</td>
-                        <td
-                          className={`p-1 text-center font-bold ${
-                            analyst.rating.includes("BUY") ||
-                            analyst.rating.includes("OVERWEIGHT")
-                              ? "text-green-400"
-                              : "text-yellow-400"
-                          }`}
-                        >
-                          {analyst.rating}
-                        </td>
-                        <td className="p-1 text-right text-white font-mono">
-                          ${analyst.target.toFixed(2)}
-                        </td>
-                        <td className="p-1 text-right text-gray-400">
-                          {analyst.updated}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
             {/* Company Info */}
             <div className="bg-gray-900 border border-gray-700 p-2">
               <div className="text-orange-400 mb-2">COMPANY INFO</div>
@@ -679,115 +614,10 @@ const TokenPage = () => {
                 </div>
               </div>
             </div>
-
-            {/* Recent News */}
-            <div className="bg-gray-900 border border-gray-700 p-2">
-              <div className="text-orange-400 mb-2">RECENT NEWS</div>
-              <div className="space-y-2">
-                {newsData.map((news, index) => (
-                  <div
-                    key={index}
-                    className="bg-black border border-gray-800 p-1"
-                  >
-                    <div className="flex flex-col sm:flex-row items-start justify-between mb-1 gap-1">
-                      <div className="text-white text-xs font-medium hover:text-orange-400 cursor-pointer">
-                        {news.title}
-                      </div>
-                      <span className="text-xs text-gray-400 whitespace-nowrap">
-                        {news.time}
-                      </span>
-                    </div>
-                    <div className="text-gray-300 text-xs mb-1">
-                      {news.summary}
-                    </div>
-                    <div className="text-xs text-orange-400">{news.source}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Technical Indicators */}
-            <div className="bg-gray-900 border border-gray-700 p-2">
-              <div className="text-orange-400 mb-2">TECHNICAL INDICATORS</div>
-              <div className="space-y-1 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">RSI (14)</span>
-                  <span className="text-yellow-400 font-mono">65.3</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">MACD</span>
-                  <span className="text-green-400 font-mono">+2.45</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">SMA (20)</span>
-                  <span className="text-white font-mono">$178.90</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">SMA (50)</span>
-                  <span className="text-white font-mono">$175.60</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Bollinger Upper</span>
-                  <span className="text-white font-mono">$185.20</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Bollinger Lower</span>
-                  <span className="text-white font-mono">$172.40</span>
-                </div>
-              </div>
-            </div>
           </div>
 
-          {/* Right Column - Market Data & Trading */}
+          {/* Right Column - Trading */}
           <div className="col-span-12 lg:col-span-4 space-y-1">
-            {/* Market Data */}
-            <div className="bg-gray-900 border border-gray-700 p-2">
-              <div className="text-orange-400 mb-2">MARKET DATA</div>
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between items-start gap-2">
-                  <span className="text-gray-400">Market Cap</span>
-                  <span className="font-mono text-white text-right">
-                    ${formatNumber(stockData.marketCap)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-start gap-2">
-                  <span className="text-gray-400">Volume</span>
-                  <span className="font-mono text-white text-right">
-                    {formatNumber(stockData.volume24h)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-start gap-2">
-                  <span className="text-gray-400">Shares Outstanding</span>
-                  <span className="font-mono text-white text-right">
-                    {formatNumber(stockData.outstandingShares)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-start gap-2">
-                  <span className="text-gray-400">Float</span>
-                  <span className="font-mono text-white text-right">
-                    {formatNumber(stockData.floatShares)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-start gap-2">
-                  <span className="text-gray-400">52W High</span>
-                  <span className="font-mono text-white text-right">
-                    ${stockData.allTimeHigh.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-start gap-2">
-                  <span className="text-gray-400">52W Low</span>
-                  <span className="font-mono text-white text-right">
-                    ${stockData.allTimeLow.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-start gap-2">
-                  <span className="text-gray-400">Institutional</span>
-                  <span className="font-mono text-white text-right">
-                    {stockData.institutional.toFixed(1)}%
-                  </span>
-                </div>
-              </div>
-            </div>
             <TradingForm
               chain={tokenData?.chain}
               symbol={tokenData?.symbol}
@@ -795,12 +625,12 @@ const TokenPage = () => {
             />
             {/* Bonding Curve Progress & Graduation Badge */}
             <BondingCurveProgress
-              progress={
-                tokenData?.curveStatus?.progress !== undefined
-                  ? Math.min(100, Math.max(0, tokenData.curveStatus.progress))
-                  : 0
+              progress={progressFromTrades}
+              graduated={
+                isGraduatedFromTrades ||
+                tokenData?.isGraduated ||
+                !!tokenData?.uniswapPair
               }
-              graduated={tokenData?.isGraduated || !!tokenData?.uniswapPair}
               uniswapPair={tokenData?.uniswapPair}
             />
             {/* Recent Trades */}

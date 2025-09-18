@@ -62,12 +62,16 @@ function isUserRejectedError(error: any): boolean {
   return check(error);
 }
 
-// Create a provider for read operations
+// Create a singleton provider for read operations to enable request coalescing/keep-alive
+let sharedReadProvider: ethers.JsonRpcProvider | null = null;
 const getReadProvider = () => {
   if (!RPC_URL) {
     throw new Error("RPC_URL not configured");
   }
-  return new ethers.JsonRpcProvider(RPC_URL);
+  if (!sharedReadProvider) {
+    sharedReadProvider = new ethers.JsonRpcProvider(RPC_URL);
+  }
+  return sharedReadProvider;
 };
 
 // Add abbreviateTokenAmount utility
@@ -110,79 +114,79 @@ const TradingForm = (props: TradingFormProps) => {
   const [tokenAllowance, setTokenAllowance] = useState("0"); // Still needed for display
   const [tokenDecimals, setTokenDecimals] = useState(18); // Default to 18 decimals
 
-  // Fetch balances
-  React.useEffect(() => {
+  // Fetch balances (debounced to avoid RPC rate limits)
+  const lastBalanceFetchRef = React.useRef<number>(0);
+  const balanceFetchInFlightRef = React.useRef<boolean>(false);
+  const fetchBalancesNow = React.useCallback(async () => {
     if (!isEthConnected || !userAddress || !props.tokenAddress) return;
+    if (balanceFetchInFlightRef.current) return;
+    balanceFetchInFlightRef.current = true;
+    try {
+      const provider = getReadProvider();
+      const evilWETH = new ethers.Contract(
+        EVILWETH_ADDRESS,
+        [
+          "function balanceOf(address) view returns (uint256)",
+          "function allowance(address,address) view returns (uint256)",
+        ],
+        provider
+      );
+      const token = new ethers.Contract(
+        props.tokenAddress,
+        [
+          "function balanceOf(address) view returns (uint256)",
+          "function allowance(address,address) view returns (uint256)",
+          "function decimals() view returns (uint8)",
+        ],
+        provider
+      );
 
-    const fetchBalances = async () => {
-      try {
-        const provider = getReadProvider();
-        const evilWETH = new ethers.Contract(
-          EVILWETH_ADDRESS,
-          [
-            "function balanceOf(address) view returns (uint256)",
-            "function allowance(address,address) view returns (uint256)",
-          ],
-          provider
-        );
-        const token = new ethers.Contract(
-          props.tokenAddress,
-          [
-            "function balanceOf(address) view returns (uint256)",
-            "function allowance(address,address) view returns (uint256)",
-            "function decimals() view returns (uint8)",
-          ],
-          provider
-        );
+      // Fetch sequentially to reduce concurrent RPC pressure
+      const evilWETHBal = await evilWETH.balanceOf(userAddress);
+      const tokenBal = await token.balanceOf(userAddress);
+      const ethBal = await provider.getBalance(userAddress);
+      const evilWETHAllowance = await evilWETH.allowance(
+        userAddress,
+        ROUTER_ADDRESS
+      );
+      const tokenAllowanceVal = await token.allowance(
+        userAddress,
+        ROUTER_ADDRESS
+      );
+      const decimals = await token.decimals();
 
-        // Fetch balances and token info
-        const [
-          evilWETHBal,
-          tokenBal,
-          ethBal,
-          evilWETHAllowance,
-          tokenAllowance,
-          decimals,
-        ] = await Promise.all([
-          evilWETH.balanceOf(userAddress),
-          token.balanceOf(userAddress),
-          provider.getBalance(userAddress),
-          evilWETH.allowance(userAddress, ROUTER_ADDRESS),
-          token.allowance(userAddress, ROUTER_ADDRESS),
-          token.decimals(),
-        ]);
+      setEvilWETHBalance(evilWETHBal.toString());
+      setTokenBalance(tokenBal.toString());
+      setEthBalance(ethBal.toString());
+      setWethAllowance(evilWETHAllowance.toString());
+      setTokenAllowance(tokenAllowanceVal.toString());
+      setTokenDecimals(decimals);
 
-        setEvilWETHBalance(evilWETHBal.toString());
-        setTokenBalance(tokenBal.toString());
-        setEthBalance(ethBal.toString());
-        setWethAllowance(evilWETHAllowance.toString());
-        setTokenAllowance(tokenAllowance.toString());
-        setTokenDecimals(decimals);
+      lastBalanceFetchRef.current = Date.now();
+    } catch (error) {
+      console.error("Error fetching balances:", error);
+      setEvilWETHBalance("0");
+      setEthBalance("0");
+      setTokenBalance("0");
+      setWethAllowance("0");
+      setTokenAllowance("0");
+    } finally {
+      balanceFetchInFlightRef.current = false;
+    }
+  }, [isEthConnected, userAddress, props.tokenAddress]);
 
-        console.log("EVILWETH Balance:", evilWETHBal.toString());
-        console.log("ETH Balance:", ethers.formatEther(ethBal));
-        console.log(`${props.symbol} Balance:`, tokenBal.toString());
-        console.log(
-          "EVILWETH Allowance for router:",
-          evilWETHAllowance.toString()
-        );
-        console.log(
-          `${props.symbol} Allowance for router:`,
-          tokenAllowance.toString()
-        );
-      } catch (error) {
-        console.error("Error fetching balances:", error);
-        // Set default values on error
-        setEvilWETHBalance("0");
-        setEthBalance("0");
-        setTokenBalance("0");
-        setWethAllowance("0");
-        setTokenAllowance("0");
-      }
-    };
+  const fetchBalancesDebounced = React.useCallback(() => {
+    const now = Date.now();
+    const elapsed = now - (lastBalanceFetchRef.current || 0);
+    const MIN_INTERVAL_MS = 5000; // at most once per 5s by default
+    if (elapsed >= MIN_INTERVAL_MS) {
+      void fetchBalancesNow();
+    }
+  }, [fetchBalancesNow]);
 
-    fetchBalances();
-  }, [isEthConnected, userAddress, props.tokenAddress, isApproving]);
+  React.useEffect(() => {
+    fetchBalancesDebounced();
+  }, [fetchBalancesDebounced, isEthConnected, userAddress, props.tokenAddress]);
 
   // Calculate expected token amount for buy (when user enters asset amount)
   const [expectedTokenAmount, setExpectedTokenAmount] = useState("0");
@@ -393,6 +397,10 @@ const TradingForm = (props: TradingFormProps) => {
           description: `Transaction Hash: ${tradeResponse.transactionHash}`,
           variant: "default",
         });
+        // Refresh balances once after a successful trade
+        setTimeout(() => {
+          void fetchBalancesNow();
+        }, 1200);
       } else if (
         tradeResponse &&
         tradeResponse.error &&
