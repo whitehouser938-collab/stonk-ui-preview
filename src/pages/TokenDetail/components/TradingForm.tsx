@@ -397,6 +397,8 @@ const TradingForm = (props: TradingFormProps) => {
           description: `Transaction Hash: ${tradeResponse.transactionHash}`,
           variant: "default",
         });
+        // Clear input after successful trade
+        setAmount("");
         // Refresh balances once after a successful trade
         setTimeout(() => {
           void fetchBalancesNow();
@@ -453,7 +455,10 @@ const TradingForm = (props: TradingFormProps) => {
         {/* Buy Button */}
         <button
           type="button"
-          onClick={() => setIsBuy(true)}
+          onClick={() => {
+            setIsBuy(true);
+            setAmount("");
+          }}
           className={`
       w-full p-3 text-sm font-bold transition-all duration-200
       ${
@@ -469,7 +474,10 @@ const TradingForm = (props: TradingFormProps) => {
         {/* Sell Button */}
         <button
           type="button"
-          onClick={() => setIsBuy(false)}
+          onClick={() => {
+            setIsBuy(false);
+            setAmount("");
+          }}
           className={`
       w-full p-3  text-sm font-bold transition-all duration-200
       ${
