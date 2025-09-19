@@ -3,6 +3,12 @@ import { ethers } from "ethers";
 import Router from "@/abi/evm/Router.json";
 import Token from "@/abi/evm/Token.json";
 import { Contract, EventLog } from "ethers";
+import {
+  calculateBuyPrice,
+  getTokenDecimals,
+  calculateSellProceeds,
+  getTokenAllowance,
+} from "@/api/rpc";
 
 export interface TradeTokenResponse {
   transactionHash: string;
@@ -63,11 +69,25 @@ export const buyTokens = async (
     // Parse the input amount (ETH or WETH amount)
     const assetAmount = ethers.parseEther(tradeData.amount);
 
-    // Calculate expected token amount for the asset amount
-    const expectedTokenAmount = await router.calculateBuyPrice(
+    // Calculate expected token amount for the asset amount using API
+    const priceData = await calculateBuyPrice(
       tradeData.tokenAddress,
-      assetAmount
+      tradeData.amount,
+      "SEP"
     );
+
+    if (!priceData.success) {
+      return {
+        success: false,
+        error: "Failed to calculate buy price from API",
+        transactionHash: "",
+        tokenAddress: "",
+        tokenAmount: "0",
+        assetAmount: "0",
+      };
+    }
+
+    const expectedTokenAmount = BigInt(priceData.data.tokenAmount);
 
     if (expectedTokenAmount === 0n) {
       return {
@@ -211,23 +231,64 @@ export const sellTokens = async (
     }
 
     // Parse token amount to sell - use the correct token decimals
-    // Get token decimals first to parse amount correctly
+    // Get token decimals first using API
+    const decimalsData = await getTokenDecimals(tradeData.tokenAddress, "SEP");
+
+    if (!decimalsData.success) {
+      return {
+        success: false,
+        error: "Failed to get token decimals from API",
+        transactionHash: "",
+        tokenAddress: "",
+        tokenAmount: "0",
+        assetAmount: "0",
+      };
+    }
+
+    const tokenDecimals = decimalsData.data.decimals;
     const token = new Contract(tradeData.tokenAddress, Token.abi, signer);
-    const tokenDecimals = await token.decimals();
 
     // Parse with the correct decimals (most tokens are 18, but some might be different)
     const tokenAmount = ethers.parseUnits(tradeData.amount, tokenDecimals);
 
-    // Calculate expected asset amount (ETH or WETH) from selling tokens
-    const expectedAssetAmount = await router.calculateSellProceeds(
+    // Calculate expected asset amount (ETH or WETH) from selling tokens using API
+    const proceedsData = await calculateSellProceeds(
       tradeData.tokenAddress,
-      tokenAmount
+      tokenAmount.toString(),
+      "SEP"
     );
+
+    console.log("[SELL PROCEEDS DEBUG]", {
+      tokenAddress: tradeData.tokenAddress,
+      tokenAmount: tokenAmount.toString(),
+      proceedsData,
+      rawAssetAmount: proceedsData.data?.assetAmount,
+    });
+
+    if (!proceedsData.success) {
+      return {
+        success: false,
+        error: "Failed to calculate sell proceeds from API",
+        transactionHash: "",
+        tokenAddress: "",
+        tokenAmount: "0",
+        assetAmount: "0",
+      };
+    }
+
+    const expectedAssetAmount = BigInt(proceedsData.data.assetAmount);
+
+    console.log("[SELL PROCEEDS CALCULATION]", {
+      expectedAssetAmount: expectedAssetAmount.toString(),
+      isZero: expectedAssetAmount === 0n,
+      tokenAmount: tokenAmount.toString(),
+      userInputAmount: tradeData.amount,
+    });
 
     if (expectedAssetAmount === 0n) {
       return {
         success: false,
-        error: `Token amount ${tradeData.amount} is too low to sell.`,
+        error: `Token amount ${tradeData.amount} resulted in 0 proceeds. This could mean insufficient liquidity or the token cannot be sold.`,
         transactionHash: "",
         tokenAddress: "",
         tokenAmount: "0",
@@ -255,7 +316,27 @@ export const sellTokens = async (
     // Check and handle token approval - this is the missing piece!
     // (token contract already created above for getting decimals)
     const userAddress = await signer.getAddress();
-    const allowance = await token.allowance(userAddress, routerAddress);
+
+    // Get allowance using API
+    const allowanceData = await getTokenAllowance(
+      userAddress,
+      tradeData.tokenAddress,
+      routerAddress,
+      "SEP"
+    );
+
+    if (!allowanceData.success) {
+      return {
+        success: false,
+        error: "Failed to get token allowance from API",
+        transactionHash: "",
+        tokenAddress: "",
+        tokenAmount: "0",
+        assetAmount: "0",
+      };
+    }
+
+    const allowance = BigInt(allowanceData.data.allowance);
 
     console.log("[APPROVAL CHECK]", {
       userAddress,

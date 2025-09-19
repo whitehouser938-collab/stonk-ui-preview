@@ -7,6 +7,7 @@ import { sellTokenETH, buyTokenETH } from "../utils/trade-token";
 import { useETHWalletSigner } from "@/hooks/signers/useWalletSigner";
 import { useToast } from "@/hooks/use-toast";
 import { ethers } from "ethers";
+// Direct contract calls - no API imports needed
 
 const MaxUint256 = ethers.MaxUint256;
 
@@ -33,7 +34,6 @@ const slippageOptions = [0.5, 1, 2.5, 5]; // Slippage options in percentage
 
 const EVILWETH_ADDRESS = import.meta.env.VITE_EVILWETH_ADDRESS;
 const ROUTER_ADDRESS = import.meta.env.VITE_EVM_ROUTER_ADDRESS;
-const RPC_URL = import.meta.env.VITE_RPC_URL;
 
 // Utility function to robustly detect user rejection errors
 function isUserRejectedError(error: any): boolean {
@@ -62,17 +62,7 @@ function isUserRejectedError(error: any): boolean {
   return check(error);
 }
 
-// Create a singleton provider for read operations to enable request coalescing/keep-alive
-let sharedReadProvider: ethers.JsonRpcProvider | null = null;
-const getReadProvider = () => {
-  if (!RPC_URL) {
-    throw new Error("RPC_URL not configured");
-  }
-  if (!sharedReadProvider) {
-    sharedReadProvider = new ethers.JsonRpcProvider(RPC_URL);
-  }
-  return sharedReadProvider;
-};
+// RPC provider removed - now using API calls
 
 // Add abbreviateTokenAmount utility
 function abbreviateTokenAmount(raw: string | number, decimals = 18): string {
@@ -122,15 +112,10 @@ const TradingForm = (props: TradingFormProps) => {
     if (balanceFetchInFlightRef.current) return;
     balanceFetchInFlightRef.current = true;
     try {
-      const provider = getReadProvider();
-      const evilWETH = new ethers.Contract(
-        EVILWETH_ADDRESS,
-        [
-          "function balanceOf(address) view returns (uint256)",
-          "function allowance(address,address) view returns (uint256)",
-        ],
-        provider
-      );
+      // Get signer for direct contract calls
+      const signer = await getETHSigner();
+
+      // Create contracts for direct calls
       const token = new ethers.Contract(
         props.tokenAddress,
         [
@@ -138,28 +123,41 @@ const TradingForm = (props: TradingFormProps) => {
           "function allowance(address,address) view returns (uint256)",
           "function decimals() view returns (uint8)",
         ],
-        provider
+        signer
       );
 
-      // Fetch sequentially to reduce concurrent RPC pressure
-      const evilWETHBal = await evilWETH.balanceOf(userAddress);
-      const tokenBal = await token.balanceOf(userAddress);
-      const ethBal = await provider.getBalance(userAddress);
-      const evilWETHAllowance = await evilWETH.allowance(
-        userAddress,
-        ROUTER_ADDRESS
+      const evilWETH = new ethers.Contract(
+        EVILWETH_ADDRESS,
+        [
+          "function balanceOf(address) view returns (uint256)",
+          "function allowance(address,address) view returns (uint256)",
+        ],
+        signer
       );
-      const tokenAllowanceVal = await token.allowance(
-        userAddress,
-        ROUTER_ADDRESS
-      );
-      const decimals = await token.decimals();
 
-      setEvilWETHBalance(evilWETHBal.toString());
-      setTokenBalance(tokenBal.toString());
-      setEthBalance(ethBal.toString());
-      setWethAllowance(evilWETHAllowance.toString());
-      setTokenAllowance(tokenAllowanceVal.toString());
+      // Fetch all balances in parallel using direct calls
+      const [
+        tokenBalance,
+        ethBalance,
+        evilWETHBalance,
+        tokenAllowance,
+        wethAllowance,
+        decimals,
+      ] = await Promise.all([
+        token.balanceOf(userAddress),
+        signer.provider.getBalance(userAddress),
+        evilWETH.balanceOf(userAddress),
+        token.allowance(userAddress, ROUTER_ADDRESS),
+        evilWETH.allowance(userAddress, ROUTER_ADDRESS),
+        token.decimals(),
+      ]);
+
+      // Update state with direct call results
+      setTokenBalance(tokenBalance.toString());
+      setEthBalance(ethBalance.toString());
+      setEvilWETHBalance(evilWETHBalance.toString());
+      setTokenAllowance(tokenAllowance.toString());
+      setWethAllowance(wethAllowance.toString());
       setTokenDecimals(decimals);
 
       lastBalanceFetchRef.current = Date.now();
@@ -173,7 +171,7 @@ const TradingForm = (props: TradingFormProps) => {
     } finally {
       balanceFetchInFlightRef.current = false;
     }
-  }, [isEthConnected, userAddress, props.tokenAddress]);
+  }, [isEthConnected, userAddress, props.tokenAddress, getETHSigner]);
 
   const fetchBalancesDebounced = React.useCallback(() => {
     const now = Date.now();
@@ -203,17 +201,16 @@ const TradingForm = (props: TradingFormProps) => {
       }
 
       try {
-        const provider = getReadProvider();
+        // Use direct contract call for price calculation
+        const signer = await getETHSigner();
         const router = new ethers.Contract(
           ROUTER_ADDRESS,
           [
             "function calculateBuyPrice(address,uint256) view returns (uint256)",
-            "function getTokenTradingState(address) view returns (bool,address,address)",
           ],
-          provider
+          signer
         );
 
-        // User enters asset amount (ETH/WETH), we calculate expected token amount
         const assetAmount = ethers.parseEther(amount);
         const tokenAmount = await router.calculateBuyPrice(
           props.tokenAddress,
