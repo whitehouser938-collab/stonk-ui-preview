@@ -266,8 +266,8 @@ const TokenPage = () => {
     if (diff < 60) return `${Math.floor(diff)}s ago`;
     if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-    const d = new Date(ts * 1000);
-    return d.toLocaleString();
+    const days = Math.floor(diff / 86400);
+    return `${days}d ago`;
   }
 
   function formatTokenAge(deploymentTimestamp: string): string {
@@ -443,10 +443,10 @@ const TokenPage = () => {
                     <img
                       src={tokenData.logoUrl}
                       alt={`${tokenData.name} logo`}
-                      className="w-8 h-8 rounded-full"
+                      className="w-16 h-16 rounded-lg object-cover"
                     />
                   ) : (
-                    <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded text-white font-bold text-sm flex items-center justify-center flex-shrink-0">
+                    <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg text-white font-bold text-lg flex items-center justify-center flex-shrink-0">
                       {tokenData?.symbol}
                     </div>
                   )}
@@ -835,7 +835,7 @@ const TokenPage = () => {
                       <tr className="text-gray-400 border-b border-gray-700">
                         <th className="text-left p-1">TRADER</th>
                         <th className="text-right p-1">TOKEN AMOUNT</th>
-                        <th className="text-right p-1">ASSET AMOUNT</th>
+                        <th className="text-right p-1">WETH AMOUNT</th>
                         <th className="text-center p-1">TYPE</th>
                         <th className="text-right p-1">TIME</th>
                         <th className="text-center p-1"></th>
