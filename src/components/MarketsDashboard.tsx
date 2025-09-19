@@ -193,13 +193,15 @@ function formatNumber(num: number): string {
 function formatTokenAge(timestamp: string): string {
   if (!timestamp) return "N/A";
 
-  const deploymentTime = parseInt(timestamp) * 1000; // Convert to milliseconds
+  const deploymentTime = new Date(timestamp).getTime(); // Parse ISO date string
   const now = Date.now();
   const ageInMs = now - deploymentTime;
 
   const days = Math.floor(ageInMs / (1000 * 60 * 60 * 24));
-  const hours = Math.floor(ageInMs / (1000 * 60 * 60));
-  const minutes = Math.floor(ageInMs / (1000 * 60));
+  const remainingMsAfterDays = ageInMs % (1000 * 60 * 60 * 24);
+  const hours = Math.floor(remainingMsAfterDays / (1000 * 60 * 60));
+  const remainingMsAfterHours = remainingMsAfterDays % (1000 * 60 * 60);
+  const minutes = Math.floor(remainingMsAfterHours / (1000 * 60));
 
   if (days > 0) {
     return `${days}d ago`;
