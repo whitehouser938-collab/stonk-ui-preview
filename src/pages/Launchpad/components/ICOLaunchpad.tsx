@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Toast } from "@/components/ui/toast";
 import {
   Rocket,
@@ -117,8 +118,8 @@ export function ICOLaunchpad() {
   const { getETHSigner } = useETHWalletSigner();
   const { toast } = useToast();
   const { isLoading, startLoading, stopLoading } = useLoading();
+  const navigate = useNavigate();
 
-  const [view, setView] = useState("launch");
   const [formData, setFormData] = useState<ICOLaunchData>({
     name: "",
     symbol: "",
@@ -133,9 +134,6 @@ export function ICOLaunchpad() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedView, setSelectedView] = useState("ICO LAUNCHPAD");
   const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
-  const [launchConfirm, setLaunchConfirm] = useState<
-    DeployTokenResponse | undefined
-  >(undefined);
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
@@ -185,9 +183,7 @@ export function ICOLaunchpad() {
   };
 
   const resetLaunchpad = () => {
-    setView("launch");
     resetFormData();
-    setLaunchConfirm(undefined);
     setValidationErrors({});
   };
 
@@ -363,7 +359,6 @@ export function ICOLaunchpad() {
         }
 
         console.log("Token deployed successfully:", deployResponse);
-        setLaunchConfirm(deployResponse);
 
         // Step 2: Add token to database (after successful blockchain transaction)
         const addTokenResponse = await addTokenToDb(
@@ -407,12 +402,16 @@ export function ICOLaunchpad() {
 
         toast({
           title: "Success",
-          description: "Your ICO has been successfully launched!",
+          description:
+            "Your ICO has been successfully launched! Redirecting to token page...",
           variant: "default",
         });
+
+        // Navigate to the newly created token page
+        // Sepolia chain ID is 11155111
+        navigate(`/token/SEP/${deployResponse.tokenAddress}`);
       }
 
-      setView("confirmed");
       stopLoading();
       resetFormData();
     } catch (error) {
@@ -435,192 +434,189 @@ export function ICOLaunchpad() {
         <div className="col-span-1 lg:col-span-8 space-y-3">
           {/* Main Form */}
           <div className="bg-gray-900 border border-gray-700 p-3">
-            {view === "launch" && (
-              <form onSubmit={handleSubmit}>
-                {/* Information */}
-                <div className="space-y-3">
-                  <div className="text-orange-400 mb-3 text-sm sm:text-base">
-                    STONK INFORMATION
-                  </div>
+            <form onSubmit={handleSubmit}>
+              {/* Information */}
+              <div className="space-y-3">
+                <div className="text-orange-400 mb-3 text-sm sm:text-base">
+                  STONK INFORMATION
+                </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <div className="text-gray-400 mb-1">Name *</div>
-                      <input
-                        placeholder="e.g., TechCorp Inc"
-                        value={formData.name}
-                        required
-                        onChange={(e) =>
-                          handleInputChange("name", e.target.value)
-                        }
-                        className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono ${
-                          validationErrors.name
-                            ? "border-red-500"
-                            : "border-gray-600"
-                        }`}
-                      />
-                      {validationErrors.name && (
-                        <div className="text-red-400 text-xs mt-1">
-                          {validationErrors.name}
-                        </div>
-                      )}
-                    </div>
-                    <div className="mb-6">
-                      <div className="text-gray-400 mb-1">Ticker Symbol *</div>
-                      <input
-                        placeholder="e.g., TECH"
-                        value={formData.symbol}
-                        required
-                        onChange={(e) =>
-                          handleInputChange("symbol", e.target.value)
-                        }
-                        className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono ${
-                          validationErrors.symbol
-                            ? "border-red-500"
-                            : "border-gray-600"
-                        }`}
-                      />
-                      {validationErrors.symbol && (
-                        <div className="text-red-400 text-xs mt-1">
-                          {validationErrors.symbol}
-                        </div>
-                      )}
-                    </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <div className="text-gray-400 mb-1">Name *</div>
+                    <input
+                      placeholder="e.g., TechCorp Inc"
+                      value={formData.name}
+                      required
+                      onChange={(e) =>
+                        handleInputChange("name", e.target.value)
+                      }
+                      className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono ${
+                        validationErrors.name
+                          ? "border-red-500"
+                          : "border-gray-600"
+                      }`}
+                    />
+                    {validationErrors.name && (
+                      <div className="text-red-400 text-xs mt-1">
+                        {validationErrors.name}
+                      </div>
+                    )}
+                  </div>
+                  <div className="mb-6">
+                    <div className="text-gray-400 mb-1">Ticker Symbol *</div>
+                    <input
+                      placeholder="e.g., TECH"
+                      value={formData.symbol}
+                      required
+                      onChange={(e) =>
+                        handleInputChange("symbol", e.target.value)
+                      }
+                      className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono ${
+                        validationErrors.symbol
+                          ? "border-red-500"
+                          : "border-gray-600"
+                      }`}
+                    />
+                    {validationErrors.symbol && (
+                      <div className="text-red-400 text-xs mt-1">
+                        {validationErrors.symbol}
+                      </div>
+                    )}
                   </div>
                 </div>
-                {/* Description*/}
-                <div className="mb-6">
-                  <div className="text-gray-400 mb-1">
-                    Company Description *
+              </div>
+              {/* Description*/}
+              <div className="mb-6">
+                <div className="text-gray-400 mb-1">Company Description *</div>
+                <textarea
+                  required
+                  placeholder="Describe your company's business model, competitive advantages, and market opportunity..."
+                  value={formData.description}
+                  onChange={(e) =>
+                    handleInputChange("description", e.target.value)
+                  }
+                  className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono h-20 sm:h-24 ${
+                    validationErrors.description
+                      ? "border-red-500"
+                      : "border-gray-600"
+                  }`}
+                />
+                {validationErrors.description && (
+                  <div className="text-red-400 text-xs mt-1">
+                    {validationErrors.description}
                   </div>
-                  <textarea
-                    required
-                    placeholder="Describe your company's business model, competitive advantages, and market opportunity..."
-                    value={formData.description}
+                )}
+              </div>
+              {/* Logo Upload and Social Links */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                <div>
+                  <div className="text-gray-400 mb-1">
+                    Logo Upload (Image/GIF) *
+                  </div>
+                  <div className="space-y-2">
+                    <input
+                      type="file"
+                      accept="image/*,.gif"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        handleFileChange(file || null);
+                      }}
+                      className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-orange-600 file:text-white hover:file:bg-orange-700 ${
+                        validationErrors.logoFile
+                          ? "border-red-500"
+                          : "border-gray-600"
+                      }`}
+                    />
+                    {validationErrors.logoFile && (
+                      <div className="text-red-400 text-xs mt-1">
+                        {validationErrors.logoFile}
+                      </div>
+                    )}
+                    {formData.logoFile && (
+                      <div className="relative">
+                        <img
+                          src={
+                            logoPreviewUrl ||
+                            URL.createObjectURL(formData.logoFile)
+                          }
+                          alt="Logo preview"
+                          className="w-16 h-16 object-cover border border-gray-600 rounded"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleFileChange(null)}
+                          className="absolute -top-1 -right-1 bg-red-600 hover:bg-red-700 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-gray-400 mb-1">Website URL</div>
+                  <input
+                    placeholder="https://yourcompany.com"
+                    value={formData.website}
                     onChange={(e) =>
-                      handleInputChange("description", e.target.value)
+                      handleInputChange("website", e.target.value)
                     }
-                    className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono h-20 sm:h-24 ${
-                      validationErrors.description
+                    className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono ${
+                      validationErrors.website
                         ? "border-red-500"
                         : "border-gray-600"
                     }`}
                   />
-                  {validationErrors.description && (
+                  {validationErrors.website && (
                     <div className="text-red-400 text-xs mt-1">
-                      {validationErrors.description}
+                      {validationErrors.website}
                     </div>
                   )}
                 </div>
-                {/* Logo Upload and Social Links */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-                  <div>
-                    <div className="text-gray-400 mb-1">
-                      Logo Upload (Image/GIF) *
+                <div>
+                  <div className="text-gray-400 mb-1">Twitter URL</div>
+                  <input
+                    placeholder="https://x.com/your_company"
+                    value={formData.twitterUrl}
+                    onChange={(e) =>
+                      handleInputChange("twitterUrl", e.target.value)
+                    }
+                    className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono ${
+                      validationErrors.twitterUrl
+                        ? "border-red-500"
+                        : "border-gray-600"
+                    }`}
+                  />
+                  {validationErrors.twitterUrl && (
+                    <div className="text-red-400 text-xs mt-1">
+                      {validationErrors.twitterUrl}
                     </div>
-                    <div className="space-y-2">
-                      <input
-                        type="file"
-                        accept="image/*,.gif"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          handleFileChange(file || null);
-                        }}
-                        className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-orange-600 file:text-white hover:file:bg-orange-700 ${
-                          validationErrors.logoFile
-                            ? "border-red-500"
-                            : "border-gray-600"
-                        }`}
-                      />
-                      {validationErrors.logoFile && (
-                        <div className="text-red-400 text-xs mt-1">
-                          {validationErrors.logoFile}
-                        </div>
-                      )}
-                      {formData.logoFile && (
-                        <div className="relative">
-                          <img
-                            src={
-                              logoPreviewUrl ||
-                              URL.createObjectURL(formData.logoFile)
-                            }
-                            alt="Logo preview"
-                            className="w-16 h-16 object-cover border border-gray-600 rounded"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => handleFileChange(null)}
-                            className="absolute -top-1 -right-1 bg-red-600 hover:bg-red-700 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
-                          >
-                            ×
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-gray-400 mb-1">Website URL</div>
-                    <input
-                      placeholder="https://yourcompany.com"
-                      value={formData.website}
-                      onChange={(e) =>
-                        handleInputChange("website", e.target.value)
-                      }
-                      className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono ${
-                        validationErrors.website
-                          ? "border-red-500"
-                          : "border-gray-600"
-                      }`}
-                    />
-                    {validationErrors.website && (
-                      <div className="text-red-400 text-xs mt-1">
-                        {validationErrors.website}
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <div className="text-gray-400 mb-1">Twitter URL</div>
-                    <input
-                      placeholder="https://x.com/your_company"
-                      value={formData.twitterUrl}
-                      onChange={(e) =>
-                        handleInputChange("twitterUrl", e.target.value)
-                      }
-                      className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono ${
-                        validationErrors.twitterUrl
-                          ? "border-red-500"
-                          : "border-gray-600"
-                      }`}
-                    />
-                    {validationErrors.twitterUrl && (
-                      <div className="text-red-400 text-xs mt-1">
-                        {validationErrors.twitterUrl}
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <div className="text-gray-400 mb-1">Telegram URL</div>
-                    <input
-                      placeholder="https://t.me/your_company"
-                      value={formData.telegramUrl}
-                      onChange={(e) =>
-                        handleInputChange("telegramUrl", e.target.value)
-                      }
-                      className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono ${
-                        validationErrors.telegramUrl
-                          ? "border-red-500"
-                          : "border-gray-600"
-                      }`}
-                    />
-                    {validationErrors.telegramUrl && (
-                      <div className="text-red-400 text-xs mt-1">
-                        {validationErrors.telegramUrl}
-                      </div>
-                    )}
-                  </div>
+                  )}
                 </div>
-                {/* Shares */}
-                {/* <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+                <div>
+                  <div className="text-gray-400 mb-1">Telegram URL</div>
+                  <input
+                    placeholder="https://t.me/your_company"
+                    value={formData.telegramUrl}
+                    onChange={(e) =>
+                      handleInputChange("telegramUrl", e.target.value)
+                    }
+                    className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono ${
+                      validationErrors.telegramUrl
+                        ? "border-red-500"
+                        : "border-gray-600"
+                    }`}
+                  />
+                  {validationErrors.telegramUrl && (
+                    <div className="text-red-400 text-xs mt-1">
+                      {validationErrors.telegramUrl}
+                    </div>
+                  )}
+                </div>
+              </div>
+              {/* Shares */}
+              {/* <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
                   <div>
                     <div className="text-gray-400 mb-1">Shares Offered</div>
                     <input
@@ -637,81 +633,44 @@ export function ICOLaunchpad() {
                     />
                   </div>
                 </div> */}
-                {/* Launchpad Section */}
-                <div className="mb-6">
-                  <div className="text-gray-400 mb-1">Launchpad</div>
-                  <div className="flex items-center space-x-4">
-                    <label className="flex items-center space-x-2">
-                      <input
-                        required
-                        type="radio"
-                        name="launchpad"
-                        value="SEP"
-                        checked={formData.launchpad === "SEP"}
-                        onChange={(e) =>
-                          handleInputChange("launchpad", e.target.value)
-                        }
-                        className="form-radio text-blue-500"
-                      />
-                      <span className="text-white text-sm">
-                        Sepolia Testnet
-                      </span>
-                    </label>
-                  </div>
+              {/* Launchpad Section */}
+              <div className="mb-6">
+                <div className="text-gray-400 mb-1">Launchpad</div>
+                <div className="flex items-center space-x-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      required
+                      type="radio"
+                      name="launchpad"
+                      value="SEP"
+                      checked={formData.launchpad === "SEP"}
+                      onChange={(e) =>
+                        handleInputChange("launchpad", e.target.value)
+                      }
+                      className="form-radio text-blue-500"
+                    />
+                    <span className="text-white text-sm">Sepolia Testnet</span>
+                  </label>
                 </div>
-                <div className="flex flex-col sm:flex-row justify-between mt-4 gap-2">
-                  <button
-                    type="submit"
-                    disabled={isValidating || isLoading}
-                    className={`px-4 py-2 text-black text-xs sm:text-sm font-bold order-1 sm:order-2 ${
-                      isValidating || isLoading
-                        ? "bg-gray-600 cursor-not-allowed"
-                        : "bg-green-600 hover:bg-green-700"
-                    }`}
-                  >
-                    {isValidating
-                      ? "VALIDATING..."
-                      : isLoading
-                      ? "PROCESSING..."
-                      : "SUBMIT ICO"}
-                  </button>
-                </div>
-              </form>
-            )}
-            {view === "confirmed" && (
-              <div className="text-green-400 text-sm sm:text-base">
-                <Rocket className="inline-block mr-1" />
-                Your ICO has been successfully submitted!
-                <div className="mt-2">
-                  <div className="text-gray-400">Transaction Hash:</div>
-                  <a
-                    href={`https://etherscan.io/tx/${launchConfirm?.transactionHash}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 hover:underline"
-                  >
-                    {launchConfirm?.transactionHash}
-                  </a>
-                </div>
-                <div className="mt-2">
-                  <div className="text-gray-400">Token Address:</div>
-                  <a
-                    href={`https://etherscan.io/address/${launchConfirm?.tokenAddress}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 hover:underline"
-                  >
-                    {launchConfirm?.tokenAddress}
-                  </a>
-                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row justify-between mt-4 gap-2">
                 <button
-                  onClick={() => resetLaunchpad()}
-                  className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold"
+                  type="submit"
+                  disabled={isValidating || isLoading}
+                  className={`px-4 py-2 text-black text-xs sm:text-sm font-bold order-1 sm:order-2 ${
+                    isValidating || isLoading
+                      ? "bg-gray-600 cursor-not-allowed"
+                      : "bg-green-600 hover:bg-green-700"
+                  }`}
                 >
-                  LAUNCH ANOTHER
+                  {isValidating
+                    ? "VALIDATING..."
+                    : isLoading
+                    ? "PROCESSING..."
+                    : "SUBMIT ICO"}
                 </button>
               </div>
-            )}
+            </form>
           </div>
           {/* Support */}
           <div className="bg-gray-900 border border-gray-700 p-2">
