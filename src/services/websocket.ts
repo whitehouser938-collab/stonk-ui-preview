@@ -17,7 +17,7 @@ class WebSocketManager {
 
       try {
         this.ws = new WebSocket(
-          import.meta.env.VITE_WEBSOCKET_URL || "ws://localhost:3000"
+          import.meta.env.VITE_WEBSOCKET_URL || "ws://localhost:3003"
         );
 
         this.ws.onopen = () => {
@@ -172,7 +172,7 @@ class WebSocketManager {
   }
 
   unsubscribeTrades(address: string, chain: string) {
-    const channel = `token_trades:${address}:${chain}`;
+    const channel = `token_trades:${chain}:${address}`;
 
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(
