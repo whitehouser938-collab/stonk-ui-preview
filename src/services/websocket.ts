@@ -172,7 +172,7 @@ class WebSocketManager {
   }
 
   unsubscribeTrades(address: string, chain: string) {
-    const channel = `token_trades:${chain}:${address}`;
+    const channel = `token_trades:${chain}:${address}`; 
 
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(
