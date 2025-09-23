@@ -16,12 +16,16 @@ export function useTradeUpdates(
   }, [onTradeUpdate]);
 
   const handleTradeUpdate = useCallback((data: TradeUpdateMessage) => {
+    console.log(`[useTradeUpdates] Received trade update:`, data);
     if (
       data.type === "trades" &&
       Array.isArray(data.trades) &&
       data.trades.length > 0
     ) {
+      console.log(`[useTradeUpdates] Processing ${data.trades.length} trades`);
       onTradeUpdateRef.current(data.trades);
+    } else {
+      console.log(`[useTradeUpdates] Invalid trade data:`, data);
     }
   }, []);
 

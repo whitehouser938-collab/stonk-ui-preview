@@ -7,6 +7,10 @@ class WebSocketManager {
   private reconnectDelay = 1000;
   private subscriptions = new Set<string>();
   private messageHandlers = new Map<string, (data: any) => void>();
+  private isConnecting = false;
+  private connectionState: "disconnected" | "connecting" | "connected" =
+    "disconnected";
+  private healthCheckInterval: NodeJS.Timeout | null = null;
 
   connect(): Promise<WebSocket> {
     return new Promise((resolve, reject) => {
@@ -15,25 +19,82 @@ class WebSocketManager {
         return;
       }
 
+      if (this.isConnecting) {
+        // If already connecting, wait for the current connection attempt
+        const checkConnection = () => {
+          if (this.connectionState === "connected" && this.ws) {
+            resolve(this.ws);
+          } else if (this.connectionState === "disconnected") {
+            reject(new Error("Connection failed"));
+          } else {
+            setTimeout(checkConnection, 100);
+          }
+        };
+        checkConnection();
+        return;
+      }
+
+      this.isConnecting = true;
+      this.connectionState = "connecting";
+
       try {
         this.ws = new WebSocket(
-          import.meta.env.VITE_WEBSOCKET_URL || "ws://localhost:3003"
+          import.meta.env.VITE_WEBSOCKET_URL || "ws://localhost:3000"
         );
 
         this.ws.onopen = () => {
           console.log("WebSocket connected");
+          console.log("WebSocket ready state:", this.ws?.readyState);
           this.reconnectAttempts = 0;
+          this.isConnecting = false;
+          this.connectionState = "connected";
 
           // Resubscribe to existing subscriptions
           this.subscriptions.forEach((channel) => {
             this.resubscribe(channel);
           });
 
+          // Start health check
+          this.startHealthCheck();
+
           resolve(this.ws!);
+        };
+
+        // Handle ping frames from server
+        this.ws.onping = (event) => {
+          console.log("[WebSocket] Received ping from server");
+          if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.pong();
+          }
+        };
+
+        // Handle pong frames from server (acknowledgment)
+        this.ws.onpong = (event) => {
+          console.log("[WebSocket] Received pong from server");
         };
 
         this.ws.onmessage = (event) => {
           try {
+            // Handle ping/pong frames explicitly
+            if (typeof event.data !== "string") {
+              // Handle binary frames (ping/pong)
+              if (event.data instanceof ArrayBuffer) {
+                // This is likely a ping frame, respond with pong
+                if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                  this.ws.send(event.data);
+                }
+              }
+              return;
+            }
+
+            // Check if it's a ping frame (some servers send "ping" as text)
+            if (event.data === "ping") {
+              if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                this.ws.send("pong");
+              }
+              return;
+            }
+
             const message = JSON.parse(event.data);
             console.log("[WebSocket] Received message:", message);
             this.handleMessage(message);
@@ -44,11 +105,16 @@ class WebSocketManager {
 
         this.ws.onclose = (event) => {
           console.log("WebSocket disconnected:", event.code, event.reason);
+          console.log("Close was clean:", event.wasClean);
+          this.isConnecting = false;
+          this.connectionState = "disconnected";
           this.handleReconnection();
         };
 
         this.ws.onerror = (error) => {
           console.error("WebSocket error:", error);
+          this.isConnecting = false;
+          this.connectionState = "disconnected";
           reject(error);
         };
       } catch (error) {
@@ -72,21 +138,62 @@ class WebSocketManager {
     }
   }
 
+  private startHealthCheck() {
+    if (this.healthCheckInterval) {
+      clearInterval(this.healthCheckInterval);
+    }
+
+    this.healthCheckInterval = setInterval(() => {
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        console.log("[WebSocket] Health check: Connection is alive");
+      } else {
+        console.log(
+          "[WebSocket] Health check: Connection is dead, state:",
+          this.ws?.readyState
+        );
+        this.connectionState = "disconnected";
+        this.handleReconnection();
+      }
+    }, 15000); // Check every 15 seconds (less frequent than server ping)
+  }
+
+  private stopHealthCheck() {
+    if (this.healthCheckInterval) {
+      clearInterval(this.healthCheckInterval);
+      this.healthCheckInterval = null;
+    }
+  }
+
   private handleReconnection() {
+    this.stopHealthCheck();
+
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
-      const delay =
-        this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
+      const delay = Math.min(
+        this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1),
+        30000 // Max 30 second delay
+      );
 
       console.log(
         `Attempting to reconnect in ${delay}ms (attempt ${this.reconnectAttempts})`
       );
 
       setTimeout(() => {
-        this.connect().catch(console.error);
+        this.connect().catch((error) => {
+          console.error("Reconnection failed:", error);
+          // Continue trying even if this attempt fails
+          this.handleReconnection();
+        });
       }, delay);
     } else {
-      console.error("Max reconnection attempts reached");
+      console.error(
+        "Max reconnection attempts reached, will retry in 60 seconds"
+      );
+      // Reset attempts after 60 seconds to allow for network recovery
+      setTimeout(() => {
+        this.reconnectAttempts = 0;
+        this.handleReconnection();
+      }, 60000);
     }
   }
 
@@ -212,6 +319,7 @@ class WebSocketManager {
   }
 
   disconnect() {
+    this.stopHealthCheck();
     this.subscriptions.clear();
     this.messageHandlers.clear();
 
@@ -219,6 +327,17 @@ class WebSocketManager {
       this.ws.close();
       this.ws = null;
     }
+  }
+
+  getConnectionState() {
+    return {
+      state: this.connectionState,
+      readyState: this.ws?.readyState,
+      isConnecting: this.isConnecting,
+      reconnectAttempts: this.reconnectAttempts,
+      subscriptions: this.subscriptions.size,
+      handlers: this.messageHandlers.size,
+    };
   }
 }
 
