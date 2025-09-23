@@ -35,6 +35,7 @@ class WebSocketManager {
         this.ws.onmessage = (event) => {
           try {
             const message = JSON.parse(event.data);
+            console.log("[WebSocket] Received message:", message);
             this.handleMessage(message);
           } catch (error) {
             console.error("Failed to parse WebSocket message:", error);
@@ -57,9 +58,17 @@ class WebSocketManager {
   }
 
   private handleMessage(message: any) {
+    console.log("[WebSocket] Handling message for channel:", message.channel);
     const handler = this.messageHandlers.get(message.channel);
     if (handler) {
+      console.log("[WebSocket] Found handler for channel:", message.channel);
       handler(message);
+    } else {
+      console.log("[WebSocket] No handler found for channel:", message.channel);
+      console.log(
+        "[WebSocket] Available handlers:",
+        Array.from(this.messageHandlers.keys())
+      );
     }
   }
 
@@ -152,19 +161,32 @@ class WebSocketManager {
   ): () => void {
     const channel = `token_trades:${chain}:${address}`;
 
+    console.log(
+      `[WebSocket] Subscribing to trades - Address: ${address}, Chain: ${chain}, Channel: ${channel}`
+    );
+
     this.connect()
       .then((ws) => {
-        ws.send(
-          JSON.stringify({
-            type: "subscribeTrades",
-            channel,
-          })
+        const subscribeMessage = {
+          type: "subscribeTrades",
+          channel,
+        };
+
+        console.log(
+          `[WebSocket] Sending subscription message:`,
+          subscribeMessage
         );
+        ws.send(JSON.stringify(subscribeMessage));
 
         this.subscriptions.add(channel);
         this.messageHandlers.set(channel, onUpdate);
 
-        console.log(`Subscribed to trades on channel: ${channel}`);
+        console.log(`[WebSocket] Subscribed to trades on channel: ${channel}`);
+        console.log(
+          `[WebSocket] Total subscriptions:`,
+          this.subscriptions.size
+        );
+        console.log(`[WebSocket] Total handlers:`, this.messageHandlers.size);
       })
       .catch(console.error);
 
@@ -172,7 +194,7 @@ class WebSocketManager {
   }
 
   unsubscribeTrades(address: string, chain: string) {
-    const channel = `token_trades:${chain}:${address}`; 
+    const channel = `token_trades:${chain}:${address}`;
 
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(

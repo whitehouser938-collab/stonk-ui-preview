@@ -6,6 +6,7 @@ import {
   TrendingUp,
   Rocket,
   Trophy,
+  User,
   Menu,
   X,
 } from "lucide-react";
@@ -20,6 +21,7 @@ const navItems = [
   { path: "/research", label: "Research", icon: Search },
   { path: "/launchpad", label: "Launchpad", icon: Rocket },
   { path: "/leaderboard", label: "Leaderboard", icon: Trophy },
+  { path: "/profile", label: "Profile", icon: User },
 ];
 
 interface LayoutProps {

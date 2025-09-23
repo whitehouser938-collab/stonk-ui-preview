@@ -14,11 +14,14 @@ interface StockData {
 }
 
 interface TokenData {
+  id: string;
   symbol: string;
   name: string;
   tokenAddress: string;
   chain: string;
-  isGraduated: boolean;
+  graduated: boolean;
+  uniswapPairAddress?: string;
+  graduationTimestamp?: string;
   logoUrl?: string;
   curveStatus?: {
     progress: number;
@@ -214,6 +217,22 @@ function formatTokenAge(timestamp: string): string {
   }
 }
 
+function formatShortSince(timestamp?: string): string {
+  if (!timestamp) return "N/A";
+  const t = new Date(timestamp).getTime();
+  const now = Date.now();
+  const diff = Math.max(0, now - t);
+  const dayMs = 1000 * 60 * 60 * 24;
+  const hourMs = 1000 * 60 * 60;
+  const minMs = 1000 * 60;
+  const days = Math.floor(diff / dayMs);
+  if (days > 0) return `${days}d`;
+  const hours = Math.floor((diff % dayMs) / hourMs);
+  if (hours > 0) return `${hours}h`;
+  const mins = Math.floor((diff % hourMs) / minMs);
+  return `${mins}m`;
+}
+
 function Sparkline({
   data,
   isPositive,
@@ -389,9 +408,14 @@ export function MarketsDashboard() {
                           <span className="text-gray-400 text-xs">
                             {token.chain}
                           </span>
-                          {token.isGraduated && (
+                          {token.graduated && (
                             <span className="bg-green-600 text-white px-1 py-0.5 rounded text-xs">
                               GRAD
+                            </span>
+                          )}
+                          {!token.graduated && (
+                            <span className="bg-purple-600 text-white px-1 py-0.5 rounded text-xs">
+                              BOND
                             </span>
                           )}
                         </div>
@@ -405,7 +429,7 @@ export function MarketsDashboard() {
                           : "N/A"}
                       </td>
                       <td className="p-1 text-right text-gray-400">
-                        {token.isGraduated
+                        {token.graduated
                           ? "N/A"
                           : `${token.curveStatus?.progress?.toFixed(2) || 0}%`}
                       </td>
@@ -467,6 +491,82 @@ export function MarketsDashboard() {
             ))}
           </div>
 
+          {/* Graduated Tokens */}
+          <div className="bg-gray-900 border border-gray-700 p-1">
+            <div className="text-orange-400 text-xs mb-1">GRADUATED TOKENS</div>
+            <div className="overflow-y-auto max-h-48">
+              <table className="w-full text-xs">
+                <thead className="bg-gray-800 sticky top-0">
+                  <tr className="text-gray-400">
+                    <th className="text-left p-1">Symbol</th>
+                    <th className="text-right p-1">MCAP</th>
+                    <th className="text-right p-1">GRAD TIME</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tokens
+                    .filter((token) => token.graduated)
+                    .sort((a, b) => {
+                      if (!a.graduationTimestamp || !b.graduationTimestamp)
+                        return 0;
+                      return (
+                        new Date(b.graduationTimestamp).getTime() -
+                        new Date(a.graduationTimestamp).getTime()
+                      );
+                    })
+                    .slice(0, 10)
+                    .map((token) => (
+                      <tr
+                        key={token.tokenAddress}
+                        className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors cursor-pointer"
+                        onClick={() => handleTokenClick(token)}
+                      >
+                        <td className="p-1">
+                          <div className="flex items-center space-x-2">
+                            {token.logoUrl ? (
+                              <img
+                                src={token.logoUrl}
+                                alt={`${token.symbol} logo`}
+                                className="w-4 h-4 rounded-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = "none";
+                                  e.currentTarget.nextElementSibling?.classList.remove(
+                                    "hidden"
+                                  );
+                                }}
+                              />
+                            ) : null}
+                            <Circle
+                              className={`w-4 h-4 text-green-400 ${
+                                token.logoUrl ? "hidden" : ""
+                              }`}
+                            />
+                            <span className="text-white font-bold">
+                              {token.symbol}
+                            </span>
+                            <span className="text-gray-400 text-xs">
+                              {token.chain}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="p-1 text-right text-gray-400">TODO</td>
+                        <td className="p-1 text-right text-gray-400">
+                          {formatShortSince(token.graduationTimestamp)}
+                        </td>
+                      </tr>
+                    ))}
+                  {tokens.filter((token) => token.graduated).length === 0 && (
+                    <tr>
+                      <td colSpan={3} className="text-center p-4 text-gray-400">
+                        No graduated tokens found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           {/* Bonding Curve Progress */}
           <div className="bg-gray-900 border border-gray-700 p-1">
             <div className="text-orange-400 text-xs mb-1">
@@ -479,30 +579,31 @@ export function MarketsDashboard() {
               <div className="text-gray-400">MCAP</div>
 
               {/* Bonding Curve Tokens */}
-              {bondingCurveVolumeData.slice(0, 6).map((token) => (
-                <div key={token.tokenAddress} className="contents">
-                  <div className="text-white flex items-center space-x-1">
-                    <Circle className="w-3 h-3 text-blue-400" />
-                    <span>{token.symbol}</span>
+              {tokens
+                .filter((token) => !token.graduated)
+                .sort((a, b) => {
+                  if (!a.deploymentTimestamp || !b.deploymentTimestamp)
+                    return 0;
+                  return (
+                    new Date(b.deploymentTimestamp).getTime() -
+                    new Date(a.deploymentTimestamp).getTime()
+                  );
+                })
+                .slice(0, 6)
+                .map((token) => (
+                  <div key={token.tokenAddress} className="contents">
+                    <div className="text-white flex items-center space-x-1">
+                      <Circle className="w-3 h-3 text-blue-400" />
+                      <span>{token.symbol}</span>
+                    </div>
+                    <div className="text-green-400">TODO</div>
+                    <div className="text-gray-400">TODO</div>
+                    <div className="text-gray-400">TODO</div>
                   </div>
-                  <div className="text-green-400">
-                    {/* Progress would need to be calculated from bonding curve data */}
-                    N/A
-                  </div>
-                  <div className="text-gray-400">
-                    {token.volume24h
-                      ? formatNumber(Number(token.volume24h))
-                      : "N/A"}
-                  </div>
-                  <div className="text-gray-400">
-                    {/* Market cap would need to be calculated from bonding curve data */}
-                    N/A
-                  </div>
-                </div>
-              ))}
+                ))}
 
               {/* Show message if no bonding curve tokens */}
-              {bondingCurveVolumeData.length === 0 && (
+              {tokens.filter((token) => !token.graduated).length === 0 && (
                 <div className="col-span-4 text-center text-gray-400 py-2">
                   No bonding curve tokens found
                 </div>

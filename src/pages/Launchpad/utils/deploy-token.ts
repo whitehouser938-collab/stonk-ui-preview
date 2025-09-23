@@ -28,15 +28,15 @@ export const deployTokenETH = async (
       );
 
       // Get the fee price and log it
-      const fee = await tokenFactory.feePrice();
-      console.log("Deployment fee:", ethers.formatEther(fee), "ETH");
-      console.log("Fee in wei:", fee.toString());
+      // const fee = await tokenFactory.feePrice();
+      // console.log("Deployment fee:", ethers.formatEther(fee), "ETH");
+      // console.log("Fee in wei:", fee.toString());
 
       // Deploy token transaction
       const tx = await tokenFactory.deployToken(
         tokenData.name,
-        tokenData.symbol,
-        { value: fee }
+        tokenData.symbol
+        // { value: fee }
       );
 
       const receipt = await tx.wait(); // Wait for the transaction to be mined

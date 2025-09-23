@@ -26,6 +26,7 @@ import Markets from "./pages/Markets";
 import Research from "./pages/Research";
 import Launchpad from "./pages/Launchpad/Launchpad";
 import Leaderboard from "./pages/Leaderboard";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import TokenDetail from "./pages/TokenDetail/TokenDetail";
 
@@ -87,6 +88,7 @@ const App = () => (
             />
             <Route path="/launchpad" element={<Launchpad />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/profile" element={<Profile />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

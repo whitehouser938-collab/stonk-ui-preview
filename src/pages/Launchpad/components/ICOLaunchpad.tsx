@@ -21,6 +21,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useLoading } from "@/hooks/use-loading";
 import LoadingScreen from "@/components/ui/loading";
 import { updateTokenLogoUrl, uploadTokenLogo } from "@/api/token";
+import { useAppKitAccount } from "@reown/appkit/react";
+import { WalletConnectionPrompt } from "@/components/WalletConnectionPrompt";
 
 export interface ICOLaunchData {
   name: string;
@@ -119,6 +121,9 @@ export function ICOLaunchpad() {
   const { toast } = useToast();
   const { isLoading, startLoading, stopLoading } = useLoading();
   const navigate = useNavigate();
+  const { isConnected: isEthConnected } = useAppKitAccount({
+    namespace: "eip155",
+  });
 
   const [formData, setFormData] = useState<ICOLaunchData>({
     name: "",
@@ -424,6 +429,57 @@ export function ICOLaunchpad() {
       stopLoading();
     }
   };
+
+  // Show wallet connection prompt if not connected
+  if (!isEthConnected) {
+    return (
+      <div className="bg-black text-gray-100 text-xs font-mono">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 p-1">
+          <div className="col-span-1 lg:col-span-8">
+            <WalletConnectionPrompt
+              title="Connect Wallet to Launch"
+              description="Connect your wallet to launch your ICO and create tokens"
+              actionText="Connect Wallet"
+            />
+          </div>
+          <div className="col-span-1 lg:col-span-4 space-y-1">
+            {/* Market Stats - show even when wallet not connected */}
+            <div className="bg-gray-900 border border-gray-700 p-2">
+              <div className="text-orange-400 mb-2 text-sm sm:text-base">
+                IPO MARKET STATS (YTD)
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
+                <div className="bg-black border border-gray-800 p-2">
+                  <div className="text-gray-400">TOTAL IPOs</div>
+                  <div className="text-white font-mono text-sm sm:text-base">
+                    {marketStats.totalIPOs}
+                  </div>
+                </div>
+                <div className="bg-black border border-gray-800 p-2">
+                  <div className="text-gray-400">TOTAL RAISED</div>
+                  <div className="text-white font-mono text-sm sm:text-base">
+                    ${(marketStats.totalRaised / 1e9).toFixed(1)}B
+                  </div>
+                </div>
+                <div className="bg-black border border-gray-800 p-2">
+                  <div className="text-gray-400">AVG RETURN</div>
+                  <div className="text-green-400 font-mono text-sm sm:text-base">
+                    +{marketStats.avgReturn.toFixed(1)}%
+                  </div>
+                </div>
+                <div className="bg-black border border-gray-800 p-2">
+                  <div className="text-gray-400">SUCCESS RATE</div>
+                  <div className="text-green-400 font-mono text-sm sm:text-base">
+                    {marketStats.successRate.toFixed(1)}%
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-black text-gray-100 text-xs font-mono">

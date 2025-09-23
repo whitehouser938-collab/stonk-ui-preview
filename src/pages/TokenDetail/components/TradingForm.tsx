@@ -7,6 +7,10 @@ import { sellTokenETH, buyTokenETH } from "../utils/trade-token";
 import { useETHWalletSigner } from "@/hooks/signers/useWalletSigner";
 import { useToast } from "@/hooks/use-toast";
 import { ethers } from "ethers";
+import {
+  WalletConnectionPrompt,
+  WalletRequiredAlert,
+} from "@/components/WalletConnectionPrompt";
 // Direct contract calls - no API imports needed
 
 const MaxUint256 = ethers.MaxUint256;
@@ -442,6 +446,20 @@ const TradingForm = (props: TradingFormProps) => {
     }
   };
 
+  // Show wallet connection prompt if not connected
+  if (!isWalletConnected) {
+    return (
+      <div className="p-2 bg-gray-900 border border-gray-700">
+        <WalletConnectionPrompt
+          title="Connect Wallet to Trade"
+          description="Connect your wallet to buy and sell tokens"
+          actionText="Connect Wallet"
+          variant="compact"
+        />
+      </div>
+    );
+  }
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -686,11 +704,6 @@ const TradingForm = (props: TradingFormProps) => {
       )}
 
       {/* Submit Button */}
-      {!isWalletConnected && (
-        <div className="text-red-500 text-sm">
-          Please connect your wallet to trade.
-        </div>
-      )}
       {/* Approve button for buy mode if allowance is insufficient */}
       {isBuy &&
       paymentMethod === "WETH" &&
@@ -709,7 +722,7 @@ const TradingForm = (props: TradingFormProps) => {
         // Note: Token approval for selling is now handled automatically in sellTokens function
         <button
           type="submit"
-          disabled={!isWalletConnected || isLoading}
+          disabled={isLoading}
           className={`w-full p-3 text-sm font-bold transition-all duration-200 ${
             isBuy
               ? "bg-green-600 hover:bg-green-700 text-black"

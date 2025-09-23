@@ -49,11 +49,13 @@ const TokenPage = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const handleTradeUpdate = useCallback((newTrades: TradeData[]) => {
-    // There are no trades before a trade message from websocket
-    if (trades.length <= 0 && newTrades.length > 0)
-      setLastTrade(newTrades[newTrades.length - 1]);
+    console.log(`[TokenPage] Received trade update:`, newTrades);
 
     setTrades((prevTrades) => {
+      // There are no trades before a trade message from websocket
+      if (prevTrades.length <= 0 && newTrades.length > 0)
+        setLastTrade(newTrades[newTrades.length - 1]);
+
       // Add new trades to the beginning and remove duplicates (Probably no need to remove duplicates because theres a high chance there won't be any)
       const combinedTrades = [...newTrades, ...prevTrades];
       const uniqueTrades = combinedTrades.filter(
