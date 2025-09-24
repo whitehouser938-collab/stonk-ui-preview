@@ -406,10 +406,10 @@ export function ICOLaunchpad() {
         }
 
         toast({
-          title: "Success",
+          title: "Token Deployed",
           description:
-            "Your ICO has been successfully launched! Redirecting to token page...",
-          variant: "default",
+            "Your ICO has been launched. Redirecting to the token page...",
+          variant: "info",
         });
 
         // Navigate to the newly created token page
