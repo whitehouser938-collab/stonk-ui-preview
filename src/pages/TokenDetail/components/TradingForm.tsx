@@ -394,9 +394,9 @@ const TradingForm = (props: TradingFormProps) => {
       console.log("Trade response:", tradeResponse);
       if (tradeResponse && tradeResponse.success) {
         toast({
-          title: "Trade Successful",
+          title: isBuy ? "Buy Successful" : "Sell Successful",
           description: `Transaction Hash: ${tradeResponse.transactionHash}`,
-          variant: "default",
+          variant: isBuy ? "success" : "softDestructive",
         });
         // Clear input after successful trade
         setAmount("");

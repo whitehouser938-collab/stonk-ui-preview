@@ -207,25 +207,8 @@ const TokenPage = () => {
     { time: "12:45", price: 182.85 },
   ];
 
-  const financialData = {
-    revenue: 394328000000,
-    netIncome: 99803000000,
-    grossMargin: 44.13,
-    operatingMargin: 29.78,
-    profitMargin: 25.31,
-    roe: 147.25,
-    roa: 28.09,
-    currentRatio: 0.98,
-    debtToEquity: 1.73,
-    freeCashFlow: 84726000000,
-  };
-
-  function formatNumber(num: number): string {
-    if (num >= 1e9) return (num / 1e9).toFixed(2) + "B";
-    if (num >= 1e6) return (num / 1e6).toFixed(2) + "M";
-    if (num >= 1e3) return (num / 1e3).toFixed(2) + "K";
-    return num.toFixed(2);
-  }
+  // Removed legacy financial mock data & formatter; token page now shows
+  // crypto-centric metrics with placeholders to be wired up later.
   const [searchTerm, setSearchTerm] = useState("");
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedView, setSelectedView] = useState("EQUITY RESEARCH");
@@ -636,52 +619,28 @@ const TokenPage = () => {
               <div className="text-orange-400 mb-2">FINANCIAL METRICS</div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 text-xs">
                 <div className="bg-black border border-gray-800 p-2">
-                  <div className="text-gray-400">REVENUE (TTM)</div>
-                  <div className="text-white font-mono text-sm">
-                    ${formatNumber(financialData.revenue)}
-                  </div>
+                  <div className="text-gray-400">MARKET CAP</div>
+                  <div className="text-white font-mono text-sm">TODO</div>
                 </div>
                 <div className="bg-black border border-gray-800 p-2">
-                  <div className="text-gray-400">NET INCOME</div>
-                  <div className="text-white font-mono text-sm">
-                    ${formatNumber(financialData.netIncome)}
-                  </div>
+                  <div className="text-gray-400">LIQUIDITY</div>
+                  <div className="text-white font-mono text-sm">TODO</div>
                 </div>
                 <div className="bg-black border border-gray-800 p-2">
-                  <div className="text-gray-400">GROSS MARGIN</div>
-                  <div className="text-white font-mono text-sm">
-                    {financialData.grossMargin.toFixed(2)}%
-                  </div>
+                  <div className="text-gray-400">FDV</div>
+                  <div className="text-white font-mono text-sm">TODO</div>
                 </div>
                 <div className="bg-black border border-gray-800 p-2">
-                  <div className="text-gray-400">PROFIT MARGIN</div>
-                  <div className="text-white font-mono text-sm">
-                    {financialData.profitMargin.toFixed(2)}%
-                  </div>
+                  <div className="text-gray-400">PRICE (USD)</div>
+                  <div className="text-white font-mono text-sm">TODO</div>
                 </div>
                 <div className="bg-black border border-gray-800 p-2">
-                  <div className="text-gray-400">ROE</div>
-                  <div className="text-white font-mono text-sm">
-                    {financialData.roe.toFixed(2)}%
-                  </div>
+                  <div className="text-gray-400">HOLDERS</div>
+                  <div className="text-white font-mono text-sm">TODO</div>
                 </div>
                 <div className="bg-black border border-gray-800 p-2">
-                  <div className="text-gray-400">ROA</div>
-                  <div className="text-white font-mono text-sm">
-                    {financialData.roa.toFixed(2)}%
-                  </div>
-                </div>
-                <div className="bg-black border border-gray-800 p-2">
-                  <div className="text-gray-400">DEBT/EQUITY</div>
-                  <div className="text-white font-mono text-sm">
-                    {financialData.debtToEquity.toFixed(2)}
-                  </div>
-                </div>
-                <div className="bg-black border border-gray-800 p-2">
-                  <div className="text-gray-400">FREE CASH FLOW</div>
-                  <div className="text-white font-mono text-sm">
-                    ${formatNumber(financialData.freeCashFlow)}
-                  </div>
+                  <div className="text-gray-400">VOLUME</div>
+                  <div className="text-white font-mono text-sm">TODO</div>
                 </div>
               </div>
             </div>
@@ -836,7 +795,9 @@ const TokenPage = () => {
                     <thead>
                       <tr className="text-gray-400 border-b border-gray-700">
                         <th className="text-left p-1">TRADER</th>
-                        <th className="text-right p-1">TOKEN AMOUNT</th>
+                        <th className="text-right p-1">
+                          {(tokenData?.symbol || "TOKEN").toUpperCase()} AMOUNT
+                        </th>
                         <th className="text-right p-1">WETH AMOUNT</th>
                         <th className="text-center p-1">TYPE</th>
                         <th className="text-right p-1">TIME</th>
