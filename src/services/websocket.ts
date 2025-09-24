@@ -60,44 +60,17 @@ class WebSocketManager {
           resolve(this.ws!);
         };
 
-        // Handle ping frames from server
-        this.ws.onping = (event) => {
-          console.log("[WebSocket] Received ping from server");
-          if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            this.ws.pong();
-          }
-        };
-
-        // Handle pong frames from server (acknowledgment)
-        this.ws.onpong = (event) => {
-          console.log("[WebSocket] Received pong from server");
-        };
+        // Note: Browser WebSocket API handles ping/pong automatically
+        // Manual ping/pong handling is not needed and can interfere with the connection
 
         this.ws.onmessage = (event) => {
           try {
-            // Handle ping/pong frames explicitly
-            if (typeof event.data !== "string") {
-              // Handle binary frames (ping/pong)
-              if (event.data instanceof ArrayBuffer) {
-                // This is likely a ping frame, respond with pong
-                if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-                  this.ws.send(event.data);
-                }
-              }
-              return;
+            // Only handle JSON messages - browser handles ping/pong automatically
+            if (typeof event.data === "string") {
+              const message = JSON.parse(event.data);
+              console.log("[WebSocket] Received message:", message);
+              this.handleMessage(message);
             }
-
-            // Check if it's a ping frame (some servers send "ping" as text)
-            if (event.data === "ping") {
-              if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-                this.ws.send("pong");
-              }
-              return;
-            }
-
-            const message = JSON.parse(event.data);
-            console.log("[WebSocket] Received message:", message);
-            this.handleMessage(message);
           } catch (error) {
             console.error("Failed to parse WebSocket message:", error);
           }
@@ -124,6 +97,12 @@ class WebSocketManager {
   }
 
   private handleMessage(message: any) {
+    // Handle heartbeat acknowledgments
+    if (message.type === "heartbeat_ack") {
+      console.log("[WebSocket] Received heartbeat acknowledgment from server");
+      return;
+    }
+
     console.log("[WebSocket] Handling message for channel:", message.channel);
     const handler = this.messageHandlers.get(message.channel);
     if (handler) {
@@ -145,7 +124,17 @@ class WebSocketManager {
 
     this.healthCheckInterval = setInterval(() => {
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-        console.log("[WebSocket] Health check: Connection is alive");
+        // Send a simple heartbeat message to verify server responsiveness
+        try {
+          this.ws.send(JSON.stringify({ type: "heartbeat" }));
+          console.log("[WebSocket] Health check: Sent heartbeat");
+        } catch (error) {
+          console.log(
+            "[WebSocket] Health check: Failed to send heartbeat, connection dead"
+          );
+          this.connectionState = "disconnected";
+          this.handleReconnection();
+        }
       } else {
         console.log(
           "[WebSocket] Health check: Connection is dead, state:",
@@ -154,7 +143,7 @@ class WebSocketManager {
         this.connectionState = "disconnected";
         this.handleReconnection();
       }
-    }, 25000); // Check every 25 seconds (aligned with server cleanup)
+    }, 45000); // Check every 45 seconds (longer than server ping interval)
   }
 
   private stopHealthCheck() {
