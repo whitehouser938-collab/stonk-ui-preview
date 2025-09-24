@@ -405,10 +405,35 @@ export function ICOLaunchpad() {
           }
         }
 
+        const abbreviateHash = (tx: string) => {
+          try {
+            if (!tx || tx.length <= 16) return tx || "";
+            const prefix = tx.slice(0, 10);
+            const suffix = tx.slice(-6);
+            return `${prefix}…${suffix}`;
+          } catch {
+            return tx || "";
+          }
+        };
+
+        const explorerUrl = `https://sepolia.etherscan.io/tx/${deployResponse.transactionHash}`;
         toast({
-          title: "Token Deployed",
-          description:
-            "Your ICO has been launched. Redirecting to the token page...",
+          title: `${
+            formData.symbol ? `$${formData.symbol}` : "Token"
+          } Deployed`,
+          description: (
+            <div>
+              <div>Transaction Hash:</div>
+              <a
+                href={explorerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2"
+              >
+                {abbreviateHash(deployResponse.transactionHash)}
+              </a>
+            </div>
+          ),
           variant: "info",
         });
 
