@@ -39,6 +39,7 @@ import {
 } from "@/api/user";
 import { useToast } from "@/hooks/use-toast";
 import { WalletConnectionPrompt } from "@/components/WalletConnectionPrompt";
+import { Link } from "react-router-dom";
 
 const ProfileDashboard = () => {
   const { address, isConnected } = useAppKitAccount({ namespace: "eip155" });
@@ -478,19 +479,46 @@ const ProfileDashboard = () => {
             {userTokens.length > 0 ? (
               <div className="space-y-4">
                 {userTokens.map((token, index) => (
-                  <div
+                  <Link
+                    to={`/token/${token.chain || token.chainId}/${
+                      token.tokenAddress
+                    }`}
                     key={index}
-                    className="flex items-center justify-between p-4 border border-gray-700 rounded-lg"
+                    className="flex items-center justify-between p-4 border border-gray-700 rounded-lg hover:border-orange-500 transition-colors"
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center">
-                        <Coins className="w-5 h-5 text-orange-400" />
+                      <div className="w-12 h-12 bg-orange-500/20 flex items-center justify-center overflow-hidden">
+                        {token.logoUrl ? (
+                          <img
+                            src={token.logoUrl}
+                            alt={`${token.symbol} logo`}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
+                        ) : (
+                          <Coins className="w-6 h-6 text-orange-400" />
+                        )}
                       </div>
                       <div>
-                        <h4 className="font-medium text-gray-200">
+                        <h4 className="font-medium text-gray-300">
                           {token.name}
                         </h4>
-                        <p className="text-sm text-gray-400">{token.symbol}</p>
+                        <div className="flex items-center space-x-2">
+                          <p className="text-sm text-gray-500">
+                            {token.symbol}
+                          </p>
+                          {token.graduated ? (
+                            <span className="bg-green-600 text-white px-1 py-0.5 rounded text-[10px] leading-none">
+                              GRAD
+                            </span>
+                          ) : (
+                            <span className="bg-purple-600 text-white px-1 py-0.5 rounded text-[10px] leading-none">
+                              BOND
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="text-right">
@@ -502,7 +530,7 @@ const ProfileDashboard = () => {
                           : "N/A"}
                       </p>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             ) : (
