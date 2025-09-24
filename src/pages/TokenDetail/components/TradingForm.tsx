@@ -88,6 +88,18 @@ function abbreviateTokenAmount(raw: string | number, decimals = 18): string {
   }
 }
 
+function abbreviateHash(transactionHash: string): string {
+  try {
+    if (!transactionHash || transactionHash.length <= 16)
+      return transactionHash || "";
+    const prefix = transactionHash.slice(0, 10);
+    const suffix = transactionHash.slice(-6);
+    return `${prefix}…${suffix}`;
+  } catch {
+    return transactionHash || "";
+  }
+}
+
 const TradingForm = (props: TradingFormProps) => {
   const [isBuy, setIsBuy] = useState(true); // "buy" or "sell"
   const [paymentMethod, setPaymentMethod] = useState<"ETH" | "WETH">("ETH"); // Payment method for buy
@@ -393,9 +405,25 @@ const TradingForm = (props: TradingFormProps) => {
       }
       console.log("Trade response:", tradeResponse);
       if (tradeResponse && tradeResponse.success) {
+        const explorerUrl = `https://sepolia.etherscan.io/tx/${tradeResponse.transactionHash}`;
+        const tickerTitle = `${props.symbol ? `$${props.symbol}` : "Token"} ${
+          isBuy ? "Buy" : "Sell"
+        } Successful`;
         toast({
-          title: isBuy ? "Buy Successful" : "Sell Successful",
-          description: `Transaction Hash: ${tradeResponse.transactionHash}`,
+          title: tickerTitle,
+          description: (
+            <div>
+              <div>Transaction Hash:</div>
+              <a
+                href={explorerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2"
+              >
+                {abbreviateHash(tradeResponse.transactionHash)}
+              </a>
+            </div>
+          ),
           variant: isBuy ? "success" : "softDestructive",
         });
         // Clear input after successful trade
