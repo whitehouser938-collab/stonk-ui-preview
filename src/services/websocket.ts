@@ -154,7 +154,7 @@ class WebSocketManager {
         this.connectionState = "disconnected";
         this.handleReconnection();
       }
-    }, 15000); // Check every 15 seconds (less frequent than server ping)
+    }, 25000); // Check every 25 seconds (aligned with server cleanup)
   }
 
   private stopHealthCheck() {
