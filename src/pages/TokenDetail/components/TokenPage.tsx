@@ -294,23 +294,16 @@ const TokenPage = () => {
     );
   }, [trades, filteredTrader]);
 
-  // Display trades - show all when filtering to display X icons, filtered when no filter
+  // Display trades - show filtered trades when filter is active, all trades when no filter
   const displayTrades = React.useMemo(() => {
-    return filteredTrader ? trades : filteredTrades;
-  }, [trades, filteredTrader, filteredTrades]);
+    return filteredTrades;
+  }, [filteredTrades]);
 
   // Memoize the mapped trade rows to avoid unnecessary re-renders
   const tradeRows = React.useMemo(
     () =>
       displayTrades.map((trade, idx) => (
-        <tr
-          key={idx}
-          className={`border-b border-gray-800 last:border-0 ${
-            filteredTrader === trade.maker
-              ? "bg-orange-500/10 border-orange-500/30"
-              : ""
-          }`}
-        >
+        <tr key={idx} className="border-b border-gray-800 last:border-0">
           <td className="p-1 text-white font-mono">
             <div className="flex items-center space-x-2">
               <a
@@ -321,7 +314,7 @@ const TokenPage = () => {
               >
                 {abbreviateAddress(trade.maker)}
               </a>
-              {filteredTrader === trade.maker ? (
+              {filteredTrader ? (
                 <button
                   onClick={() => setFilteredTrader(null)}
                   className="text-red-400 hover:text-red-300 transition-colors"
