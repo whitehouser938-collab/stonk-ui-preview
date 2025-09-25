@@ -306,14 +306,12 @@ const TokenPage = () => {
         <tr key={idx} className="border-b border-gray-800 last:border-0">
           <td className="p-1 text-white font-mono">
             <div className="flex items-center space-x-2">
-              <a
-                href={`${getExplorer(chainId)}/address/${trade.maker}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-orange-400 underline"
+              <button
+                onClick={() => navigate(`/profile/${trade.maker}`)}
+                className="hover:text-orange-400 underline text-left"
               >
                 {abbreviateAddress(trade.maker)}
-              </a>
+              </button>
               {filteredTrader ? (
                 <button
                   onClick={() => setFilteredTrader(null)}
@@ -846,7 +844,7 @@ const TokenPage = () => {
                   className="overflow-x-auto h-96 custom-scrollbar"
                 >
                   <table className="w-full text-xs min-w-[400px]">
-                    <thead>
+                    <thead className="bg-gray-900 sticky top-0 z-10">
                       <tr className="text-gray-400 border-b border-gray-700">
                         <th className="text-left p-1">
                           <div className="flex items-center space-x-1">
