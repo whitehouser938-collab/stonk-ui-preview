@@ -28,6 +28,7 @@ import {
   Coins,
   Calendar,
   Wallet,
+  LogOut,
 } from "lucide-react";
 import {
   getUserByWalletAddress,
@@ -40,10 +41,42 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { WalletConnectionPrompt } from "@/components/WalletConnectionPrompt";
 import { Link } from "react-router-dom";
+import { useDisconnect } from "wagmi";
 
-const ProfileDashboard = () => {
+interface ProfileDashboardProps {
+  walletAddress?: string;
+}
+
+const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
   const { address, isConnected } = useAppKitAccount({ namespace: "eip155" });
+  const { disconnect } = useDisconnect();
+
+  // Use the provided walletAddress or fall back to connected address
+  const targetAddress = walletAddress || address;
+  const isOwnProfile = !walletAddress || walletAddress === address;
   const { toast } = useToast();
+
+  const handleDisconnect = async () => {
+    setDisconnecting(true);
+    try {
+      await disconnect();
+      toast({
+        title: "Wallet Disconnected",
+        description:
+          "Your wallet has been successfully disconnected from the site.",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error("Error disconnecting wallet:", error);
+      toast({
+        title: "Disconnect Failed",
+        description: "Failed to disconnect wallet. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setDisconnecting(false);
+    }
+  };
 
   const [user, setUser] = useState<UserType | null>(null);
   const [userTokens, setUserTokens] = useState<any[]>([]);
@@ -60,6 +93,7 @@ const ProfileDashboard = () => {
     null
   );
   const [checkingUsername, setCheckingUsername] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
 
   useEffect(() => {
     // Set wallet loading to false after a short delay to allow wallet state to initialize
@@ -67,34 +101,39 @@ const ProfileDashboard = () => {
       setWalletLoading(false);
     }, 1000);
 
-    if (isConnected && address) {
+    if (targetAddress) {
       loadUserData();
     }
 
     return () => clearTimeout(timer);
-  }, [isConnected, address]);
+  }, [targetAddress]);
 
   const loadUserData = async () => {
-    if (!address) return;
+    if (!targetAddress) return;
 
     setLoading(true);
     try {
       let userData;
       try {
         // Try to get existing user
-        userData = await getUserByWalletAddress(address);
+        userData = await getUserByWalletAddress(targetAddress);
       } catch (error) {
-        // If user doesn't exist, create one
-        console.log("User not found, creating new user...");
-        userData = await createUser(address);
-        toast({
-          title: "Welcome!",
-          description: "Your profile has been created successfully",
-          variant: "default",
-        });
+        // If user doesn't exist and it's the user's own profile, create one
+        if (isOwnProfile) {
+          console.log("User not found, creating new user...");
+          userData = await createUser(targetAddress);
+          toast({
+            title: "Welcome!",
+            description: "Your profile has been created successfully",
+            variant: "default",
+          });
+        } else {
+          // If viewing someone else's profile and they don't exist, show error
+          throw new Error("Profile not found");
+        }
       }
 
-      const tokensData = await getUserTokens(address);
+      const tokensData = await getUserTokens(targetAddress);
 
       setUser(userData);
       setUserTokens(tokensData);
@@ -147,17 +186,17 @@ const ProfileDashboard = () => {
   };
 
   const handleSave = async () => {
-    if (!address) return;
+    if (!targetAddress) return;
 
     setCheckingUsername(true);
     try {
       let profileImageUrl = editForm.profileImage;
       if (selectedFile && !fileError) {
-        const url = await uploadUserProfileImage(address, selectedFile);
+        const url = await uploadUserProfileImage(targetAddress, selectedFile);
         profileImageUrl = url;
       }
 
-      const updatedUser = await updateUser(address, {
+      const updatedUser = await updateUser(targetAddress, {
         username: editForm.username,
         profileImage: profileImageUrl,
       });
@@ -228,8 +267,8 @@ const ProfileDashboard = () => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  // Show wallet connection prompt if not connected (and wallet state has loaded)
-  if (!isConnected && !walletLoading) {
+  // Show wallet connection prompt if not connected and viewing own profile (and wallet state has loaded)
+  if (!isConnected && !walletLoading && isOwnProfile) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -295,18 +334,38 @@ const ProfileDashboard = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-orange-400">Profile</h1>
-        {!editing && (
-          <Button
-            onClick={() => setEditing(true)}
-            variant="outline"
-            size="sm"
-            className="text-orange-400"
-          >
-            <Edit3 className="w-4 h-4 mr-2 text-orange-400" />
-            Edit Profile
-          </Button>
-        )}
+        <h1 className="text-3xl font-bold text-orange-400">
+          {isOwnProfile
+            ? "Profile"
+            : `${
+                user?.username || formatAddress(targetAddress || "")
+              }'s Profile`}
+        </h1>
+        <div className="flex items-center space-x-2">
+          {!editing && isOwnProfile && (
+            <Button
+              onClick={() => setEditing(true)}
+              variant="outline"
+              size="sm"
+              className="text-orange-400"
+            >
+              <Edit3 className="w-4 h-4 mr-2 text-orange-400" />
+              Edit Profile
+            </Button>
+          )}
+          {isOwnProfile && (
+            <Button
+              onClick={handleDisconnect}
+              disabled={disconnecting}
+              variant="outline"
+              size="sm"
+              className="text-red-400 border-red-500/30 hover:bg-red-900/20 hover:border-red-400/50 disabled:opacity-50"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              {disconnecting ? "Disconnecting..." : "Disconnect"}
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="max-w-4xl mx-auto space-y-6">
@@ -440,13 +499,13 @@ const ProfileDashboard = () => {
                     <p className="text-gray-400 flex items-center space-x-2">
                       <Wallet className="w-4 h-4" />
                       <span className="font-mono">
-                        {formatAddress(address || "")}
+                        {formatAddress(targetAddress || "")}
                       </span>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() =>
-                          navigator.clipboard.writeText(address || "")
+                          navigator.clipboard.writeText(targetAddress || "")
                         }
                       >
                         <ExternalLink className="w-4 h-4" />

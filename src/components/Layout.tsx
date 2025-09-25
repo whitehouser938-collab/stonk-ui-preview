@@ -6,22 +6,25 @@ import {
   TrendingUp,
   Rocket,
   Trophy,
-  User,
   Menu,
   X,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ConnectWallet } from "./ConnectWallet";
 import { MobileNav } from "./MobileNav";
 import SearchBar from "./SearchBar";
 import GlobalClock from "./GlobalClock";
+import { ProfileDisplay } from "./ProfileDisplay";
+import { Button } from "./ui/button";
+import { useAppKitAccount } from "@reown/appkit/react";
+import { useDisconnect } from "wagmi";
 
 const navItems = [
   { path: "/", label: "Markets", icon: BarChart },
   { path: "/research", label: "Research", icon: Search },
   { path: "/launchpad", label: "Launchpad", icon: Rocket },
   { path: "/leaderboard", label: "Leaderboard", icon: Trophy },
-  { path: "/profile", label: "Profile", icon: User },
 ];
 
 interface LayoutProps {
@@ -31,6 +34,20 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
+  const { disconnect } = useDisconnect();
+  const { isConnected } = useAppKitAccount({ namespace: "eip155" });
+
+  const handleDisconnect = async () => {
+    setDisconnecting(true);
+    try {
+      await disconnect();
+    } catch (error) {
+      console.error("Error disconnecting wallet:", error);
+    } finally {
+      setDisconnecting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
@@ -77,12 +94,18 @@ export function Layout({ children }: LayoutProps) {
             </nav>
           </div>
           <div className="hidden md:flex items-center space-x-2 sm:space-x-4 text-sm">
-            <ConnectWallet />
-            <div className="hidden sm:block text-gray-400">
-              <span className="text-gray-500">Server:</span>{" "}
-              <span className="text-orange-400 font-mono">ONLINE</span>
-            </div>
-            <div className="hidden sm:block w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+            <ProfileDisplay />
+            {isConnected && (
+              <Button
+                onClick={handleDisconnect}
+                disabled={disconnecting}
+                variant="ghost"
+                size="sm"
+                className="text-gray-400 hover:text-red-400 hover:bg-red-900/20 transition-all duration-200 disabled:opacity-50"
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         </div>
         <MobileNav
