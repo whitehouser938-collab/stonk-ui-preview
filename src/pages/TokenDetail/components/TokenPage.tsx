@@ -12,6 +12,8 @@ import {
   ArrowUpRight,
   ExternalLink,
   Clock,
+  Filter,
+  X,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -26,6 +28,7 @@ import OrderBook from "./OrderBook";
 import { useTradeUpdates } from "@/hooks/useTradeUpdates";
 import { useToast } from "@/hooks/use-toast";
 import { Chain, TokenDetails, TradeData } from "@/types";
+import { CommentsSection } from "@/components/Comments";
 
 const TokenPage = () => {
   const { chainId, tokenAddress } = useParams<{
@@ -45,6 +48,7 @@ const TokenPage = () => {
   const [lastTrade, setLastTrade] = useState<TradeData>(null);
   const [hasMoreTrades, setHasMoreTrades] = useState(true);
   const [isFetchingMoreTrades, setIsFetchingMoreTrades] = useState(false);
+  const [filteredTrader, setFilteredTrader] = useState<string | null>(null);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -282,20 +286,59 @@ const TokenPage = () => {
     return "0";
   }
 
+  // Filter trades by trader if filter is active
+  const filteredTrades = React.useMemo(() => {
+    if (!filteredTrader) return trades;
+    return trades.filter(
+      (trade) => trade.maker.toLowerCase() === filteredTrader.toLowerCase()
+    );
+  }, [trades, filteredTrader]);
+
+  // Display trades - show all when filtering to display X icons, filtered when no filter
+  const displayTrades = React.useMemo(() => {
+    return filteredTrader ? trades : filteredTrades;
+  }, [trades, filteredTrader, filteredTrades]);
+
   // Memoize the mapped trade rows to avoid unnecessary re-renders
   const tradeRows = React.useMemo(
     () =>
-      trades.map((trade, idx) => (
-        <tr key={idx} className="border-b border-gray-800 last:border-0">
+      displayTrades.map((trade, idx) => (
+        <tr
+          key={idx}
+          className={`border-b border-gray-800 last:border-0 ${
+            filteredTrader === trade.maker
+              ? "bg-orange-500/10 border-orange-500/30"
+              : ""
+          }`}
+        >
           <td className="p-1 text-white font-mono">
-            <a
-              href={`${getExplorer(chainId)}/address/${trade.maker}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-orange-400 underline"
-            >
-              {abbreviateAddress(trade.maker)}
-            </a>
+            <div className="flex items-center space-x-2">
+              <a
+                href={`${getExplorer(chainId)}/address/${trade.maker}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-orange-400 underline"
+              >
+                {abbreviateAddress(trade.maker)}
+              </a>
+              {filteredTrader === trade.maker ? (
+                <button
+                  onClick={() => setFilteredTrader(null)}
+                  className="text-red-400 hover:text-red-300 transition-colors"
+                  title="Clear filter"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              ) : (
+                <button
+                  onClick={() => setFilteredTrader(trade.maker)}
+                  className="text-gray-400 hover:text-orange-400 transition-colors"
+                  title="Filter by this trader"
+                >
+                  <Filter className="w-3 h-3" />
+                </button>
+              )}
+            </div>
           </td>
           <td className="p-1 text-right text-white font-mono">
             {abbreviateTokenAmount(trade.baseAmount)}
@@ -330,7 +373,7 @@ const TokenPage = () => {
           </td>
         </tr>
       )),
-    [trades]
+    [displayTrades, chainId, filteredTrader]
   );
 
   // --- Bonding Curve Progress from Trades (dynamic, client-side) ---
@@ -759,6 +802,12 @@ const TokenPage = () => {
                   {tokenData?.description}
                 </div>
               </div>
+
+              {/* Comments Section */}
+              <CommentsSection
+                tokenAddress={tokenData?.tokenAddress || ""}
+                tokenSymbol={tokenData?.symbol || ""}
+              />
             </div>
           </div>
 
@@ -781,10 +830,22 @@ const TokenPage = () => {
             />
             {/* Recent Trades */}
             <div className="bg-gray-900 border border-gray-700 p-2">
-              <div className="text-orange-400 mb-2">RECENT TRADES</div>
-              {trades.length === 0 ? (
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-orange-400">RECENT TRADES</div>
+                {filteredTrader && (
+                  <button
+                    onClick={() => setFilteredTrader(null)}
+                    className="text-xs text-orange-400 hover:text-orange-300 transition-colors"
+                  >
+                    Clear Filter
+                  </button>
+                )}
+              </div>
+              {displayTrades.length === 0 ? (
                 <div className="text-gray-400 text-xs">
-                  No recent trades found.
+                  {filteredTrader
+                    ? "No trades found for this trader."
+                    : "No recent trades found."}
                 </div>
               ) : (
                 <div
@@ -794,7 +855,14 @@ const TokenPage = () => {
                   <table className="w-full text-xs min-w-[400px]">
                     <thead>
                       <tr className="text-gray-400 border-b border-gray-700">
-                        <th className="text-left p-1">TRADER</th>
+                        <th className="text-left p-1">
+                          <div className="flex items-center space-x-1">
+                            <span>TRADER</span>
+                            {filteredTrader && (
+                              <Filter className="w-3 h-3 text-orange-400 fill-current" />
+                            )}
+                          </div>
+                        </th>
                         <th className="text-right p-1">
                           {(tokenData?.symbol || "TOKEN").toUpperCase()} AMOUNT
                         </th>

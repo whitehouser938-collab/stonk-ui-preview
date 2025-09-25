@@ -312,28 +312,19 @@ export function MarketsDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 p-1 h-full">
         {/* Left Column */}
         <div className="lg:col-span-3 space-y-1">
-          {/* Top Movers */}
+          {/* Volume Leaders */}
           <div className="bg-gray-900 border border-gray-700 p-1">
-            <div className="text-orange-400 text-xs mb-1">TOP MOVERS</div>
-            {extendedMockData.slice(0, 8).map((stock) => (
+            <div className="text-orange-400 text-xs mb-1">VOLUME LEADERS</div>
+            {tokens.slice(0, 6).map((token) => (
               <div
-                key={stock.symbol}
-                className="flex justify-between items-center py-0.5 text-xs border-b border-gray-800 last:border-0"
+                key={token.tokenAddress}
+                className="flex justify-between text-xs py-0.5 border-b border-gray-800 last:border-0"
               >
-                <span className="text-white">{stock.symbol}</span>
+                <span className="text-white">{token.symbol}</span>
                 <span className="text-gray-400">
-                  $
-                  {stock.price < 1
-                    ? stock.price.toFixed(4)
-                    : stock.price.toFixed(2)}
-                </span>
-                <span
-                  className={
-                    stock.change24h >= 0 ? "text-green-400" : "text-red-400"
-                  }
-                >
-                  {stock.change24h >= 0 ? "+" : ""}
-                  {stock.change24h.toFixed(2)}%
+                  {token.volume24h
+                    ? formatNumber(Number(token.volume24h))
+                    : "N/A"}
                 </span>
               </div>
             ))}
@@ -473,24 +464,6 @@ export function MarketsDashboard() {
 
         {/* Right Column - Additional Data */}
         <div className="lg:col-span-3 space-y-1">
-          {/* Volume Leaders */}
-          <div className="bg-gray-900 border border-gray-700 p-1">
-            <div className="text-orange-400 text-xs mb-1">VOLUME LEADERS</div>
-            {tokens.slice(0, 6).map((token) => (
-              <div
-                key={token.tokenAddress}
-                className="flex justify-between text-xs py-0.5 border-b border-gray-800 last:border-0"
-              >
-                <span className="text-white">{token.symbol}</span>
-                <span className="text-gray-400">
-                  {token.volume24h
-                    ? formatNumber(Number(token.volume24h))
-                    : "N/A"}
-                </span>
-              </div>
-            ))}
-          </div>
-
           {/* Graduated Tokens */}
           <div className="bg-gray-900 border border-gray-700 p-1">
             <div className="text-orange-400 text-xs mb-1">GRADUATED TOKENS</div>
