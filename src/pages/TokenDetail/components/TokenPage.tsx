@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getExplorer, getToken, getTokenTrades } from "@/api/token";
 import LoadingScreen from "@/components/ui/loading";
 import { useLoading } from "@/hooks/use-loading";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 import {
   Globe,
@@ -21,6 +22,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import TradingForm from "./TradingForm";
 import BondingCurveProgress from "./BondingCurveProgress";
 import TradingViewChart from "@/components/TradingViewChart";
@@ -39,6 +46,8 @@ const TokenPage = () => {
   const [tokenData, setTokenData] = useState<TokenDetails>(null);
   const [view, setView] = useState("details");
   const [error, setError] = useState<string | null>(null);
+  const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const { isLoading, startLoading, stopLoading } = useLoading();
   const { toast } = useToast();
@@ -462,10 +471,26 @@ const TokenPage = () => {
                     <img
                       src={tokenData.logoUrl}
                       alt={`${tokenData.name} logo`}
-                      className="w-16 h-16 rounded-lg object-cover"
+                      className={`w-16 h-16 rounded-lg object-cover ${
+                        isMobile
+                          ? "cursor-pointer hover:opacity-80 transition-opacity"
+                          : ""
+                      }`}
+                      onClick={
+                        isMobile ? () => setIsLogoModalOpen(true) : undefined
+                      }
                     />
                   ) : (
-                    <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg text-white font-bold text-lg flex items-center justify-center flex-shrink-0">
+                    <div
+                      className={`w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg text-white font-bold text-lg flex items-center justify-center flex-shrink-0 ${
+                        isMobile
+                          ? "cursor-pointer hover:opacity-80 transition-opacity"
+                          : ""
+                      }`}
+                      onClick={
+                        isMobile ? () => setIsLogoModalOpen(true) : undefined
+                      }
+                    >
                       {tokenData?.symbol}
                     </div>
                   )}
@@ -870,6 +895,48 @@ const TokenPage = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Token Logo Modal - Mobile Only */}
+      {isMobile && (
+        <Dialog open={isLogoModalOpen} onOpenChange={setIsLogoModalOpen}>
+          <DialogContent className="max-w-sm mx-auto bg-gray-900 border-gray-700">
+            <DialogHeader>
+              <DialogTitle className="text-center text-orange-400 text-lg">
+                {tokenData?.name || tokenData?.symbol}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex justify-center items-center py-8">
+              {tokenData?.logoUrl ? (
+                <img
+                  src={tokenData.logoUrl}
+                  alt={`${tokenData.name} logo`}
+                  className="w-48 h-48 rounded-2xl object-cover shadow-2xl"
+                />
+              ) : (
+                <div className="w-48 h-48 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl text-white font-bold text-4xl flex items-center justify-center shadow-2xl">
+                  {tokenData?.symbol}
+                </div>
+              )}
+            </div>
+            <div className="text-center text-gray-300 text-sm">
+              <p className="mb-2">
+                <span className="text-orange-400 font-bold">
+                  {tokenData?.symbol}
+                </span>
+                {tokenData?.name && (
+                  <span className="ml-2">{tokenData.name}</span>
+                )}
+              </p>
+              {tokenData?.tokenAddress && (
+                <p className="text-gray-400 text-xs">
+                  {tokenData.tokenAddress.slice(0, 6)}...
+                  {tokenData.tokenAddress.slice(-4)}
+                </p>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
