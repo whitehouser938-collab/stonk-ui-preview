@@ -463,9 +463,9 @@ const TokenPage = () => {
           {/* Left Column - Stock Overview */}
           <div className="col-span-12 lg:col-span-8 space-y-1">
             {/* Stock Header */}
-            <div className="bg-gray-900 border border-gray-700 p-2">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2">
-                <div className="flex items-center space-x-3 mb-2 sm:mb-0">
+            <div className="bg-gray-900 border border-gray-700 p-2 overflow-hidden">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 min-w-0">
+                <div className="flex items-center space-x-3 mb-2 sm:mb-0 min-w-0 flex-1">
                   {/* Token Logo */}
                   {tokenData?.logoUrl ? (
                     <img
@@ -495,16 +495,17 @@ const TokenPage = () => {
                     </div>
                   )}
 
-                  <div>
-                    <div className="flex items-center space-x-3">
-                      <div className="text-orange-400 font-bold text-2xl sm:text-3xl">
+                  <div className="flex-1 min-w-0">
+                    {/* Mobile: Stack vertically, Desktop: Keep horizontal */}
+                    <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-3">
+                      <div className="text-orange-400 font-bold text-2xl sm:text-3xl truncate">
                         {tokenData?.symbol}
                       </div>
-                      <div className="text-gray-300 text-sm sm:text-base">
+                      <div className="text-gray-300 text-sm sm:text-base truncate">
                         {tokenData?.name}
                       </div>
                       <span
-                        className="text-gray-400 text-xs cursor-pointer hover:text-orange-400 transition-colors"
+                        className="text-gray-400 text-xs cursor-pointer hover:text-orange-400 transition-colors truncate flex-shrink-0"
                         onClick={async () => {
                           if (tokenData?.tokenAddress) {
                             await navigator.clipboard.writeText(
@@ -529,8 +530,8 @@ const TokenPage = () => {
                     </div>
                     {/* Social Links */}
 
-                    <div className="flex items-center space-x-2 mt-2">
-                      <span className="text-white">
+                    <div className="flex items-center space-x-2 mt-2 overflow-hidden">
+                      <span className="text-white flex-shrink-0">
                         {tokenData?.deploymentTimestamp
                           ? formatTokenAge(tokenData.deploymentTimestamp)
                           : "Unknown"}
@@ -612,12 +613,33 @@ const TokenPage = () => {
                     </div>
                   </div>
                 </div>
-                <div className="text-left sm:text-right">
-                  <div className="text-xl sm:text-2xl font-mono text-white">
+
+                {/* Desktop: Price on the right, Mobile: Hidden (shown below instead) */}
+                <div className="hidden sm:block text-left sm:text-right min-w-0">
+                  <div className="text-xl sm:text-2xl font-mono text-white truncate">
                     ${stockData.price.toFixed(2)}
                   </div>
                   <div
-                    className={`text-base sm:text-lg font-mono ${
+                    className={`text-base sm:text-lg font-mono truncate ${
+                      stockData.change24h >= 0
+                        ? "text-green-400"
+                        : "text-red-400"
+                    }`}
+                  >
+                    {stockData.change24h >= 0 ? "+" : ""}
+                    {stockData.change24h.toFixed(2)}%
+                  </div>
+                </div>
+              </div>
+
+              {/* Mobile: Price row underneath */}
+              <div className="sm:hidden mt-3 pt-3 border-t border-gray-700">
+                <div className="flex justify-between items-center min-w-0">
+                  <div className="text-xl font-mono text-white truncate">
+                    ${stockData.price.toFixed(2)}
+                  </div>
+                  <div
+                    className={`text-lg font-mono flex-shrink-0 ml-2 ${
                       stockData.change24h >= 0
                         ? "text-green-400"
                         : "text-red-400"
