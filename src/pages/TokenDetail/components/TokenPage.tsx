@@ -471,7 +471,7 @@ const TokenPage = () => {
                     <img
                       src={tokenData.logoUrl}
                       alt={`${tokenData.name} logo`}
-                      className={`w-16 h-16 rounded-lg object-cover ${
+                      className={`w-16 h-16 object-cover ${
                         isMobile
                           ? "cursor-pointer hover:opacity-80 transition-opacity"
                           : ""
@@ -482,7 +482,7 @@ const TokenPage = () => {
                     />
                   ) : (
                     <div
-                      className={`w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg text-white font-bold text-lg flex items-center justify-center flex-shrink-0 ${
+                      className={`w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 text-white font-bold text-lg flex items-center justify-center flex-shrink-0 ${
                         isMobile
                           ? "cursor-pointer hover:opacity-80 transition-opacity"
                           : ""
@@ -933,10 +933,10 @@ const TokenPage = () => {
                 <img
                   src={tokenData.logoUrl}
                   alt={`${tokenData.name} logo`}
-                  className="w-48 h-48 rounded-2xl object-cover shadow-2xl"
+                  className="w-48 h-48 object-cover shadow-2xl"
                 />
               ) : (
-                <div className="w-48 h-48 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl text-white font-bold text-4xl flex items-center justify-center shadow-2xl">
+                <div className="w-48 h-48 bg-gradient-to-br from-orange-500 to-red-600 text-white font-bold text-4xl flex items-center justify-center shadow-2xl">
                   {tokenData?.symbol}
                 </div>
               )}
