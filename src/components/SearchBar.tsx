@@ -240,7 +240,7 @@ const SearchBar = () => {
           onClick={handleSearch}
           className="px-3 py-1 bg-orange-600 text-black text-xs font-bold hover:bg-orange-500 transition-colors"
         >
-          ANALYZE
+          SEARCH
         </button>
       </div>
     </div>
