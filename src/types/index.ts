@@ -62,4 +62,4 @@ export interface BarUpdateMessage {
   bar: BarData;
 }
 
-export type Chain = "SEP" | "SOL" | "BASE";
+export type Chain = "SEP";

@@ -9,7 +9,7 @@ interface TradingViewChartProps {
 type ResolutionString = TradingView.ResolutionString;
 
 function TradingViewChart({
-  symbol = "CRYPTOCAP:SOL",
+  symbol = "CRYPTOCAP:ETH",
   height,
 }: TradingViewChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
@@ -45,14 +45,14 @@ function TradingViewChart({
         locale: "en",
         enabled_features: [],
         disabled_features: [
-          "header_compare", 
-          "header_symbol_search", 
-          "header_quick_search", 
+          "header_compare",
+          "header_symbol_search",
+          "header_quick_search",
           "edit_buttons_in_legend",
         ],
         overrides: {
           "mainSeriesProperties.precision": 4,
-          "paneProperties.background": "#1e293b"
+          "paneProperties.background": "#1e293b",
         },
         time_frames: [
           {

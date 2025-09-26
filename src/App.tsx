@@ -4,23 +4,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { WagmiProvider } from "wagmi";
+import { UserProvider } from "@/contexts/UserContext";
 import Index from "./pages/Index";
 
 //Reown imports
 import { createAppKit } from "@reown/appkit/react";
-import {
-  arbitrum,
-  mainnet,
-  base,
-  sepolia,
-  AppKitNetwork,
-  solana,
-  solanaTestnet,
-  solanaDevnet,
-  polygon,
-} from "@reown/appkit/networks";
+import { sepolia, AppKitNetwork } from "@reown/appkit/networks";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { SolanaAdapter } from "@reown/appkit-adapter-solana/react";
 
 import Markets from "./pages/Markets";
 import Research from "./pages/Research";
@@ -44,18 +34,8 @@ const metadata = {
   icons: ["https://stonkterminal.com/favicon.ico"],
 };
 
-const networks = [
-  mainnet,
-  arbitrum,
-  base,
-  sepolia,
-  polygon,
-  solana,
-  solanaTestnet,
-  solanaDevnet,
-] as [AppKitNetwork, ...AppKitNetwork[]];
+const networks = [sepolia] as [AppKitNetwork, ...AppKitNetwork[]];
 
-const solanaWeb3JsAdapter = new SolanaAdapter();
 const wagmiAdapter = new WagmiAdapter({
   networks,
   projectId,
@@ -63,7 +43,7 @@ const wagmiAdapter = new WagmiAdapter({
 });
 
 const appKit = createAppKit({
-  adapters: [wagmiAdapter, solanaWeb3JsAdapter],
+  adapters: [wagmiAdapter],
   networks,
   projectId,
   metadata,
@@ -75,26 +55,28 @@ const appKit = createAppKit({
 const App = () => (
   <WagmiProvider config={wagmiAdapter.wagmiConfig}>
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Markets />} />
-            <Route path="/research" element={<Research />} />
-            <Route
-              path="/token/:chainId/:tokenAddress"
-              element={<TokenDetail />}
-            />
-            <Route path="/launchpad" element={<Launchpad />} />
-            <Route path="/leaderboard" element={<Leaderboard />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/profile/:walletAddress" element={<Profile />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <UserProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Markets />} />
+              <Route path="/research" element={<Research />} />
+              <Route
+                path="/token/:chainId/:tokenAddress"
+                element={<TokenDetail />}
+              />
+              <Route path="/launchpad" element={<Launchpad />} />
+              <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/profile/:walletAddress" element={<Profile />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </UserProvider>
     </QueryClientProvider>
   </WagmiProvider>
 );

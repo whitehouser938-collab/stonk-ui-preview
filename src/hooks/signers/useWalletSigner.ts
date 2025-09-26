@@ -17,14 +17,3 @@ export const useETHWalletSigner = () => {
 
   return { getETHSigner };
 };
-
-export const useSOLWalletSigner = () => {
-  const { walletProvider } = useAppKitProvider<Provider>("solana");
-
-  const getSOLSigner = async () => {
-    // For Solana, we typically use the wallet provider directly
-    return walletProvider;
-  };
-
-  return { getSOLSigner };
-};

@@ -1,17 +1,15 @@
 import { Chain } from "@/types";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+import { getApiBaseUrl } from "@/utils/apiConfig";
+
+const API_BASE_URL = getApiBaseUrl();
 
 export const getExplorer = (chain: Chain) => {
   switch (chain) {
     case "SEP":
       return "https://sepolia.etherscan.io";
-    case "BASE":
-      return "https://basescan.org";
-    case "SOL":
-      return "https://solscan.io";
     default:
-      return "https://basescan.org";
+      return "https://sepolia.etherscan.io";
   }
 };
 
