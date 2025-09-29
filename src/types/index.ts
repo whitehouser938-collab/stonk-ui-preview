@@ -1,3 +1,9 @@
+export interface DeployerInfo {
+  address: string;
+  username: string;
+  pfp: string;
+}
+
 export interface TokenDetails {
   name: string;
   symbol: string;
@@ -9,6 +15,7 @@ export interface TokenDetails {
   twitterUrl: string;
   telegramUrl: string;
   deployerAddress: string;
+  deployer?: DeployerInfo;
   tokenAddress: string;
   bondingCurveAddress: string;
   deploymentTimestamp?: string;

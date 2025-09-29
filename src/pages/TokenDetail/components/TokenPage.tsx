@@ -528,14 +528,42 @@ const TokenPage = () => {
                           : "N/A"}
                       </span>
                     </div>
-                    {/* Social Links */}
 
+                    {/* Age and Deployer Row */}
+                    <div className="flex items-center space-x-4 mt-2 overflow-hidden">
+                      <div className="flex items-center space-x-2">
+                        <Clock className="w-3 h-3 text-orange-400" />
+                        <span className="text-white text-sm">
+                          {tokenData?.deploymentTimestamp
+                            ? formatTokenAge(tokenData.deploymentTimestamp)
+                            : "Unknown"}
+                        </span>
+                      </div>
+                      {tokenData?.deployer && (
+                        <button
+                          onClick={() =>
+                            navigate(`/profile/${tokenData.deployer.address}`)
+                          }
+                          className="flex items-center space-x-2 text-orange-400 hover:text-orange-300 transition-colors"
+                        >
+                          <img
+                            src={tokenData.deployer.pfp}
+                            alt={`${tokenData.deployer.username} profile`}
+                            className="w-5 h-5 rounded-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = "none";
+                            }}
+                          />
+                          <span className="text-sm truncate max-w-32">
+                            {tokenData.deployer.username}
+                          </span>
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Social Links Row */}
                     <div className="flex items-center space-x-2 mt-2 overflow-hidden">
-                      <span className="text-white flex-shrink-0">
-                        {tokenData?.deploymentTimestamp
-                          ? formatTokenAge(tokenData.deploymentTimestamp)
-                          : "Unknown"}
-                      </span>
                       {tokenData?.websiteUrl && (
                         <a
                           href={tokenData.websiteUrl}
@@ -744,6 +772,35 @@ const TokenPage = () => {
                       ? formatTokenAge(tokenData.deploymentTimestamp)
                       : "Unknown"}
                   </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 flex items-center justify-center">
+                    <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                  </div>
+                  <span className="text-gray-400">Deployer</span>
+                  {tokenData?.deployer ? (
+                    <button
+                      onClick={() =>
+                        navigate(`/profile/${tokenData.deployer.address}`)
+                      }
+                      className="flex items-center space-x-2 text-orange-400 hover:text-orange-300 transition-colors"
+                    >
+                      <img
+                        src={tokenData.deployer.pfp}
+                        alt={`${tokenData.deployer.username} profile`}
+                        className="w-4 h-4 rounded-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = "none";
+                        }}
+                      />
+                      <span className="truncate max-w-32">
+                        {tokenData.deployer.username}
+                      </span>
+                    </button>
+                  ) : (
+                    <span className="text-gray-600">Unknown</span>
+                  )}
                 </div>
                 <div className="flex items-center space-x-2">
                   <Globe
