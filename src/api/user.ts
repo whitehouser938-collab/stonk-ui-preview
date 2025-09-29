@@ -441,3 +441,103 @@ export const updateUser = async (
   if (userData.username) payload.username = userData.username;
   return upsertUser(payload);
 };
+
+// User overview (comments, replies, stats)
+export interface UserOverviewCommentToken {
+  id?: string;
+  chainId?: number | string;
+  symbol: string;
+  logoUrl?: string;
+  address?: string; // legacy
+  tokenAddress?: string; // new field from API
+}
+
+export interface UserOverviewComment {
+  id: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  likeCount: number;
+  replyCount?: number;
+  token: UserOverviewCommentToken;
+  replies?: Array<{
+    id: string;
+    content: string;
+    createdAt: string;
+    updatedAt: string;
+    likeCount: number;
+    author: {
+      id?: string;
+      walletAddress: string;
+      username?: string | null;
+      pfp?: string | null;
+    };
+  }>;
+}
+
+export interface UserOverviewReply {
+  id: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  likeCount: number;
+  commentId: string;
+  parentComment?: {
+    id: string;
+    content?: string;
+    createdAt?: string;
+    user: {
+      id?: string;
+      walletAddress: string;
+      username?: string | null;
+      pfp?: string | null;
+    };
+  };
+  token: UserOverviewCommentToken;
+}
+
+export interface UserOverviewStats {
+  tokensDeployed: number;
+  graduatedTokens: number;
+  likesSent: number;
+  likesReceived: number;
+  commentsMade: number;
+  repliesMade: number;
+  repliesReceived: number;
+}
+
+export interface GetUserOverviewResponse {
+  success: boolean;
+  data: {
+    user: User;
+    activity: {
+      comments: UserOverviewComment[];
+      replies: UserOverviewReply[];
+      likedComments?: (UserOverviewComment & {
+        author: {
+          id?: string;
+          walletAddress: string;
+          username?: string | null;
+          pfp?: string | null;
+        };
+      })[];
+    };
+    stats: UserOverviewStats;
+  };
+}
+
+export const getUserOverview = async (
+  walletAddress: string
+): Promise<GetUserOverviewResponse["data"]> => {
+  if (!walletAddress) throw new Error("wallet is required");
+  const response = await fetch(`${API_ROOT}/user/${walletAddress}/overview`);
+  if (!response.ok) {
+    const message = `Failed to fetch user overview (${response.status})`;
+    throw new Error(message);
+  }
+  const json = await response.json();
+  if (!json?.success || !json?.data) {
+    throw new Error(json?.message || "Failed to fetch user overview");
+  }
+  return json.data as GetUserOverviewResponse["data"];
+};
