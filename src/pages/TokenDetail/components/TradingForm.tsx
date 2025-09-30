@@ -33,7 +33,7 @@ export interface TokenTradeData {
   decimals?: number; // Token decimals
 }
 
-const presetAmounts = [0.1, 0.5, 1]; // Preset amounts for quick selection
+const presetAmounts = [0.1, 0.25, 0.5, 1]; // Preset amounts for quick selection
 const slippageOptions = [0.5, 1, 2.5, 5]; // Slippage options in percentage
 
 const EVILWETH_ADDRESS = import.meta.env.VITE_EVILWETH_ADDRESS;
@@ -426,8 +426,6 @@ const TradingForm = (props: TradingFormProps) => {
           ),
           variant: isBuy ? "success" : "softDestructive",
         });
-        // Clear input after successful trade
-        setAmount("");
         // Refresh balances once after a successful trade
         setTimeout(() => {
           void fetchBalancesNow();
@@ -678,15 +676,26 @@ const TradingForm = (props: TradingFormProps) => {
         )}
       </div>
 
-      {/* Max Button */}
-      <button
-        key="max"
-        type="button"
-        onClick={handleMax}
-        className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-full text-xsm font-medium transition-all duration-200"
-      >
-        Max
-      </button>
+      {/* Quick Buy Buttons (only for buy mode) */}
+      {isBuy && (
+        <div>
+          <label className="block mb-2 text-sm text-gray-500">Quick Buy</label>
+          <div className="flex space-x-2">
+            {presetAmounts.map((value) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => {
+                  setAmount(value.toString());
+                }}
+                className="px-3 py-2 text-xs font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300"
+              >
+                {value}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Percentage Sell Buttons (only for sell mode) */}
       {!isBuy && (

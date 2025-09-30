@@ -290,29 +290,6 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
   };
 
   const [profileReplies, setProfileReplies] = useState<ProfileUserReply[]>([]);
-  type LikedComment = {
-    id: string;
-    content: string;
-    createdAt: string;
-    updatedAt: string;
-    likeCount: number;
-    replyCount?: number;
-    token: {
-      id?: string;
-      chainId?: number | string;
-      symbol: string;
-      logoUrl?: string;
-      tokenAddress?: string;
-      address?: string;
-    };
-    author: {
-      id?: string;
-      walletAddress: string;
-      username?: string | null;
-      pfp?: string | null;
-    };
-  };
-  const [likedComments, setLikedComments] = useState<LikedComment[]>([]);
 
   const toggleUserReplyLike = (replyId: string) => {
     setProfileReplies((prev) =>
@@ -463,26 +440,6 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
         parentCommentContent: r.parentComment?.content,
       }));
       setProfileReplies(mappedReplies);
-
-      setLikedComments(
-        (overview.activity.likedComments || []).map((lc) => ({
-          id: lc.id,
-          content: lc.content,
-          createdAt: lc.createdAt,
-          updatedAt: lc.updatedAt,
-          likeCount: lc.likeCount || 0,
-          replyCount: lc.replyCount || 0,
-          token: {
-            id: lc.token.id,
-            chainId: lc.token.chainId,
-            symbol: lc.token.symbol,
-            logoUrl: lc.token.logoUrl,
-            tokenAddress: lc.token.tokenAddress,
-            address: lc.token.address,
-          },
-          author: lc.author,
-        }))
-      );
 
       setProfileStats({
         deployer: {
@@ -1213,76 +1170,6 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                             )}
                           </div>
                         )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Liked Comments */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Heart className="w-5 h-5" />
-                  <span>Liked Comments</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {likedComments.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <Heart className="w-10 h-10 mx-auto mb-3 text-gray-600" />
-                    <p className="text-sm">No liked comments yet</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {likedComments.map((c) => (
-                      <div
-                        key={c.id}
-                        className="bg-gray-800 border border-gray-700 rounded p-4"
-                      >
-                        <div className="flex items-center justify-between mb-2 text-xs">
-                          <div className="flex items-center gap-2">
-                            <span className="text-gray-400">On</span>
-                            <Link
-                              to={`/token/SEP/${
-                                c.token.tokenAddress || c.token.address || ""
-                              }`}
-                              className="px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/30 hover:bg-orange-600/10 flex items-center gap-1"
-                            >
-                              {c.token.logoUrl ? (
-                                <img
-                                  src={c.token.logoUrl}
-                                  alt={`${c.token.symbol} logo`}
-                                  className="w-4 h-4 rounded-sm"
-                                />
-                              ) : (
-                                <Coins className="w-3.5 h-3.5 text-orange-400" />
-                              )}
-                              <span>{c.token.symbol}</span>
-                            </Link>
-                            <span className="text-gray-500">
-                              {formatTimeAgo(c.createdAt)}
-                            </span>
-                          </div>
-                          <div className="text-gray-400 flex items-center gap-1">
-                            <Heart className="w-3.5 h-3.5 text-red-400 fill-current" />
-                            <span className="text-xs">{c.likeCount}</span>
-                          </div>
-                        </div>
-                        <div className="text-gray-200 text-sm mb-2">
-                          {c.content}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          By
-                          <Link
-                            to={`/profile/${c.author.walletAddress}`}
-                            className="ml-1 text-orange-400 hover:text-white font-mono"
-                          >
-                            {c.author.username ||
-                              formatAddress(c.author.walletAddress)}
-                          </Link>
-                        </div>
                       </div>
                     ))}
                   </div>
