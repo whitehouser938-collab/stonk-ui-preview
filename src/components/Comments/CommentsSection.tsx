@@ -173,7 +173,15 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
           <h3 className="text-orange-400 font-mono text-sm font-bold">
             COMMENTS
           </h3>
-          <span className="text-gray-500 text-xs">({comments.length})</span>
+          <span className="text-gray-500 text-xs">
+            (
+            {comments.length +
+              comments.reduce(
+                (total, comment) => total + (comment._count?.replies || 0),
+                0
+              )}
+            )
+          </span>
         </div>
         {isConnected && currentUserId ? (
           <button
