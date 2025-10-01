@@ -58,8 +58,23 @@ const TokenPage = () => {
   const [hasMoreTrades, setHasMoreTrades] = useState(true);
   const [isFetchingMoreTrades, setIsFetchingMoreTrades] = useState(false);
   const [filteredTrader, setFilteredTrader] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"trades" | "holders">("trades");
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Hardcoded holders data
+  const holdersData = [
+    { address: "0x1234...5678", balance: "1,250,000", percentage: "12.5%" },
+    { address: "0x2345...6789", balance: "980,000", percentage: "9.8%" },
+    { address: "0x3456...789a", balance: "750,000", percentage: "7.5%" },
+    { address: "0x4567...89ab", balance: "650,000", percentage: "6.5%" },
+    { address: "0x5678...9abc", balance: "500,000", percentage: "5.0%" },
+    { address: "0x6789...abcd", balance: "420,000", percentage: "4.2%" },
+    { address: "0x789a...bcde", balance: "380,000", percentage: "3.8%" },
+    { address: "0x89ab...cdef", balance: "320,000", percentage: "3.2%" },
+    { address: "0x9abc...def0", balance: "280,000", percentage: "2.8%" },
+    { address: "0xabcd...ef01", balance: "250,000", percentage: "2.5%" },
+  ];
 
   const handleTradeUpdate = useCallback((newTrades: TradeData[]) => {
     console.log(`[TokenPage] Received trade update:`, newTrades);
@@ -923,11 +938,32 @@ const TokenPage = () => {
               }
               uniswapPair={tokenData?.uniswapPair}
             />
-            {/* Recent Trades */}
+            {/* Recent Trades / Holders */}
             <div className="bg-gray-900 border border-gray-700 p-2">
               <div className="flex items-center justify-between mb-2">
-                <div className="text-orange-400">RECENT TRADES</div>
-                {filteredTrader && (
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() => setActiveTab("trades")}
+                    className={`text-xs font-bold transition-colors ${
+                      activeTab === "trades"
+                        ? "text-orange-400"
+                        : "text-gray-400 hover:text-orange-300"
+                    }`}
+                  >
+                    RECENT TRADES
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("holders")}
+                    className={`text-xs font-bold transition-colors ${
+                      activeTab === "holders"
+                        ? "text-orange-400"
+                        : "text-gray-400 hover:text-orange-300"
+                    }`}
+                  >
+                    HOLDERS
+                  </button>
+                </div>
+                {activeTab === "trades" && filteredTrader && (
                   <button
                     onClick={() => setFilteredTrader(null)}
                     className="text-xs text-orange-400 hover:text-orange-300 transition-colors"
@@ -936,38 +972,84 @@ const TokenPage = () => {
                   </button>
                 )}
               </div>
-              {displayTrades.length === 0 ? (
-                <div className="text-gray-400 text-xs">
-                  {filteredTrader
-                    ? "No trades found for this trader."
-                    : "No recent trades found."}
-                </div>
+              {activeTab === "trades" ? (
+                displayTrades.length === 0 ? (
+                  <div className="text-gray-400 text-xs">
+                    {filteredTrader
+                      ? "No trades found for this trader."
+                      : "No recent trades found."}
+                  </div>
+                ) : (
+                  <div
+                    ref={scrollContainerRef}
+                    className="overflow-x-auto h-96 custom-scrollbar"
+                  >
+                    <table className="w-full text-xs min-w-[400px]">
+                      <thead className="bg-gray-900 sticky top-0 z-10">
+                        <tr className="text-gray-400 border-b border-gray-700">
+                          <th className="text-left p-1">
+                            <div className="flex items-center space-x-1">
+                              <span>TRADER</span>
+                              {filteredTrader && (
+                                <Filter className="w-3 h-3 text-orange-400 fill-current" />
+                              )}
+                            </div>
+                          </th>
+                          <th className="text-right p-1">
+                            {(tokenData?.symbol || "TOKEN").toUpperCase()} AMOUNT
+                          </th>
+                          <th className="text-right p-1">WETH AMOUNT</th>
+                          <th className="text-center p-1">TYPE</th>
+                          <th className="text-right p-1">TIME</th>
+                          <th className="text-center p-1"></th>
+                        </tr>
+                      </thead>
+                      <tbody>{tradeRows}</tbody>
+                    </table>
+                  </div>
+                )
               ) : (
-                <div
-                  ref={scrollContainerRef}
-                  className="overflow-x-auto h-96 custom-scrollbar"
-                >
+                <div className="overflow-x-auto h-96 custom-scrollbar">
                   <table className="w-full text-xs min-w-[400px]">
                     <thead className="bg-gray-900 sticky top-0 z-10">
                       <tr className="text-gray-400 border-b border-gray-700">
-                        <th className="text-left p-1">
-                          <div className="flex items-center space-x-1">
-                            <span>TRADER</span>
-                            {filteredTrader && (
-                              <Filter className="w-3 h-3 text-orange-400 fill-current" />
-                            )}
-                          </div>
-                        </th>
-                        <th className="text-right p-1">
-                          {(tokenData?.symbol || "TOKEN").toUpperCase()} AMOUNT
-                        </th>
-                        <th className="text-right p-1">WETH AMOUNT</th>
-                        <th className="text-center p-1">TYPE</th>
-                        <th className="text-right p-1">TIME</th>
+                        <th className="text-left p-1">ADDRESS</th>
+                        <th className="text-right p-1">BALANCE</th>
+                        <th className="text-right p-1">PERCENTAGE</th>
                         <th className="text-center p-1"></th>
                       </tr>
                     </thead>
-                    <tbody>{tradeRows}</tbody>
+                    <tbody>
+                      {holdersData.map((holder, idx) => (
+                        <tr key={idx} className="border-b border-gray-800 last:border-0">
+                          <td className="p-1 text-white font-mono">
+                            <button
+                              onClick={() => navigate(`/profile/${holder.address}`)}
+                              className="hover:text-orange-400 underline text-left"
+                            >
+                              {holder.address}
+                            </button>
+                          </td>
+                          <td className="p-1 text-right text-white font-mono">
+                            {holder.balance}
+                          </td>
+                          <td className="p-1 text-right text-gray-400">
+                            {holder.percentage}
+                          </td>
+                          <td className="p-1 text-center">
+                            <a
+                              href={`${getExplorer(chainId)}/address/${holder.address}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:text-orange-400"
+                              title="View on Etherscan"
+                            >
+                              <ArrowUpRight className="w-4 h-4 inline" />
+                            </a>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
                   </table>
                 </div>
               )}

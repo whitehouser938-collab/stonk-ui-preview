@@ -341,14 +341,14 @@ export function MarketsDashboard() {
               <thead className="bg-gray-800 sticky top-0">
                 <tr className="text-gray-400">
                   <th className="text-left p-1">Symbol</th>
-                  <th className="text-left p-1">Name</th>
+                  <th className="text-left p-1 hidden md:table-cell">Name</th>
                   <th className="text-right p-1">PRICE</th>
+                  <th className="text-right p-1">MCAP</th>
                   <th className="text-right p-1">24H</th>
                   <th className="text-right p-1">6H</th>
                   <th className="text-right p-1">1H</th>
                   <th className="text-right p-1">5M</th>
                   <th className="text-right p-1">VOL</th>
-                  <th className="text-right p-1 hidden md:table-cell">MCAP</th>
                   <th className="text-right p-1 hidden md:table-cell">AGE</th>
                 </tr>
               </thead>
@@ -411,12 +411,19 @@ export function MarketsDashboard() {
                           )}
                         </div>
                       </td>
-                      <td className="p-1 text-gray-400 text-xs">
+                      <td className="p-1 text-gray-400 text-xs hidden md:table-cell">
                         {token.name}
                       </td>
                       <td className="p-1 text-right text-white font-mono">
                         {token.currentPrice
                           ? `$${Number(token.currentPrice).toFixed(6)}`
+                          : "N/A"}
+                      </td>
+                      <td className="p-1 text-right text-gray-400">
+                        {token.curveStatus?.marketCap
+                          ? `$${formatNumber(
+                              Number(token.curveStatus.marketCap)
+                            )}`
                           : "N/A"}
                       </td>
                       <td className="p-1 text-right text-gray-400">
@@ -442,13 +449,6 @@ export function MarketsDashboard() {
                       <td className="p-1 text-right text-gray-400">
                         {token.volume24h
                           ? formatNumber(Number(token.volume24h))
-                          : "N/A"}
-                      </td>
-                      <td className="p-1 text-right text-gray-400 hidden md:table-cell">
-                        {token.curveStatus?.marketCap
-                          ? `$${formatNumber(
-                              Number(token.curveStatus.marketCap)
-                            )}`
                           : "N/A"}
                       </td>
                       <td className="p-1 text-right text-gray-400 hidden md:table-cell">
