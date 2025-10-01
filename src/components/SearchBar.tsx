@@ -23,6 +23,7 @@ const SearchBar = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const searchRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   // Debounced search function
@@ -106,9 +107,13 @@ const SearchBar = () => {
   };
 
   const selectToken = (token: TokenSearchResult) => {
-    setStoredSearchTerm(token.symbol);
+    setStoredSearchTerm("");
     setShowPreview(false);
     setSelectedIndex(-1);
+    // Blur the input field to close the search bar
+    if (inputRef.current) {
+      inputRef.current.blur();
+    }
     // Navigate to token detail page
     navigate(`/token/${token.chain}/${token.tokenAddress}`);
   };
@@ -117,8 +122,14 @@ const SearchBar = () => {
     if (searchResults.length > 0) {
       selectToken(searchResults[0]);
     } else if (storedSearchTerm.trim()) {
-      // If no results but there's a search term, still try to search
+      // If no results but there's a search term, clear and blur
       console.log("Searching for:", storedSearchTerm);
+      setStoredSearchTerm("");
+      setShowPreview(false);
+      setSelectedIndex(-1);
+      if (inputRef.current) {
+        inputRef.current.blur();
+      }
     }
   };
 
@@ -132,6 +143,7 @@ const SearchBar = () => {
         <div className="relative flex-1 max-w-sm" ref={searchRef}>
           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3" />
           <input
+            ref={inputRef}
             placeholder="Search ticker or name..."
             value={storedSearchTerm}
             onChange={(e) => setStoredSearchTerm(e.target.value)}
