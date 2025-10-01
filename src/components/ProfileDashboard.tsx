@@ -30,6 +30,7 @@ import {
   Wallet,
   LogOut,
   Heart,
+  Copy,
 } from "lucide-react";
 import {
   getUserByWalletAddress,
@@ -829,11 +830,26 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() =>
-                        navigator.clipboard.writeText(targetAddress || "")
-                      }
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(targetAddress || "");
+                          toast({
+                            title: "Address Copied",
+                            description: "Wallet address copied to clipboard",
+                            variant: "default",
+                          });
+                        } catch (error) {
+                          console.error("Failed to copy address:", error);
+                          toast({
+                            title: "Copy Failed",
+                            description: "Failed to copy address to clipboard",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                      className="hover:text-orange-400 transition-colors"
                     >
-                      <ExternalLink className="w-4 h-4" />
+                      <Copy className="w-4 h-4" />
                     </Button>
                   </p>
                   <div className="flex items-center space-x-4 text-sm text-gray-400 mt-1">

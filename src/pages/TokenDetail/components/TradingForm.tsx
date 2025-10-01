@@ -241,6 +241,61 @@ const TradingForm = (props: TradingFormProps) => {
     calc();
   }, [isBuy, amount, props.tokenAddress, slippagePercent]);
 
+  // Calculate expected WETH amount for sell (when user enters token amount)
+  const [expectedWethAmount, setExpectedWethAmount] = useState("0");
+  const [isCalculatingSellConversion, setIsCalculatingSellConversion] =
+    useState(false);
+  React.useEffect(() => {
+    const calc = async () => {
+      if (isBuy || !amount || !props.tokenAddress) {
+        return setExpectedWethAmount("0");
+      }
+
+      // Validate amount is a valid positive number
+      const numAmount = parseFloat(amount);
+      if (isNaN(numAmount) || numAmount <= 0) {
+        return setExpectedWethAmount("0");
+      }
+
+      // Check if amount is extremely large to prevent obvious overflow errors
+      const maxReasonableAmount = 100000000; // 100M tokens max - much more reasonable
+      if (numAmount > maxReasonableAmount) {
+        console.warn(
+          "Amount extremely large, skipping conversion calculation to prevent overflow"
+        );
+        return setExpectedWethAmount("0");
+      }
+
+      setIsCalculatingSellConversion(true);
+      try {
+        // Use direct contract call - same as the API but more efficient
+        const signer = await getETHSigner();
+        const router = new ethers.Contract(
+          ROUTER_ADDRESS,
+          [
+            "function calculateSellWithFees(address,uint256) view returns (uint256,uint256,bool)",
+          ],
+          signer
+        );
+
+        const tokenAmount = ethers.parseUnits(amount, tokenDecimals);
+        const [assetAmount, fee, isBondingCurve] =
+          await router.calculateSellWithFees(props.tokenAddress, tokenAmount);
+
+        // Calculate net amount after fees (what user actually receives)
+        // For graduated tokens (isBondingCurve = false), fee should be 0
+        const netAmount = isBondingCurve ? assetAmount - fee : assetAmount;
+        setExpectedWethAmount(netAmount.toString());
+      } catch (error) {
+        console.error("Error calculating expected WETH amount:", error);
+        setExpectedWethAmount("0");
+      } finally {
+        setIsCalculatingSellConversion(false);
+      }
+    };
+    calc();
+  }, [isBuy, amount, props.tokenAddress, tokenDecimals]);
+
   // Note: sellTokenAmount calculation removed - approval is now handled automatically in sellTokens function
 
   const handleApprove = async () => {
@@ -651,20 +706,39 @@ const TradingForm = (props: TradingFormProps) => {
         <label htmlFor="amount" className="block text-xs text-gray-400 mb-1">
           Amount ({isBuy ? paymentMethod : props.symbol})
         </label>
-        <input
-          id="amount"
-          type="number"
-          min="0"
-          step="any"
-          className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-          placeholder={
-            isBuy
-              ? `Enter ${paymentMethod} to spend`
-              : `Enter ${props.symbol} to sell`
-          }
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-        />
+        <div className="relative">
+          <input
+            id="amount"
+            type="number"
+            min="0"
+            step="any"
+            className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+            placeholder={
+              isBuy
+                ? `Enter ${paymentMethod} to spend`
+                : `Enter ${props.symbol} to sell`
+            }
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+          />
+          {/* Sell conversion display on the right side */}
+          {!isBuy && amount && parseFloat(amount) > 0 && (
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+              {isCalculatingSellConversion ? (
+                <div className="flex items-center space-x-1">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-400"></div>
+                  <span className="text-xs text-gray-400">Calculating...</span>
+                </div>
+              ) : expectedWethAmount && expectedWethAmount !== "0" ? (
+                <div className="text-right">
+                  <div className="text-xs text-orange-400 font-mono">
+                    ≈ {abbreviateTokenAmount(expectedWethAmount, 18)} WETH
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          )}
+        </div>
         {!isBuy && (
           <div className="text-xs text-gray-400 mt-1">
             Balance:{" "}

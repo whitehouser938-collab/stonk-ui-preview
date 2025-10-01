@@ -996,7 +996,8 @@ const TokenPage = () => {
                             </div>
                           </th>
                           <th className="text-right p-1">
-                            {(tokenData?.symbol || "TOKEN").toUpperCase()} AMOUNT
+                            {(tokenData?.symbol || "TOKEN").toUpperCase()}{" "}
+                            AMOUNT
                           </th>
                           <th className="text-right p-1">WETH AMOUNT</th>
                           <th className="text-center p-1">TYPE</th>
@@ -1021,10 +1022,15 @@ const TokenPage = () => {
                     </thead>
                     <tbody>
                       {holdersData.map((holder, idx) => (
-                        <tr key={idx} className="border-b border-gray-800 last:border-0">
+                        <tr
+                          key={idx}
+                          className="border-b border-gray-800 last:border-0"
+                        >
                           <td className="p-1 text-white font-mono">
                             <button
-                              onClick={() => navigate(`/profile/${holder.address}`)}
+                              onClick={() =>
+                                navigate(`/profile/${holder.address}`)
+                              }
                               className="hover:text-orange-400 underline text-left"
                             >
                               {holder.address}
@@ -1038,7 +1044,9 @@ const TokenPage = () => {
                           </td>
                           <td className="p-1 text-center">
                             <a
-                              href={`${getExplorer(chainId)}/address/${holder.address}`}
+                              href={`${getExplorer(chainId)}/address/${
+                                holder.address
+                              }`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="hover:text-orange-400"

@@ -1,16 +1,18 @@
 import { useAppKitAccount, useAppKit } from "@reown/appkit/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { User, Wallet } from "lucide-react";
+import { User, Wallet, Copy } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getUserByWalletAddress, User as UserType } from "@/api/user";
+import { useToast } from "@/hooks/use-toast";
 
 export function ProfileDisplay() {
   const { address, isConnected } = useAppKitAccount({ namespace: "eip155" });
   const { open } = useAppKit();
   const [user, setUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (isConnected && address) {
@@ -83,13 +85,69 @@ export function ProfileDisplay() {
         </AvatarFallback>
       </Avatar>
       <div className="flex flex-col items-start">
-        <span className="text-sm font-medium text-gray-200 group-hover:text-orange-400 transition-colors">
-          {user?.username || formatAddress(address || "")}
-        </span>
-        {user?.username && (
-          <span className="text-xs text-gray-500 font-mono">
-            {formatAddress(address || "")}
+        <div className="flex items-center space-x-1">
+          <span className="text-sm font-medium text-gray-200 group-hover:text-orange-400 transition-colors">
+            {user?.username || formatAddress(address || "")}
           </span>
+          {!user?.username && (
+            <button
+              onClick={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                try {
+                  await navigator.clipboard.writeText(address || "");
+                  toast({
+                    title: "Address Copied",
+                    description: "Wallet address copied to clipboard",
+                    variant: "default",
+                  });
+                } catch (error) {
+                  console.error("Failed to copy address:", error);
+                  toast({
+                    title: "Copy Failed",
+                    description: "Failed to copy address to clipboard",
+                    variant: "destructive",
+                  });
+                }
+              }}
+              className="text-gray-500 hover:text-orange-400 transition-colors"
+              title="Copy wallet address"
+            >
+              <Copy className="w-3 h-3" />
+            </button>
+          )}
+        </div>
+        {user?.username && (
+          <div className="flex items-center space-x-1">
+            <span className="text-xs text-gray-500 font-mono">
+              {formatAddress(address || "")}
+            </span>
+            <button
+              onClick={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                try {
+                  await navigator.clipboard.writeText(address || "");
+                  toast({
+                    title: "Address Copied",
+                    description: "Wallet address copied to clipboard",
+                    variant: "default",
+                  });
+                } catch (error) {
+                  console.error("Failed to copy address:", error);
+                  toast({
+                    title: "Copy Failed",
+                    description: "Failed to copy address to clipboard",
+                    variant: "destructive",
+                  });
+                }
+              }}
+              className="text-gray-500 hover:text-orange-400 transition-colors"
+              title="Copy wallet address"
+            >
+              <Copy className="w-3 h-3" />
+            </button>
+          </div>
         )}
       </div>
     </Link>
