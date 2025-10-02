@@ -71,6 +71,7 @@ const TokenPage = () => {
   const [filteredTrader, setFilteredTrader] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"trades" | "holders">("trades");
   const [holdersData, setHoldersData] = useState<TokenHolder[]>([]);
+  const [holdersCount, setHoldersCount] = useState<number>(0);
   const [isLoadingHolders, setIsLoadingHolders] = useState(false);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -164,9 +165,11 @@ const TokenPage = () => {
     try {
       const response = await getTokenHolders(tokenAddress);
       setHoldersData(response.data.holders);
+      setHoldersCount(response.data.holdersCount);
     } catch (error) {
       console.error("Error fetching holders:", error);
       setHoldersData([]);
+      setHoldersCount(0);
     } finally {
       setIsLoadingHolders(false);
     }
@@ -982,7 +985,7 @@ const TokenPage = () => {
                         : "text-gray-400 hover:text-orange-300"
                     }`}
                   >
-                    HOLDERS
+                    HOLDERS{holdersCount > 0 ? ` (${holdersCount})` : ""}
                   </button>
                 </div>
                 {activeTab === "trades" && filteredTrader && (
