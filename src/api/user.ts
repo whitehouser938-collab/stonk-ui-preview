@@ -549,6 +549,7 @@ export interface Holding {
   amount: string;
   decimals: string;
   logo: string;
+  address: string;
 }
 
 export interface UserHoldingsResponse {

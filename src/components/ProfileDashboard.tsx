@@ -607,6 +607,13 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
     }
   };
 
+  const getTokenAmount = (amount: string, decimals: string) => {
+    const amountNum = parseFloat(amount);
+    const decimalsNum = parseInt(decimals);
+    const divisor = Math.pow(10, decimalsNum);
+    return amountNum / divisor;
+  };
+
   const toggleCommentLike = (commentId: string) => {
     setProfileComments((prev) =>
       prev.map((c) =>
@@ -1074,51 +1081,59 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                   <TrendingUp className="w-5 h-5" />
                   <span className="text-lg font-semibold">Holdings</span>
                 </div>
-                {userHoldings.length > 0 ? (
+                {userHoldings.filter(
+                  (holding) =>
+                    getTokenAmount(holding.amount, holding.decimals) >= 1
+                ).length > 0 ? (
                   <div className="space-y-4">
-                    {userHoldings.map((holding, index) => (
-                      <Link
-                        to={`/token/SEP/${holding.symbol}`}
-                        key={index}
-                        className="flex items-center justify-between p-4 border border-gray-700 rounded-lg hover:border-orange-500 transition-colors"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-12 h-12 bg-orange-500/20 flex items-center justify-center overflow-hidden">
-                            {holding.logo ? (
-                              <img
-                                src={holding.logo}
-                                alt={`${holding.symbol} logo`}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = "none";
-                                }}
-                              />
-                            ) : (
-                              <Coins className="w-6 h-6 text-orange-400" />
-                            )}
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-gray-300">
-                              {holding.name}
-                            </h4>
-                            <div className="flex items-center space-x-2">
-                              <p className="text-sm text-gray-500">
-                                {holding.symbol}
-                              </p>
+                    {userHoldings
+                      .filter(
+                        (holding) =>
+                          getTokenAmount(holding.amount, holding.decimals) >= 1
+                      )
+                      .map((holding, index) => (
+                        <Link
+                          to={`/token/SEP/${holding.address}`}
+                          key={index}
+                          className="flex items-center justify-between p-4 border border-gray-700 rounded-lg hover:border-orange-500 transition-colors"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="w-12 h-12 bg-orange-500/20 flex items-center justify-center overflow-hidden">
+                              {holding.logo ? (
+                                <img
+                                  src={holding.logo}
+                                  alt={`${holding.symbol} logo`}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = "none";
+                                  }}
+                                />
+                              ) : (
+                                <Coins className="w-6 h-6 text-orange-400" />
+                              )}
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-gray-300">
+                                {holding.name}
+                              </h4>
+                              <div className="flex items-center space-x-2">
+                                <p className="text-sm text-gray-500">
+                                  {holding.symbol}
+                                </p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm text-gray-400">Amount</p>
-                          <p className="font-medium text-gray-500">
-                            {formatTokenAmount(
-                              holding.amount,
-                              holding.decimals
-                            )}
-                          </p>
-                        </div>
-                      </Link>
-                    ))}
+                          <div className="text-right">
+                            <p className="text-sm text-gray-400">Amount</p>
+                            <p className="font-medium text-gray-500">
+                              {formatTokenAmount(
+                                holding.amount,
+                                holding.decimals
+                              )}
+                            </p>
+                          </div>
+                        </Link>
+                      ))}
                   </div>
                 ) : (
                   <div className="text-center py-8">
