@@ -73,6 +73,7 @@ const TokenPage = () => {
   const [holdersData, setHoldersData] = useState<TokenHolder[]>([]);
   const [holdersCount, setHoldersCount] = useState<number>(0);
   const [isLoadingHolders, setIsLoadingHolders] = useState(false);
+  const [burntData, setBurntData] = useState<TokenHolder | null>(null);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -164,11 +165,26 @@ const TokenPage = () => {
     setIsLoadingHolders(true);
     try {
       const response = await getTokenHolders(tokenAddress);
-      setHoldersData(response.data.holders);
+      const allHolders = response.data.holders;
+
+      // Separate burnt tokens from regular holders
+      const burnAddress = "0x000000000000000000000000000000000000dEaD";
+      const burntHolder = allHolders.find(
+        (holder) =>
+          holder.holderAddress.toLowerCase() === burnAddress.toLowerCase()
+      );
+      const regularHolders = allHolders.filter(
+        (holder) =>
+          holder.holderAddress.toLowerCase() !== burnAddress.toLowerCase()
+      );
+
+      setHoldersData(regularHolders);
+      setBurntData(burntHolder || null);
       setHoldersCount(response.data.holdersCount);
     } catch (error) {
       console.error("Error fetching holders:", error);
       setHoldersData([]);
+      setBurntData(null);
       setHoldersCount(0);
     } finally {
       setIsLoadingHolders(false);
@@ -1058,63 +1074,104 @@ const TokenPage = () => {
                             </div>
                           </td>
                         </tr>
-                      ) : holdersData.length === 0 ? (
-                        <tr>
-                          <td
-                            colSpan={4}
-                            className="p-4 text-center text-gray-400"
-                          >
-                            No holders found
-                          </td>
-                        </tr>
                       ) : (
-                        holdersData.map((holder, idx) => (
-                          <tr
-                            key={idx}
-                            className="border-b border-gray-800 last:border-0"
-                          >
-                            <td className="p-1 text-white">
-                              <div className="flex items-center space-x-2">
-                                <img
-                                  src={holder.pfp || "/default-pfp.jpeg"}
-                                  alt="Profile"
-                                  className="w-6 h-6 rounded-full"
-                                  onError={(e) => {
-                                    e.currentTarget.src = "/default-pfp.jpeg";
-                                  }}
-                                />
-                                <button
-                                  onClick={() =>
-                                    navigate(`/profile/${holder.holderAddress}`)
-                                  }
-                                  className="hover:text-orange-400 underline text-left font-mono"
+                        <>
+                          {/* Burnt tokens section */}
+                          {burntData && (
+                            <tr className="border-b border-gray-800 bg-red-900/20">
+                              <td className="p-1 text-red-400">
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-lg">🔥</span>
+                                  <span className="font-mono text-sm">
+                                    0x0000...dEaD
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="p-1 text-right text-red-400 font-mono">
+                                {formatBalance(burntData.balance)}
+                              </td>
+                              <td className="p-1 text-right text-red-400">
+                                {calculatePercentage(burntData.balance)}
+                              </td>
+                              <td className="p-1 text-center">
+                                <a
+                                  href={`${getExplorer(
+                                    chainId
+                                  )}/address/0x000000000000000000000000000000000000dEaD`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="hover:text-red-300"
+                                  title="View on Etherscan"
                                 >
-                                  {holder.username ||
-                                    abbreviateAddress(holder.holderAddress)}
-                                </button>
-                              </div>
-                            </td>
-                            <td className="p-1 text-right text-white font-mono">
-                              {formatBalance(holder.balance)}
-                            </td>
-                            <td className="p-1 text-right text-gray-400">
-                              {calculatePercentage(holder.balance)}
-                            </td>
-                            <td className="p-1 text-center">
-                              <a
-                                href={`${getExplorer(chainId)}/address/${
-                                  holder.holderAddress
-                                }`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="hover:text-orange-400"
-                                title="View on Etherscan"
+                                  <ArrowUpRight className="w-4 h-4 inline" />
+                                </a>
+                              </td>
+                            </tr>
+                          )}
+
+                          {/* Regular holders */}
+                          {holdersData.length === 0 && !burntData ? (
+                            <tr>
+                              <td
+                                colSpan={4}
+                                className="p-4 text-center text-gray-400"
                               >
-                                <ArrowUpRight className="w-4 h-4 inline" />
-                              </a>
-                            </td>
-                          </tr>
-                        ))
+                                No holders found
+                              </td>
+                            </tr>
+                          ) : (
+                            holdersData.map((holder, idx) => (
+                              <tr
+                                key={idx}
+                                className="border-b border-gray-800 last:border-0"
+                              >
+                                <td className="p-1 text-white">
+                                  <div className="flex items-center space-x-2">
+                                    <img
+                                      src={holder.pfp || "/default-pfp.jpeg"}
+                                      alt="Profile"
+                                      className="w-6 h-6 rounded-full"
+                                      onError={(e) => {
+                                        e.currentTarget.src =
+                                          "/default-pfp.jpeg";
+                                      }}
+                                    />
+                                    <button
+                                      onClick={() =>
+                                        navigate(
+                                          `/profile/${holder.holderAddress}`
+                                        )
+                                      }
+                                      className="hover:text-orange-400 underline text-left font-mono"
+                                    >
+                                      {holder.username ||
+                                        abbreviateAddress(holder.holderAddress)}
+                                    </button>
+                                  </div>
+                                </td>
+                                <td className="p-1 text-right text-white font-mono">
+                                  {formatBalance(holder.balance)}
+                                </td>
+                                <td className="p-1 text-right text-gray-400">
+                                  {calculatePercentage(holder.balance)}
+                                </td>
+                                <td className="p-1 text-center">
+                                  <a
+                                    href={`${getExplorer(chainId)}/address/${
+                                      holder.holderAddress
+                                    }`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:text-orange-400"
+                                    title="View on Etherscan"
+                                  >
+                                    <ArrowUpRight className="w-4 h-4 inline" />
+                                  </a>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </>
                       )}
                     </tbody>
                   </table>
