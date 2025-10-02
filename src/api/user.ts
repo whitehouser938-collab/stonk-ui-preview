@@ -541,3 +541,46 @@ export const getUserOverview = async (
   }
   return json.data as GetUserOverviewResponse["data"];
 };
+
+// Holdings API
+export interface Holding {
+  symbol: string;
+  name: string;
+  amount: string;
+  decimals: string;
+  logo: string;
+}
+
+export interface UserHoldingsResponse {
+  success: boolean;
+  data: {
+    walletAddress: string;
+    holdings: Holding[];
+    totalTokens: number;
+  };
+}
+
+export const getUserHoldings = async (
+  walletAddress: string
+): Promise<UserHoldingsResponse["data"]> => {
+  if (!walletAddress) throw new Error("wallet address is required");
+
+  try {
+    const response = await fetch(`${API_ROOT}/user/${walletAddress}/holdings`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch user holdings (${response.status})`);
+    }
+
+    const data = await response.json();
+
+    if (!data?.success || !data?.data) {
+      throw new Error(data?.message || "Failed to fetch user holdings");
+    }
+
+    return data.data as UserHoldingsResponse["data"];
+  } catch (error) {
+    console.error("Error fetching user holdings:", error);
+    throw error;
+  }
+};

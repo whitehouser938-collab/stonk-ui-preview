@@ -39,8 +39,10 @@ import {
   uploadUserProfileImage,
   createUser,
   getUserOverview,
+  getUserHoldings,
   User as UserType,
   GetUserOverviewResponse,
+  Holding,
 } from "@/api/user";
 import { useToast } from "@/hooks/use-toast";
 import { WalletConnectionPrompt } from "@/components/WalletConnectionPrompt";
@@ -86,6 +88,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
 
   const [user, setUser] = useState<UserType | null>(null);
   const [userTokens, setUserTokens] = useState<any[]>([]);
+  const [userHoldings, setUserHoldings] = useState<Holding[]>([]);
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState(false);
   const [walletLoading, setWalletLoading] = useState(true);
@@ -351,9 +354,11 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
       }
 
       const tokensData = await getUserTokens(targetAddress);
+      const holdingsData = await getUserHoldings(targetAddress);
 
       setUser(userData);
       setUserTokens(tokensData);
+      setUserHoldings(holdingsData.holdings);
 
       // Initialize edit form with current user data
       setEditForm({
@@ -584,6 +589,22 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
     if (m < 60) return `${m}m ago`;
     if (h < 24) return `${h}h ago`;
     return `${d}d ago`;
+  };
+
+  const formatTokenAmount = (amount: string, decimals: string) => {
+    const amountNum = parseFloat(amount);
+    const decimalsNum = parseInt(decimals);
+    const divisor = Math.pow(10, decimalsNum);
+    const cleanAmount = amountNum / divisor;
+
+    // Format with K/M notation
+    if (cleanAmount >= 1000000) {
+      return (cleanAmount / 1000000).toFixed(2) + "M";
+    } else if (cleanAmount >= 1000) {
+      return (cleanAmount / 1000).toFixed(2) + "K";
+    } else {
+      return cleanAmount.toFixed(2);
+    }
   };
 
   const toggleCommentLike = (commentId: string) => {
@@ -832,7 +853,9 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                       size="sm"
                       onClick={async () => {
                         try {
-                          await navigator.clipboard.writeText(targetAddress || "");
+                          await navigator.clipboard.writeText(
+                            targetAddress || ""
+                          );
                           toast({
                             title: "Address Copied",
                             description: "Wallet address copied to clipboard",
@@ -970,79 +993,143 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
 
         {/* Bottom section: Two columns */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left column: Deployed Tokens (thinner) */}
+          {/* Left column: Deployed Tokens and Holdings */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Coins className="w-5 h-5" />
-                <span>Deployed Tokens</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {userTokens.length > 0 ? (
-                <div className="space-y-4">
-                  {userTokens.map((token, index) => (
-                    <Link
-                      to={`/token/SEP/${token.tokenAddress}`}
-                      key={index}
-                      className="flex items-center justify-between p-4 border border-gray-700 rounded-lg hover:border-orange-500 transition-colors"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-orange-500/20 flex items-center justify-center overflow-hidden">
-                          {token.logoUrl ? (
-                            <img
-                              src={token.logoUrl}
-                              alt={`${token.symbol} logo`}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                e.currentTarget.style.display = "none";
-                              }}
-                            />
-                          ) : (
-                            <Coins className="w-6 h-6 text-orange-400" />
-                          )}
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-gray-300">
-                            {token.name}
-                          </h4>
-                          <div className="flex items-center space-x-2">
-                            <p className="text-sm text-gray-500">
-                              {token.symbol}
-                            </p>
-                            {token.graduated ? (
-                              <span className="bg-green-600 text-white px-1 py-0.5 rounded text-[10px] leading-none">
-                                GRAD
-                              </span>
+            <CardContent className="p-0">
+              {/* Deployed Tokens Section */}
+              <div className="p-6 border-b border-gray-700">
+                <div className="flex items-center space-x-2 mb-4">
+                  <Coins className="w-5 h-5" />
+                  <span className="text-lg font-semibold">Deployed Tokens</span>
+                </div>
+                {userTokens.length > 0 ? (
+                  <div className="space-y-4">
+                    {userTokens.map((token, index) => (
+                      <Link
+                        to={`/token/SEP/${token.tokenAddress}`}
+                        key={index}
+                        className="flex items-center justify-between p-4 border border-gray-700 rounded-lg hover:border-orange-500 transition-colors"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-12 h-12 bg-orange-500/20 flex items-center justify-center overflow-hidden">
+                            {token.logoUrl ? (
+                              <img
+                                src={token.logoUrl}
+                                alt={`${token.symbol} logo`}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = "none";
+                                }}
+                              />
                             ) : (
-                              <span className="bg-purple-600 text-white px-1 py-0.5 rounded text-[10px] leading-none">
-                                BOND
-                              </span>
+                              <Coins className="w-6 h-6 text-orange-400" />
                             )}
                           </div>
+                          <div>
+                            <h4 className="font-medium text-gray-300">
+                              {token.name}
+                            </h4>
+                            <div className="flex items-center space-x-2">
+                              <p className="text-sm text-gray-500">
+                                {token.symbol}
+                              </p>
+                              {token.graduated ? (
+                                <span className="bg-green-600 text-white px-1 py-0.5 rounded text-[10px] leading-none">
+                                  GRAD
+                                </span>
+                              ) : (
+                                <span className="bg-purple-600 text-white px-1 py-0.5 rounded text-[10px] leading-none">
+                                  BOND
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-400">Market Cap</p>
-                        <p className="font-medium text-gray-200">
-                          $
-                          {token.marketCap
-                            ? token.marketCap.toLocaleString()
-                            : "N/A"}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
+                        <div className="text-right">
+                          <p className="text-sm text-gray-400">Market Cap</p>
+                          <p className="font-medium text-gray-200">
+                            $
+                            {token.marketCap
+                              ? token.marketCap.toLocaleString()
+                              : "N/A"}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Coins className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                    <p className="text-gray-400">No tokens deployed yet</p>
+                    <p className="text-sm text-gray-500">
+                      Visit the Launchpad to create your first token
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Holdings Section */}
+              <div className="p-6">
+                <div className="flex items-center space-x-2 mb-4">
+                  <TrendingUp className="w-5 h-5" />
+                  <span className="text-lg font-semibold">Holdings</span>
                 </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Coins className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                  <p className="text-gray-400">No tokens deployed yet</p>
-                  <p className="text-sm text-gray-500">
-                    Visit the Launchpad to create your first token
-                  </p>
-                </div>
-              )}
+                {userHoldings.length > 0 ? (
+                  <div className="space-y-4">
+                    {userHoldings.map((holding, index) => (
+                      <Link
+                        to={`/token/SEP/${holding.symbol}`}
+                        key={index}
+                        className="flex items-center justify-between p-4 border border-gray-700 rounded-lg hover:border-orange-500 transition-colors"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-12 h-12 bg-orange-500/20 flex items-center justify-center overflow-hidden">
+                            {holding.logo ? (
+                              <img
+                                src={holding.logo}
+                                alt={`${holding.symbol} logo`}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = "none";
+                                }}
+                              />
+                            ) : (
+                              <Coins className="w-6 h-6 text-orange-400" />
+                            )}
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-gray-300">
+                              {holding.name}
+                            </h4>
+                            <div className="flex items-center space-x-2">
+                              <p className="text-sm text-gray-500">
+                                {holding.symbol}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-gray-400">Amount</p>
+                          <p className="font-medium text-gray-500">
+                            {formatTokenAmount(
+                              holding.amount,
+                              holding.decimals
+                            )}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <TrendingUp className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                    <p className="text-gray-400">No holdings yet</p>
+                    <p className="text-sm text-gray-500">
+                      Start trading to build your portfolio
+                    </p>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
 
