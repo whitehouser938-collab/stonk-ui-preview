@@ -1093,7 +1093,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                       )
                       .map((holding, index) => (
                         <Link
-                          to={`/token/SEP/${holding.address}`}
+                          to={`/token/SEP/${holding.tokenAddress}`}
                           key={index}
                           className="flex items-center justify-between p-4 border border-gray-700 rounded-lg hover:border-orange-500 transition-colors"
                         >
