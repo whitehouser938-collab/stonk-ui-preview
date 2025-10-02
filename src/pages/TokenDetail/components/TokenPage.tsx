@@ -1,9 +1,20 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getExplorer, getToken, getTokenTrades } from "@/api/token";
+import {
+  getExplorer,
+  getToken,
+  getTokenTrades,
+  getTokenHolders,
+  TokenHolder,
+} from "@/api/token";
 import LoadingScreen from "@/components/ui/loading";
 import { useLoading } from "@/hooks/use-loading";
 import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  formatBalance,
+  calculatePercentage,
+  abbreviateAddress,
+} from "@/lib/utils";
 
 import {
   Globe,
@@ -59,22 +70,10 @@ const TokenPage = () => {
   const [isFetchingMoreTrades, setIsFetchingMoreTrades] = useState(false);
   const [filteredTrader, setFilteredTrader] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"trades" | "holders">("trades");
+  const [holdersData, setHoldersData] = useState<TokenHolder[]>([]);
+  const [isLoadingHolders, setIsLoadingHolders] = useState(false);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  // Hardcoded holders data
-  const holdersData = [
-    { address: "0x1234...5678", balance: "1,250,000", percentage: "12.5%" },
-    { address: "0x2345...6789", balance: "980,000", percentage: "9.8%" },
-    { address: "0x3456...789a", balance: "750,000", percentage: "7.5%" },
-    { address: "0x4567...89ab", balance: "650,000", percentage: "6.5%" },
-    { address: "0x5678...9abc", balance: "500,000", percentage: "5.0%" },
-    { address: "0x6789...abcd", balance: "420,000", percentage: "4.2%" },
-    { address: "0x789a...bcde", balance: "380,000", percentage: "3.8%" },
-    { address: "0x89ab...cdef", balance: "320,000", percentage: "3.2%" },
-    { address: "0x9abc...def0", balance: "280,000", percentage: "2.8%" },
-    { address: "0xabcd...ef01", balance: "250,000", percentage: "2.5%" },
-  ];
 
   const handleTradeUpdate = useCallback((newTrades: TradeData[]) => {
     console.log(`[TokenPage] Received trade update:`, newTrades);
@@ -156,6 +155,29 @@ const TokenPage = () => {
     };
     fetchTrades();
   }, [chainId, tokenAddress]);
+
+  // Fetch holders data
+  const fetchHolders = useCallback(async () => {
+    if (!tokenAddress) return;
+
+    setIsLoadingHolders(true);
+    try {
+      const response = await getTokenHolders(tokenAddress);
+      setHoldersData(response.data.holders);
+    } catch (error) {
+      console.error("Error fetching holders:", error);
+      setHoldersData([]);
+    } finally {
+      setIsLoadingHolders(false);
+    }
+  }, [tokenAddress]);
+
+  // Fetch holders when active tab changes to holders
+  useEffect(() => {
+    if (activeTab === "holders" && holdersData.length === 0) {
+      fetchHolders();
+    }
+  }, [activeTab, fetchHolders, holdersData.length]);
 
   // --- Infinite Scroll Handler ---
   const handleScroll = useCallback(async () => {
@@ -1014,49 +1036,83 @@ const TokenPage = () => {
                   <table className="w-full text-xs min-w-[400px]">
                     <thead className="bg-gray-900 sticky top-0 z-10">
                       <tr className="text-gray-400 border-b border-gray-700">
-                        <th className="text-left p-1">ADDRESS</th>
+                        <th className="text-left p-1">HOLDER</th>
                         <th className="text-right p-1">BALANCE</th>
                         <th className="text-right p-1">PERCENTAGE</th>
                         <th className="text-center p-1"></th>
                       </tr>
                     </thead>
                     <tbody>
-                      {holdersData.map((holder, idx) => (
-                        <tr
-                          key={idx}
-                          className="border-b border-gray-800 last:border-0"
-                        >
-                          <td className="p-1 text-white font-mono">
-                            <button
-                              onClick={() =>
-                                navigate(`/profile/${holder.address}`)
-                              }
-                              className="hover:text-orange-400 underline text-left"
-                            >
-                              {holder.address}
-                            </button>
-                          </td>
-                          <td className="p-1 text-right text-white font-mono">
-                            {holder.balance}
-                          </td>
-                          <td className="p-1 text-right text-gray-400">
-                            {holder.percentage}
-                          </td>
-                          <td className="p-1 text-center">
-                            <a
-                              href={`${getExplorer(chainId)}/address/${
-                                holder.address
-                              }`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="hover:text-orange-400"
-                              title="View on Etherscan"
-                            >
-                              <ArrowUpRight className="w-4 h-4 inline" />
-                            </a>
+                      {isLoadingHolders ? (
+                        <tr>
+                          <td
+                            colSpan={4}
+                            className="p-4 text-center text-gray-400"
+                          >
+                            <div className="flex items-center justify-center space-x-2">
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-400"></div>
+                              <span>Loading holders...</span>
+                            </div>
                           </td>
                         </tr>
-                      ))}
+                      ) : holdersData.length === 0 ? (
+                        <tr>
+                          <td
+                            colSpan={4}
+                            className="p-4 text-center text-gray-400"
+                          >
+                            No holders found
+                          </td>
+                        </tr>
+                      ) : (
+                        holdersData.map((holder, idx) => (
+                          <tr
+                            key={idx}
+                            className="border-b border-gray-800 last:border-0"
+                          >
+                            <td className="p-1 text-white">
+                              <div className="flex items-center space-x-2">
+                                <img
+                                  src={holder.pfp || "/default-pfp.jpeg"}
+                                  alt="Profile"
+                                  className="w-6 h-6 rounded-full"
+                                  onError={(e) => {
+                                    e.currentTarget.src = "/default-pfp.jpeg";
+                                  }}
+                                />
+                                <button
+                                  onClick={() =>
+                                    navigate(`/profile/${holder.holderAddress}`)
+                                  }
+                                  className="hover:text-orange-400 underline text-left font-mono"
+                                >
+                                  {holder.username ||
+                                    abbreviateAddress(holder.holderAddress)}
+                                </button>
+                              </div>
+                            </td>
+                            <td className="p-1 text-right text-white font-mono">
+                              {formatBalance(holder.balance)}
+                            </td>
+                            <td className="p-1 text-right text-gray-400">
+                              {calculatePercentage(holder.balance)}
+                            </td>
+                            <td className="p-1 text-center">
+                              <a
+                                href={`${getExplorer(chainId)}/address/${
+                                  holder.holderAddress
+                                }`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:text-orange-400"
+                                title="View on Etherscan"
+                              >
+                                <ArrowUpRight className="w-4 h-4 inline" />
+                              </a>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>

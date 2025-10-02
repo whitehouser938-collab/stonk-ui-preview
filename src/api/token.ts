@@ -453,3 +453,50 @@ export const getVolumeLeaders = async (limit?: number): Promise<any[]> => {
     return [];
   }
 };
+
+// Types for token holders
+export interface TokenHolder {
+  holderAddress: string;
+  balance: string;
+  balanceRawInteger: string;
+  pfp?: string;
+  username?: string;
+}
+
+export interface TokenHoldersResponse {
+  success: boolean;
+  message: string;
+  data: {
+    blockchain: string;
+    contractAddress: string;
+    tokenDecimals: number;
+    holders: TokenHolder[];
+    holdersCount: number;
+    syncStatus: {
+      timestamp: number;
+      lag: string;
+      status: string;
+    };
+  };
+}
+
+export const getTokenHolders = async (
+  tokenAddress: string
+): Promise<TokenHoldersResponse> => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/token/${tokenAddress}/holders`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch token holders");
+    }
+    const data = await response.json();
+    if (!data || !data.success) {
+      throw new Error("Token holders fetch unsuccessful");
+    }
+    return data;
+  } catch (error) {
+    console.error("Error fetching token holders:", error);
+    throw error;
+  }
+};
