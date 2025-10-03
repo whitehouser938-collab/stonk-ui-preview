@@ -39,7 +39,7 @@ class WebSocketManager {
 
       try {
         this.ws = new WebSocket(
-          import.meta.env.VITE_WEBSOCKET_URL || "ws://localhost:3000"
+          import.meta.env.VITE_WEBSOCKET_URL || "ws://localhost:3003"
         );
 
         this.ws.onopen = () => {

@@ -1,196 +1,15 @@
 import React, { useState, useEffect, Fragment } from "react";
 import { Circle } from "lucide-react";
-import { getAllTokens, getBondingCurveVolumeData } from "@/api/token";
+import { getAllTokens } from "@/api/token";
 import { useNavigate } from "react-router-dom";
+import { TokenMarketOverview } from "@/types";
 
-interface StockData {
-  symbol: string;
-  name: string;
-  price: number;
-  change24h: number;
-  volume: number;
-  marketCap: number;
-  sparkline: number[];
-}
-
-interface TokenData {
-  id: string;
-  symbol: string;
-  name: string;
-  tokenAddress: string;
-  chain: string;
-  graduated: boolean;
-  uniswapPairAddress?: string;
-  graduationTimestamp?: string;
-  logoUrl?: string;
-  curveStatus?: {
-    progress: number;
-    marketCap: string;
-  };
-  currentPrice?: string;
-  volume24h?: string;
-  volume6h?: string;
-  volume1h?: string;
-  volume5m?: string;
-  totalVolume?: string;
-  tradeCount?: string;
-  deploymentTimestamp?: string;
-  createdAt?: string;
-}
-
-interface VolumeLeaderData {
-  tokenAddress: string;
-  symbol: string;
-  name: string;
-  volume24h: string;
-  totalVolume: string;
-  tradeCount: string;
-  isGraduated: boolean;
-}
-
-const extendedMockData: StockData[] = [
-  {
-    symbol: "AAPL",
-    name: "Apple Inc",
-    price: 182.5,
-    change24h: 2.45,
-    volume: 85000000,
-    marketCap: 2850000000000,
-    sparkline: [180, 181, 183, 180.5, 182, 183.5, 182.5],
-  },
-  {
-    symbol: "MSFT",
-    name: "Microsoft Corp",
-    price: 415.75,
-    change24h: -1.22,
-    volume: 32000000,
-    marketCap: 3100000000000,
-    sparkline: [420, 418, 416, 417.5, 416.5, 414, 415.75],
-  },
-  {
-    symbol: "NVDA",
-    name: "NVIDIA Corp",
-    price: 485.45,
-    change24h: 5.67,
-    volume: 125000000,
-    marketCap: 1200000000000,
-    sparkline: [460, 465, 475, 480, 490, 488, 485.45],
-  },
-  {
-    symbol: "GOOGL",
-    name: "Alphabet Inc",
-    price: 138.85,
-    change24h: -0.85,
-    volume: 28500000,
-    marketCap: 1750000000000,
-    sparkline: [140, 139.5, 139, 138.5, 139.2, 138.8, 138.85],
-  },
-  {
-    symbol: "AMZN",
-    name: "Amazon.com Inc",
-    price: 152.78,
-    change24h: 3.21,
-    volume: 45000000,
-    marketCap: 1580000000000,
-    sparkline: [148, 149, 150.5, 152, 153.5, 153, 152.78],
-  },
-  {
-    symbol: "TSLA",
-    name: "Tesla Inc",
-    price: 245.89,
-    change24h: -2.14,
-    volume: 95000000,
-    marketCap: 780000000000,
-    sparkline: [250, 248, 246, 244, 246.5, 245.2, 245.89],
-  },
-  {
-    symbol: "META",
-    name: "Meta Platforms",
-    price: 325.42,
-    change24h: 4.32,
-    volume: 22000000,
-    marketCap: 820000000000,
-    sparkline: [312, 315, 320, 318, 325, 327, 325.42],
-  },
-  {
-    symbol: "JPM",
-    name: "JPMorgan Chase",
-    price: 175.56,
-    change24h: 1.89,
-    volume: 15000000,
-    marketCap: 510000000000,
-    sparkline: [172, 173, 175, 174.5, 176, 175.8, 175.56],
-  },
-  {
-    symbol: "V",
-    name: "Visa Inc",
-    price: 285.78,
-    change24h: -3.45,
-    volume: 8500000,
-    marketCap: 580000000000,
-    sparkline: [295, 292, 288, 285, 287, 286, 285.78],
-  },
-  {
-    symbol: "JNJ",
-    name: "Johnson & Johnson",
-    price: 162.23,
-    change24h: 2.67,
-    volume: 12000000,
-    marketCap: 425000000000,
-    sparkline: [158, 160, 161.5, 162.5, 163, 162.8, 162.23],
-  },
-  {
-    symbol: "WMT",
-    name: "Walmart Inc",
-    price: 165.31,
-    change24h: -1.58,
-    volume: 9500000,
-    marketCap: 535000000000,
-    sparkline: [168, 167, 166, 165.5, 166.2, 165.8, 165.31],
-  },
-  {
-    symbol: "PG",
-    name: "Procter & Gamble",
-    price: 155.24,
-    change24h: 0.89,
-    volume: 7200000,
-    marketCap: 365000000000,
-    sparkline: [154, 154.5, 155, 155.5, 155.2, 154.8, 155.24],
-  },
-  {
-    symbol: "HD",
-    name: "Home Depot Inc",
-    price: 315.28,
-    change24h: 3.57,
-    volume: 6800000,
-    marketCap: 325000000000,
-    sparkline: [304, 308, 312, 316, 318, 316.5, 315.28],
-  },
-  {
-    symbol: "BAC",
-    name: "Bank of America",
-    price: 32.67,
-    change24h: -4.23,
-    volume: 85000000,
-    marketCap: 245000000000,
-    sparkline: [34, 33.5, 33, 32.5, 33.2, 33, 32.67],
-  },
-  {
-    symbol: "DIS",
-    name: "Walt Disney Co",
-    price: 95.45,
-    change24h: 1.23,
-    volume: 18500000,
-    marketCap: 175000000000,
-    sparkline: [94, 94.5, 95.2, 95.8, 95.5, 95.1, 95.45],
-  },
-];
 
 function formatNumber(num: number): string {
-  if (num >= 1e9) return (num / 1e9).toFixed(2) + "B";
-  if (num >= 1e6) return (num / 1e6).toFixed(2) + "M";
-  if (num >= 1e3) return (num / 1e3).toFixed(2) + "K";
-  return num.toFixed(2);
+  if (num >= 1e9) return parseFloat((num / 1e9).toFixed(2)) + "B";
+  if (num >= 1e6) return parseFloat((num / 1e6).toFixed(2)) + "M";
+  if (num >= 1e3) return parseFloat((num / 1e3).toFixed(2)) + "K";
+  return parseFloat(num.toFixed(2))+"";
 }
 
 function formatTokenAge(timestamp: string): string {
@@ -233,41 +52,9 @@ function formatShortSince(timestamp?: string): string {
   return `${mins}m`;
 }
 
-function Sparkline({
-  data,
-  isPositive,
-}: {
-  data: number[];
-  isPositive: boolean;
-}) {
-  const max = Math.max(...data);
-  const min = Math.min(...data);
-  const range = max - min;
-
-  const points = data
-    .map((value, index) => {
-      const x = (index / (data.length - 1)) * 100;
-      const y = 100 - ((value - min) / range) * 100;
-      return `${x},${y}`;
-    })
-    .join(" ");
-
-  return (
-    <svg width="60" height="20" className="inline-block">
-      <polyline
-        points={points}
-        fill="none"
-        stroke={isPositive ? "#10b981" : "#ef4444"}
-        strokeWidth="1.5"
-        className="drop-shadow-sm"
-      />
-    </svg>
-  );
-}
-
 export function MarketsDashboard() {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [tokens, setTokens] = useState<TokenData[]>([]);
+  const [tokens, setTokens] = useState<TokenMarketOverview[]>([]);
   const [bondingCurveVolumeData, setBondingCurveVolumeData] = useState<any[]>(
     []
   );
@@ -284,12 +71,8 @@ export function MarketsDashboard() {
     const fetchTokens = async () => {
       try {
         setIsLoading(true);
-        const [tokenData, volumeData] = await Promise.all([
-          getAllTokens(),
-          getBondingCurveVolumeData(),
-        ]);
+        const tokenData = await getAllTokens();
         setTokens(tokenData);
-        setBondingCurveVolumeData(volumeData);
       } catch (error) {
         console.error("Error fetching tokens:", error);
         setTokens([]);
@@ -302,7 +85,7 @@ export function MarketsDashboard() {
     fetchTokens();
   }, []);
 
-  const handleTokenClick = (token: TokenData) => {
+  const handleTokenClick = (token: TokenMarketOverview) => {
     navigate(`/token/${token.chain}/${token.tokenAddress}`);
   };
 
@@ -320,11 +103,9 @@ export function MarketsDashboard() {
                 key={token.tokenAddress}
                 className="flex justify-between text-xs py-0.5 border-b border-gray-800 last:border-0"
               >
-                <span className="text-white">{token.symbol}</span>
+                <span className="text-white">{token.tokenSymbol}</span>
                 <span className="text-gray-400">
-                  {token.volume24h
-                    ? formatNumber(Number(token.volume24h))
-                    : "N/A"}
+                  {formatNumber(Number(token.totalVolume))}
                 </span>
               </div>
             ))}
@@ -377,7 +158,7 @@ export function MarketsDashboard() {
                           {token.logoUrl ? (
                             <img
                               src={token.logoUrl}
-                              alt={`${token.symbol} logo`}
+                              alt={`${token.tokenSymbol} logo`}
                               className="w-4 h-4 rounded-full object-cover"
                               onError={(e) => {
                                 // Fallback to circle if image fails to load
@@ -394,7 +175,7 @@ export function MarketsDashboard() {
                             }`}
                           />
                           <span className="text-white font-bold">
-                            {token.symbol}
+                            {token.tokenSymbol}
                           </span>
                           <span className="text-gray-400 text-xs">
                             {token.chain}
@@ -411,45 +192,33 @@ export function MarketsDashboard() {
                           )}
                         </div>
                       </td>
-                      <td className="p-1 text-gray-400 text-xs hidden md:table-cell">
-                        {token.name}
+                      <td className="p-1 text-gray-400 text-xs">
+                        {token.tokenName}
                       </td>
                       <td className="p-1 text-right text-white font-mono">
-                        {token.currentPrice
-                          ? `$${Number(token.currentPrice).toFixed(6)}`
-                          : "N/A"}
+                        {`$${Number(token.currentPrice).toFixed(6)}`}
+                      </td>
+                      <td className="p-1 text-right text-gray-400 hidden md:table-cell">
+                        {formatNumber(token.currentPrice * 1_000_000_000)}
                       </td>
                       <td className="p-1 text-right text-gray-400">
-                        {token.curveStatus?.marketCap
-                          ? `$${formatNumber(
-                              Number(token.curveStatus.marketCap)
-                            )}`
-                          : "N/A"}
+                        {/* {formatNumber(Number(token.buyVolume24h + token.sellVolume24h))} */}
+                        {parseFloat(token.priceChange24h.toFixed(2))}%
                       </td>
                       <td className="p-1 text-right text-gray-400">
-                        {token.graduated
-                          ? "N/A"
-                          : `${token.curveStatus?.progress?.toFixed(2) || 0}%`}
+                        {/* {formatNumber(Number(token.buyVolume6h + token.sellVolume6h))} */}
+                        {parseFloat(token.priceChange6h.toFixed(2))}%
                       </td>
                       <td className="p-1 text-right text-gray-400">
-                        {token.volume6h
-                          ? formatNumber(Number(token.volume6h))
-                          : "N/A"}
+                        {/* {formatNumber(Number(token.buyVolume1h + token.sellVolume1h))} */}
+                        {parseFloat(token.priceChange1h.toFixed(2))}%
                       </td>
                       <td className="p-1 text-right text-gray-400">
-                        {token.volume1h
-                          ? formatNumber(Number(token.volume1h))
-                          : "N/A"}
+                        {/* {formatNumber(Number(token.buyVolume5m + token.sellVolume5m))} */}
+                        {parseFloat(token.priceChange5m.toFixed(2))}%
                       </td>
-                      <td className="p-1 text-right text-gray-400">
-                        {token.volume5m
-                          ? formatNumber(Number(token.volume5m))
-                          : "N/A"}
-                      </td>
-                      <td className="p-1 text-right text-gray-400">
-                        {token.volume24h
-                          ? formatNumber(Number(token.volume24h))
-                          : "N/A"}
+                      <td className="p-1 text-right text-gray-400 hidden md:table-cell">
+                        {formatNumber(token.totalVolume)}
                       </td>
                       <td className="p-1 text-right text-gray-400 hidden md:table-cell">
                         {formatTokenAge(token.deploymentTimestamp || "")}
@@ -499,7 +268,7 @@ export function MarketsDashboard() {
                             {token.logoUrl ? (
                               <img
                                 src={token.logoUrl}
-                                alt={`${token.symbol} logo`}
+                                alt={`${token.tokenSymbol} logo`}
                                 className="w-4 h-4 rounded-full object-cover"
                                 onError={(e) => {
                                   e.currentTarget.style.display = "none";
@@ -515,14 +284,16 @@ export function MarketsDashboard() {
                               }`}
                             />
                             <span className="text-white font-bold">
-                              {token.symbol}
+                              {token.tokenSymbol}
                             </span>
                             <span className="text-gray-400 text-xs">
                               {token.chain}
                             </span>
                           </div>
                         </td>
-                        <td className="p-1 text-right text-gray-400">TODO</td>
+                        <td className="p-1 text-right text-gray-400">
+                          {formatNumber(token.currentPrice * 1_000_000_000)}
+                        </td>
                         <td className="p-1 text-right text-gray-400">
                           {formatShortSince(token.graduationTimestamp)}
                         </td>
@@ -567,11 +338,15 @@ export function MarketsDashboard() {
                   <div key={token.tokenAddress} className="contents">
                     <div className="text-white flex items-center space-x-1">
                       <Circle className="w-3 h-3 text-blue-400" />
-                      <span>{token.symbol}</span>
+                      <span>{token.tokenSymbol}</span>
                     </div>
                     <div className="text-green-400">TODO</div>
-                    <div className="text-gray-400">TODO</div>
-                    <div className="text-gray-400">TODO</div>
+                    <div className="text-gray-400">
+                      {formatNumber(token.totalVolume)}
+                    </div>
+                    <div className="text-gray-400">
+                      {formatNumber(token.currentPrice * 1_000_000_000)}
+                    </div>
                   </div>
                 ))}
 

@@ -45,8 +45,15 @@ import TradingViewChart from "@/components/TradingViewChart";
 import OrderBook from "./OrderBook";
 import { useTradeUpdates } from "@/hooks/useTradeUpdates";
 import { useToast } from "@/hooks/use-toast";
-import { Chain, TokenDetails, TradeData } from "@/types";
+import { Chain, TokenFullData, TradeData } from "@/types";
 import { CommentsSection } from "@/components/Comments";
+
+function formatNumber(num: number): string {
+  if (num >= 1e9) return parseFloat((num / 1e9).toFixed(2)) + "B";
+  if (num >= 1e6) return parseFloat((num / 1e6).toFixed(2)) + "M";
+  if (num >= 1e3) return parseFloat((num / 1e3).toFixed(2)) + "K";
+  return parseFloat(num.toFixed(2))+"";
+}
 
 const TokenPage = () => {
   const { chainId, tokenAddress } = useParams<{
@@ -54,7 +61,7 @@ const TokenPage = () => {
     tokenAddress: string;
   }>();
   const navigate = useNavigate();
-  const [tokenData, setTokenData] = useState<TokenDetails>(null);
+  const [tokenData, setTokenData] = useState<TokenFullData>(null);
   const [view, setView] = useState("details");
   const [error, setError] = useState<string | null>(null);
   const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
@@ -103,6 +110,9 @@ const TokenPage = () => {
 
   // Subscribe to real-time trade updates
   useTradeUpdates(chainId, tokenAddress, handleTradeUpdate);
+
+  // Subscribe to real-time volume updates
+  // useTradeUpdates(chainId, tokenAddress, handleTradeUpdate);
 
   useEffect(() => {
     const fetchTokenData = async () => {
@@ -243,39 +253,6 @@ const TokenPage = () => {
     };
   }, [handleScroll]);
 
-  const stockData = {
-    symbol: "AAPL",
-    name: "Apple Inc",
-    price: 182.5,
-    change24h: 2.45,
-    marketCap: 2850000000000,
-    volume24h: 85000000,
-    outstandingShares: 15600000000,
-    floatShares: 15500000000,
-    allTimeHigh: 198.23,
-    allTimeLow: 142.27,
-    institutional: 59.8,
-    description:
-      "Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories worldwide. The company serves consumers, and small and mid-sized businesses; and the education, enterprise, and government markets.",
-  };
-
-  const chartData = [
-    { time: "09:30", price: 180.5 },
-    { time: "09:45", price: 180.75 },
-    { time: "10:00", price: 181.25 },
-    { time: "10:15", price: 181.15 },
-    { time: "10:30", price: 180.9 },
-    { time: "10:45", price: 181.5 },
-    { time: "11:00", price: 182.15 },
-    { time: "11:15", price: 182.0 },
-    { time: "11:30", price: 181.8 },
-    { time: "11:45", price: 182.2 },
-    { time: "12:00", price: 182.6 },
-    { time: "12:15", price: 182.4 },
-    { time: "12:30", price: 182.5 },
-    { time: "12:45", price: 182.85 },
-  ];
-
   // Removed legacy financial mock data & formatter; token page now shows
   // crypto-centric metrics with placeholders to be wired up later.
   const [searchTerm, setSearchTerm] = useState("");
@@ -286,16 +263,6 @@ const TokenPage = () => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
-
-  const dataMaxPrice = Math.max(...chartData.map((p) => p.price));
-  const dataMinPrice = Math.min(...chartData.map((p) => p.price));
-  const priceRange = dataMaxPrice - dataMinPrice;
-
-  // Add 10% padding to the top and bottom of the chart range
-  const yAxisPadding = priceRange > 0 ? priceRange * 0.1 : 1;
-  const chartMax = dataMaxPrice + yAxisPadding;
-  const chartMin = dataMinPrice - yAxisPadding;
-  const chartAvg = (chartMax + chartMin) / 2;
 
   function abbreviateNumber(num: string | number): string {
     const n = typeof num === "string" ? parseFloat(num) : num;
@@ -701,17 +668,17 @@ const TokenPage = () => {
                 {/* Desktop: Price on the right, Mobile: Hidden (shown below instead) */}
                 <div className="hidden sm:block text-left sm:text-right min-w-0">
                   <div className="text-xl sm:text-2xl font-mono text-white truncate">
-                    ${stockData.price.toFixed(2)}
+                    ${tokenData.price.currentPrice ? parseFloat((tokenData.price.currentPrice).toFixed(7)) : "N/A"}
                   </div>
                   <div
                     className={`text-base sm:text-lg font-mono truncate ${
-                      stockData.change24h >= 0
+                      tokenData.price.priceChange24h >= 0
                         ? "text-green-400"
                         : "text-red-400"
                     }`}
                   >
-                    {stockData.change24h >= 0 ? "+" : ""}
-                    {stockData.change24h.toFixed(2)}%
+                    {tokenData.price.priceChange24h >= 0 ? "+" : ""}
+                    {tokenData.price.priceChange24h.toFixed(2)}%
                   </div>
                 </div>
               </div>
@@ -720,17 +687,17 @@ const TokenPage = () => {
               <div className="sm:hidden mt-3 pt-3 border-t border-gray-700">
                 <div className="flex justify-between items-center min-w-0">
                   <div className="text-xl font-mono text-white truncate">
-                    ${stockData.price.toFixed(2)}
+                    ${tokenData.price.currentPrice ? parseFloat((tokenData.price.currentPrice).toFixed(7)) : "N/A"}
                   </div>
                   <div
                     className={`text-lg font-mono flex-shrink-0 ml-2 ${
-                      stockData.change24h >= 0
+                      tokenData.price.priceChange24h >= 0
                         ? "text-green-400"
                         : "text-red-400"
                     }`}
                   >
-                    {stockData.change24h >= 0 ? "+" : ""}
-                    {stockData.change24h.toFixed(2)}%
+                    {tokenData.price.priceChange24h >= 0 ? "+" : ""}
+                    {tokenData.price.priceChange24h.toFixed(2)}%
                   </div>
                 </div>
               </div>
@@ -785,19 +752,27 @@ const TokenPage = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 text-xs">
                 <div className="bg-black border border-gray-800 p-2">
                   <div className="text-gray-400">MARKET CAP</div>
-                  <div className="text-white font-mono text-sm">TODO</div>
+                  <div className="text-white font-mono text-sm">
+                    {formatNumber(tokenData.price.currentPrice * 1_000_000_000)}
+                  </div>
                 </div>
                 <div className="bg-black border border-gray-800 p-2">
                   <div className="text-gray-400">LIQUIDITY</div>
-                  <div className="text-white font-mono text-sm">TODO</div>
+                  <div className="text-white font-mono text-sm">
+                    TODO
+                  </div>
                 </div>
                 <div className="bg-black border border-gray-800 p-2">
                   <div className="text-gray-400">FDV</div>
-                  <div className="text-white font-mono text-sm">TODO</div>
+                  <div className="text-white font-mono text-sm">
+                    {formatNumber(tokenData.price.currentPrice * 1_000_000_000)}
+                  </div>
                 </div>
                 <div className="bg-black border border-gray-800 p-2">
                   <div className="text-gray-400">PRICE (USD)</div>
-                  <div className="text-white font-mono text-sm">TODO</div>
+                  <div className="text-white font-mono text-sm">
+                    ${tokenData.price.currentPrice ? parseFloat((tokenData.price.currentPrice).toFixed(7)) : "N/A"}
+                  </div>
                 </div>
                 <div className="bg-black border border-gray-800 p-2">
                   <div className="text-gray-400">HOLDERS</div>
@@ -805,7 +780,9 @@ const TokenPage = () => {
                 </div>
                 <div className="bg-black border border-gray-800 p-2">
                   <div className="text-gray-400">VOLUME</div>
-                  <div className="text-white font-mono text-sm">TODO</div>
+                  <div className="text-white font-mono text-sm">
+                    {formatNumber(tokenData.price.totalVolume)}
+                  </div>
                 </div>
               </div>
             </div>
