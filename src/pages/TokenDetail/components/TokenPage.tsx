@@ -52,7 +52,7 @@ function formatNumber(num: number): string {
   if (num >= 1e9) return parseFloat((num / 1e9).toFixed(2)) + "B";
   if (num >= 1e6) return parseFloat((num / 1e6).toFixed(2)) + "M";
   if (num >= 1e3) return parseFloat((num / 1e3).toFixed(2)) + "K";
-  return parseFloat(num.toFixed(2))+"";
+  return parseFloat(num.toFixed(2)) + "";
 }
 
 const TokenPage = () => {
@@ -81,6 +81,10 @@ const TokenPage = () => {
   const [holdersCount, setHoldersCount] = useState<number>(0);
   const [isLoadingHolders, setIsLoadingHolders] = useState(false);
   const [burntData, setBurntData] = useState<TokenHolder | null>(null);
+  const [uniswapData, setUniswapData] = useState<TokenHolder | null>(null);
+  const [bondingCurveData, setBondingCurveData] = useState<TokenHolder | null>(
+    null
+  );
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -177,36 +181,66 @@ const TokenPage = () => {
       const response = await getTokenHolders(tokenAddress);
       const allHolders = response.data.holders;
 
-      // Separate burnt tokens from regular holders
+      // Define special addresses that should be excluded from holder count
       const burnAddress = "0x000000000000000000000000000000000000dEaD";
+      const specialAddresses = [
+        burnAddress.toLowerCase(),
+        tokenData?.uniswapPair?.toLowerCase(),
+        tokenData?.bondingCurveAddress?.toLowerCase(),
+      ].filter(Boolean);
+
+      // Find special holders
       const burntHolder = allHolders.find(
         (holder) =>
           holder.holderAddress.toLowerCase() === burnAddress.toLowerCase()
       );
+
+      const uniswapHolder = tokenData?.uniswapPair
+        ? allHolders.find(
+            (holder) =>
+              holder.holderAddress.toLowerCase() ===
+              tokenData.uniswapPair.toLowerCase()
+          )
+        : null;
+
+      const bondingCurveHolder = tokenData?.bondingCurveAddress
+        ? allHolders.find(
+            (holder) =>
+              holder.holderAddress.toLowerCase() ===
+              tokenData.bondingCurveAddress.toLowerCase()
+          )
+        : null;
+
+      // Filter out special addresses from regular holders
       const regularHolders = allHolders.filter(
         (holder) =>
-          holder.holderAddress.toLowerCase() !== burnAddress.toLowerCase()
+          !specialAddresses.includes(holder.holderAddress.toLowerCase())
       );
 
       setHoldersData(regularHolders);
       setBurntData(burntHolder || null);
-      setHoldersCount(response.data.holdersCount);
+      setUniswapData(uniswapHolder || null);
+      setBondingCurveData(bondingCurveHolder || null);
+      // Holder count should only include regular holders, not special addresses
+      setHoldersCount(regularHolders.length);
     } catch (error) {
       console.error("Error fetching holders:", error);
       setHoldersData([]);
       setBurntData(null);
+      setUniswapData(null);
+      setBondingCurveData(null);
       setHoldersCount(0);
     } finally {
       setIsLoadingHolders(false);
     }
-  }, [tokenAddress]);
+  }, [tokenAddress, tokenData?.uniswapPair, tokenData?.bondingCurveAddress]);
 
-  // Fetch holders when active tab changes to holders
+  // Fetch holders by default when token data is loaded
   useEffect(() => {
-    if (activeTab === "holders" && holdersData.length === 0) {
+    if (tokenData && holdersData.length === 0) {
       fetchHolders();
     }
-  }, [activeTab, fetchHolders, holdersData.length]);
+  }, [tokenData, fetchHolders, holdersData.length]);
 
   // --- Infinite Scroll Handler ---
   const handleScroll = useCallback(async () => {
@@ -668,7 +702,10 @@ const TokenPage = () => {
                 {/* Desktop: Price on the right, Mobile: Hidden (shown below instead) */}
                 <div className="hidden sm:block text-left sm:text-right min-w-0">
                   <div className="text-xl sm:text-2xl font-mono text-white truncate">
-                    ${tokenData.price.currentPrice ? parseFloat((tokenData.price.currentPrice).toFixed(7)) : "N/A"}
+                    $
+                    {tokenData.price.currentPrice
+                      ? parseFloat(tokenData.price.currentPrice.toFixed(7))
+                      : "N/A"}
                   </div>
                   <div
                     className={`text-base sm:text-lg font-mono truncate ${
@@ -687,7 +724,10 @@ const TokenPage = () => {
               <div className="sm:hidden mt-3 pt-3 border-t border-gray-700">
                 <div className="flex justify-between items-center min-w-0">
                   <div className="text-xl font-mono text-white truncate">
-                    ${tokenData.price.currentPrice ? parseFloat((tokenData.price.currentPrice).toFixed(7)) : "N/A"}
+                    $
+                    {tokenData.price.currentPrice
+                      ? parseFloat(tokenData.price.currentPrice.toFixed(7))
+                      : "N/A"}
                   </div>
                   <div
                     className={`text-lg font-mono flex-shrink-0 ml-2 ${
@@ -771,12 +811,17 @@ const TokenPage = () => {
                 <div className="bg-black border border-gray-800 p-2">
                   <div className="text-gray-400">PRICE (USD)</div>
                   <div className="text-white font-mono text-sm">
-                    ${tokenData.price.currentPrice ? parseFloat((tokenData.price.currentPrice).toFixed(7)) : "N/A"}
+                    $
+                    {tokenData.price.currentPrice
+                      ? parseFloat(tokenData.price.currentPrice.toFixed(7))
+                      : "N/A"}
                   </div>
                 </div>
                 <div className="bg-black border border-gray-800 p-2">
                   <div className="text-gray-400">HOLDERS</div>
-                  <div className="text-white font-mono text-sm">TODO</div>
+                  <div className="text-white font-mono text-sm">
+                    {holdersCount > 0 ? holdersCount : "Loading..."}
+                  </div>
                 </div>
                 <div className="bg-black border border-gray-800 p-2">
                   <div className="text-gray-400">VOLUME</div>
@@ -1078,6 +1123,72 @@ const TokenPage = () => {
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="hover:text-red-300"
+                                  title="View on Etherscan"
+                                >
+                                  <ArrowUpRight className="w-4 h-4 inline" />
+                                </a>
+                              </td>
+                            </tr>
+                          )}
+
+                          {/* Uniswap pair section */}
+                          {uniswapData && (
+                            <tr className="border-b border-gray-800 bg-blue-900/20">
+                              <td className="p-1 text-blue-400">
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-lg">🏦</span>
+                                  <span className="font-mono text-sm">
+                                    UNISWAP
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="p-1 text-right text-blue-400 font-mono">
+                                {formatBalance(uniswapData.balance)}
+                              </td>
+                              <td className="p-1 text-right text-blue-400">
+                                {calculatePercentage(uniswapData.balance)}
+                              </td>
+                              <td className="p-1 text-center">
+                                <a
+                                  href={`${getExplorer(chainId)}/address/${
+                                    uniswapData.holderAddress
+                                  }`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="hover:text-blue-300"
+                                  title="View on Etherscan"
+                                >
+                                  <ArrowUpRight className="w-4 h-4 inline" />
+                                </a>
+                              </td>
+                            </tr>
+                          )}
+
+                          {/* Bonding curve section - only for non-graduated tokens */}
+                          {bondingCurveData && (
+                            <tr className="border-b border-gray-800 bg-purple-900/20">
+                              <td className="p-1 text-purple-400">
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-lg">🔮</span>
+                                  <span className="font-mono text-sm">
+                                    BONDING CURVE
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="p-1 text-right text-purple-400 font-mono">
+                                {formatBalance(bondingCurveData.balance)}
+                              </td>
+                              <td className="p-1 text-right text-purple-400">
+                                {calculatePercentage(bondingCurveData.balance)}
+                              </td>
+                              <td className="p-1 text-center">
+                                <a
+                                  href={`${getExplorer(chainId)}/address/${
+                                    bondingCurveData.holderAddress
+                                  }`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="hover:text-purple-300"
                                   title="View on Etherscan"
                                 >
                                   <ArrowUpRight className="w-4 h-4 inline" />
