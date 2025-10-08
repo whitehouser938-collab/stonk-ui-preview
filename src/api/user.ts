@@ -265,7 +265,7 @@ export const getUserTokens = async (walletAddress: string): Promise<any[]> => {
       return [];
     }
 
-    return data.data.tokens || [];
+    return data.data.deployedTokens || [];
   } catch (error) {
     console.error("Error fetching user tokens:", error);
     return [];
@@ -550,6 +550,11 @@ export interface Holding {
   decimals: string;
   logo: string;
   tokenAddress: string;
+  chain: string;
+  currentPrice: number;
+  marketCap: string;
+  totalValue: string;
+  priceChange24h: number;
 }
 
 export interface UserHoldingsResponse {

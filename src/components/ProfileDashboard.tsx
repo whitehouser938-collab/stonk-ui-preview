@@ -50,6 +50,8 @@ import { Link } from "react-router-dom";
 import { useDisconnect } from "wagmi";
 import { MessageSquareHeart, BarChart3 } from "lucide-react";
 import { getReplies } from "@/api/comment";
+import HoldingsTable from "@/components/HoldingsTable";
+import DeployedTokensTable from "@/components/DeployedTokensTable";
 
 interface ProfileDashboardProps {
   walletAddress?: string;
@@ -999,154 +1001,16 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
         </Card>
 
         {/* Bottom section: Two columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Left column: Deployed Tokens and Holdings */}
-          <Card>
-            <CardContent className="p-0">
-              {/* Deployed Tokens Section */}
-              <div className="p-6 border-b border-gray-700">
-                <div className="flex items-center space-x-2 mb-4">
-                  <Coins className="w-5 h-5" />
-                  <span className="text-lg font-semibold">Deployed Tokens</span>
-                </div>
-                {userTokens.length > 0 ? (
-                  <div className="space-y-4">
-                    {userTokens.map((token, index) => (
-                      <Link
-                        to={`/token/SEP/${token.tokenAddress}`}
-                        key={index}
-                        className="flex items-center justify-between p-4 border border-gray-700 rounded-lg hover:border-orange-500 transition-colors"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-12 h-12 bg-orange-500/20 flex items-center justify-center overflow-hidden">
-                            {token.logoUrl ? (
-                              <img
-                                src={token.logoUrl}
-                                alt={`${token.symbol} logo`}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = "none";
-                                }}
-                              />
-                            ) : (
-                              <Coins className="w-6 h-6 text-orange-400" />
-                            )}
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-gray-300">
-                              {token.name}
-                            </h4>
-                            <div className="flex items-center space-x-2">
-                              <p className="text-sm text-gray-500">
-                                {token.symbol}
-                              </p>
-                              {token.graduated ? (
-                                <span className="bg-green-600 text-white px-1 py-0.5 rounded text-[10px] leading-none">
-                                  GRAD
-                                </span>
-                              ) : (
-                                <span className="bg-purple-600 text-white px-1 py-0.5 rounded text-[10px] leading-none">
-                                  BOND
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm text-gray-400">Market Cap</p>
-                          <p className="font-medium text-gray-200">
-                            $
-                            {token.marketCap
-                              ? token.marketCap.toLocaleString()
-                              : "N/A"}
-                          </p>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Coins className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                    <p className="text-gray-400">No tokens deployed yet</p>
-                    <p className="text-sm text-gray-500">
-                      Visit the Launchpad to create your first token
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Holdings Section */}
-              <div className="p-6">
-                <div className="flex items-center space-x-2 mb-4">
-                  <TrendingUp className="w-5 h-5" />
-                  <span className="text-lg font-semibold">Holdings</span>
-                </div>
-                {userHoldings.filter(
-                  (holding) =>
-                    getTokenAmount(holding.amount, holding.decimals) >= 1
-                ).length > 0 ? (
-                  <div className="space-y-4">
-                    {userHoldings
-                      .filter(
-                        (holding) =>
-                          getTokenAmount(holding.amount, holding.decimals) >= 1
-                      )
-                      .map((holding, index) => (
-                        <Link
-                          to={`/token/SEP/${holding.tokenAddress}`}
-                          key={index}
-                          className="flex items-center justify-between p-4 border border-gray-700 rounded-lg hover:border-orange-500 transition-colors"
-                        >
-                          <div className="flex items-center space-x-3">
-                            <div className="w-12 h-12 bg-orange-500/20 flex items-center justify-center overflow-hidden">
-                              {holding.logo ? (
-                                <img
-                                  src={holding.logo}
-                                  alt={`${holding.symbol} logo`}
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    e.currentTarget.style.display = "none";
-                                  }}
-                                />
-                              ) : (
-                                <Coins className="w-6 h-6 text-orange-400" />
-                              )}
-                            </div>
-                            <div>
-                              <h4 className="font-medium text-gray-300">
-                                {holding.name}
-                              </h4>
-                              <div className="flex items-center space-x-2">
-                                <p className="text-sm text-gray-500">
-                                  {holding.symbol}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm text-gray-400">Amount</p>
-                            <p className="font-medium text-gray-500">
-                              {formatTokenAmount(
-                                holding.amount,
-                                holding.decimals
-                              )}
-                            </p>
-                          </div>
-                        </Link>
-                      ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <TrendingUp className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                    <p className="text-gray-400">No holdings yet</p>
-                    <p className="text-sm text-gray-500">
-                      Start trading to build your portfolio
-                    </p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <div className="lg:col-span-2">
+            <Card>
+              <CardContent className="p-6 space-y-6">
+                <DeployedTokensTable tokens={userTokens} />
+                <HoldingsTable holdings={userHoldings} />
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Right column: Comments, Replies, Likes */}
           <div className="lg:col-span-2 space-y-6">

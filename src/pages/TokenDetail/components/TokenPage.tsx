@@ -798,9 +798,7 @@ const TokenPage = () => {
                 </div>
                 <div className="bg-black border border-gray-800 p-2">
                   <div className="text-gray-400">LIQUIDITY</div>
-                  <div className="text-white font-mono text-sm">
-                    TODO
-                  </div>
+                  <div className="text-white font-mono text-sm">TODO</div>
                 </div>
                 <div className="bg-black border border-gray-800 p-2">
                   <div className="text-gray-400">FDV</div>
