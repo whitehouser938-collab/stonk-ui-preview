@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Circle, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { ethers } from "ethers";
 import { Holding } from "@/api/user";
 
 interface HoldingsTableProps {
@@ -52,6 +53,16 @@ const HoldingsTable: React.FC<HoldingsTableProps> = ({ holdings }) => {
   const formatPriceChange = (change: number): string => {
     const sign = change >= 0 ? "+" : "";
     return `${sign}${change.toFixed(2)}%`;
+  };
+
+  // Convert address to checksum format for proper API calls
+  const toChecksumAddress = (address: string): string => {
+    try {
+      return ethers.getAddress(address);
+    } catch (error) {
+      // If address is invalid, return as-is
+      return address;
+    }
   };
 
   const formatTokenAmount = (amount: string, decimals: string) => {
@@ -214,7 +225,9 @@ const HoldingsTable: React.FC<HoldingsTableProps> = ({ holdings }) => {
               >
                 <td className="p-1">
                   <Link
-                    to={`/token/${holding.chain}/${holding.tokenAddress}`}
+                    to={`/token/${holding.chain}/${toChecksumAddress(
+                      holding.tokenAddress
+                    )}`}
                     className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
                   >
                     {holding.logo ? (
