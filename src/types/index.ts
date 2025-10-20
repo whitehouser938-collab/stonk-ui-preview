@@ -103,4 +103,47 @@ export interface BarUpdateMessage {
   bar: BarData;
 }
 
+export interface TokenMarketUpdateMessage {
+  type: "tokenMarketOverview";
+  channel: string;
+  tokenMarketOverview: TokenMarketOverview;
+}
+
+export interface MarketsUpdateMessage {
+  type: "marketsOverview";
+  channel: string;
+  marketsOverview: TokenMarketOverview[];
+}
+
 export type Chain = "SEP";
+
+export const SUBSCRIPTION_TYPES = {
+  bars: {
+    prefix: "token_bars",
+    subscribeType: "subscribeBars",
+    unsubscribeType: "unsubscribeBars",
+    channelFormatter: (address: string, chain: string, resolution: string) => 
+      `token_bars:${chain}:${address}:${resolution}`,
+  },
+  trades: {
+    prefix: "token_trades",
+    subscribeType: "subscribeTrades",
+    unsubscribeType: "unsubscribeTrades",
+    channelFormatter: (address: string, chain: string) => 
+      `token_trades:${chain}:${address}`,
+  },
+  tokenMarketOverview: {
+    prefix: "token_market_overview",
+    subscribeType: "subscribeTokenMarketOverview",
+    unsubscribeType: "unsubscribeTokenMarketOverview",
+    channelFormatter: (address: string, chain: string) => 
+      `token_market_overview:${chain}:${address}`,
+  },
+  marketsOverview: {
+    prefix: "markets_overview",
+    subscribeType: "subscribeMarketsOverview",
+    unsubscribeType: "unsubscribeMarketsOverview",
+    channelFormatter: (chain: string) => 
+      `markets_overview:${chain}`,
+  },
+} as const;

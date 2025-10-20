@@ -173,6 +173,7 @@ export const getTokenTrades = async (
 ): Promise<any[]> => {
   try {
     const cursorIdQuery = cursorId ? `&cursorId=${cursorId}` : "";
+    console.log(cursorIdQuery, " Cur id query");
     const response = await fetch(
       `${API_BASE_URL}/token/trades/${tokenAddress}?chain=${chainId}&limit=${limit}${cursorIdQuery}`
     );

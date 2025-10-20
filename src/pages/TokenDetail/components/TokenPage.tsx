@@ -45,14 +45,15 @@ import TradingViewChart from "@/components/TradingViewChart";
 import OrderBook from "./OrderBook";
 import { useTradeUpdates } from "@/hooks/useTradeUpdates";
 import { useToast } from "@/hooks/use-toast";
-import { Chain, TokenFullData, TradeData } from "@/types";
+import { Chain, TokenFullData, TokenMarketOverview, TradeData } from "@/types";
 import { CommentsSection } from "@/components/Comments";
+import { useTokenMarketUpdates } from "@/hooks/useTokenMarketUpdate";
 
 function formatNumber(num: number): string {
   if (num >= 1e9) return parseFloat((num / 1e9).toFixed(2)) + "B";
   if (num >= 1e6) return parseFloat((num / 1e6).toFixed(2)) + "M";
   if (num >= 1e3) return parseFloat((num / 1e3).toFixed(2)) + "K";
-  return parseFloat(num.toFixed(2)) + "";
+  return parseFloat(num.toFixed(2))+"";
 }
 
 const TokenPage = () => {
@@ -116,7 +117,14 @@ const TokenPage = () => {
   useTradeUpdates(chainId, tokenAddress, handleTradeUpdate);
 
   // Subscribe to real-time volume updates
-  // useTradeUpdates(chainId, tokenAddress, handleTradeUpdate);
+  const handleMarketUpdate = useCallback((freshMarketOverview: TokenMarketOverview) => {
+    setTokenData((prev) => ({
+      ...prev, 
+      price: freshMarketOverview
+    }))
+  }, []);
+
+  useTokenMarketUpdates(chainId, tokenAddress, handleMarketUpdate);
 
   useEffect(() => {
     const fetchTokenData = async () => {
@@ -159,7 +167,6 @@ const TokenPage = () => {
           tokenAddress,
           TRADE_PAGE_SIZE
         );
-
         if (initialTrades.length < TRADE_PAGE_SIZE) setHasMoreTrades(false);
         if (initialTrades.length > 0)
           setLastTrade(initialTrades[initialTrades.length - 1]);
@@ -250,14 +257,14 @@ const TokenPage = () => {
 
     const isAtBottom =
       container.scrollHeight - container.scrollTop <=
-      container.clientHeight + 100;
+      container.clientHeight + 20;
     if (isAtBottom) {
       try {
         console.log(
           `[Scroll] Reached bottom. Fetching trades after ${lastTrade.transactionHash}...`
         );
         setIsFetchingMoreTrades(true);
-        const cursorId = `${lastTrade.transactionHash}:${lastTrade.logIndex}`;
+        const cursorId = `${lastTrade.transactionHash}:${lastTrade.logIndex}:${lastTrade.timestamp}`;
         const moreTrades = await getTokenTrades(
           chainId,
           tokenAddress,
@@ -266,8 +273,9 @@ const TokenPage = () => {
         );
 
         if (moreTrades.length < TRADE_PAGE_SIZE) setHasMoreTrades(false);
-        if (moreTrades.length > 0)
+        if (moreTrades.length > 0){
           setLastTrade(moreTrades[moreTrades.length - 1]);
+        }
         setTrades((prev) => prev.concat(moreTrades));
       } catch (error) {
         console.error("Error fetching more trades:", error);
@@ -285,7 +293,7 @@ const TokenPage = () => {
     return () => {
       container.removeEventListener("scroll", handleScroll);
     };
-  }, [handleScroll]);
+  }, [handleScroll, scrollContainerRef.current]);
 
   // Removed legacy financial mock data & formatter; token page now shows
   // crypto-centric metrics with placeholders to be wired up later.
@@ -724,10 +732,7 @@ const TokenPage = () => {
               <div className="sm:hidden mt-3 pt-3 border-t border-gray-700">
                 <div className="flex justify-between items-center min-w-0">
                   <div className="text-xl font-mono text-white truncate">
-                    $
-                    {tokenData.price.currentPrice
-                      ? parseFloat(tokenData.price.currentPrice.toFixed(7))
-                      : "N/A"}
+                    ${tokenData.price.currentPrice ? parseFloat((tokenData.price.currentPrice).toFixed(7)) : "N/A"}
                   </div>
                   <div
                     className={`text-lg font-mono flex-shrink-0 ml-2 ${
@@ -798,7 +803,9 @@ const TokenPage = () => {
                 </div>
                 <div className="bg-black border border-gray-800 p-2">
                   <div className="text-gray-400">LIQUIDITY</div>
-                  <div className="text-white font-mono text-sm">TODO</div>
+                  <div className="text-white font-mono text-sm">
+                    TODO
+                  </div>
                 </div>
                 <div className="bg-black border border-gray-800 p-2">
                   <div className="text-gray-400">FDV</div>
@@ -1043,7 +1050,7 @@ const TokenPage = () => {
                 ) : (
                   <div
                     ref={scrollContainerRef}
-                    className="overflow-x-auto h-96 custom-scrollbar"
+                    className="overflow-y-auto h-96 custom-scrollbar"
                   >
                     <table className="w-full text-xs min-w-[400px]">
                       <thead className="bg-gray-900 sticky top-0 z-10">

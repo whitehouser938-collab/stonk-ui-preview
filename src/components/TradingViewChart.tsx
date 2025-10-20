@@ -8,22 +8,13 @@ interface TradingViewChartProps {
 
 type ResolutionString = TradingView.ResolutionString;
 
-function TradingViewChart({
-  symbol = "CRYPTOCAP:ETH",
-  height,
-}: TradingViewChartProps) {
+function TradingViewChart({ symbol, height }: TradingViewChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
+  const tvWidgetRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-
-    let widget: any;
-
     const initChart = async () => {
-      // Dynamically load the Charting Library
       const TradingView = await import(
         "../../public/charting_library/charting_library"
       );
@@ -34,14 +25,21 @@ function TradingViewChart({
       }
 
       if (!chartContainerRef.current) return;
-      widget = new TradingView.widget({
+
+      // Destroy previous widget if exists
+      if (tvWidgetRef.current) {
+        tvWidgetRef.current.remove();
+        tvWidgetRef.current = null;
+      }
+
+      // Initialize widget
+      const widget = new TradingView.widget({
         container: chartContainerRef.current,
         autosize: true,
-        symbol, // e.g., "CRYPTOCAP:BTC:0x12323232323232321231"
-        interval: "60" as ResolutionString,
+        symbol: symbol || "CRYPTOCAP:BTC",
+        interval: "1" as ResolutionString,
         timezone: "exchange",
         theme: "dark",
-        // style: "1",
         locale: "en",
         enabled_features: [],
         disabled_features: [
@@ -50,43 +48,33 @@ function TradingViewChart({
           "header_quick_search",
           "edit_buttons_in_legend",
         ],
-        overrides: {
-          "mainSeriesProperties.precision": 4,
+        settings_overrides: {
+          "mainSeries.priceFormat.precision": 6,
           "paneProperties.background": "#1e293b",
         },
         time_frames: [
-          {
-            text: "1M",
-            resolution: "240" as ResolutionString,
-            description: "1 Month",
-          },
-          {
-            text: "7D",
-            resolution: "60" as ResolutionString,
-            description: "1 Week",
-          },
-          {
-            text: "3D",
-            resolution: "30" as ResolutionString,
-            description: "3 Day",
-          },
-          {
-            text: "1H",
-            resolution: "1" as ResolutionString,
-            description: "1 Hour",
-          },
+          { text: "1M", resolution: "240" as ResolutionString, description: "1 Month" },
+          { text: "7D", resolution: "60" as ResolutionString, description: "1 Week" },
+          { text: "3D", resolution: "30" as ResolutionString, description: "3 Day" },
+          { text: "1H", resolution: "1" as ResolutionString, description: "1 Hour" },
         ],
         datafeed: Datafeed,
         library_path: "/charting_library/charting_library/",
+      });
+
+      tvWidgetRef.current = widget;
+
+      widget.onChartReady(() => {
+        setIsLoading(false);
       });
     };
 
     initChart();
 
     return () => {
-      clearTimeout(timer);
-      if (widget) {
-        widget.remove();
+      if (tvWidgetRef.current) {
+        tvWidgetRef.current.remove();
+        tvWidgetRef.current = null;
       }
     };
   }, [symbol]);
@@ -96,15 +84,11 @@ function TradingViewChart({
       <div
         className="tradingview-widget-container"
         ref={chartContainerRef}
-        style={{
-          height: height ? `${height}px` : "100%",
-          width: "100%",
-        }}
-      ></div>
-
+        style={{ height: height ? `${height}px` : "100%", width: "100%" }}
+      />
       {isLoading && (
-        <div className="absolute inset-0 z-10 animate-pulse space-y-4 bg-[#1a1a1f] p-4">
-          {/* You can add loading skeleton elements here if needed */}
+        <div className="absolute inset-0 z-10 animate-pulse bg-[#1a1a1f] p-4">
+          {/* Optional loading skeleton */}
         </div>
       )}
     </div>

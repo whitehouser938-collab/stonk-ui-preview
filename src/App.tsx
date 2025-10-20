@@ -62,6 +62,7 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Markets />} />
+              <Route path="/:chainId" element={<Markets />} />
               <Route path="/research" element={<Research />} />
               <Route
                 path="/token/:chainId/:tokenAddress"

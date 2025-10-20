@@ -1,8 +1,11 @@
-import React, { useState, useEffect, Fragment } from "react";
+import React, { useState, useEffect, Fragment, useCallback } from "react";
 import { Circle } from "lucide-react";
 import { getAllTokens } from "@/api/token";
-import { useNavigate } from "react-router-dom";
-import { TokenMarketOverview } from "@/types";
+import { useNavigate, useParams } from "react-router-dom";
+import { Chain, TokenMarketOverview } from "@/types";
+import { useMarketsUpdates } from "@/hooks/useMarketsUpdate";
+
+const DEFAULT_CHAIN: Chain = "SEP";
 
 
 function formatNumber(num: number): string {
@@ -53,6 +56,9 @@ function formatShortSince(timestamp?: string): string {
 }
 
 export function MarketsDashboard() {
+  const { chainId } = useParams<{
+    chainId: Chain;
+  }>();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [tokens, setTokens] = useState<TokenMarketOverview[]>([]);
   const [bondingCurveVolumeData, setBondingCurveVolumeData] = useState<any[]>(
@@ -61,6 +67,12 @@ export function MarketsDashboard() {
 
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+  if (!chainId) {
+    navigate(`/${DEFAULT_CHAIN}`, { replace: true });
+  }
+  }, [chainId, navigate]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -84,6 +96,35 @@ export function MarketsDashboard() {
 
     fetchTokens();
   }, []);
+
+  const handleMarketsUpdate = useCallback((updatedMarketsOverview: TokenMarketOverview[]) => {
+    setTokens((prev) => {
+      const updatedMarketsMap = new Map(
+        updatedMarketsOverview.map(market => [market.tokenAddress, market])
+      );
+
+      const existingTokensMap = new Map(prev.map(token => [token.tokenAddress, token]));
+
+      // Merge existing with updates
+      updatedMarketsMap.forEach((updatedMarket, tokenAddress) => {
+        const existing = existingTokensMap.get(tokenAddress);
+        if (existing) {
+          existingTokensMap.set(tokenAddress, {
+            ...existing,
+            ...updatedMarket
+          });
+        } else {
+          existingTokensMap.set(tokenAddress, updatedMarket);
+        }
+      });
+
+      // Convert back to array and sort by totalVolume descending
+      return Array.from(existingTokensMap.values())
+        .sort((a, b) => b.totalVolume - a.totalVolume);
+    });
+  }, []);
+  
+  useMarketsUpdates(chainId, handleMarketsUpdate);
 
   const handleTokenClick = (token: TokenMarketOverview) => {
     navigate(`/token/${token.chain}/${token.tokenAddress}`);

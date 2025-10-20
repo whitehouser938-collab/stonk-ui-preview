@@ -1,6 +1,6 @@
 import { wsManager } from "@/services/websocket";
 import { resolutionMap } from "./datafeed";
-import { BarData, BarUpdateMessage } from "@/types";
+import { BarData, BarUpdateMessage, SUBSCRIPTION_TYPES } from "@/types";
 
 interface SubscriptionItem {
   subscriberUID: string;
@@ -38,7 +38,7 @@ export function subscribeOnStream(
   onResetCacheNeededCallback: () => void,
   lastBar: BarData | null,
 ) {
-  const channelString = `token_bars:${symbolInfo.chain}:${symbolInfo.address}:${resolutionMap[resolution]}`;
+  const channelString = SUBSCRIPTION_TYPES.bars.channelFormatter(symbolInfo.address, symbolInfo.chain, resolutionMap[resolution]);
   const handler = {
     id: subscriberUID,
     callback: onRealtimeCallback,
@@ -60,7 +60,7 @@ export function subscribeOnStream(
     "[subscribeBars]: Subscribe to streaming. Channel:",
     channelString,
   );
-  wsManager.subscribeBars(channelString, handleBarUpdate)
+  wsManager.subscribe("bars", handleBarUpdate, channelString);
 }
 
 export function unsubscribeFromStream(subscriberUID: string) {
@@ -81,7 +81,7 @@ export function unsubscribeFromStream(subscriberUID: string) {
           "[unsubscribeBars]: Unsubscribe from streaming. Channel:",
           channelString,
         );
-        wsManager.unsubscribeBars(subscriptionItem.channel);
+        wsManager.unsubscribe("bars", channelString);
         channelToSubscription.delete(channelString);
         break;
       }

@@ -1,4 +1,4 @@
-import { BarUpdateMessage, TradeUpdateMessage } from "@/types";
+import { SUBSCRIPTION_TYPES } from "@/types";
 
 class WebSocketManager {
   private ws: WebSocket | null = null;
@@ -188,123 +188,63 @@ class WebSocketManager {
 
   private resubscribe(channel: string) {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      const [type] = channel.split(":");
-      switch (type) {
-        case "token_trades":
-          this.ws.send(
-            JSON.stringify({
-              type: "subscribeTrades",
-              channel,
-            })
-          );
-          break;
-        case "token_bars":
-          this.ws.send(
-            JSON.stringify({
-              type: "subscribeBars",
-              channel,
-            })
-          );
-          break;
-        default:
-          break;
+      const [channelType] = channel.split(":");
+      
+      const config = Object.values(SUBSCRIPTION_TYPES).find(
+        (cfg) => cfg.prefix === channelType
+      );
+
+      if (config) {
+        this.ws.send(
+          JSON.stringify({
+            type: config.subscribeType,
+            channel,
+          })
+        );
       }
     }
   }
 
-  subscribeBars(
-    channel: string,
-    onUpdate: (data: BarUpdateMessage) => void
+  subscribe<T>(
+    subscriptionKey: keyof typeof SUBSCRIPTION_TYPES,
+    onUpdate: (data: T) => void,
+    channel: string
   ): () => void {
+    const config = SUBSCRIPTION_TYPES[subscriptionKey];
+
+    console.log(`[WebSocket] Subscribing to ${subscriptionKey} on channel: ${channel}`);
+
     this.connect()
       .then((ws) => {
-        const subRequest = {
-          type: "subscribeBars",
-          channel: channel,
-        };
-        ws.send(JSON.stringify(subRequest));
-
+        ws.send(JSON.stringify({
+          type: config.subscribeType,
+          channel,
+        }));
         this.subscriptions.add(channel);
         this.messageHandlers.set(channel, onUpdate);
-
-        console.log(`Subscribed to bars on channel ${channel}`);
+        console.log(`[WebSocket] Subscribed to ${subscriptionKey} on channel: ${channel}`);
       })
       .catch(console.error);
 
-    return () => this.unsubscribeBars(channel);
+    return () => this.unsubscribe(subscriptionKey, channel);
   }
 
-  unsubscribeBars(channel: string) {
+  unsubscribe(
+    subscriptionKey: keyof typeof SUBSCRIPTION_TYPES,
+    channel: string
+  ): void {
+    const config = SUBSCRIPTION_TYPES[subscriptionKey];
+
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(
-        JSON.stringify({
-          type: "unsubscribeBars",
-          channel,
-        })
-      );
+      this.ws.send(JSON.stringify({
+        type: config.unsubscribeType,
+        channel,
+      }));
     }
 
     this.subscriptions.delete(channel);
     this.messageHandlers.delete(channel);
-
-    console.log(`Unsubscribed from bars on channel: ${channel}`);
-  }
-
-  subscribeTrades(
-    address: string,
-    chain: string,
-    onUpdate: (data: TradeUpdateMessage) => void
-  ): () => void {
-    const channel = `token_trades:${chain}:${address}`;
-
-    console.log(
-      `[WebSocket] Subscribing to trades - Address: ${address}, Chain: ${chain}, Channel: ${channel}`
-    );
-
-    this.connect()
-      .then((ws) => {
-        const subscribeMessage = {
-          type: "subscribeTrades",
-          channel,
-        };
-
-        console.log(
-          `[WebSocket] Sending subscription message:`,
-          subscribeMessage
-        );
-        ws.send(JSON.stringify(subscribeMessage));
-
-        this.subscriptions.add(channel);
-        this.messageHandlers.set(channel, onUpdate);
-
-        console.log(`[WebSocket] Subscribed to trades on channel: ${channel}`);
-        console.log(
-          `[WebSocket] Total subscriptions:`,
-          this.subscriptions.size
-        );
-        console.log(`[WebSocket] Total handlers:`, this.messageHandlers.size);
-      })
-      .catch(console.error);
-
-    return () => this.unsubscribeTrades(address, chain);
-  }
-
-  unsubscribeTrades(address: string, chain: string) {
-    const channel = `token_trades:${chain}:${address}`;
-
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(
-        JSON.stringify({
-          type: "unsubscribeTrades",
-          channel,
-        })
-      );
-    }
-
-    this.subscriptions.delete(channel);
-    this.messageHandlers.delete(channel);
-
-    console.log(`Unsubscribed from trades on channel: ${channel}`);
+    console.log(`[WebSocket] Unsubscribed from ${subscriptionKey} on channel: ${channel}`);
   }
 
   disconnect() {

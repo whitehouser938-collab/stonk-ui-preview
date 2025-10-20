@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useRef } from "react";
 import { wsManager } from "../services/websocket.ts";
-import { TradeData, TradeUpdateMessage } from "@/types/index.ts";
+import { SUBSCRIPTION_TYPES, TradeData, TradeUpdateMessage } from "@/types/index.ts";
 
 export function useTradeUpdates(
   chainId: string | undefined,
@@ -35,11 +35,8 @@ export function useTradeUpdates(
         `[useTradeUpdates] Subscribing to trades for ${tokenAddress} on ${chainId}`
       );
 
-      const unsubscribe = wsManager.subscribeTrades(
-        tokenAddress,
-        chainId,
-        handleTradeUpdate
-      );
+      const channelString = SUBSCRIPTION_TYPES.trades.channelFormatter(tokenAddress, chainId);
+      const unsubscribe = wsManager.subscribe("trades", handleTradeUpdate, channelString);
 
       unsubscribeRef.current = unsubscribe;
     }

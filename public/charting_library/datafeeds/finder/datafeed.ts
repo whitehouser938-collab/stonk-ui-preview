@@ -1,9 +1,10 @@
 import { BarData, Chain } from "@/types";
-import { makeApiRequest } from "./helpers";
+import { getTradeLimitForResolution, makeApiRequest } from "./helpers";
 import { subscribeOnStream, unsubscribeFromStream } from "./streaming";
 
 const lastBarsCache: Map<string, BarData> = new Map();
 const prevBarsCache: Map<string, BarData> = new Map();
+const endOfDataCache = new Map<string, boolean>();
 
 // Define the types for symbols and configuration
 interface Symbol {
@@ -117,11 +118,24 @@ const Datafeed = {
   ): Promise<void> => {
     const { from, to, firstDataRequest } = periodParams;
 
+    const cacheKey = `${symbolInfo.address}:${symbolInfo.chain}:${resolution}`;
+
+    if (firstDataRequest) {
+      prevBarsCache.delete(cacheKey);
+      lastBarsCache.delete(cacheKey);
+      endOfDataCache.delete(cacheKey);
+    }
+    // If we've already reached the end, don't make another request
+    if (endOfDataCache.has(cacheKey) && endOfDataCache.get(cacheKey) === true) {
+      onHistoryCallback([], { noData: true });
+      return;
+    }
+
     const urlParameters = {
       time_to: to,
       time_from: from,
       chain: symbolInfo.chain,
-      limit: 2000,
+      limit: getTradeLimitForResolution(resolution),
 
       //Get birdeye api type from resolution
       resolution: resolutionMap[resolution as keyof typeof resolutionMap],
@@ -134,17 +148,12 @@ const Datafeed = {
       const data = await makeApiRequest(
         `token/bars/${symbolInfo.address}?${query}`
       );
-      if (!data.bars || data.end) {
+
+      if (!data.bars || data.bars.length <= 0) {
+        endOfDataCache.set(cacheKey, true);
         onHistoryCallback([], { noData: true });
         return;
       }
-      const cacheKey = `${symbolInfo.address}:${symbolInfo.chain}:${resolution}`;
-
-      if (firstDataRequest) {
-        prevBarsCache.delete(cacheKey);
-        lastBarsCache.delete(cacheKey);
-      }
-
       const newBars = [...data.bars];
       if (data.bars.length > 0) {
         const prevBar = prevBarsCache.get(cacheKey);
@@ -168,7 +177,10 @@ const Datafeed = {
       console.log(
         `Returning ${newBars.length} bar(s) for the requested period.`
       );
-      onHistoryCallback(newBars, { noData: false });
+
+      if (data.end) endOfDataCache.set(cacheKey, true);
+    
+      onHistoryCallback(newBars, { noData: data.end });
     } catch (error) {
       onErrorCallback(error);
     }
