@@ -13,6 +13,12 @@ export interface DeployTokenResponse {
   success: boolean;
 }
 
+// Minimal ERC20 ABI for approve function
+const ERC20_ABI = [
+  "function approve(address spender, uint256 amount) public returns (bool)",
+  "function allowance(address owner, address spender) public view returns (uint256)"
+];
+
 export const deployTokenETH = async (
   tokenData: ICOLaunchData,
   signer: ethers.Signer
@@ -41,6 +47,27 @@ export const deployTokenETH = async (
 
         // Determine if using ETH (default to true if not specified)
         const useETH = tokenData.useETH !== undefined ? tokenData.useETH : true;
+
+        // If using WETH, check and approve allowance first
+        if (!useETH) {
+          const wethAddress = import.meta.env.VITE_EVILWETH_ADDRESS;
+          const wethContract = new Contract(wethAddress, ERC20_ABI, signer);
+          const userAddress = await signer.getAddress();
+
+          // Check current allowance
+          const currentAllowance = await wethContract.allowance(userAddress, tokenFactoryAddress);
+          console.log("Current WETH allowance:", ethers.formatEther(currentAllowance), "WETH");
+
+          // If allowance is insufficient, approve
+          if (currentAllowance < initialBuyAmountWei) {
+            console.log("Approving WETH spending...");
+            const approveTx = await wethContract.approve(tokenFactoryAddress, initialBuyAmountWei);
+            await approveTx.wait();
+            console.log("WETH approved successfully");
+          } else {
+            console.log("Sufficient WETH allowance already exists");
+          }
+        }
 
         // Deploy token with initial buy
         tx = await tokenFactory.deployToken(
