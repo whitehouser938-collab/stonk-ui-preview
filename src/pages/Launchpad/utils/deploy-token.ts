@@ -39,16 +39,19 @@ export const deployTokenETH = async (
         // Convert initial buy amount to Wei
         const initialBuyAmountWei = ethers.parseEther(tokenData.initialBuyAmount);
 
+        // Determine if using ETH (default to true if not specified)
+        const useETH = tokenData.useETH !== undefined ? tokenData.useETH : true;
+
         // Deploy token with initial buy
         tx = await tokenFactory.deployToken(
           tokenData.name,
           tokenData.symbol,
           initialBuyAmountWei,
-          true, // useETH = true
-          { value: initialBuyAmountWei } // Send ETH for initial buy
+          useETH, // useETH from form data
+          useETH ? { value: initialBuyAmountWei } : {} // Only send ETH value if using ETH
         );
 
-        console.log("Deploying with initial buy of", tokenData.initialBuyAmount, "ETH");
+        console.log("Deploying with initial buy of", tokenData.initialBuyAmount, useETH ? "ETH" : "WETH");
       } else {
         // Deploy token without initial buy (original function)
         tx = await tokenFactory.deployToken(

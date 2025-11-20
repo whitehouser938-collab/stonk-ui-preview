@@ -33,7 +33,8 @@ export interface ICOLaunchData {
   twitterUrl?: string;
   logoFile?: File;
   launchpad: string; // "SEPOLIA" only
-  initialBuyAmount?: string; // Optional initial buy amount in ETH
+  initialBuyAmount?: string; // Optional initial buy amount in ETH/WETH
+  useETH?: boolean; // true for ETH, false for WETH
 }
 
 const recentIPOs = [
@@ -136,6 +137,7 @@ export function ICOLaunchpad() {
     logoFile: undefined,
     launchpad: "SEP", // Default to Sepolia
     initialBuyAmount: "", // Default to empty (optional)
+    useETH: true, // Default to ETH
   });
 
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -152,7 +154,10 @@ export function ICOLaunchpad() {
   }, []);
 
   const handleInputChange = (key: keyof ICOLaunchData, value: string) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
+    // Handle boolean conversion for useETH field
+    const processedValue = key === "useETH" ? value === "true" : value;
+
+    setFormData((prev) => ({ ...prev, [key]: processedValue }));
 
     // Validate the field and update errors
     const error = validateField(key, value);
@@ -187,6 +192,7 @@ export function ICOLaunchpad() {
       logoFile: undefined,
       launchpad: "SEP", // Reset to Sepolia
       initialBuyAmount: "", // Reset to empty
+      useETH: true, // Reset to ETH
     });
   };
 
@@ -725,19 +731,43 @@ export function ICOLaunchpad() {
                     Buy tokens immediately after deployment
                   </span>
                 </div>
-                <input
-                  type="number"
-                  step="0.001"
-                  min="0"
-                  placeholder="e.g., 0.01 ETH"
-                  value={formData.initialBuyAmount}
-                  onChange={(e) =>
-                    handleInputChange("initialBuyAmount", e.target.value)
-                  }
-                  className="w-full p-2 bg-black border border-gray-600 text-white text-xs sm:text-sm font-mono"
-                />
-                <div className="text-xs text-gray-500 mt-1">
-                  Amount of ETH to use for initial token purchase (leave empty to skip)
+                <div className="space-y-3">
+                  <input
+                    type="number"
+                    step="0.001"
+                    min="0"
+                    placeholder={`e.g., 0.01 ${formData.useETH ? 'ETH' : 'WETH'}`}
+                    value={formData.initialBuyAmount}
+                    onChange={(e) =>
+                      handleInputChange("initialBuyAmount", e.target.value)
+                    }
+                    className="w-full p-2 bg-black border border-gray-600 text-white text-xs sm:text-sm font-mono"
+                  />
+                  <div className="flex items-center space-x-4">
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        checked={formData.useETH === true}
+                        onChange={() => handleInputChange("useETH", "true")}
+                        className="form-radio text-orange-500"
+                      />
+                      <span className="text-white text-sm">Use ETH</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        checked={formData.useETH === false}
+                        onChange={() => handleInputChange("useETH", "false")}
+                        className="form-radio text-orange-500"
+                      />
+                      <span className="text-white text-sm">Use WETH</span>
+                    </label>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Amount of {formData.useETH ? 'ETH' : 'WETH'} to use for initial token purchase (leave empty to skip)
+                  </div>
                 </div>
               </div>
               {/* Launchpad Section */}
