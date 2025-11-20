@@ -33,6 +33,7 @@ export interface ICOLaunchData {
   twitterUrl?: string;
   logoFile?: File;
   launchpad: string; // "SEPOLIA" only
+  initialBuyAmount?: string; // Optional initial buy amount in ETH
 }
 
 const recentIPOs = [
@@ -134,6 +135,7 @@ export function ICOLaunchpad() {
     twitterUrl: "",
     logoFile: undefined,
     launchpad: "SEP", // Default to Sepolia
+    initialBuyAmount: "", // Default to empty (optional)
   });
 
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -184,6 +186,7 @@ export function ICOLaunchpad() {
       twitterUrl: "",
       logoFile: undefined,
       launchpad: "SEP", // Reset to Sepolia
+      initialBuyAmount: "", // Reset to empty
     });
   };
 
@@ -714,6 +717,29 @@ export function ICOLaunchpad() {
                     />
                   </div>
                 </div> */}
+              {/* Initial Buy Amount */}
+              <div className="mb-6">
+                <div className="text-gray-400 mb-1">
+                  Initial Buy Amount (Optional)
+                  <span className="text-xs ml-2 text-gray-500">
+                    Buy tokens immediately after deployment
+                  </span>
+                </div>
+                <input
+                  type="number"
+                  step="0.001"
+                  min="0"
+                  placeholder="e.g., 0.01 ETH"
+                  value={formData.initialBuyAmount}
+                  onChange={(e) =>
+                    handleInputChange("initialBuyAmount", e.target.value)
+                  }
+                  className="w-full p-2 bg-black border border-gray-600 text-white text-xs sm:text-sm font-mono"
+                />
+                <div className="text-xs text-gray-500 mt-1">
+                  Amount of ETH to use for initial token purchase (leave empty to skip)
+                </div>
+              </div>
               {/* Launchpad Section */}
               <div className="mb-6">
                 <div className="text-gray-400 mb-1">Launchpad</div>

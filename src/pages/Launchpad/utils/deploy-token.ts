@@ -32,12 +32,33 @@ export const deployTokenETH = async (
       // console.log("Deployment fee:", ethers.formatEther(fee), "ETH");
       // console.log("Fee in wei:", fee.toString());
 
-      // Deploy token transaction
-      const tx = await tokenFactory.deployToken(
-        tokenData.name,
-        tokenData.symbol
-        // { value: fee }
-      );
+      let tx;
+
+      // Check if initial buy amount is provided
+      if (tokenData.initialBuyAmount && parseFloat(tokenData.initialBuyAmount) > 0) {
+        // Convert initial buy amount to Wei
+        const initialBuyAmountWei = ethers.parseEther(tokenData.initialBuyAmount);
+
+        // Deploy token with initial buy
+        tx = await tokenFactory.deployToken(
+          tokenData.name,
+          tokenData.symbol,
+          initialBuyAmountWei,
+          true, // useETH = true
+          { value: initialBuyAmountWei } // Send ETH for initial buy
+        );
+
+        console.log("Deploying with initial buy of", tokenData.initialBuyAmount, "ETH");
+      } else {
+        // Deploy token without initial buy (original function)
+        tx = await tokenFactory.deployToken(
+          tokenData.name,
+          tokenData.symbol
+          // { value: fee }
+        );
+
+        console.log("Deploying without initial buy");
+      }
 
       const receipt = await tx.wait(); // Wait for the transaction to be mined
       console.log("Transaction mined:", tx);
