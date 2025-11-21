@@ -69,11 +69,13 @@ export const buyTokens = async (
     // Parse the input amount (ETH or WETH amount)
     const assetAmount = ethers.parseEther(tradeData.amount);
 
-    // Calculate expected token amount for the asset amount using API
+    // Calculate expected token amount for the asset amount using user's provider
+    const provider = signer.provider;
     const priceData = await calculateBuyPrice(
       tradeData.tokenAddress,
       tradeData.amount,
-      "SEP"
+      "SEP",
+      provider
     );
 
     if (!priceData.success) {
@@ -231,8 +233,9 @@ export const sellTokens = async (
     }
 
     // Parse token amount to sell - use the correct token decimals
-    // Get token decimals first using API
-    const decimalsData = await getTokenDecimals(tradeData.tokenAddress, "SEP");
+    // Get token decimals first using user's provider
+    const provider = signer.provider;
+    const decimalsData = await getTokenDecimals(tradeData.tokenAddress, "SEP", provider);
 
     if (!decimalsData.success) {
       return {
@@ -251,11 +254,12 @@ export const sellTokens = async (
     // Parse with the correct decimals (most tokens are 18, but some might be different)
     const tokenAmount = ethers.parseUnits(tradeData.amount, tokenDecimals);
 
-    // Calculate expected asset amount (ETH or WETH) from selling tokens using API
+    // Calculate expected asset amount (ETH or WETH) from selling tokens using user's provider
     const proceedsData = await calculateSellProceeds(
       tradeData.tokenAddress,
       tokenAmount.toString(),
-      "SEP"
+      "SEP",
+      provider
     );
 
     console.log("[SELL PROCEEDS DEBUG]", {
@@ -317,12 +321,13 @@ export const sellTokens = async (
     // (token contract already created above for getting decimals)
     const userAddress = await signer.getAddress();
 
-    // Get allowance using API
+    // Get allowance using user's provider
     const allowanceData = await getTokenAllowance(
       userAddress,
       tradeData.tokenAddress,
       routerAddress,
-      "SEP"
+      "SEP",
+      provider
     );
 
     if (!allowanceData.success) {

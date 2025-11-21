@@ -1,17 +1,8 @@
-import { ethers, Contract } from "ethers";
+import { ethers, Contract, Provider } from "ethers";
 import Router from "@/abi/evm/Router.json";
 import Token from "@/abi/evm/Token.json";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
-
-// Sepolia RPC URL - use env var if available, otherwise use public Sepolia RPC
-// Check both VITE_RPC_URL and VITE_EVM_RPC_URL for flexibility
-const SEPOLIA_RPC_URL = import.meta.env.VITE_RPC_URL || import.meta.env.VITE_EVM_RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com";
-
-// Get provider for direct contract calls
-const getProvider = () => {
-  return new ethers.JsonRpcProvider(SEPOLIA_RPC_URL);
-};
 
 export interface BalancesResponse {
   success: boolean;
@@ -116,15 +107,18 @@ export const fetchBalances = async (
 };
 
 /**
- * Calculate buy price for a given asset amount - calls contract directly
+ * Calculate buy price for a given asset amount - calls contract directly using user's provider
  */
 export const calculateBuyPrice = async (
   tokenAddress: string,
   assetAmount: string,
-  chain: string = "SEP"
+  chain: string = "SEP",
+  provider?: Provider
 ): Promise<CalculateBuyPriceResponse> => {
   try {
-    const provider = getProvider();
+    if (!provider) {
+      throw new Error("Provider is required for calculateBuyPrice");
+    }
     const routerAddress = import.meta.env.VITE_EVM_ROUTER_ADDRESS;
     const router = new Contract(routerAddress, Router.abi, provider);
 
@@ -174,14 +168,17 @@ export const getTradingState = async (
 };
 
 /**
- * Get token decimals - calls contract directly
+ * Get token decimals - calls contract directly using user's provider
  */
 export const getTokenDecimals = async (
   tokenAddress: string,
-  chain: string = "SEP"
+  chain: string = "SEP",
+  provider?: Provider
 ): Promise<DecimalsResponse> => {
   try {
-    const provider = getProvider();
+    if (!provider) {
+      throw new Error("Provider is required for getTokenDecimals");
+    }
     const token = new Contract(tokenAddress, Token.abi, provider);
 
     const decimals = await token.decimals();
@@ -243,15 +240,18 @@ export const getWethBalance = async (
 };
 
 /**
- * Calculate sell proceeds for a given token amount - calls contract directly
+ * Calculate sell proceeds for a given token amount - calls contract directly using user's provider
  */
 export const calculateSellProceeds = async (
   tokenAddress: string,
   tokenAmount: string,
-  chain: string = "SEP"
+  chain: string = "SEP",
+  provider?: Provider
 ): Promise<CalculateSellProceedsResponse> => {
   try {
-    const provider = getProvider();
+    if (!provider) {
+      throw new Error("Provider is required for calculateSellProceeds");
+    }
     const routerAddress = import.meta.env.VITE_EVM_ROUTER_ADDRESS;
     const router = new Contract(routerAddress, Router.abi, provider);
 
@@ -281,16 +281,19 @@ export const calculateSellProceeds = async (
 };
 
 /**
- * Get token allowance for a user and spender - calls contract directly
+ * Get token allowance for a user and spender - calls contract directly using user's provider
  */
 export const getTokenAllowance = async (
   userAddress: string,
   tokenAddress: string,
   spender: string,
-  chain: string = "SEP"
+  chain: string = "SEP",
+  provider?: Provider
 ): Promise<TokenAllowanceResponse> => {
   try {
-    const provider = getProvider();
+    if (!provider) {
+      throw new Error("Provider is required for getTokenAllowance");
+    }
     const token = new Contract(tokenAddress, Token.abi, provider);
 
     const allowance = await token.allowance(userAddress, spender);
