@@ -1,4 +1,14 @@
+import { ethers, Contract } from "ethers";
+import Router from "@/abi/evm/Router.json";
+import Token from "@/abi/evm/Token.json";
+
 const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+// Get provider for direct contract calls
+const getProvider = () => {
+  const rpcUrl = import.meta.env.VITE_EVM_RPC_URL;
+  return new ethers.JsonRpcProvider(rpcUrl);
+};
 
 export interface BalancesResponse {
   success: boolean;
@@ -103,22 +113,43 @@ export const fetchBalances = async (
 };
 
 /**
- * Calculate buy price for a given asset amount
+ * Calculate buy price for a given asset amount - calls contract directly
  */
 export const calculateBuyPrice = async (
   tokenAddress: string,
   assetAmount: string,
   chain: string = "SEP"
 ): Promise<CalculateBuyPriceResponse> => {
-  const response = await fetch(
-    `${API_BASE_URL}/token/rpc/calculate-buy-price?tokenAddress=${tokenAddress}&assetAmount=${assetAmount}&chain=${chain}`
-  );
+  try {
+    const provider = getProvider();
+    const routerAddress = import.meta.env.VITE_EVM_ROUTER_ADDRESS;
+    const router = new Contract(routerAddress, Router.abi, provider);
 
-  if (!response.ok) {
-    throw new Error(`Failed to calculate buy price: ${response.status}`);
+    // Convert asset amount to wei
+    const assetAmountWei = ethers.parseEther(assetAmount);
+
+    // Call calculateBuyPrice on the router contract
+    const tokenAmount = await router.calculateBuyPrice(tokenAddress, assetAmountWei);
+
+    return {
+      success: true,
+      data: {
+        tokenAmount: tokenAmount.toString(),
+        assetAmount: assetAmountWei.toString(),
+        tokenAddress: tokenAddress,
+      },
+    };
+  } catch (error) {
+    console.error("Error calculating buy price from contract:", error);
+    return {
+      success: false,
+      data: {
+        tokenAmount: "0",
+        assetAmount: "0",
+        tokenAddress: tokenAddress,
+      },
+    };
   }
-
-  return response.json();
 };
 
 /**
@@ -140,21 +171,35 @@ export const getTradingState = async (
 };
 
 /**
- * Get token decimals
+ * Get token decimals - calls contract directly
  */
 export const getTokenDecimals = async (
   tokenAddress: string,
   chain: string = "SEP"
 ): Promise<DecimalsResponse> => {
-  const response = await fetch(
-    `${API_BASE_URL}/token/rpc/decimals?tokenAddress=${tokenAddress}&chain=${chain}`
-  );
+  try {
+    const provider = getProvider();
+    const token = new Contract(tokenAddress, Token.abi, provider);
 
-  if (!response.ok) {
-    throw new Error(`Failed to get token decimals: ${response.status}`);
+    const decimals = await token.decimals();
+
+    return {
+      success: true,
+      data: {
+        decimals: Number(decimals),
+        tokenAddress: tokenAddress,
+      },
+    };
+  } catch (error) {
+    console.error("Error getting token decimals from contract:", error);
+    return {
+      success: false,
+      data: {
+        decimals: 18, // Default to 18
+        tokenAddress: tokenAddress,
+      },
+    };
   }
-
-  return response.json();
 };
 
 /**
@@ -195,26 +240,45 @@ export const getWethBalance = async (
 };
 
 /**
- * Calculate sell proceeds for a given token amount
+ * Calculate sell proceeds for a given token amount - calls contract directly
  */
 export const calculateSellProceeds = async (
   tokenAddress: string,
   tokenAmount: string,
   chain: string = "SEP"
 ): Promise<CalculateSellProceedsResponse> => {
-  const response = await fetch(
-    `${API_BASE_URL}/token/rpc/calculate-sell-proceeds?tokenAddress=${tokenAddress}&tokenAmount=${tokenAmount}&chain=${chain}`
-  );
+  try {
+    const provider = getProvider();
+    const routerAddress = import.meta.env.VITE_EVM_ROUTER_ADDRESS;
+    const router = new Contract(routerAddress, Router.abi, provider);
 
-  if (!response.ok) {
-    throw new Error(`Failed to calculate sell proceeds: ${response.status}`);
+    // Call calculateSellProceeds on the router contract
+    // tokenAmount is already in wei (passed from trade-token.ts)
+    const assetAmount = await router.calculateSellProceeds(tokenAddress, tokenAmount);
+
+    return {
+      success: true,
+      data: {
+        assetAmount: assetAmount.toString(),
+        tokenAmount: tokenAmount,
+        tokenAddress: tokenAddress,
+      },
+    };
+  } catch (error) {
+    console.error("Error calculating sell proceeds from contract:", error);
+    return {
+      success: false,
+      data: {
+        assetAmount: "0",
+        tokenAmount: tokenAmount,
+        tokenAddress: tokenAddress,
+      },
+    };
   }
-
-  return response.json();
 };
 
 /**
- * Get token allowance for a user and spender
+ * Get token allowance for a user and spender - calls contract directly
  */
 export const getTokenAllowance = async (
   userAddress: string,
@@ -222,15 +286,33 @@ export const getTokenAllowance = async (
   spender: string,
   chain: string = "SEP"
 ): Promise<TokenAllowanceResponse> => {
-  const response = await fetch(
-    `${API_BASE_URL}/token/rpc/token-allowance?userAddress=${userAddress}&tokenAddress=${tokenAddress}&spender=${spender}&chain=${chain}`
-  );
+  try {
+    const provider = getProvider();
+    const token = new Contract(tokenAddress, Token.abi, provider);
 
-  if (!response.ok) {
-    throw new Error(`Failed to get token allowance: ${response.status}`);
+    const allowance = await token.allowance(userAddress, spender);
+
+    return {
+      success: true,
+      data: {
+        allowance: allowance.toString(),
+        tokenAddress: tokenAddress,
+        userAddress: userAddress,
+        spender: spender,
+      },
+    };
+  } catch (error) {
+    console.error("Error getting token allowance from contract:", error);
+    return {
+      success: false,
+      data: {
+        allowance: "0",
+        tokenAddress: tokenAddress,
+        userAddress: userAddress,
+        spender: spender,
+      },
+    };
   }
-
-  return response.json();
 };
 
 /**
