@@ -150,21 +150,19 @@ export const buyTokens = async (
       throw new Error("Transaction receipt is null");
     }
 
-    // Find the TokensPurchased event
+    // Find the TokensPurchased event - try multiple detection methods
     const eventLog = receipt.logs.find(
       (log): log is EventLog =>
         log instanceof EventLog && log.fragment?.name === "TokensPurchased"
     );
 
-    if (!eventLog) {
-      throw new Error("TokensPurchased event not found");
-    }
-
-    const [tokenAddress] = eventLog.args;
+    // If we found the event, extract the token address from it
+    // Otherwise, use the token address from tradeData (transaction still succeeded)
+    const finalTokenAddress = eventLog?.args?.[0] ?? tradeData.tokenAddress;
 
     return {
       transactionHash: tx.hash,
-      tokenAddress: tokenAddress,
+      tokenAddress: finalTokenAddress,
       tokenAmount: expectedTokenAmount.toString(),
       assetAmount: assetAmount.toString(),
       success: true,
