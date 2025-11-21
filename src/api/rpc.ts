@@ -5,7 +5,8 @@ import Token from "@/abi/evm/Token.json";
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 // Sepolia RPC URL - use env var if available, otherwise use public Sepolia RPC
-const SEPOLIA_RPC_URL = import.meta.env.VITE_EVM_RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com";
+// Check both VITE_RPC_URL and VITE_EVM_RPC_URL for flexibility
+const SEPOLIA_RPC_URL = import.meta.env.VITE_RPC_URL || import.meta.env.VITE_EVM_RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com";
 
 // Get provider for direct contract calls
 const getProvider = () => {
