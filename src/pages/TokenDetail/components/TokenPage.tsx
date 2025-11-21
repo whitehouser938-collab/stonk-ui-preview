@@ -443,10 +443,10 @@ const TokenPage = () => {
 
   // --- Bonding Curve Progress from Trades (dynamic, client-side) ---
   const GRADUATION_ASSET_THRESHOLD_WEI = React.useMemo(() => {
-    // 20 asset tokens, assuming 18 decimals
-    const twenty = 20n;
+    // 7 asset tokens (ETH/WETH), assuming 18 decimals
+    const threshold = 7n;
     const wei = 10n ** 18n;
-    return twenty * wei;
+    return threshold * wei;
   }, []);
 
   const netAssetInCurveWei = React.useMemo(() => {
