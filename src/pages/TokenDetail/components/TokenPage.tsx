@@ -89,8 +89,18 @@ const TokenPage = () => {
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // Callback refs to notify TradingForm of confirmed trades
+  const tradeConfirmCallbackRef = useRef<((txHash: string, tradeType: "BUY" | "SELL") => void) | null>(null);
+
   const handleTradeUpdate = useCallback((newTrades: TradeData[]) => {
-    console.log(`[TokenPage] Received trade update:`, newTrades);
+    console.log(`[TokenPage] Received trade update at ${Date.now()}:`, newTrades);
+
+    // Notify TradingForm if any of these trades match pending tx
+    if (tradeConfirmCallbackRef.current) {
+      newTrades.forEach(trade => {
+        tradeConfirmCallbackRef.current?.(trade.transactionHash, trade.tradeType);
+      });
+    }
 
     setTrades((prevTrades) => {
       // There are no trades before a trade message from websocket
@@ -1014,6 +1024,9 @@ const TokenPage = () => {
               chain={tokenData?.chain}
               symbol={tokenData?.symbol}
               tokenAddress={tokenData?.tokenAddress}
+              onTradeConfirmed={(callback) => {
+                tradeConfirmCallbackRef.current = callback;
+              }}
             />
             {/* Bonding Curve Progress & Graduation Badge */}
             <BondingCurveProgress

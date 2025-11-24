@@ -19,6 +19,7 @@ interface TradingFormProps {
   chain?: string;
   symbol?: string;
   tokenAddress?: string;
+  onTradeConfirmed?: (callback: (txHash: string, tradeType: "BUY" | "SELL") => void) => void;
 }
 
 export interface TokenTradeData {
@@ -119,6 +120,46 @@ const TradingForm = (props: TradingFormProps) => {
   const [wethAllowance, setWethAllowance] = useState("0");
   const [tokenAllowance, setTokenAllowance] = useState("0"); // Still needed for display
   const [tokenDecimals, setTokenDecimals] = useState(18); // Default to 18 decimals
+  const [pendingTxHash, setPendingTxHash] = useState<string | null>(null); // Track pending tx
+  const [pendingTradeType, setPendingTradeType] = useState<"BUY" | "SELL" | null>(null); // Track pending trade type
+
+  // Register callback with parent to receive trade confirmations
+  React.useEffect(() => {
+    if (props.onTradeConfirmed) {
+      props.onTradeConfirmed((txHash: string, tradeType: "BUY" | "SELL") => {
+        console.log("[TradingForm] Trade confirmed via WebSocket:", txHash, tradeType);
+        if (pendingTxHash && txHash === pendingTxHash) {
+          // Our pending transaction was confirmed!
+          const explorerUrl = `https://sepolia.etherscan.io/tx/${txHash}`;
+          const tickerTitle = `${props.symbol ? `$${props.symbol}` : "Token"} ${
+            tradeType === "BUY" ? "Buy" : "Sell"
+          } Successful`;
+          toast({
+            title: tickerTitle,
+            description: (
+              <div>
+                <div>Transaction Hash:</div>
+                <a
+                  href={explorerUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2"
+                >
+                  {abbreviateHash(txHash)}
+                </a>
+              </div>
+            ),
+            variant: tradeType === "BUY" ? "success" : "softDestructive",
+          });
+          // Refresh balances
+          void fetchBalancesNow();
+          // Clear pending state
+          setPendingTxHash(null);
+          setPendingTradeType(null);
+        }
+      });
+    }
+  }, [props.onTradeConfirmed, pendingTxHash, props.symbol, toast, fetchBalancesNow]);
 
   // Fetch balances (debounced to avoid RPC rate limits)
   const lastBalanceFetchRef = React.useRef<number>(0);
@@ -506,29 +547,38 @@ const TradingForm = (props: TradingFormProps) => {
       }
       console.log("Trade response:", tradeResponse);
       if (tradeResponse && tradeResponse.success) {
-        const explorerUrl = `https://sepolia.etherscan.io/tx/${tradeResponse.transactionHash}`;
-        const tickerTitle = `${props.symbol ? `$${props.symbol}` : "Token"} ${
-          isBuy ? "Buy" : "Sell"
-        } Successful`;
-        toast({
-          title: tickerTitle,
-          description: (
-            <div>
-              <div>Transaction Hash:</div>
-              <a
-                href={explorerUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline underline-offset-2"
-              >
-                {abbreviateHash(tradeResponse.transactionHash)}
-              </a>
-            </div>
-          ),
-          variant: isBuy ? "success" : "softDestructive",
-        });
-        // Refresh balances immediately after successful trade
-        void fetchBalancesNow();
+        if (tradeResponse.pending) {
+          // Transaction sent but not confirmed - store tx hash and type
+          // Toast will be shown when WebSocket confirms it
+          setPendingTxHash(tradeResponse.transactionHash);
+          setPendingTradeType(isBuy ? "BUY" : "SELL");
+          console.log("[TradingForm] Pending transaction:", tradeResponse.transactionHash, isBuy ? "BUY" : "SELL");
+        } else {
+          // Shouldn't happen anymore since we removed tx.wait()
+          const explorerUrl = `https://sepolia.etherscan.io/tx/${tradeResponse.transactionHash}`;
+          const tickerTitle = `${props.symbol ? `$${props.symbol}` : "Token"} ${
+            isBuy ? "Buy" : "Sell"
+          } Successful`;
+          toast({
+            title: tickerTitle,
+            description: (
+              <div>
+                <div>Transaction Hash:</div>
+                <a
+                  href={explorerUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2"
+                >
+                  {abbreviateHash(tradeResponse.transactionHash)}
+                </a>
+              </div>
+            ),
+            variant: isBuy ? "success" : "softDestructive",
+          });
+          // Refresh balances immediately after successful trade
+          void fetchBalancesNow();
+        }
       } else if (
         tradeResponse &&
         tradeResponse.error &&

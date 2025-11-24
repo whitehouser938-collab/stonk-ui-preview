@@ -14,6 +14,7 @@ export interface TradeTokenResponse {
   tokenAmount: string;
   assetAmount: string;
   success: boolean;
+  pending?: boolean; // True if tx sent but not confirmed
   error?: string;
 }
 
@@ -139,31 +140,17 @@ export const buyTokens = async (
       );
     }
 
-    console.log("Transaction sent:", tx.hash);
+    console.log("[BUY] Transaction sent:", tx.hash);
 
-    const receipt = await tx.wait();
-    console.log("Transaction mined:", receipt);
-
-    if (!receipt) {
-      throw new Error("Transaction receipt is null");
-    }
-
-    // Find the TokensPurchased event - try multiple detection methods
-    const eventLog = receipt.logs.find(
-      (log): log is EventLog =>
-        log instanceof EventLog && log.fragment?.name === "TokensPurchased"
-    );
-
-    // If we found the event, extract the token address from it
-    // Otherwise, use the token address from tradeData (transaction still succeeded)
-    const finalTokenAddress = eventLog?.args?.[0] ?? tradeData.tokenAddress;
-
+    // Don't wait for confirmation - let backend/WebSocket handle that
+    // This eliminates RPC dependency and matches backend timing
     return {
       transactionHash: tx.hash,
-      tokenAddress: finalTokenAddress,
+      tokenAddress: tradeData.tokenAddress,
       tokenAmount: expectedTokenAmount.toString(),
       assetAmount: assetAmount.toString(),
       success: true,
+      pending: true, // Mark as pending since not confirmed yet
     };
   } catch (error) {
     console.error(
@@ -326,35 +313,17 @@ export const sellTokens = async (
       deadline
     );
 
-    console.log("Transaction sent:", tx.hash);
+    console.log("[SELL] Transaction sent:", tx.hash);
 
-    const receipt = await tx.wait();
-    console.log("Transaction mined:", receipt);
-
-    if (!receipt) {
-      throw new Error("Transaction receipt is null");
-    }
-
-    // Find the TokensSold event
-    const eventLog = receipt.logs.find(
-      (log): log is EventLog =>
-        log instanceof EventLog && log.fragment?.name === "TokensSold"
-    );
-
-    let finalTokenAddress = tradeData.tokenAddress;
-    let finalTokenAmount = tokenAmount;
-    let finalAssetAmount = expectedAssetAmount;
-
-    if (eventLog) {
-      [finalTokenAddress, finalTokenAmount, finalAssetAmount] = eventLog.args;
-    }
-
+    // Don't wait for confirmation - let backend/WebSocket handle that
+    // This eliminates RPC dependency and matches backend timing
     return {
       transactionHash: tx.hash,
-      tokenAddress: finalTokenAddress,
-      tokenAmount: finalTokenAmount.toString(),
-      assetAmount: finalAssetAmount.toString(),
+      tokenAddress: tradeData.tokenAddress,
+      tokenAmount: tokenAmount.toString(),
+      assetAmount: expectedAssetAmount.toString(),
       success: true,
+      pending: true, // Mark as pending since not confirmed yet
     };
   } catch (error) {
     console.error(
