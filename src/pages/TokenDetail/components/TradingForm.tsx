@@ -330,7 +330,17 @@ const TradingForm = (props: TradingFormProps) => {
           signer
         );
 
-        const tokenAmount = ethers.parseUnits(amount, tokenDecimals);
+        // Truncate amount to token decimals to avoid parseUnits error
+        const truncatedAmount = parseFloat(amount).toFixed(tokenDecimals);
+        const tokenAmount = ethers.parseUnits(truncatedAmount, tokenDecimals);
+
+        console.log("[SELL CONVERSION]", {
+          amount,
+          truncatedAmount,
+          tokenDecimals,
+          tokenAmount: tokenAmount.toString()
+        });
+
         const [assetAmount, fee, isBondingCurve] =
           await router.calculateSellWithFees(props.tokenAddress, tokenAmount);
 
@@ -339,7 +349,11 @@ const TradingForm = (props: TradingFormProps) => {
         const netAmount = isBondingCurve ? assetAmount - fee : assetAmount;
         setExpectedWethAmount(netAmount.toString());
       } catch (error) {
-        console.error("Error calculating expected WETH amount:", error);
+        console.error("Error calculating expected WETH amount:", error, {
+          amount,
+          tokenDecimals,
+          tokenAddress: props.tokenAddress
+        });
         setExpectedWethAmount("0");
       } finally {
         setIsCalculatingSellConversion(false);
@@ -904,11 +918,12 @@ const TradingForm = (props: TradingFormProps) => {
                   console.log("[PERCENTAGE SELL CALCULATION]", {
                     tokenBalanceNum,
                     sellAmount,
-                    sellAmountFixed: sellAmount.toFixed(6),
+                    tokenDecimals,
+                    sellAmountFixed: sellAmount.toFixed(tokenDecimals),
                   });
 
-                  // Limit precision to avoid ethers parsing issues
-                  setAmount(sellAmount.toFixed(6));
+                  // Use token decimals for precision to match parseUnits
+                  setAmount(sellAmount.toFixed(tokenDecimals));
                 }}
                 className="px-3 py-2 text-xs font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300"
               >
