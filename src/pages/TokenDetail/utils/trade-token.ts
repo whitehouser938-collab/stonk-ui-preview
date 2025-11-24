@@ -141,26 +141,12 @@ export const buyTokens = async (
 
     console.log("Transaction sent:", tx.hash);
 
-    const receipt = await tx.wait();
-    console.log("Transaction mined:", receipt);
-
-    if (!receipt) {
-      throw new Error("Transaction receipt is null");
-    }
-
-    // Find the TokensPurchased event - try multiple detection methods
-    const eventLog = receipt.logs.find(
-      (log): log is EventLog =>
-        log instanceof EventLog && log.fragment?.name === "TokensPurchased"
-    );
-
-    // If we found the event, extract the token address from it
-    // Otherwise, use the token address from tradeData (transaction still succeeded)
-    const finalTokenAddress = eventLog?.args?.[0] ?? tradeData.tokenAddress;
-
+    // Return immediately with transaction hash (don't wait for confirmation)
+    // The toast will show faster, matching when the trade appears in the table
+    // Backend will pick up the transaction and broadcast via WebSocket
     return {
       transactionHash: tx.hash,
-      tokenAddress: finalTokenAddress,
+      tokenAddress: tradeData.tokenAddress,
       tokenAmount: expectedTokenAmount.toString(),
       assetAmount: assetAmount.toString(),
       success: true,
@@ -328,32 +314,14 @@ export const sellTokens = async (
 
     console.log("Transaction sent:", tx.hash);
 
-    const receipt = await tx.wait();
-    console.log("Transaction mined:", receipt);
-
-    if (!receipt) {
-      throw new Error("Transaction receipt is null");
-    }
-
-    // Find the TokensSold event
-    const eventLog = receipt.logs.find(
-      (log): log is EventLog =>
-        log instanceof EventLog && log.fragment?.name === "TokensSold"
-    );
-
-    let finalTokenAddress = tradeData.tokenAddress;
-    let finalTokenAmount = tokenAmount;
-    let finalAssetAmount = expectedAssetAmount;
-
-    if (eventLog) {
-      [finalTokenAddress, finalTokenAmount, finalAssetAmount] = eventLog.args;
-    }
-
+    // Return immediately with transaction hash (don't wait for confirmation)
+    // The toast will show faster, matching when the trade appears in the table
+    // Backend will pick up the transaction and broadcast via WebSocket
     return {
       transactionHash: tx.hash,
-      tokenAddress: finalTokenAddress,
-      tokenAmount: finalTokenAmount.toString(),
-      assetAmount: finalAssetAmount.toString(),
+      tokenAddress: tradeData.tokenAddress,
+      tokenAmount: tokenAmount.toString(),
+      assetAmount: expectedAssetAmount.toString(),
       success: true,
     };
   } catch (error) {
