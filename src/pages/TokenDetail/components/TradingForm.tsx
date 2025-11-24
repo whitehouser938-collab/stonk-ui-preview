@@ -1003,14 +1003,16 @@ const TradingForm = (props: TradingFormProps) => {
       ) : (
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoading || pendingTxHash !== null}
           className={`w-full p-3 text-sm font-bold transition-all duration-200 ${
             isBuy
               ? "bg-green-600 hover:bg-green-700 text-black"
               : "bg-red-600 hover:bg-red-700 text-white"
           }`}
         >
-          {isLoading
+          {pendingTxHash
+            ? "Waiting for Confirmation..."
+            : isLoading
             ? isBuy
               ? "Submitting Buy..."
               : "Submitting Sell..."
