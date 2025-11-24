@@ -19,7 +19,9 @@ interface TradingFormProps {
   chain?: string;
   symbol?: string;
   tokenAddress?: string;
-  onTradeConfirmed?: (callback: (txHash: string, tradeType: "BUY" | "SELL") => void) => void;
+  onTradeConfirmed?: (
+    callback: (txHash: string, tradeType: "BUY" | "SELL") => void
+  ) => void;
 }
 
 export interface TokenTradeData {
@@ -109,10 +111,6 @@ const TradingForm = (props: TradingFormProps) => {
   const [customSlippage, setCustomSlippage] = useState(""); // For custom slippage input
   const { isLoading, startLoading, stopLoading } = useLoading();
   const { getETHSigner } = useETHWalletSigner();
-  const getETHSignerRef = React.useRef(getETHSigner);
-  React.useEffect(() => {
-    getETHSignerRef.current = getETHSigner;
-  }, [getETHSigner]);
   const { toast } = useToast();
   const { isConnected: isEthConnected, address: userAddress } =
     useAppKitAccount({ namespace: "eip155" });
@@ -125,10 +123,15 @@ const TradingForm = (props: TradingFormProps) => {
   const [tokenAllowance, setTokenAllowance] = useState("0"); // Still needed for display
   const [tokenDecimals, setTokenDecimals] = useState(18); // Default to 18 decimals
   const [pendingTxHash, setPendingTxHash] = useState<string | null>(null); // Track pending tx
-  const [pendingTradeType, setPendingTradeType] = useState<"BUY" | "SELL" | null>(null); // Track pending trade type
+  const [pendingTradeType, setPendingTradeType] = useState<
+    "BUY" | "SELL" | null
+  >(null); // Track pending trade type
 
   // Use ref to store latest values without causing re-registration
-  const pendingTxRef = React.useRef<{ hash: string; type: "BUY" | "SELL" } | null>(null);
+  const pendingTxRef = React.useRef<{
+    hash: string;
+    type: "BUY" | "SELL";
+  } | null>(null);
   React.useEffect(() => {
     if (pendingTxHash && pendingTradeType) {
       pendingTxRef.current = { hash: pendingTxHash, type: pendingTradeType };
@@ -191,8 +194,7 @@ const TradingForm = (props: TradingFormProps) => {
       setEvilWETHBalance(evilWETHBalance.toString());
       setTokenAllowance(tokenAllowance.toString());
       setWethAllowance(wethAllowance.toString());
-      // Convert decimals to number (it may be a BigInt from contract call)
-      setTokenDecimals(Number(decimals));
+      setTokenDecimals(decimals);
 
       lastBalanceFetchRef.current = Date.now();
     } catch (error) {
@@ -224,7 +226,11 @@ const TradingForm = (props: TradingFormProps) => {
   React.useEffect(() => {
     if (props.onTradeConfirmed) {
       props.onTradeConfirmed((txHash: string, tradeType: "BUY" | "SELL") => {
-        console.log("[TradingForm] Trade confirmed via WebSocket:", txHash, tradeType);
+        console.log(
+          "[TradingForm] Trade confirmed via WebSocket:",
+          txHash,
+          tradeType
+        );
         const pending = pendingTxRef.current;
         if (pending && txHash === pending.hash) {
           // Our pending transaction was confirmed!
@@ -331,7 +337,7 @@ const TradingForm = (props: TradingFormProps) => {
       setIsCalculatingSellConversion(true);
       try {
         // Use signed-in user's provider for direct contract call
-        const signer = await getETHSignerRef.current();
+        const signer = await getETHSigner();
 
         if (cancelled) return; // Don't continue if effect was cancelled
 
@@ -353,7 +359,7 @@ const TradingForm = (props: TradingFormProps) => {
           amount,
           truncatedAmount,
           tokenDecimals,
-          tokenAmount: tokenAmount.toString()
+          tokenAmount: tokenAmount.toString(),
         });
 
         const [assetAmount, fee, isBondingCurve] =
@@ -369,7 +375,7 @@ const TradingForm = (props: TradingFormProps) => {
           amount,
           netAmount: netAmount.toString(),
           fee: fee.toString(),
-          isBondingCurve
+          isBondingCurve,
         });
       } catch (error) {
         if (cancelled) return;
@@ -377,7 +383,7 @@ const TradingForm = (props: TradingFormProps) => {
           amount,
           truncatedAmount: parseFloat(amount).toFixed(Number(tokenDecimals)),
           tokenDecimals,
-          tokenAddress: props.tokenAddress
+          tokenAddress: props.tokenAddress,
         });
         setExpectedWethAmount("0");
       } finally {
@@ -391,8 +397,7 @@ const TradingForm = (props: TradingFormProps) => {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isBuy, amount, props.tokenAddress, tokenDecimals]);
+  }, [isBuy, amount, props.tokenAddress, tokenDecimals, getETHSigner]);
 
   // Note: sellTokenAmount calculation removed - approval is now handled automatically in sellTokens function
 
@@ -607,10 +612,16 @@ const TradingForm = (props: TradingFormProps) => {
         if (tradeResponse.pending) {
           // Transaction sent but not confirmed - store tx hash and type
           // Toast will be shown when WebSocket confirms it
-          console.log("[TradingForm] Setting pending state for tx:", tradeResponse.transactionHash, isBuy ? "BUY" : "SELL");
+          console.log(
+            "[TradingForm] Setting pending state for tx:",
+            tradeResponse.transactionHash,
+            isBuy ? "BUY" : "SELL"
+          );
           setPendingTxHash(tradeResponse.transactionHash);
           setPendingTradeType(isBuy ? "BUY" : "SELL");
-          console.log("[TradingForm] Pending state set. Waiting for WebSocket confirmation...");
+          console.log(
+            "[TradingForm] Pending state set. Waiting for WebSocket confirmation..."
+          );
         } else {
           // Shouldn't happen anymore since we removed tx.wait()
           const explorerUrl = `https://sepolia.etherscan.io/tx/${tradeResponse.transactionHash}`;
@@ -948,18 +959,18 @@ const TradingForm = (props: TradingFormProps) => {
                   );
                   const sellAmount = (tokenBalanceNum * percentage) / 100;
 
-                  // Convert tokenDecimals to number for toFixed() (it may be a BigInt)
-                  const decimalsNum = Number(tokenDecimals);
-                  
-                  // Remove trailing zeros and ensure valid number string
-                  const sellAmountString = sellAmount.toFixed(decimalsNum).replace(/\.?0+$/, '');
+                  // Truncate to 6 decimal places for display (reasonable precision)
+                  // Remove trailing zeros for cleaner display
+                  const sellAmountString = sellAmount
+                    .toFixed(6)
+                    .replace(/\.?0+$/, "");
 
                   console.log("[PERCENTAGE SELL CALCULATION]", {
                     percentage,
                     tokenBalanceNum,
                     sellAmount,
                     tokenDecimals,
-                    sellAmountFixed: sellAmount.toFixed(decimalsNum),
+                    sellAmountFixed: sellAmount.toFixed(6),
                     sellAmountString,
                   });
 
@@ -992,18 +1003,18 @@ const TradingForm = (props: TradingFormProps) => {
         </button>
       ) : /* Approve button for sell mode (Token) if allowance is insufficient */
       !isBuy &&
-      amount &&
-      parseFloat(amount) > 0 &&
-      (() => {
-        try {
-          const requiredAllowance = ethers.parseUnits(amount, tokenDecimals);
-          const currentAllowance = BigInt(tokenAllowance);
-          return currentAllowance < requiredAllowance;
-        } catch {
-          // If parsing fails, don't show approve button (let submit handle the error)
-          return false;
-        }
-      })() ? (
+        amount &&
+        parseFloat(amount) > 0 &&
+        (() => {
+          try {
+            const requiredAllowance = ethers.parseUnits(amount, tokenDecimals);
+            const currentAllowance = BigInt(tokenAllowance);
+            return currentAllowance < requiredAllowance;
+          } catch {
+            // If parsing fails, don't show approve button (let submit handle the error)
+            return false;
+          }
+        })() ? (
         <button
           type="button"
           disabled={isApproving || !isWalletConnected || !amount}
