@@ -276,7 +276,23 @@ const TokenPage = () => {
         if (moreTrades.length > 0){
           setLastTrade(moreTrades[moreTrades.length - 1]);
         }
-        setTrades((prev) => prev.concat(moreTrades));
+        setTrades((prev) => {
+          const combined = prev.concat(moreTrades);
+          // Deduplicate by transactionHash + logIndex
+          const unique = combined.filter(
+            (trade, index, arr) =>
+              arr.findIndex(
+                (t) =>
+                  t.transactionHash === trade.transactionHash &&
+                  t.logIndex === trade.logIndex
+              ) === index
+          );
+          // If no new unique trades were added, stop fetching
+          if (unique.length === prev.length) {
+            setHasMoreTrades(false);
+          }
+          return unique;
+        });
       } catch (error) {
         console.error("Error fetching more trades:", error);
       } finally {
