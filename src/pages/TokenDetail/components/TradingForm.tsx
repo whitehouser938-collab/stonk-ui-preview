@@ -109,6 +109,10 @@ const TradingForm = (props: TradingFormProps) => {
   const [customSlippage, setCustomSlippage] = useState(""); // For custom slippage input
   const { isLoading, startLoading, stopLoading } = useLoading();
   const { getETHSigner } = useETHWalletSigner();
+  const getETHSignerRef = React.useRef(getETHSigner);
+  React.useEffect(() => {
+    getETHSignerRef.current = getETHSigner;
+  }, [getETHSigner]);
   const { toast } = useToast();
   const { isConnected: isEthConnected, address: userAddress } =
     useAppKitAccount({ namespace: "eip155" });
@@ -187,7 +191,8 @@ const TradingForm = (props: TradingFormProps) => {
       setEvilWETHBalance(evilWETHBalance.toString());
       setTokenAllowance(tokenAllowance.toString());
       setWethAllowance(wethAllowance.toString());
-      setTokenDecimals(decimals);
+      // Convert decimals to number (it may be a BigInt from contract call)
+      setTokenDecimals(Number(decimals));
 
       lastBalanceFetchRef.current = Date.now();
     } catch (error) {
@@ -326,7 +331,7 @@ const TradingForm = (props: TradingFormProps) => {
       setIsCalculatingSellConversion(true);
       try {
         // Use signed-in user's provider for direct contract call
-        const signer = await getETHSigner();
+        const signer = await getETHSignerRef.current();
 
         if (cancelled) return; // Don't continue if effect was cancelled
 
@@ -386,7 +391,8 @@ const TradingForm = (props: TradingFormProps) => {
     return () => {
       cancelled = true;
     };
-  }, [isBuy, amount, props.tokenAddress, tokenDecimals, getETHSigner]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isBuy, amount, props.tokenAddress, tokenDecimals]);
 
   // Note: sellTokenAmount calculation removed - approval is now handled automatically in sellTokens function
 
