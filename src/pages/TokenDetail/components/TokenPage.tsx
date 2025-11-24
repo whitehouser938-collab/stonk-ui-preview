@@ -272,27 +272,30 @@ const TokenPage = () => {
           cursorId
         );
 
-        if (moreTrades.length < TRADE_PAGE_SIZE) setHasMoreTrades(false);
-        if (moreTrades.length > 0){
-          setLastTrade(moreTrades[moreTrades.length - 1]);
+        console.log(`[Scroll] Fetched ${moreTrades.length} trades`);
+
+        // Check for duplicates before updating state
+        const uniqueNewTrades = moreTrades.filter(
+          (newTrade) =>
+            !trades.some(
+              (existingTrade) =>
+                existingTrade.transactionHash === newTrade.transactionHash &&
+                existingTrade.logIndex === newTrade.logIndex
+            )
+        );
+
+        console.log(`[Scroll] ${uniqueNewTrades.length} unique new trades out of ${moreTrades.length}`);
+
+        // Stop pagination if we got fewer trades than requested or no unique trades
+        if (moreTrades.length < TRADE_PAGE_SIZE || uniqueNewTrades.length === 0) {
+          console.log(`[Scroll] Stopping pagination (moreTrades: ${moreTrades.length}, unique: ${uniqueNewTrades.length})`);
+          setHasMoreTrades(false);
         }
-        setTrades((prev) => {
-          const combined = prev.concat(moreTrades);
-          // Deduplicate by transactionHash + logIndex
-          const unique = combined.filter(
-            (trade, index, arr) =>
-              arr.findIndex(
-                (t) =>
-                  t.transactionHash === trade.transactionHash &&
-                  t.logIndex === trade.logIndex
-              ) === index
-          );
-          // If no new unique trades were added, stop fetching
-          if (unique.length === prev.length) {
-            setHasMoreTrades(false);
-          }
-          return unique;
-        });
+
+        if (uniqueNewTrades.length > 0) {
+          setLastTrade(uniqueNewTrades[uniqueNewTrades.length - 1]);
+          setTrades((prev) => [...prev, ...uniqueNewTrades]);
+        }
       } catch (error) {
         console.error("Error fetching more trades:", error);
       } finally {
