@@ -11,7 +11,7 @@ import {
   WalletConnectionPrompt,
   WalletRequiredAlert,
 } from "@/components/WalletConnectionPrompt";
-// Direct contract calls - no API imports needed
+// Direct contract calls using signed-in user's provider
 
 const MaxUint256 = ethers.MaxUint256;
 
@@ -298,15 +298,19 @@ const TradingForm = (props: TradingFormProps) => {
   const [isCalculatingSellConversion, setIsCalculatingSellConversion] =
     useState(false);
   React.useEffect(() => {
+    let cancelled = false;
+
     const calc = async () => {
       if (isBuy || !amount || !props.tokenAddress) {
-        return setExpectedWethAmount("0");
+        setExpectedWethAmount("0");
+        return;
       }
 
       // Validate amount is a valid positive number
       const numAmount = parseFloat(amount);
       if (isNaN(numAmount) || numAmount <= 0) {
-        return setExpectedWethAmount("0");
+        setExpectedWethAmount("0");
+        return;
       }
 
       // Check if amount is extremely large to prevent obvious overflow errors
@@ -315,13 +319,17 @@ const TradingForm = (props: TradingFormProps) => {
         console.warn(
           "Amount extremely large, skipping conversion calculation to prevent overflow"
         );
-        return setExpectedWethAmount("0");
+        setExpectedWethAmount("0");
+        return;
       }
 
       setIsCalculatingSellConversion(true);
       try {
-        // Use direct contract call - same as the API but more efficient
+        // Use signed-in user's provider for direct contract call
         const signer = await getETHSigner();
+
+        if (cancelled) return; // Don't continue if effect was cancelled
+
         const router = new ethers.Contract(
           ROUTER_ADDRESS,
           [
@@ -344,23 +352,39 @@ const TradingForm = (props: TradingFormProps) => {
         const [assetAmount, fee, isBondingCurve] =
           await router.calculateSellWithFees(props.tokenAddress, tokenAmount);
 
+        if (cancelled) return; // Don't update state if effect was cancelled
+
         // Calculate net amount after fees (what user actually receives)
         // For graduated tokens (isBondingCurve = false), fee should be 0
         const netAmount = isBondingCurve ? assetAmount - fee : assetAmount;
         setExpectedWethAmount(netAmount.toString());
+        console.log("[SELL CONVERSION SUCCESS]", {
+          amount,
+          netAmount: netAmount.toString(),
+          fee: fee.toString(),
+          isBondingCurve
+        });
       } catch (error) {
+        if (cancelled) return;
         console.error("Error calculating expected WETH amount:", error, {
           amount,
+          truncatedAmount: parseFloat(amount).toFixed(tokenDecimals),
           tokenDecimals,
           tokenAddress: props.tokenAddress
         });
         setExpectedWethAmount("0");
       } finally {
-        setIsCalculatingSellConversion(false);
+        if (!cancelled) {
+          setIsCalculatingSellConversion(false);
+        }
       }
     };
     calc();
-  }, [isBuy, amount, props.tokenAddress, tokenDecimals]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isBuy, amount, props.tokenAddress, tokenDecimals, getETHSigner]);
 
   // Note: sellTokenAmount calculation removed - approval is now handled automatically in sellTokens function
 
@@ -915,15 +939,20 @@ const TradingForm = (props: TradingFormProps) => {
                   );
                   const sellAmount = (tokenBalanceNum * percentage) / 100;
 
+                  // Remove trailing zeros and ensure valid number string
+                  const sellAmountString = sellAmount.toFixed(tokenDecimals).replace(/\.?0+$/, '');
+
                   console.log("[PERCENTAGE SELL CALCULATION]", {
+                    percentage,
                     tokenBalanceNum,
                     sellAmount,
                     tokenDecimals,
                     sellAmountFixed: sellAmount.toFixed(tokenDecimals),
+                    sellAmountString,
                   });
 
-                  // Use token decimals for precision to match parseUnits
-                  setAmount(sellAmount.toFixed(tokenDecimals));
+                  // Set the amount (removing trailing zeros for cleaner display)
+                  setAmount(sellAmountString || "0");
                 }}
                 className="px-3 py-2 text-xs font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300"
               >
