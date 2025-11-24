@@ -48,7 +48,8 @@ export function useMarketsUpdates(
         unsubscribeRef.current = null;
       }
     };
-  }, [chainId, handleMarketsUpdate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chainId]);
 
   return unsubscribeRef.current;
 }

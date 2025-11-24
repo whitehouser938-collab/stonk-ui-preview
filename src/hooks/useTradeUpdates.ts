@@ -51,7 +51,8 @@ export function useTradeUpdates(
         unsubscribeRef.current = null;
       }
     };
-  }, [chainId, tokenAddress, handleTradeUpdate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chainId, tokenAddress]);
 
   return unsubscribeRef.current;
 }
