@@ -339,7 +339,9 @@ const TradingForm = (props: TradingFormProps) => {
         );
 
         // Truncate amount to token decimals to avoid parseUnits error
-        const truncatedAmount = parseFloat(amount).toFixed(tokenDecimals);
+        // Convert tokenDecimals to number for toFixed() (it may be a BigInt)
+        const decimalsNum = Number(tokenDecimals);
+        const truncatedAmount = parseFloat(amount).toFixed(decimalsNum);
         const tokenAmount = ethers.parseUnits(truncatedAmount, tokenDecimals);
 
         console.log("[SELL CONVERSION]", {
@@ -368,7 +370,7 @@ const TradingForm = (props: TradingFormProps) => {
         if (cancelled) return;
         console.error("Error calculating expected WETH amount:", error, {
           amount,
-          truncatedAmount: parseFloat(amount).toFixed(tokenDecimals),
+          truncatedAmount: parseFloat(amount).toFixed(Number(tokenDecimals)),
           tokenDecimals,
           tokenAddress: props.tokenAddress
         });
@@ -940,15 +942,18 @@ const TradingForm = (props: TradingFormProps) => {
                   );
                   const sellAmount = (tokenBalanceNum * percentage) / 100;
 
+                  // Convert tokenDecimals to number for toFixed() (it may be a BigInt)
+                  const decimalsNum = Number(tokenDecimals);
+                  
                   // Remove trailing zeros and ensure valid number string
-                  const sellAmountString = sellAmount.toFixed(tokenDecimals).replace(/\.?0+$/, '');
+                  const sellAmountString = sellAmount.toFixed(decimalsNum).replace(/\.?0+$/, '');
 
                   console.log("[PERCENTAGE SELL CALCULATION]", {
                     percentage,
                     tokenBalanceNum,
                     sellAmount,
                     tokenDecimals,
-                    sellAmountFixed: sellAmount.toFixed(tokenDecimals),
+                    sellAmountFixed: sellAmount.toFixed(decimalsNum),
                     sellAmountString,
                   });
 
