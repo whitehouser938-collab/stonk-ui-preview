@@ -314,6 +314,8 @@ const TradingForm = (props: TradingFormProps) => {
         description: "You can now buy tokens with WETH.",
         variant: "default",
       });
+      // Refresh allowance after approval
+      await fetchBalancesNow();
       setIsApproving(false);
     } catch (error) {
       // Check if user rejected the transaction
@@ -334,7 +336,51 @@ const TradingForm = (props: TradingFormProps) => {
     }
   };
 
-  // Note: handleTokenApprove removed - token approval for selling is now handled automatically in sellTokens function
+  // Handle token approval for selling (mirrors WETH approval for buying)
+  const handleTokenApprove = async () => {
+    setIsApproving(true);
+    try {
+      const signer = await getETHSigner();
+      const token = new ethers.Contract(
+        props.tokenAddress!,
+        ["function approve(address,uint256) returns (bool)"],
+        signer
+      );
+      // Approve max amount to avoid repeated approvals
+      const tx = await token.approve(ROUTER_ADDRESS, MaxUint256);
+      await tx.wait();
+
+      // Immediately update allowance state to MaxUint256 (we just approved it)
+      // This ensures the UI updates instantly without waiting for RPC
+      setTokenAllowance(MaxUint256.toString());
+
+      toast({
+        title: "Approval Successful",
+        description: `You can now sell ${props.symbol}.`,
+        variant: "default",
+      });
+      setIsApproving(false);
+
+      // Also refresh balances in background (but UI already updated)
+      fetchBalancesNow();
+    } catch (error) {
+      // Check if user rejected the transaction
+      if (isUserRejectedError(error)) {
+        toast({
+          title: "Approval Cancelled",
+          description: "You rejected the transaction.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Approval Failed",
+          description: error?.message || JSON.stringify(error),
+          variant: "destructive",
+        });
+      }
+      setIsApproving(false);
+    }
+  };
 
   const isWalletConnected = isEthConnected;
 
@@ -815,7 +861,7 @@ const TradingForm = (props: TradingFormProps) => {
       )}
 
       {/* Submit Button */}
-      {/* Approve button for buy mode if allowance is insufficient */}
+      {/* Approve button for buy mode (WETH) if allowance is insufficient */}
       {isBuy &&
       paymentMethod === "WETH" &&
       amount &&
@@ -829,8 +875,29 @@ const TradingForm = (props: TradingFormProps) => {
         >
           {isApproving ? "Approving..." : "Approve WETH"}
         </button>
+      ) : /* Approve button for sell mode (Token) if allowance is insufficient */
+      !isBuy &&
+      amount &&
+      parseFloat(amount) > 0 &&
+      (() => {
+        try {
+          const requiredAllowance = ethers.parseUnits(amount, tokenDecimals);
+          const currentAllowance = BigInt(tokenAllowance);
+          return currentAllowance < requiredAllowance;
+        } catch {
+          // If parsing fails, don't show approve button (let submit handle the error)
+          return false;
+        }
+      })() ? (
+        <button
+          type="button"
+          disabled={isApproving || !isWalletConnected || !amount}
+          onClick={handleTokenApprove}
+          className="w-full p-3 text-sm font-bold transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          {isApproving ? "Approving..." : `Approve ${props.symbol}`}
+        </button>
       ) : (
-        // Note: Token approval for selling is now handled automatically in sellTokens function
         <button
           type="submit"
           disabled={isLoading}

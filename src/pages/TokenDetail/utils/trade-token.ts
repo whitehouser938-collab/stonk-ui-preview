@@ -1,13 +1,11 @@
 import { TokenTradeData } from "../components/TradingForm";
 import { ethers } from "ethers";
 import Router from "@/abi/evm/Router.json";
-import Token from "@/abi/evm/Token.json";
 import { Contract, EventLog } from "ethers";
 import {
   calculateBuyPrice,
   getTokenDecimals,
   calculateSellProceeds,
-  getTokenAllowance,
 } from "@/api/rpc";
 
 export interface TradeTokenResponse {
@@ -247,7 +245,6 @@ export const sellTokens = async (
     }
 
     const tokenDecimals = decimalsData.data.decimals;
-    const token = new Contract(tradeData.tokenAddress, Token.abi, signer);
 
     // Parse with the correct decimals (most tokens are 18, but some might be different)
     const tokenAmount = ethers.parseUnits(tradeData.amount, tokenDecimals);
@@ -315,47 +312,8 @@ export const sellTokens = async (
       deadline: deadline,
     });
 
-    // Check and handle token approval - this is the missing piece!
-    // (token contract already created above for getting decimals)
-    const userAddress = await signer.getAddress();
-
-    // Get allowance using user's provider
-    const allowanceData = await getTokenAllowance(
-      userAddress,
-      tradeData.tokenAddress,
-      routerAddress,
-      "SEP",
-      provider
-    );
-
-    if (!allowanceData.success) {
-      return {
-        success: false,
-        error: "Failed to get token allowance from API",
-        transactionHash: "",
-        tokenAddress: "",
-        tokenAmount: "0",
-        assetAmount: "0",
-      };
-    }
-
-    const allowance = BigInt(allowanceData.data.allowance);
-
-    console.log("[APPROVAL CHECK]", {
-      userAddress,
-      routerAddress,
-      tokenAmount: tokenAmount.toString(),
-      currentAllowance: allowance.toString(),
-      needsApproval: allowance < tokenAmount,
-    });
-
-    // Approve tokens if needed - EXACTLY like the working hardhat script
-    if (allowance < tokenAmount) {
-      console.log("🔑 Approving tokens...");
-      const approveTx = await token.approve(routerAddress, tokenAmount);
-      await approveTx.wait();
-      console.log("✅ Approval successful");
-    }
+    // Token approval is now handled in the UI (TradingForm) before calling this function
+    // This eliminates double wallet popups - users see a clear "Approve Token" button first
 
     let tx;
 
