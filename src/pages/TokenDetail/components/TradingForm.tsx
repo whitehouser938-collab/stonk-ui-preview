@@ -599,9 +599,10 @@ const TradingForm = (props: TradingFormProps) => {
         if (tradeResponse.pending) {
           // Transaction sent but not confirmed - store tx hash and type
           // Toast will be shown when WebSocket confirms it
+          console.log("[TradingForm] Setting pending state for tx:", tradeResponse.transactionHash, isBuy ? "BUY" : "SELL");
           setPendingTxHash(tradeResponse.transactionHash);
           setPendingTradeType(isBuy ? "BUY" : "SELL");
-          console.log("[TradingForm] Pending transaction:", tradeResponse.transactionHash, isBuy ? "BUY" : "SELL");
+          console.log("[TradingForm] Pending state set. Waiting for WebSocket confirmation...");
         } else {
           // Shouldn't happen anymore since we removed tx.wait()
           const explorerUrl = `https://sepolia.etherscan.io/tx/${tradeResponse.transactionHash}`;
