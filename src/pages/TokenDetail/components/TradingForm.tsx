@@ -133,45 +133,6 @@ const TradingForm = (props: TradingFormProps) => {
     }
   }, [pendingTxHash, pendingTradeType]);
 
-  // Register callback with parent to receive trade confirmations (only once)
-  React.useEffect(() => {
-    if (props.onTradeConfirmed) {
-      props.onTradeConfirmed((txHash: string, tradeType: "BUY" | "SELL") => {
-        console.log("[TradingForm] Trade confirmed via WebSocket:", txHash, tradeType);
-        const pending = pendingTxRef.current;
-        if (pending && txHash === pending.hash) {
-          // Our pending transaction was confirmed!
-          const explorerUrl = `https://sepolia.etherscan.io/tx/${txHash}`;
-          const tickerTitle = `${props.symbol ? `$${props.symbol}` : "Token"} ${
-            tradeType === "BUY" ? "Buy" : "Sell"
-          } Successful`;
-          toast({
-            title: tickerTitle,
-            description: (
-              <div>
-                <div>Transaction Hash:</div>
-                <a
-                  href={explorerUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline underline-offset-2"
-                >
-                  {abbreviateHash(txHash)}
-                </a>
-              </div>
-            ),
-            variant: tradeType === "BUY" ? "success" : "softDestructive",
-          });
-          // Refresh balances
-          void fetchBalancesNow();
-          // Clear pending state
-          setPendingTxHash(null);
-          setPendingTradeType(null);
-        }
-      });
-    }
-  }, [props.onTradeConfirmed, props.symbol, toast, fetchBalancesNow]);
-
   // Fetch balances (debounced to avoid RPC rate limits)
   const lastBalanceFetchRef = React.useRef<number>(0);
   const balanceFetchInFlightRef = React.useRef<boolean>(false);
@@ -253,6 +214,45 @@ const TradingForm = (props: TradingFormProps) => {
   React.useEffect(() => {
     fetchBalancesDebounced();
   }, [fetchBalancesDebounced, isEthConnected, userAddress, props.tokenAddress]);
+
+  // Register callback with parent to receive trade confirmations
+  React.useEffect(() => {
+    if (props.onTradeConfirmed) {
+      props.onTradeConfirmed((txHash: string, tradeType: "BUY" | "SELL") => {
+        console.log("[TradingForm] Trade confirmed via WebSocket:", txHash, tradeType);
+        const pending = pendingTxRef.current;
+        if (pending && txHash === pending.hash) {
+          // Our pending transaction was confirmed!
+          const explorerUrl = `https://sepolia.etherscan.io/tx/${txHash}`;
+          const tickerTitle = `${props.symbol ? `$${props.symbol}` : "Token"} ${
+            tradeType === "BUY" ? "Buy" : "Sell"
+          } Successful`;
+          toast({
+            title: tickerTitle,
+            description: (
+              <div>
+                <div>Transaction Hash:</div>
+                <a
+                  href={explorerUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2"
+                >
+                  {abbreviateHash(txHash)}
+                </a>
+              </div>
+            ),
+            variant: tradeType === "BUY" ? "success" : "softDestructive",
+          });
+          // Refresh balances
+          void fetchBalancesNow();
+          // Clear pending state
+          setPendingTxHash(null);
+          setPendingTradeType(null);
+        }
+      });
+    }
+  }, [props.onTradeConfirmed, props.symbol, toast, fetchBalancesNow]);
 
   // Calculate expected token amount for buy (when user enters asset amount)
   const [expectedTokenAmount, setExpectedTokenAmount] = useState("0");
