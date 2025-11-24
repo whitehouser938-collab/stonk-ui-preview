@@ -527,10 +527,8 @@ const TradingForm = (props: TradingFormProps) => {
           ),
           variant: isBuy ? "success" : "softDestructive",
         });
-        // Refresh balances once after a successful trade
-        setTimeout(() => {
-          void fetchBalancesNow();
-        }, 1200);
+        // Refresh balances immediately after successful trade
+        void fetchBalancesNow();
       } else if (
         tradeResponse &&
         tradeResponse.error &&
