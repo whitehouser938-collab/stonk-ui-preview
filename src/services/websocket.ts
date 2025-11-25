@@ -1,4 +1,5 @@
 import { SUBSCRIPTION_TYPES } from "@/types";
+import { getWebSocketUrl } from "@/utils/apiConfig";
 
 class WebSocketManager {
   private ws: WebSocket | null = null;
@@ -38,9 +39,9 @@ class WebSocketManager {
       this.connectionState = "connecting";
 
       try {
-        this.ws = new WebSocket(
-          import.meta.env.VITE_WEBSOCKET_URL || "ws://localhost:3003"
-        );
+        const wsUrl = getWebSocketUrl();
+        console.log("[WebSocket] Connecting to:", wsUrl);
+        this.ws = new WebSocket(wsUrl);
 
         this.ws.onopen = () => {
           console.log("WebSocket connected");
