@@ -144,27 +144,6 @@ const TradingForm = (props: TradingFormProps) => {
     }
   }, [pendingTxHash, pendingTradeType]);
 
-  // Timeout for pending transactions - if not confirmed in 60 seconds, clear pending state
-  React.useEffect(() => {
-    if (!pendingTxHash) return;
-
-    const timeoutId = setTimeout(() => {
-      console.log(
-        "[TradingForm] Transaction confirmation timeout - clearing pending state"
-      );
-      toast({
-        title: "Transaction Submitted",
-        description: `Transaction sent but confirmation is taking longer than expected. Check recent trades or refresh the page.`,
-        variant: "default",
-      });
-      setPendingTxHash(null);
-      setPendingTradeType(null);
-      void fetchBalancesNow();
-    }, 60000); // 60 second timeout
-
-    return () => clearTimeout(timeoutId);
-  }, [pendingTxHash, toast, fetchBalancesNow]);
-
   // Fetch balances (debounced to avoid RPC rate limits)
   const lastBalanceFetchRef = React.useRef<number>(0);
   const balanceFetchInFlightRef = React.useRef<boolean>(false);
@@ -247,6 +226,27 @@ const TradingForm = (props: TradingFormProps) => {
   React.useEffect(() => {
     fetchBalancesDebounced();
   }, [fetchBalancesDebounced, isEthConnected, userAddress, props.tokenAddress]);
+
+  // Timeout for pending transactions - if not confirmed in 60 seconds, clear pending state
+  React.useEffect(() => {
+    if (!pendingTxHash) return;
+
+    const timeoutId = setTimeout(() => {
+      console.log(
+        "[TradingForm] Transaction confirmation timeout - clearing pending state"
+      );
+      toast({
+        title: "Transaction Submitted",
+        description: `Transaction sent but confirmation is taking longer than expected. Check recent trades or refresh the page.`,
+        variant: "default",
+      });
+      setPendingTxHash(null);
+      setPendingTradeType(null);
+      void fetchBalancesNow();
+    }, 60000); // 60 second timeout
+
+    return () => clearTimeout(timeoutId);
+  }, [pendingTxHash, toast, fetchBalancesNow]);
 
   // Register callback with parent to receive trade confirmations
   React.useEffect(() => {
