@@ -350,16 +350,6 @@ const TradingForm = (props: TradingFormProps) => {
         return;
       }
 
-      // Check if amount is extremely large to prevent obvious overflow errors
-      const maxReasonableAmount = 100000000; // 100M tokens max - much more reasonable
-      if (numAmount > maxReasonableAmount) {
-        console.warn(
-          "Amount extremely large, skipping conversion calculation to prevent overflow"
-        );
-        setExpectedWethAmount("0");
-        return;
-      }
-
       setIsCalculatingSellConversion(true);
       try {
         // Use signed-in user's provider for direct contract call
