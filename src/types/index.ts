@@ -56,9 +56,9 @@ export interface TokenFullData{
   telegramUrl: string | null;
   deployer: {
     address: string;
-    username: string;
-    pfp: string;
-  };
+    username: string | null;
+    pfp: string | null;
+  } | null;
   tokenAddress: string;
   bondingCurveAddress: string;
   deploymentTimestamp: string;

@@ -640,17 +640,19 @@ const TokenPage = () => {
                           }
                           className="flex items-center space-x-2 text-orange-400 hover:text-orange-300 transition-colors"
                         >
-                          <img
-                            src={tokenData.deployer.pfp}
-                            alt={`${tokenData.deployer.username} profile`}
-                            className="w-5 h-5 rounded-full object-cover"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = "none";
-                            }}
-                          />
+                          {tokenData.deployer.pfp && (
+                            <img
+                              src={tokenData.deployer.pfp}
+                              alt={`${tokenData.deployer.username || tokenData.deployer.address} profile`}
+                              className="w-5 h-5 rounded-full object-cover"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = "none";
+                              }}
+                            />
+                          )}
                           <span className="text-sm truncate max-w-32">
-                            {tokenData.deployer.username}
+                            {tokenData.deployer.username || abbreviateAddress(tokenData.deployer.address)}
                           </span>
                         </button>
                       )}
@@ -897,17 +899,19 @@ const TokenPage = () => {
                       }
                       className="flex items-center space-x-2 text-orange-400 hover:text-orange-300 transition-colors"
                     >
-                      <img
-                        src={tokenData.deployer.pfp}
-                        alt={`${tokenData.deployer.username} profile`}
-                        className="w-4 h-4 rounded-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = "none";
-                        }}
-                      />
+                      {tokenData.deployer.pfp && (
+                        <img
+                          src={tokenData.deployer.pfp}
+                          alt={`${tokenData.deployer.username || tokenData.deployer.address} profile`}
+                          className="w-4 h-4 rounded-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = "none";
+                          }}
+                        />
+                      )}
                       <span className="truncate max-w-32">
-                        {tokenData.deployer.username}
+                        {tokenData.deployer.username || abbreviateAddress(tokenData.deployer.address)}
                       </span>
                     </button>
                   ) : (
