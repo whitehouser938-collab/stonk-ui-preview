@@ -340,18 +340,15 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
         // Try to get existing user
         userData = await getUserByWalletAddress(targetAddress);
       } catch (error) {
-        // If user doesn't exist and it's the user's own profile, create one
+        // If user doesn't exist, create one on-the-fly (for any profile, not just own)
+        console.log("User not found, creating new user on-the-fly...");
+        userData = await createUser(targetAddress);
         if (isOwnProfile) {
-          console.log("User not found, creating new user...");
-          userData = await createUser(targetAddress);
           toast({
             title: "Welcome!",
             description: "Your profile has been created successfully",
             variant: "default",
           });
-        } else {
-          // If viewing someone else's profile and they don't exist, show error
-          throw new Error("Profile not found");
         }
       }
 
