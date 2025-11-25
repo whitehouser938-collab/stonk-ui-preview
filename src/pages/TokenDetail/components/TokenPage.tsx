@@ -470,41 +470,6 @@ const TokenPage = () => {
     [displayTrades, chainId, filteredTrader]
   );
 
-  // --- Bonding Curve Progress from Trades (dynamic, client-side) ---
-  const GRADUATION_ASSET_THRESHOLD_WEI = React.useMemo(() => {
-    // 7 asset tokens (ETH/WETH), assuming 18 decimals
-    const threshold = 7n;
-    const wei = 10n ** 18n;
-    return threshold * wei;
-  }, []);
-
-  const netAssetInCurveWei = React.useMemo(() => {
-    // Aggregate BUY quoteAmount (asset in) minus SELL quoteAmount (asset out)
-    return trades.reduce((acc, trade) => {
-      try {
-        const amt = BigInt(trade.quoteAmount || "0");
-        return trade.tradeType === "BUY" ? acc + amt : acc - amt;
-      } catch {
-        return acc;
-      }
-    }, 0n);
-  }, [trades]);
-
-  const progressFromTrades = React.useMemo(() => {
-    if (GRADUATION_ASSET_THRESHOLD_WEI <= 0n) return 0;
-    const numerator = Number(netAssetInCurveWei);
-    const denominator = Number(GRADUATION_ASSET_THRESHOLD_WEI);
-    if (!isFinite(numerator) || !isFinite(denominator) || denominator === 0)
-      return 0;
-    const pct = (numerator / denominator) * 100;
-    return Math.max(0, Math.min(100, Math.floor(pct)));
-  }, [netAssetInCurveWei, GRADUATION_ASSET_THRESHOLD_WEI]);
-
-  const isGraduatedFromTrades = React.useMemo(
-    () => netAssetInCurveWei >= GRADUATION_ASSET_THRESHOLD_WEI,
-    [netAssetInCurveWei, GRADUATION_ASSET_THRESHOLD_WEI]
-  );
-
   return (
     <div className="bg-black text-gray-100 text-xs font-mono">
       {isLoading && <LoadingScreen />}
@@ -1034,9 +999,8 @@ const TokenPage = () => {
             />
             {/* Bonding Curve Progress & Graduation Badge */}
             <BondingCurveProgress
-              progress={progressFromTrades}
+              progress={tokenData?.progress ?? 0}
               graduated={
-                isGraduatedFromTrades ||
                 tokenData?.isGraduated ||
                 !!tokenData?.uniswapPair
               }

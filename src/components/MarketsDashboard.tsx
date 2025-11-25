@@ -381,7 +381,7 @@ export function MarketsDashboard() {
                       <Circle className="w-3 h-3 text-blue-400" />
                       <span>{token.tokenSymbol}</span>
                     </div>
-                    <div className="text-green-400">TODO</div>
+                    <div className="text-green-400">{token.progress?.toFixed(1) ?? '0.0'}%</div>
                     <div className="text-gray-400">
                       {formatNumber(token.totalVolume)}
                     </div>

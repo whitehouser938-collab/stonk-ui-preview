@@ -41,7 +41,9 @@ export interface TokenMarketOverview extends TokenVolumeSummary {
   graduationTimestamp: string | null;
   deploymentTimestamp: string;
   logoUrl: string | null;
-  uniswapPairAddress: string | null
+  uniswapPairAddress: string | null;
+  liquidityWeth?: string;
+  progress?: number;
 }
 
 export interface TokenFullData{
@@ -64,6 +66,11 @@ export interface TokenFullData{
   deploymentTimestamp: string;
   isGraduated: boolean;
   uniswapPair?: string;
+  marketCap?: string;
+  liquidityWeth?: string;
+  graduationThreshold?: string;
+  assetBalance?: string;
+  progress?: number;
   price: VolumeData
 }
 
