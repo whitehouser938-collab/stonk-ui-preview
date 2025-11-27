@@ -409,11 +409,21 @@ const TokenPage = () => {
         <tr key={idx} className="border-b border-gray-800 last:border-0">
           <td className="p-1 text-white font-mono">
             <div className="flex items-center space-x-2">
+              {trade.makerPfp && (
+                <img
+                  src={trade.makerPfp}
+                  alt="Profile"
+                  className="w-6 h-6 rounded-full"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              )}
               <button
                 onClick={() => navigate(`/profile/${trade.maker}`)}
                 className="hover:text-orange-400 underline text-left"
               >
-                {abbreviateAddress(trade.maker)}
+                {trade.makerUsername || abbreviateAddress(trade.maker)}
               </button>
               {filteredTrader ? (
                 <button
