@@ -359,6 +359,18 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
       setUserTokens(tokensData);
       setUserHoldings(holdingsData.holdings);
 
+      // Update deployer stats from actual tokens data
+      const graduatedCount = tokensData.filter(
+        (token: any) => token.isGraduated || token.graduated
+      ).length;
+      setProfileStats((prev) => ({
+        ...prev,
+        deployer: {
+          tokensDeployed: tokensData.length,
+          graduatedTokens: graduatedCount,
+        },
+      }));
+
       // Initialize edit form with current user data
       setEditForm({
         username: userData.username || "",

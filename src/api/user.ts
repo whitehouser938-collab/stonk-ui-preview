@@ -584,7 +584,72 @@ export const getUserHoldings = async (
       throw new Error(data?.message || "Failed to fetch user holdings");
     }
 
-    return data.data as UserHoldingsResponse["data"];
+    // Transform the API response to match the expected Holding interface
+    // The API already returns all necessary fields, so we just need to map them
+    const rawHoldings = data.data.holdings || [];
+
+    const transformedHoldings: Holding[] = rawHoldings.map(
+      (rawHolding: any) => {
+        // Use decimals from API or default to 18
+        const decimals = rawHolding.decimals?.toString() || "18";
+        const decimalsNum = parseInt(decimals);
+        const balanceNum = parseFloat(rawHolding.balance || "0");
+        const divisor = Math.pow(10, decimalsNum);
+        const tokenAmount = balanceNum / divisor;
+
+        // Get price data from API response (may be nested in price object or flat)
+        const currentPrice =
+          rawHolding.price?.currentPrice ||
+          rawHolding.currentPrice ||
+          rawHolding.price ||
+          0;
+        const marketCap =
+          rawHolding.price?.marketCap ||
+          rawHolding.marketCap ||
+          rawHolding.mcap ||
+          "0";
+        const priceChange24h =
+          rawHolding.price?.priceChange24h ||
+          rawHolding.priceChange24h ||
+          rawHolding.priceChange ||
+          0;
+
+        // Calculate total value
+        const totalValue = (
+          tokenAmount *
+          (typeof currentPrice === "number"
+            ? currentPrice
+            : parseFloat(currentPrice) || 0)
+        ).toString();
+
+        return {
+          symbol: rawHolding.symbol || "UNKNOWN",
+          name: rawHolding.name || "Unknown Token",
+          amount: rawHolding.balance || "0",
+          decimals: decimals,
+          logo: rawHolding.logoUrl || rawHolding.logo || "",
+          tokenAddress: rawHolding.tokenAddress || rawHolding.marketAddress,
+          chain: rawHolding.chain,
+          currentPrice:
+            typeof currentPrice === "number"
+              ? currentPrice
+              : parseFloat(currentPrice) || 0,
+          marketCap:
+            typeof marketCap === "string" ? marketCap : marketCap.toString(),
+          totalValue: totalValue,
+          priceChange24h:
+            typeof priceChange24h === "number"
+              ? priceChange24h
+              : parseFloat(priceChange24h) || 0,
+        };
+      }
+    );
+
+    return {
+      walletAddress: data.data.walletAddress,
+      holdings: transformedHoldings,
+      totalTokens: data.data.totalTokens || transformedHoldings.length,
+    };
   } catch (error) {
     console.error("Error fetching user holdings:", error);
     throw error;
