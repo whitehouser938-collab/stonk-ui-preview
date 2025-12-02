@@ -1,95 +1,367 @@
-import Datafeed from "../../public/charting_library/datafeeds/finder/datafeed";
+import Datafeed from "@/charting/datafeed";
 import { useEffect, useRef, useState } from "react";
+import {
+  ChartingLibraryWidgetOptions,
+  IChartingLibraryWidget,
+  ResolutionString,
+} from "../../public/charting_library/charting_library";
+import { Chain } from "@/types";
+import { buildTvSymbol } from "@/charting/helpers";
 
-interface TradingViewChartProps {
-  symbol?: string;
-  height?: number;
+declare global {
+  interface Window {
+    TradingView: any;
+    Datafeeds: any;
+  }
 }
 
-type ResolutionString = TradingView.ResolutionString;
+export {};
 
-function TradingViewChart({ symbol, height }: TradingViewChartProps) {
+interface TradingViewChartProps {
+  tokenSymbol: string;
+  tokenAddress: string;
+  tokenSupply: number;
+  chain: Chain;
+  height?: number;
+}
+const formatTinyPrice = (price: number) => {
+    if (price <= 0 || !isFinite(price)) return price.toString();
+
+    if (price >= 0.01) {
+        return price.toString();
+    }
+
+    const subscripts = ['₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈', '₉'];
+
+    const plain = price.toString();
+
+    let normalized = plain;
+
+    if (plain.includes('e')) {
+        const [mantissa, expStr] = plain.split('e');
+        const exp = parseInt(expStr, 10);
+
+        if (exp < 0) {
+            // 5.12e-7  → 0.000000512
+            const zeros = Math.abs(exp) - 1;
+            const digits = mantissa.replace('.', '');
+
+            normalized = '0.' + '0'.repeat(zeros) + digits;
+        }
+    }
+
+    // "0.000000512" → leadingZeros = 6
+    const match = normalized.match(/^0\.0+/);
+    if (!match) {
+        return price.toString();
+    }
+
+    const leadingZeros = match[0].length - 2; // subtract "0."
+
+    // Extract significant digits that come after the leading zeros
+    const significant = normalized.slice(match[0].length);
+
+    const subscript = leadingZeros
+        .toString()
+        .split('')
+        .map(d => subscripts[parseInt(d)])
+        .join('');
+
+    // Final formatted price
+    // Example: 0.000000512 → "0.0₆512"
+    return `0.0${subscript}${significant.slice(0, 3)}`;
+};
+
+const customFormatters = {
+    priceFormatterFactory: (symbolInfo: any, minTick: any) => {
+        const mode = symbolInfo?.mode; 
+        
+        if (mode === 'mcap') {
+            return {
+                format: (value: number) => {
+                    const absValue = Math.abs(value);
+                    
+                    if (absValue >= 1e12) return (value / 1e12).toFixed(2) + 'T';
+                    if (absValue >= 1e9) return (value / 1e9).toFixed(2) + 'B';
+                    if (absValue >= 1e6) return (value / 1e6).toFixed(2) + 'M';
+                    if (absValue >= 1e3) return (value / 1e3).toFixed(2) + 'K';
+                    return value.toFixed(2);
+                }
+            };
+        }
+
+        return {
+            format: (price: number, signPositive: any) => {
+                const absPrice = Math.abs(price);
+                
+                if (absPrice > 0 && absPrice < 0.001) {
+                    return formatTinyPrice(price);
+                }
+
+                if (absPrice >= 10) {
+                     return price.toFixed(2);
+                }
+                
+                if (absPrice >= 0.001) {
+                     return price.toFixed(6);
+                }
+
+                return price.toString();
+            },
+        };
+    },
+
+    studyFormatterFactory: (format: any, symbolInfo: any) => {
+        if (format.type === 'volume') {
+            return {
+                format: (value: number) => {
+                    if (value >= 1e12) return (value / 1e12).toFixed(2) + 'T';
+                    if (value >= 1e9) return (value / 1e9).toFixed(2) + 'B';
+                    if (value >= 1e6) return (value / 1e6).toFixed(2) + 'M';
+                    if (value >= 1e3) return (value / 1e3).toFixed(2) + 'K';
+                    return value.toFixed(2);
+                }
+            };
+        }
+        return null;
+    }
+};
+
+function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000, chain, height }: TradingViewChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const tvWidgetRef = useRef<any>(null);
+  const scriptLoadedRef = useRef(false);
+  const initializingRef = useRef(false);
   const [isLoading, setIsLoading] = useState(true);
+  const modeRef = useRef<"price" | "mcap">("price");
+  const assetRef = useRef<"USD" | "WETH">("USD");
+
 
   useEffect(() => {
-    const initChart = async () => {
-      const TradingView = await import(
-        "../../public/charting_library/charting_library"
-      );
+    if (initializingRef.current) return;
 
-      if (!TradingView || !TradingView.widget) {
-        console.error("TradingView.widget is not available");
-        return;
-      }
+    const SCRIPT_SRC = "/charting_library/charting_library.js";
+
+    const initChart = () => {
+      if (!window.TradingView) return;
 
       if (!chartContainerRef.current) return;
 
-      // Destroy previous widget if exists
-      if (tvWidgetRef.current) {
+      if (initializingRef.current) return;
+      initializingRef.current = true;
+
+      if (tvWidgetRef.current && tvWidgetRef.current._iFrame) {
         tvWidgetRef.current.remove();
-        tvWidgetRef.current = null;
       }
 
-      // Initialize widget
-      const widget = new TradingView.widget({
+      const tvSymbol = buildTvSymbol({
+        tokenAddress: tokenAddress,
+        tokenSymbol: tokenSymbol,
+        tokenSupply: tokenSupply,
+        chain: chain,
+        mode: "price",
+        asset: "USD",
+      })
+
+      const widgetOptions: ChartingLibraryWidgetOptions = {
         container: chartContainerRef.current,
         autosize: true,
-        symbol: symbol || "CRYPTOCAP:BTC",
+        symbol: tvSymbol,
         interval: "1" as ResolutionString,
         timezone: "exchange",
         theme: "dark",
         locale: "en",
-        enabled_features: [],
+
+        enabled_features: ["use_localstorage_for_settings"],
         disabled_features: [
           "header_compare",
           "header_symbol_search",
           "header_quick_search",
           "edit_buttons_in_legend",
         ],
-        settings_overrides: {
-          "mainSeries.priceFormat.precision": 6,
-          "paneProperties.background": "#1e293b",
-        },
+
+        custom_formatters: customFormatters,
+
         time_frames: [
           { text: "1M", resolution: "240" as ResolutionString, description: "1 Month" },
           { text: "7D", resolution: "60" as ResolutionString, description: "1 Week" },
           { text: "3D", resolution: "30" as ResolutionString, description: "3 Day" },
           { text: "1H", resolution: "1" as ResolutionString, description: "1 Hour" },
         ],
+
         datafeed: Datafeed,
-        library_path: "/charting_library/charting_library/",
-      });
+        debug: false,
+        library_path: "/charting_library/",
+      }
+
+      const widget: IChartingLibraryWidget  = new window.TradingView.widget(widgetOptions);
 
       tvWidgetRef.current = widget;
 
+      widget.headerReady().then(() => {
+        const priceButton = widget.createButton();
+        priceButton.classList.add('apply-common-tooltip');
+        priceButton.addEventListener("click", (e: any) => {
+          const priceEl = priceButton.querySelector(".tv-opt-price") as HTMLElement;
+          const mcapEl = priceButton.querySelector(".tv-opt-mcap") as HTMLElement;
+
+          modeRef.current = modeRef.current === "price" ? "mcap" : "price";
+
+          const mode = modeRef.current;
+          const asset = assetRef.current;
+          if (mode === "price") {
+            priceEl.style.color = "#fff";
+            priceEl.style.fontWeight = "600";
+
+            mcapEl.style.color = "#888";
+            mcapEl.style.fontWeight = "400";
+          } else {
+            mcapEl.style.color = "#fff";
+            mcapEl.style.fontWeight = "600";
+
+            priceEl.style.color = "#888";
+            priceEl.style.fontWeight = "400";
+          }
+
+          const tvSymbol = buildTvSymbol({
+            tokenAddress: tokenAddress,
+            tokenSymbol: tokenSymbol,
+            tokenSupply: tokenSupply,
+            chain: chain,
+            mode: mode,
+            asset: asset,
+          })
+
+          widget.activeChart().setSymbol(tvSymbol);
+        });
+
+        priceButton.innerHTML = `
+          <div style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+            <span 
+              class="tv-opt-price"
+              data-val="price"
+              style="color:#fff;font-weight:600;"
+            >
+              Price
+            </span>
+            <span style="color:#666;">/</span>
+            <span 
+              class="tv-opt-mcap"
+              data-val="mcap"
+              style="color:#888;"
+            >
+              MCap
+            </span>
+          </div>
+        `;
+
+        const assetButton = widget.createButton();
+        assetButton.classList.add('apply-common-tooltip');
+        assetButton.addEventListener("click", (e: any) => {
+          const usdEl = assetButton.querySelector(".tv-opt-asset-usd") as HTMLElement;
+          const wethEl = assetButton.querySelector(".tv-opt-asset-weth") as HTMLElement;
+
+          assetRef.current = assetRef.current === "USD" ? "WETH" : "USD";
+
+          const mode = modeRef.current;
+          const asset = assetRef.current;
+
+          if (asset === "USD") {
+            usdEl.style.color = "#fff";
+            usdEl.style.fontWeight = "600";
+
+            wethEl.style.color = "#888";
+            wethEl.style.fontWeight = "400";
+          } else {
+            wethEl.style.color = "#fff";
+            wethEl.style.fontWeight = "600";
+
+            usdEl.style.color = "#888";
+            usdEl.style.fontWeight = "400";
+          }
+
+          const tvSymbol = buildTvSymbol({
+            tokenAddress: tokenAddress,
+            tokenSymbol: tokenSymbol,
+            tokenSupply: tokenSupply,
+            chain: chain,
+            mode: mode,
+            asset: asset,
+          })
+
+          widget.activeChart().setSymbol(tvSymbol);
+        });
+        assetButton.innerHTML = `
+          <div style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+            <span 
+              class="tv-opt-asset-usd"
+              data-val="price"
+              style="color:#fff;font-weight:600;"
+            >
+              USD
+            </span>
+            <span style="color:#666;">/</span>
+            <span 
+              class="tv-opt-asset-weth"
+              data-val="mcap"
+              style="color:#888;"
+            >
+              WETH
+            </span>
+          </div>
+        `;
+      });
+
       widget.onChartReady(() => {
         setIsLoading(false);
+
+        initializingRef.current = false;
       });
     };
 
-    initChart();
+    // Script Loader (only once)
+    if (window.TradingView) {
+      scriptLoadedRef.current = true;
+      initChart();
+    } else {
+      // only add script once
+      if (!document.querySelector(`script[src="${SCRIPT_SRC}"]`)) {
+        const script = document.createElement("script");
+        script.src = SCRIPT_SRC;
+        script.onload = () => {
+          scriptLoadedRef.current = true;
+          initChart();
+        };
+        document.body.appendChild(script);
+      } else {
+        // script exists but not yet loaded
+        document
+          .querySelector(`script[src="${SCRIPT_SRC}"]`)
+          ?.addEventListener("load", initChart);
+      }
+    }
 
     return () => {
-      if (tvWidgetRef.current) {
+      // ONLY remove if widget exists AND fully initialized
+      if (tvWidgetRef.current && tvWidgetRef.current._iFrame) {
         tvWidgetRef.current.remove();
-        tvWidgetRef.current = null;
       }
+      tvWidgetRef.current = null;
     };
-  }, [symbol]);
+  }, [tokenSymbol]);
 
   return (
     <div className="relative h-full w-full">
       <div
-        className="tradingview-widget-container"
         ref={chartContainerRef}
-        style={{ height: height ? `${height}px` : "100%", width: "100%" }}
+        id="tv_chart_container"
+        style={{
+          height: height ? `${height}px` : "100%",
+          width: "100%",
+        }}
       />
       {isLoading && (
-        <div className="absolute inset-0 z-10 animate-pulse bg-[#1a1a1f] p-4">
-          {/* Optional loading skeleton */}
-        </div>
+        <div className="absolute inset-0 z-10 animate-pulse bg-[#1a1a1f] p-4"></div>
       )}
     </div>
   );

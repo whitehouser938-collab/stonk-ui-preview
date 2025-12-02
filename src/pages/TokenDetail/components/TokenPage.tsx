@@ -758,7 +758,10 @@ const TokenPage = () => {
             <div className="bg-gray-900 border border-gray-700 p-2">
               <div className="text-orange-400 mb-2">INTRADAY CHART</div>
               <TradingViewChart
-                symbol={`${tokenData?.symbol}:${chainId}:${tokenAddress}`}
+                tokenSymbol={tokenData.symbol}
+                tokenAddress={tokenAddress}
+                tokenSupply={tokenData.totalSupply}
+                chain={chainId}
                 height={300}
               />
               {/* <div className="bg-black border border-gray-800 p-2 h-48 flex">

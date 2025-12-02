@@ -102,6 +102,9 @@ class WebSocketManager {
     if (message.type === "heartbeat_ack") {
       console.log("[WebSocket] Received heartbeat acknowledgment from server");
       return;
+    }else if (message.type === "subscribed"){
+      console.log(`[WebSocket] Subscribed to channel: ${message.channel}`);
+      return;
     }
 
     console.log("[WebSocket] Handling message for channel:", message.channel);
@@ -223,7 +226,6 @@ class WebSocketManager {
         }));
         this.subscriptions.add(channel);
         this.messageHandlers.set(channel, onUpdate);
-        console.log(`[WebSocket] Subscribed to ${subscriptionKey} on channel: ${channel}`);
       })
       .catch(console.error);
 

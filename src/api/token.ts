@@ -1,4 +1,4 @@
-import { Chain } from "@/types";
+import { BarData, Chain } from "@/types";
 
 import { getApiBaseUrl } from "@/utils/apiConfig";
 
@@ -188,6 +188,33 @@ export const getTokenTrades = async (
   } catch (error) {
     console.error("Error fetching token trades:", error);
     return [];
+  }
+};
+
+export const getTokenOHLCVBars = async (
+  tokenAddress: string,
+  time_to: number,
+  time_from: number,
+  chain: Chain,
+  limit: number,
+  resolution: string,
+  isUsd: boolean,
+): Promise<any> => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/token/bars/${tokenAddress}?time_to=${time_to}&time_from=${time_from}&chain=${chain}&limit=${limit}&resolution=${resolution}&to_usd=${isUsd}`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch token trades");
+    }
+    const data = await response.json();
+    if (!data || !data.success || !data.bars) {
+      return { end: true, bars: [] };
+    }
+    return data;
+  } catch (error) {
+    console.error("Error fetching token trades:", error);
+    return { end: true, bars: [] };
   }
 };
 
