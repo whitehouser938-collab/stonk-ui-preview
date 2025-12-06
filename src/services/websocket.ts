@@ -97,6 +97,12 @@ class WebSocketManager {
     });
   }
 
+  private normalizeChannel(channel: string): string {
+    // Normalize channel by converting to lowercase
+    // This ensures consistent matching between server (lowercase) and client
+    return channel.toLowerCase();
+  }
+
   private handleMessage(message: any) {
     // Handle heartbeat acknowledgments
     if (message.type === "heartbeat_ack") {
@@ -107,13 +113,16 @@ class WebSocketManager {
       return;
     }
 
-    console.log("[WebSocket] Handling message for channel:", message.channel);
-    const handler = this.messageHandlers.get(message.channel);
+    // Normalize the channel from the server message
+    const normalizedChannel = this.normalizeChannel(message.channel);
+    console.log("[WebSocket] Handling message for channel:", message.channel, "->", normalizedChannel);
+
+    const handler = this.messageHandlers.get(normalizedChannel);
     if (handler) {
-      console.log("[WebSocket] Found handler for channel:", message.channel);
+      console.log("[WebSocket] Found handler for channel:", normalizedChannel);
       handler(message);
     } else {
-      console.log("[WebSocket] No handler found for channel:", message.channel);
+      console.log("[WebSocket] No handler found for channel:", normalizedChannel);
       console.log(
         "[WebSocket] Available handlers:",
         Array.from(this.messageHandlers.keys())
@@ -215,17 +224,19 @@ class WebSocketManager {
     channel: string
   ): () => void {
     const config = SUBSCRIPTION_TYPES[subscriptionKey];
+    const normalizedChannel = this.normalizeChannel(channel);
 
-    console.log(`[WebSocket] Subscribing to ${subscriptionKey} on channel: ${channel}`);
+    console.log(`[WebSocket] Subscribing to ${subscriptionKey} on channel: ${channel} -> ${normalizedChannel}`);
 
     this.connect()
       .then((ws) => {
         ws.send(JSON.stringify({
           type: config.subscribeType,
-          channel,
+          channel,  // Send original channel to server (server will normalize)
         }));
-        this.subscriptions.add(channel);
-        this.messageHandlers.set(channel, onUpdate);
+        // Store with normalized channel for matching incoming messages
+        this.subscriptions.add(normalizedChannel);
+        this.messageHandlers.set(normalizedChannel, onUpdate);
       })
       .catch(console.error);
 
@@ -237,17 +248,19 @@ class WebSocketManager {
     channel: string
   ): void {
     const config = SUBSCRIPTION_TYPES[subscriptionKey];
+    const normalizedChannel = this.normalizeChannel(channel);
 
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify({
         type: config.unsubscribeType,
-        channel,
+        channel,  // Send original channel to server
       }));
     }
 
-    this.subscriptions.delete(channel);
-    this.messageHandlers.delete(channel);
-    console.log(`[WebSocket] Unsubscribed from ${subscriptionKey} on channel: ${channel}`);
+    // Delete using normalized channel
+    this.subscriptions.delete(normalizedChannel);
+    this.messageHandlers.delete(normalizedChannel);
+    console.log(`[WebSocket] Unsubscribed from ${subscriptionKey} on channel: ${channel} -> ${normalizedChannel}`);
   }
 
   disconnect() {
