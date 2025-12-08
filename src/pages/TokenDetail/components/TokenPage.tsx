@@ -56,6 +56,31 @@ function formatNumber(num: number): string {
   return parseFloat(num.toFixed(2))+"";
 }
 
+// Helper function to get liquidity display value
+function getLiquidityWeth(tokenData: TokenFullData): string {
+  if (!tokenData) return "N/A";
+
+  // For non-graduated tokens, show bonding curve asset balance
+  if (!tokenData.isGraduated && tokenData.bondingCurve?.assetBalance) {
+    const wethAmount = parseFloat(tokenData.bondingCurve.assetBalance) / 1e18;
+    return wethAmount.toFixed(4);
+  }
+
+  // For graduated tokens, show Uniswap liquidity
+  if (tokenData.isGraduated && tokenData.uniswapLiquidity?.wethReserve) {
+    const wethAmount = parseFloat(tokenData.uniswapLiquidity.wethReserve) / 1e18;
+    return wethAmount.toFixed(4);
+  }
+
+  // Fallback to legacy liquidityWeth field if available
+  if (tokenData.liquidityWeth) {
+    const wethAmount = parseFloat(tokenData.liquidityWeth) / 1e18;
+    return wethAmount.toFixed(4);
+  }
+
+  return "N/A";
+}
+
 const TokenPage = () => {
   const { chainId, tokenAddress } = useParams<{
     chainId: Chain;
@@ -129,8 +154,13 @@ const TokenPage = () => {
   // Subscribe to real-time volume updates
   const handleMarketUpdate = useCallback((freshMarketOverview: TokenMarketOverview) => {
     setTokenData((prev) => ({
-      ...prev, 
-      price: freshMarketOverview
+      ...prev,
+      price: freshMarketOverview,
+      // Update bonding curve and liquidity data from market overview
+      bondingCurve: freshMarketOverview.bondingCurve,
+      uniswapLiquidity: freshMarketOverview.uniswapLiquidity,
+      // Update progress if available
+      progress: freshMarketOverview.bondingCurve?.progress ?? prev.progress,
     }))
   }, []);
 
@@ -813,7 +843,7 @@ const TokenPage = () => {
                 <div className="bg-black border border-gray-800 p-2">
                   <div className="text-gray-400">LIQUIDITY</div>
                   <div className="text-white font-mono text-sm">
-                    TODO
+                    {getLiquidityWeth(tokenData)} WETH
                   </div>
                 </div>
                 <div className="bg-black border border-gray-800 p-2">
@@ -1012,7 +1042,7 @@ const TokenPage = () => {
             />
             {/* Bonding Curve Progress & Graduation Badge */}
             <BondingCurveProgress
-              progress={tokenData?.progress ?? 0}
+              progress={tokenData?.bondingCurve?.progress ?? tokenData?.progress ?? 0}
               graduated={
                 tokenData?.isGraduated ||
                 !!tokenData?.uniswapPair

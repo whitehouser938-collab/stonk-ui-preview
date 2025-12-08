@@ -44,6 +44,15 @@ export interface TokenMarketOverview extends TokenVolumeSummary {
   uniswapPairAddress: string | null;
   liquidityWeth?: string;
   progress?: number;
+  bondingCurve?: {
+    assetBalance: string;
+    graduationThreshold: string;
+    progress: number;
+  } | null;
+  uniswapLiquidity?: {
+    wethReserve: string;
+    tokenReserve: string;
+  } | null;
 }
 
 export interface TokenFullData{
@@ -71,6 +80,15 @@ export interface TokenFullData{
   graduationThreshold?: string;
   assetBalance?: string;
   progress?: number;
+  bondingCurve?: {
+    assetBalance: string;
+    graduationThreshold: string;
+    progress: number;
+  } | null;
+  uniswapLiquidity?: {
+    wethReserve: string;
+    tokenReserve: string;
+  } | null;
   price: VolumeData
 }
 

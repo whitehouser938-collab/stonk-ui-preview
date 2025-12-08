@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import { createAppKit } from "@reown/appkit/react";
 import { sepolia, AppKitNetwork } from "@reown/appkit/networks";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
+import { injected } from "@wagmi/connectors";
 
 import Markets from "./pages/Markets";
 import Research from "./pages/Research";
@@ -40,6 +41,9 @@ const wagmiAdapter = new WagmiAdapter({
   networks,
   projectId,
   ssr: true,
+  connectors: [
+    injected(), // Auto-detects MetaMask, Coinbase Wallet, etc.
+  ],
 });
 
 const appKit = createAppKit({
