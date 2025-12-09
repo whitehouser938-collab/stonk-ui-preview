@@ -53,7 +53,7 @@ function formatNumber(num: number): string {
   if (num >= 1e9) return parseFloat((num / 1e9).toFixed(2)) + "B";
   if (num >= 1e6) return parseFloat((num / 1e6).toFixed(2)) + "M";
   if (num >= 1e3) return parseFloat((num / 1e3).toFixed(2)) + "K";
-  return parseFloat(num.toFixed(2))+"";
+  return parseFloat(num.toFixed(2)) + "";
 }
 
 // Helper function to get liquidity display value
@@ -68,7 +68,8 @@ function getLiquidityWeth(tokenData: TokenFullData): string {
 
   // For graduated tokens, show Uniswap liquidity
   if (tokenData.isGraduated && tokenData.uniswapLiquidity?.wethReserve) {
-    const wethAmount = parseFloat(tokenData.uniswapLiquidity.wethReserve) / 1e18;
+    const wethAmount =
+      parseFloat(tokenData.uniswapLiquidity.wethReserve) / 1e18;
     return wethAmount.toFixed(4);
   }
 
@@ -115,15 +116,23 @@ const TokenPage = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Callback refs to notify TradingForm of confirmed trades
-  const tradeConfirmCallbackRef = useRef<((txHash: string, tradeType: "BUY" | "SELL") => void) | null>(null);
+  const tradeConfirmCallbackRef = useRef<
+    ((txHash: string, tradeType: "BUY" | "SELL") => void) | null
+  >(null);
 
   const handleTradeUpdate = useCallback((newTrades: TradeData[]) => {
-    console.log(`[TokenPage] Received trade update at ${Date.now()}:`, newTrades);
+    console.log(
+      `[TokenPage] Received trade update at ${Date.now()}:`,
+      newTrades
+    );
 
     // Notify TradingForm if any of these trades match pending tx
     if (tradeConfirmCallbackRef.current) {
-      newTrades.forEach(trade => {
-        tradeConfirmCallbackRef.current?.(trade.transactionHash, trade.tradeType);
+      newTrades.forEach((trade) => {
+        tradeConfirmCallbackRef.current?.(
+          trade.transactionHash,
+          trade.tradeType
+        );
       });
     }
 
@@ -152,17 +161,20 @@ const TokenPage = () => {
   useTradeUpdates(chainId, tokenAddress, handleTradeUpdate);
 
   // Subscribe to real-time volume updates
-  const handleMarketUpdate = useCallback((freshMarketOverview: TokenMarketOverview) => {
-    setTokenData((prev) => ({
-      ...prev,
-      price: freshMarketOverview,
-      // Update bonding curve and liquidity data from market overview
-      bondingCurve: freshMarketOverview.bondingCurve,
-      uniswapLiquidity: freshMarketOverview.uniswapLiquidity,
-      // Update progress if available
-      progress: freshMarketOverview.bondingCurve?.progress ?? prev.progress,
-    }))
-  }, []);
+  const handleMarketUpdate = useCallback(
+    (freshMarketOverview: TokenMarketOverview) => {
+      setTokenData((prev) => ({
+        ...prev,
+        price: freshMarketOverview,
+        // Update bonding curve and liquidity data from market overview
+        bondingCurve: freshMarketOverview.bondingCurve,
+        uniswapLiquidity: freshMarketOverview.uniswapLiquidity,
+        // Update progress if available
+        progress: freshMarketOverview.bondingCurve?.progress ?? prev.progress,
+      }));
+    },
+    []
+  );
 
   useTokenMarketUpdates(chainId, tokenAddress, handleMarketUpdate);
 
@@ -197,6 +209,85 @@ const TokenPage = () => {
       fetchTokenData();
     }
   }, [chainId, tokenAddress]);
+
+  // Update meta tags when token data is loaded
+  useEffect(() => {
+    if (tokenData) {
+      const tokenName = tokenData.name || tokenData.symbol || "Token";
+      const title = `${tokenName} on Stonk Market`;
+      const imageUrl = tokenData.logoUrl
+        ? tokenData.logoUrl.startsWith("http")
+          ? tokenData.logoUrl
+          : `${window.location.origin}${tokenData.logoUrl}`
+        : `${window.location.origin}/default-pfp.jpeg`;
+
+      // Update document title
+      document.title = title;
+
+      // Update or create og:title
+      let ogTitle = document.querySelector('meta[property="og:title"]');
+      if (!ogTitle) {
+        ogTitle = document.createElement("meta");
+        ogTitle.setAttribute("property", "og:title");
+        document.head.appendChild(ogTitle);
+      }
+      ogTitle.setAttribute("content", title);
+
+      // Update or create og:image
+      let ogImage = document.querySelector('meta[property="og:image"]');
+      if (!ogImage) {
+        ogImage = document.createElement("meta");
+        ogImage.setAttribute("property", "og:image");
+        document.head.appendChild(ogImage);
+      }
+      ogImage.setAttribute("content", imageUrl);
+
+      // Update or create og:description
+      let ogDescription = document.querySelector(
+        'meta[property="og:description"]'
+      );
+      if (!ogDescription) {
+        ogDescription = document.createElement("meta");
+        ogDescription.setAttribute("property", "og:description");
+        document.head.appendChild(ogDescription);
+      }
+      ogDescription.setAttribute(
+        "content",
+        `View ${tokenName} on Stonk Market`
+      );
+
+      // Update or create twitter:title
+      let twitterTitle = document.querySelector('meta[name="twitter:title"]');
+      if (!twitterTitle) {
+        twitterTitle = document.createElement("meta");
+        twitterTitle.setAttribute("name", "twitter:title");
+        document.head.appendChild(twitterTitle);
+      }
+      twitterTitle.setAttribute("content", title);
+
+      // Update or create twitter:image
+      let twitterImage = document.querySelector('meta[name="twitter:image"]');
+      if (!twitterImage) {
+        twitterImage = document.createElement("meta");
+        twitterImage.setAttribute("name", "twitter:image");
+        document.head.appendChild(twitterImage);
+      }
+      twitterImage.setAttribute("content", imageUrl);
+    } else {
+      // Reset to default when no token data
+      document.title = "Stonk Market";
+      const defaultImage = `${window.location.origin}/default-pfp.jpeg`;
+
+      let ogTitle = document.querySelector('meta[property="og:title"]');
+      if (ogTitle) ogTitle.setAttribute("content", "Stonk Market");
+
+      let ogImage = document.querySelector('meta[property="og:image"]');
+      if (ogImage) ogImage.setAttribute("content", defaultImage);
+
+      let twitterImage = document.querySelector('meta[name="twitter:image"]');
+      if (twitterImage) twitterImage.setAttribute("content", defaultImage);
+    }
+  }, [tokenData]);
 
   useEffect(() => {
     const fetchTrades = async () => {
@@ -324,11 +415,18 @@ const TokenPage = () => {
             )
         );
 
-        console.log(`[Scroll] ${uniqueNewTrades.length} unique new trades out of ${moreTrades.length}`);
+        console.log(
+          `[Scroll] ${uniqueNewTrades.length} unique new trades out of ${moreTrades.length}`
+        );
 
         // Stop pagination if we got fewer trades than requested or no unique trades
-        if (moreTrades.length < TRADE_PAGE_SIZE || uniqueNewTrades.length === 0) {
-          console.log(`[Scroll] Stopping pagination (moreTrades: ${moreTrades.length}, unique: ${uniqueNewTrades.length})`);
+        if (
+          moreTrades.length < TRADE_PAGE_SIZE ||
+          uniqueNewTrades.length === 0
+        ) {
+          console.log(
+            `[Scroll] Stopping pagination (moreTrades: ${moreTrades.length}, unique: ${uniqueNewTrades.length})`
+          );
           setHasMoreTrades(false);
         }
 
@@ -648,7 +746,10 @@ const TokenPage = () => {
                           {tokenData.deployer.pfp && (
                             <img
                               src={tokenData.deployer.pfp}
-                              alt={`${tokenData.deployer.username || tokenData.deployer.address} profile`}
+                              alt={`${
+                                tokenData.deployer.username ||
+                                tokenData.deployer.address
+                              } profile`}
                               className="w-5 h-5 rounded-full object-cover"
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
@@ -657,7 +758,8 @@ const TokenPage = () => {
                             />
                           )}
                           <span className="text-sm truncate max-w-32">
-                            {tokenData.deployer.username || abbreviateAddress(tokenData.deployer.address)}
+                            {tokenData.deployer.username ||
+                              abbreviateAddress(tokenData.deployer.address)}
                           </span>
                         </button>
                       )}
@@ -768,7 +870,10 @@ const TokenPage = () => {
               <div className="sm:hidden mt-3 pt-3 border-t border-gray-700">
                 <div className="flex justify-between items-center min-w-0">
                   <div className="text-xl font-mono text-white truncate">
-                    ${tokenData.price.currentPrice ? parseFloat((tokenData.price.currentPrice).toFixed(7)) : "N/A"}
+                    $
+                    {tokenData.price.currentPrice
+                      ? parseFloat(tokenData.price.currentPrice.toFixed(7))
+                      : "N/A"}
                   </div>
                   <div
                     className={`text-lg font-mono flex-shrink-0 ml-2 ${
@@ -910,7 +1015,10 @@ const TokenPage = () => {
                       {tokenData.deployer.pfp && (
                         <img
                           src={tokenData.deployer.pfp}
-                          alt={`${tokenData.deployer.username || tokenData.deployer.address} profile`}
+                          alt={`${
+                            tokenData.deployer.username ||
+                            tokenData.deployer.address
+                          } profile`}
                           className="w-4 h-4 rounded-full object-cover"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
@@ -919,7 +1027,8 @@ const TokenPage = () => {
                         />
                       )}
                       <span className="truncate max-w-32">
-                        {tokenData.deployer.username || abbreviateAddress(tokenData.deployer.address)}
+                        {tokenData.deployer.username ||
+                          abbreviateAddress(tokenData.deployer.address)}
                       </span>
                     </button>
                   ) : (
@@ -1042,11 +1151,10 @@ const TokenPage = () => {
             />
             {/* Bonding Curve Progress & Graduation Badge */}
             <BondingCurveProgress
-              progress={tokenData?.bondingCurve?.progress ?? tokenData?.progress ?? 0}
-              graduated={
-                tokenData?.isGraduated ||
-                !!tokenData?.uniswapPair
+              progress={
+                tokenData?.bondingCurve?.progress ?? tokenData?.progress ?? 0
               }
+              graduated={tokenData?.isGraduated || !!tokenData?.uniswapPair}
               uniswapPair={tokenData?.uniswapPair}
             />
             {/* Recent Trades / Holders */}

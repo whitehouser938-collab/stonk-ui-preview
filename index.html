@@ -2,25 +2,46 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/jpeg" href="/default-pfp.jpeg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stonk-terminal-alpha-view</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
-
-    <meta property="og:title" content="stonk-terminal-alpha-view" />
-    <meta property="og:description" content="Lovable Generated Project" />
-    <meta property="og:type" content="website" />
+    <title>Stonk Market</title>
     <meta
-      property="og:image"
-      content="https://lovable.dev/opengraph-image-p98pqg.png"
+      name="description"
+      content="Stonk Market - Trade tokens on the decentralized exchange"
     />
+    <meta name="author" content="Stonk Market" />
+
+    <meta property="og:title" content="Stonk Market" />
+    <meta
+      property="og:description"
+      content="Stonk Market - Trade tokens on the decentralized exchange"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/default-pfp.jpeg" id="og-image" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
-    <meta
-      name="twitter:image"
-      content="https://lovable.dev/opengraph-image-p98pqg.png"
-    />
+    <meta name="twitter:site" content="@stonkmarket" />
+    <meta name="twitter:image" content="/default-pfp.jpeg" id="twitter-image" />
+    <script>
+      // Convert relative image URLs to absolute URLs for social media crawlers
+      (function () {
+        const baseUrl = window.location.origin;
+        const ogImage = document.querySelector('meta[property="og:image"]');
+        const twitterImage = document.querySelector(
+          'meta[name="twitter:image"]'
+        );
+        if (ogImage && ogImage.content && !ogImage.content.startsWith("http")) {
+          ogImage.content = baseUrl + ogImage.content;
+        }
+        if (
+          twitterImage &&
+          twitterImage.content &&
+          !twitterImage.content.startsWith("http")
+        ) {
+          twitterImage.content = baseUrl + twitterImage.content;
+        }
+      })();
+    </script>
   </head>
 
   <body>
