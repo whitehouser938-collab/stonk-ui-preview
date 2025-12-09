@@ -213,10 +213,10 @@ const TokenPage = () => {
   // Update meta tags when token data is loaded
   useEffect(() => {
     if (tokenData) {
-      const tokenName = tokenData.name || tokenData.symbol || "Token";
-      const title = `${tokenName} on Stonk Market`;
+      const tokenSymbol = tokenData.symbol || tokenData.name || "Token";
+      const title = `${tokenSymbol} on Stonk Market`;
       const imageUrl = tokenData.logoUrl
-        ? tokenData.logoUrl.startsWith("http")
+        ? tokenData.logoUrl.startsWith("https")
           ? tokenData.logoUrl
           : `${window.location.origin}${tokenData.logoUrl}`
         : `${window.location.origin}/default-pfp.jpeg`;
@@ -253,7 +253,7 @@ const TokenPage = () => {
       }
       ogDescription.setAttribute(
         "content",
-        `View ${tokenName} on Stonk Market`
+        `View ${tokenSymbol} on Stonk Market`
       );
 
       // Update or create twitter:title
