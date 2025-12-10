@@ -6,8 +6,9 @@ interface DeployedToken {
   name: string;
   symbol: string;
   tokenAddress: string;
-  marketCap?: string;
-  currentPrice?: number;
+  marketCap?: string | null;
+  currentPrice?: number | null;
+  priceChange24h?: number | null;
   isGraduated?: boolean;
   graduationTimestamp?: string | null;
   deploymentTimestamp?: string;
@@ -18,7 +19,7 @@ interface DeployedTokensTableProps {
   tokens: DeployedToken[];
 }
 
-type SortField = "symbol" | "marketCap" | "status" | "deploymentTimestamp";
+type SortField = "symbol" | "price" | "marketCap" | "priceChange24h" | "status" | "deploymentTimestamp";
 type SortDirection = "asc" | "desc";
 
 const DeployedTokensTable: React.FC<DeployedTokensTableProps> = ({
@@ -57,10 +58,31 @@ const DeployedTokensTable: React.FC<DeployedTokensTableProps> = ({
     return parseFloat(num.toFixed(2)) + "";
   };
 
-  const formatMarketCap = (marketCap?: string) => {
+  const formatMarketCap = (marketCap?: string | null) => {
     if (!marketCap || marketCap === "0") return "N/A";
     const num = parseFloat(marketCap);
     return formatNumber(num);
+  };
+
+  const formatPrice = (price?: number | null) => {
+    if (price === null || price === undefined) return "N/A";
+    if (price === 0) return "N/A";
+    if (price < 0.000001) return price.toExponential(2);
+    if (price < 0.01) return price.toFixed(6);
+    return "$" + price.toFixed(4);
+  };
+
+  const formatPriceChange = (change?: number | null) => {
+    if (change === null || change === undefined) return "N/A";
+    const sign = change >= 0 ? "+" : "";
+    return `${sign}${change.toFixed(2)}%`;
+  };
+
+  const getPriceChangeColor = (change?: number | null) => {
+    if (change === null || change === undefined) return "text-gray-400";
+    if (change > 0) return "text-green-400";
+    if (change < 0) return "text-red-400";
+    return "text-gray-400";
   };
 
   const formatDeploymentTime = (timestamp?: string) => {
@@ -88,9 +110,17 @@ const DeployedTokensTable: React.FC<DeployedTokensTableProps> = ({
           aValue = a.symbol.toLowerCase();
           bValue = b.symbol.toLowerCase();
           break;
+        case "price":
+          aValue = a.currentPrice || 0;
+          bValue = b.currentPrice || 0;
+          break;
         case "marketCap":
           aValue = parseFloat(a.marketCap || "0");
           bValue = parseFloat(b.marketCap || "0");
+          break;
+        case "priceChange24h":
+          aValue = a.priceChange24h || 0;
+          bValue = b.priceChange24h || 0;
           break;
         case "status":
           aValue = a.isGraduated ? "graduated" : "bonding";
@@ -147,11 +177,29 @@ const DeployedTokensTable: React.FC<DeployedTokensTableProps> = ({
               </th>
               <th className="text-right p-1">
                 <button
+                  onClick={() => handleSort("price")}
+                  className="flex items-center space-x-1 hover:text-white transition-colors ml-auto"
+                >
+                  <span>PRICE</span>
+                  {getSortIcon("price")}
+                </button>
+              </th>
+              <th className="text-right p-1">
+                <button
                   onClick={() => handleSort("marketCap")}
                   className="flex items-center space-x-1 hover:text-white transition-colors ml-auto"
                 >
                   <span>MCAP</span>
                   {getSortIcon("marketCap")}
+                </button>
+              </th>
+              <th className="text-right p-1">
+                <button
+                  onClick={() => handleSort("priceChange24h")}
+                  className="flex items-center space-x-1 hover:text-white transition-colors ml-auto"
+                >
+                  <span>24H</span>
+                  {getSortIcon("priceChange24h")}
                 </button>
               </th>
               <th className="text-right p-1">
@@ -208,7 +256,13 @@ const DeployedTokensTable: React.FC<DeployedTokensTableProps> = ({
                   </Link>
                 </td>
                 <td className="p-1 text-right text-gray-400 font-mono">
+                  {formatPrice(token.currentPrice)}
+                </td>
+                <td className="p-1 text-right text-gray-400 font-mono">
                   {formatMarketCap(token.marketCap)}
+                </td>
+                <td className={`p-1 text-right font-mono ${getPriceChangeColor(token.priceChange24h)}`}>
+                  {formatPriceChange(token.priceChange24h)}
                 </td>
                 <td className="p-1 text-right">
                   {token.isGraduated ? (

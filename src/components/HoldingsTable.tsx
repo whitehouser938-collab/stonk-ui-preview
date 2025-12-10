@@ -35,24 +35,35 @@ const HoldingsTable: React.FC<HoldingsTableProps> = ({ holdings }) => {
     return parseFloat(num.toFixed(2)) + "";
   };
 
-  const formatPrice = (price: number): string => {
+  const formatPrice = (price: number | null | undefined): string => {
+    if (price === null || price === undefined) return "N/A";
+    if (price === 0) return "N/A";
     if (price < 0.000001) return `$${price.toExponential(2)}`;
     if (price < 0.01) return `$${price.toFixed(6)}`;
     if (price < 1) return `$${price.toFixed(4)}`;
     return `$${price.toFixed(2)}`;
   };
 
-  const formatCurrency = (value: string | number): string => {
+  const formatCurrency = (value: string | number | null | undefined): string => {
+    if (value === null || value === undefined) return "N/A";
     const num = typeof value === "string" ? parseFloat(value) : value;
+    if (isNaN(num) || num === 0) return "N/A";
     if (num >= 1e9) return `$${parseFloat((num / 1e9).toFixed(2))}B`;
     if (num >= 1e6) return `$${parseFloat((num / 1e6).toFixed(2))}M`;
     if (num >= 1e3) return `$${parseFloat((num / 1e3).toFixed(2))}K`;
     return `$${parseFloat(num.toFixed(2))}`;
   };
 
-  const formatPriceChange = (change: number): string => {
+  const formatPriceChange = (change: number | null | undefined): string => {
+    if (change === null || change === undefined) return "N/A";
     const sign = change >= 0 ? "+" : "";
     return `${sign}${change.toFixed(2)}%`;
+  };
+
+  const getPriceChangeColor = (change: number | null | undefined): string => {
+    if (change === null || change === undefined) return "text-gray-400";
+    if (change >= 0) return "text-green-400";
+    return "text-red-400";
   };
 
   // Convert address to checksum format for proper API calls
@@ -109,16 +120,16 @@ const HoldingsTable: React.FC<HoldingsTableProps> = ({ holdings }) => {
           bValue = parseFloat(b.totalValue);
           break;
         case "price":
-          aValue = a.currentPrice;
-          bValue = b.currentPrice;
+          aValue = a.currentPrice ?? 0;
+          bValue = b.currentPrice ?? 0;
           break;
         case "marketCap":
-          aValue = parseFloat(a.marketCap);
-          bValue = parseFloat(b.marketCap);
+          aValue = parseFloat(a.marketCap) || 0;
+          bValue = parseFloat(b.marketCap) || 0;
           break;
         case "priceChange":
-          aValue = a.priceChange24h;
-          bValue = b.priceChange24h;
+          aValue = a.priceChange24h ?? 0;
+          bValue = b.priceChange24h ?? 0;
           break;
         default:
           return 0;
@@ -269,11 +280,7 @@ const HoldingsTable: React.FC<HoldingsTableProps> = ({ holdings }) => {
                   {formatCurrency(holding.marketCap)}
                 </td>
                 <td
-                  className={`p-1 text-right font-mono ${
-                    holding.priceChange24h >= 0
-                      ? "text-green-400"
-                      : "text-red-400"
-                  }`}
+                  className={`p-1 text-right font-mono ${getPriceChangeColor(holding.priceChange24h)}`}
                 >
                   {formatPriceChange(holding.priceChange24h)}
                 </td>
