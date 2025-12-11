@@ -1,10 +1,10 @@
 import { Layout } from "@/components/Layout";
-import { TokenResearch } from "@/components/TokenResearch";
+import { WatchlistDashboard } from "@/components/WatchlistDashboard";
 
 const Research = () => {
   return (
     <Layout>
-      <TokenResearch />
+      <WatchlistDashboard />
     </Layout>
   );
 };

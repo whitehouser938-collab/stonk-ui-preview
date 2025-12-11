@@ -1,9 +1,11 @@
 import React, { useState, useEffect, Fragment, useCallback } from "react";
-import { Circle } from "lucide-react";
+import { Circle, Star } from "lucide-react";
 import { getAllTokens } from "@/api/token";
 import { useNavigate, useParams } from "react-router-dom";
 import { Chain, TokenMarketOverview } from "@/types";
 import { useMarketsUpdates } from "@/hooks/useMarketsUpdate";
+import { useWatchlist } from "@/hooks/useWatchlist";
+import { useAppKitAccount } from "@reown/appkit/react";
 
 const DEFAULT_CHAIN: Chain = "SEP";
 
@@ -67,6 +69,8 @@ export function MarketsDashboard() {
 
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const { address, isConnected } = useAppKitAccount({ namespace: "eip155" });
+  const { isInWatchlist, toggleWatchlist } = useWatchlist(address);
 
   useEffect(() => {
   if (!chainId) {
@@ -130,6 +134,19 @@ export function MarketsDashboard() {
     navigate(`/token/${token.chain}/${token.tokenAddress}`);
   };
 
+  const handleToggleWatchlist = async (
+    e: React.MouseEvent,
+    tokenAddress: string,
+    chain: string
+  ) => {
+    e.stopPropagation(); // Prevent row click
+    if (!isConnected) {
+      alert("Please connect your wallet to use the watchlist feature");
+      return;
+    }
+    await toggleWatchlist(tokenAddress, chain);
+  };
+
   return (
     <div className="h-screen overflow-auto bg-black text-gray-100 text-xs font-mono">
       {/* Main Grid Layout */}
@@ -162,6 +179,7 @@ export function MarketsDashboard() {
             <table className="w-full text-xs min-w-[640px]">
               <thead className="bg-gray-800 sticky top-0">
                 <tr className="text-gray-400">
+                  <th className="text-center p-1 w-8"></th>
                   <th className="text-left p-1">Symbol</th>
                   <th className="text-left p-1 hidden md:table-cell">Name</th>
                   <th className="text-right p-1">PRICE</th>
@@ -177,13 +195,13 @@ export function MarketsDashboard() {
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan={10} className="text-center p-4 text-gray-400">
+                    <td colSpan={11} className="text-center p-4 text-gray-400">
                       Loading tokens...
                     </td>
                   </tr>
                 ) : tokens.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="text-center p-4 text-gray-400">
+                    <td colSpan={11} className="text-center p-4 text-gray-400">
                       No tokens found
                     </td>
                   </tr>
@@ -194,6 +212,27 @@ export function MarketsDashboard() {
                       className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors cursor-pointer"
                       onClick={() => handleTokenClick(token)}
                     >
+                      <td className="p-1 text-center">
+                        <button
+                          onClick={(e) =>
+                            handleToggleWatchlist(e, token.tokenAddress, token.chain)
+                          }
+                          className="hover:scale-110 transition-transform"
+                          title={
+                            isInWatchlist(token.tokenAddress, token.chain)
+                              ? "Remove from watchlist"
+                              : "Add to watchlist"
+                          }
+                        >
+                          <Star
+                            className={`w-4 h-4 ${
+                              isInWatchlist(token.tokenAddress, token.chain)
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "text-gray-500"
+                            }`}
+                          />
+                        </button>
+                      </td>
                       <td className="p-1">
                         <div className="flex items-center space-x-2">
                           {token.logoUrl ? (

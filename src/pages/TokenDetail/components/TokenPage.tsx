@@ -26,6 +26,7 @@ import {
   Clock,
   Filter,
   X,
+  Star,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -48,6 +49,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Chain, TokenFullData, TokenMarketOverview, TradeData } from "@/types";
 import { CommentsSection } from "@/components/Comments";
 import { useTokenMarketUpdates } from "@/hooks/useTokenMarketUpdate";
+import { useWatchlist } from "@/hooks/useWatchlist";
+import { useAppKitAccount } from "@reown/appkit/react";
 
 function formatNumber(num: number): string {
   if (num >= 1e9) return parseFloat((num / 1e9).toFixed(2)) + "B";
@@ -96,6 +99,8 @@ const TokenPage = () => {
 
   const { isLoading, startLoading, stopLoading } = useLoading();
   const { toast } = useToast();
+  const { address, isConnected } = useAppKitAccount({ namespace: "eip155" });
+  const { isInWatchlist, toggleWatchlist } = useWatchlist(address);
 
   const TRADE_PAGE_SIZE = 20;
   const [trades, setTrades] = useState<TradeData[]>([]);
@@ -841,6 +846,44 @@ const TokenPage = () => {
                             </svg>
                           </div>
                         )}
+
+                      {/* Watchlist Star - Only show if wallet connected */}
+                      {isConnected && tokenData?.tokenAddress && (
+                        <>
+                          <div className="w-px h-4 bg-gray-600 mx-1"></div>
+                          <button
+                            onClick={async () => {
+                              await toggleWatchlist(
+                                tokenData.tokenAddress,
+                                chainId
+                              );
+                              toast({
+                                title: isInWatchlist(tokenData.tokenAddress, chainId)
+                                  ? "Removed from Watchlist"
+                                  : "Added to Watchlist",
+                                description: isInWatchlist(tokenData.tokenAddress, chainId)
+                                  ? "Token removed from your watchlist"
+                                  : "Token added to your watchlist",
+                                variant: "default",
+                              });
+                            }}
+                            className="hover:scale-110 transition-transform"
+                            title={
+                              isInWatchlist(tokenData.tokenAddress, chainId)
+                                ? "Remove from watchlist"
+                                : "Add to watchlist"
+                            }
+                          >
+                            <Star
+                              className={`w-5 h-5 ${
+                                isInWatchlist(tokenData.tokenAddress, chainId)
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-orange-400 hover:text-orange-300"
+                              }`}
+                            />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
