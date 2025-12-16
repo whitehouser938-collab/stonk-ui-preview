@@ -17,11 +17,11 @@ function formatNumber(num: number): string {
   return parseFloat(num.toFixed(2))+"";
 }
 
-function formatTokenAge(timestamp: string): string {
+function formatTokenAge(timestamp: string, _currentTime?: Date): string {
   if (!timestamp) return "N/A";
 
   const deploymentTime = new Date(timestamp).getTime(); // Parse ISO date string
-  const now = Date.now();
+  const now = Date.now(); // Use current time for calculation
   const ageInMs = now - deploymentTime;
 
   const days = Math.floor(ageInMs / (1000 * 60 * 60 * 24));
@@ -41,10 +41,10 @@ function formatTokenAge(timestamp: string): string {
   }
 }
 
-function formatShortSince(timestamp?: string): string {
+function formatShortSince(timestamp?: string, _currentTime?: Date): string {
   if (!timestamp) return "N/A";
   const t = new Date(timestamp).getTime();
-  const now = Date.now();
+  const now = Date.now(); // Use current time for calculation
   const diff = Math.max(0, now - t);
   const dayMs = 1000 * 60 * 60 * 24;
   const hourMs = 1000 * 60 * 60;
@@ -78,8 +78,9 @@ export function MarketsDashboard() {
   }
   }, [chainId, navigate]);
 
+  // Update current time every 60 seconds to refresh age displays
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000); // 60 seconds
     return () => clearInterval(timer);
   }, []);
 
@@ -301,7 +302,7 @@ export function MarketsDashboard() {
                         {formatNumber(token.totalVolume)}
                       </td>
                       <td className="p-1 text-right text-gray-400 hidden md:table-cell">
-                        {formatTokenAge(token.deploymentTimestamp || "")}
+                        {formatTokenAge(token.deploymentTimestamp || "", currentTime)}
                       </td>
                     </tr>
                   ))
@@ -375,7 +376,7 @@ export function MarketsDashboard() {
                           {formatNumber(token.currentPrice * 1_000_000_000)}
                         </td>
                         <td className="p-1 text-right text-gray-400">
-                          {formatShortSince(token.graduationTimestamp)}
+                          {formatShortSince(token.graduationTimestamp, currentTime)}
                         </td>
                       </tr>
                     ))}
