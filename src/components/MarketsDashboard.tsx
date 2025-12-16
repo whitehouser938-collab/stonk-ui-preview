@@ -57,6 +57,26 @@ function formatShortSince(timestamp?: string, _currentTime?: Date): string {
   return `${mins}m`;
 }
 
+// Helper function to format price change % with color
+function formatPriceChange(priceChange: number): {
+  text: string;
+  color: string;
+} {
+  // If no price change (0 or very small), show dash
+  if (Math.abs(priceChange) < 0.01) {
+    return { text: "-", color: "text-gray-400" };
+  }
+
+  // Green for positive, red for negative
+  const color = priceChange > 0 ? "text-green-400" : "text-red-400";
+  const sign = priceChange > 0 ? "+" : "";
+
+  return {
+    text: `${sign}${priceChange.toFixed(2)}%`,
+    color,
+  };
+}
+
 export function MarketsDashboard() {
   const { chainId } = useParams<{
     chainId: Chain;
@@ -297,21 +317,17 @@ export function MarketsDashboard() {
                       <td className="p-1 text-right text-gray-400 hidden md:table-cell">
                         {formatNumber(token.currentPrice * 1_000_000_000)}
                       </td>
-                      <td className="p-1 text-right text-gray-400">
-                        {/* {formatNumber(Number(token.buyVolume24h + token.sellVolume24h))} */}
-                        {parseFloat(token.priceChange24h.toFixed(2))}%
+                      <td className={`p-1 text-right ${formatPriceChange(token.priceChange24h).color}`}>
+                        {formatPriceChange(token.priceChange24h).text}
                       </td>
-                      <td className="p-1 text-right text-gray-400">
-                        {/* {formatNumber(Number(token.buyVolume6h + token.sellVolume6h))} */}
-                        {parseFloat(token.priceChange6h.toFixed(2))}%
+                      <td className={`p-1 text-right ${formatPriceChange(token.priceChange6h).color}`}>
+                        {formatPriceChange(token.priceChange6h).text}
                       </td>
-                      <td className="p-1 text-right text-gray-400">
-                        {/* {formatNumber(Number(token.buyVolume1h + token.sellVolume1h))} */}
-                        {parseFloat(token.priceChange1h.toFixed(2))}%
+                      <td className={`p-1 text-right ${formatPriceChange(token.priceChange1h).color}`}>
+                        {formatPriceChange(token.priceChange1h).text}
                       </td>
-                      <td className="p-1 text-right text-gray-400">
-                        {/* {formatNumber(Number(token.buyVolume5m + token.sellVolume5m))} */}
-                        {parseFloat(token.priceChange5m.toFixed(2))}%
+                      <td className={`p-1 text-right ${formatPriceChange(token.priceChange5m).color}`}>
+                        {formatPriceChange(token.priceChange5m).text}
                       </td>
                       <td className="p-1 text-right text-gray-400 hidden md:table-cell">
                         {formatNumber(token.totalVolume)}
