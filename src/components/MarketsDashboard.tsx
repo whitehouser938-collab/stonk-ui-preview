@@ -292,10 +292,10 @@ export function MarketsDashboard() {
                         {token.tokenName}
                       </td>
                       <td className="p-1 text-right text-white font-mono">
-                        {token.currentPrice === 0 ? "$0.00" : `$${Number(token.currentPrice).toFixed(6)}`}
+                        {`$${Number(token.currentPrice).toFixed(6)}`}
                       </td>
                       <td className="p-1 text-right text-gray-400 hidden md:table-cell">
-                        {token.currentPrice === 0 ? "$0.00" : formatNumber(token.currentPrice * 1_000_000_000)}
+                        {formatNumber(token.currentPrice * 1_000_000_000)}
                       </td>
                       <td className="p-1 text-right text-gray-400">
                         {/* {formatNumber(Number(token.buyVolume24h + token.sellVolume24h))} */}
