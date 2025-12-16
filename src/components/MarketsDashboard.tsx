@@ -66,6 +66,7 @@ export function MarketsDashboard() {
   const [bondingCurveVolumeData, setBondingCurveVolumeData] = useState<any[]>(
     []
   );
+  const [volumePeriod, setVolumePeriod] = useState<"5m" | "1h" | "6h" | "24h">("24h");
 
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
@@ -148,26 +149,40 @@ export function MarketsDashboard() {
     await toggleWatchlist(tokenAddress, chain);
   };
 
+  // Get volume leaders for selected time period (no backend request, use existing data)
+  const getVolumeLeaders = () => {
+    const getVolumeForPeriod = (token: TokenMarketOverview) => {
+      switch (volumePeriod) {
+        case "5m":
+          return token.buyVolume5m + token.sellVolume5m;
+        case "1h":
+          return token.buyVolume1h + token.sellVolume1h;
+        case "6h":
+          return token.buyVolume6h + token.sellVolume6h;
+        case "24h":
+        default:
+          return token.totalVolume;
+      }
+    };
+
+    return tokens
+      .map(token => ({ token, volume: getVolumeForPeriod(token) }))
+      .filter(item => item.volume > 0) // Filter non-zero values only
+      .sort((a, b) => b.volume - a.volume)
+      .slice(0, 6);
+  };
+
   return (
     <div className="h-screen overflow-auto bg-black text-gray-100 text-xs font-mono">
       {/* Main Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 p-1 h-full">
-        {/* Left Column */}
+        {/* Left Column - Terminal Placeholder */}
         <div className="lg:col-span-3 space-y-1">
-          {/* Volume Leaders */}
-          <div className="bg-gray-900 border border-gray-700 p-1">
-            <div className="text-orange-400 text-xs mb-1">VOLUME LEADERS</div>
-            {tokens.slice(0, 6).map((token) => (
-              <div
-                key={token.tokenAddress}
-                className="flex justify-between text-xs py-0.5 border-b border-gray-800 last:border-0"
-              >
-                <span className="text-white">{token.tokenSymbol}</span>
-                <span className="text-gray-400">
-                  {formatNumber(Number(token.totalVolume))}
-                </span>
-              </div>
-            ))}
+          <div className="bg-gray-900 border border-gray-700 p-4 h-full flex flex-col items-center justify-center">
+            <div className="text-orange-400 text-lg font-bold mb-2">TERMINAL</div>
+            <div className="text-gray-500 text-xs text-center">
+              Coming Soon
+            </div>
           </div>
         </div>
 
@@ -277,10 +292,10 @@ export function MarketsDashboard() {
                         {token.tokenName}
                       </td>
                       <td className="p-1 text-right text-white font-mono">
-                        {`$${Number(token.currentPrice).toFixed(6)}`}
+                        {token.currentPrice === 0 ? "$0.00" : `$${Number(token.currentPrice).toFixed(6)}`}
                       </td>
                       <td className="p-1 text-right text-gray-400 hidden md:table-cell">
-                        {formatNumber(token.currentPrice * 1_000_000_000)}
+                        {token.currentPrice === 0 ? "$0.00" : formatNumber(token.currentPrice * 1_000_000_000)}
                       </td>
                       <td className="p-1 text-right text-gray-400">
                         {/* {formatNumber(Number(token.buyVolume24h + token.sellVolume24h))} */}
@@ -314,6 +329,44 @@ export function MarketsDashboard() {
 
         {/* Right Column - Additional Data */}
         <div className="lg:col-span-3 space-y-1">
+          {/* Volume Leaders */}
+          <div className="bg-gray-900 border border-gray-700 p-1">
+            <div className="flex justify-between items-center mb-2">
+              <div className="text-orange-400 text-xs">VOLUME LEADERS</div>
+              <div className="flex gap-1">
+                {(["5m", "1h", "6h", "24h"] as const).map((period) => (
+                  <button
+                    key={period}
+                    onClick={() => setVolumePeriod(period)}
+                    className={`px-2 py-0.5 text-xs rounded transition-colors ${
+                      volumePeriod === period
+                        ? "bg-orange-400 text-black font-bold"
+                        : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+                    }`}
+                  >
+                    {period.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {getVolumeLeaders().map(({ token, volume }) => (
+              <div
+                key={token.tokenAddress}
+                className="flex justify-between text-xs py-0.5 border-b border-gray-800 last:border-0"
+              >
+                <span className="text-white">{token.tokenSymbol}</span>
+                <span className="text-gray-400">
+                  {formatNumber(volume)}
+                </span>
+              </div>
+            ))}
+            {getVolumeLeaders().length === 0 && (
+              <div className="text-center text-gray-400 py-2 text-xs">
+                No volume data for {volumePeriod}
+              </div>
+            )}
+          </div>
+
           {/* Graduated Tokens */}
           <div className="bg-gray-900 border border-gray-700 p-1">
             <div className="text-orange-400 text-xs mb-1">GRADUATED TOKENS</div>
@@ -437,25 +490,6 @@ export function MarketsDashboard() {
                   No bonding curve tokens found
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Market Depth */}
-          <div className="bg-gray-900 border border-gray-700 p-1">
-            <div className="text-orange-400 text-xs mb-1">MARKET DEPTH</div>
-            <div className="space-y-0.5">
-              {[
-                { level: "1%", bid: "847K", ask: "923K" },
-                { level: "2%", bid: "1.2M", ask: "1.4M" },
-                { level: "5%", bid: "2.8M", ask: "3.1M" },
-                { level: "10%", bid: "5.2M", ask: "5.9M" },
-              ].map((depth, idx) => (
-                <div key={idx} className="grid grid-cols-3 gap-1 text-xs">
-                  <div className="text-gray-400">{depth.level}</div>
-                  <div className="text-green-400">{depth.bid}</div>
-                  <div className="text-red-400">{depth.ask}</div>
-                </div>
-              ))}
             </div>
           </div>
 
