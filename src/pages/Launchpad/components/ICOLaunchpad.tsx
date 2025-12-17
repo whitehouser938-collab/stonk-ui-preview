@@ -1,18 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Toast } from "@/components/ui/toast";
-import {
-  Rocket,
-  Upload,
-  Calendar,
-  DollarSign,
-  Users,
-  Lock,
-  Building,
-  TrendingUp,
-  Activity,
-  ChevronDown,
-} from "lucide-react";
 
 import { deployTokenETH, DeployTokenResponse } from "../utils/deploy-token";
 import { addTokenToDb } from "../utils/add-token-to-db";
@@ -36,87 +24,6 @@ export interface ICOLaunchData {
   initialBuyAmount?: string; // Optional initial buy amount in ETH/WETH
   useETH?: boolean; // true for ETH, false for WETH
 }
-
-const recentIPOs = [
-  {
-    symbol: "RBLX",
-    name: "Roblox Corp",
-    price: 68.5,
-    change: 15.2,
-    volume: 45000000,
-    date: "2024-01-15",
-  },
-  {
-    symbol: "COIN",
-    name: "Coinbase Global",
-    price: 245.3,
-    change: -3.4,
-    volume: 12000000,
-    date: "2024-01-12",
-  },
-  {
-    symbol: "DASH",
-    name: "DoorDash Inc",
-    price: 142.75,
-    change: 8.7,
-    volume: 8500000,
-    date: "2024-01-10",
-  },
-  {
-    symbol: "SNOW",
-    name: "Snowflake Inc",
-    price: 198.9,
-    change: -2.1,
-    volume: 6700000,
-    date: "2024-01-08",
-  },
-  {
-    symbol: "PLTR",
-    name: "Palantir Technologies",
-    price: 16.45,
-    change: 12.8,
-    volume: 35000000,
-    date: "2024-01-05",
-  },
-];
-
-const upcomingIPOs = [
-  {
-    company: "TechCorp Solutions",
-    symbol: "TCHS",
-    priceRange: "$18-22",
-    date: "2024-02-15",
-    shares: "25M",
-  },
-  {
-    company: "Green Energy Systems",
-    symbol: "GREN",
-    priceRange: "$12-16",
-    date: "2024-02-20",
-    shares: "30M",
-  },
-  {
-    company: "FinTech Innovations",
-    symbol: "FTIN",
-    priceRange: "$25-30",
-    date: "2024-02-25",
-    shares: "20M",
-  },
-  {
-    company: "BioMed Research Corp",
-    symbol: "BMRC",
-    priceRange: "$35-42",
-    date: "2024-03-01",
-    shares: "15M",
-  },
-];
-
-const marketStats = {
-  totalIPOs: 156,
-  totalRaised: 42500000000,
-  avgReturn: 23.4,
-  successRate: 78.5,
-};
 
 export function ICOLaunchpad() {
   const { getETHSigner } = useETHWalletSigner();
@@ -468,48 +375,12 @@ export function ICOLaunchpad() {
   if (!isEthConnected) {
     return (
       <div className="bg-black text-gray-100 text-xs font-mono">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 p-1">
-          <div className="col-span-1 lg:col-span-8">
-            <WalletConnectionPrompt
-              title="Connect Wallet to Launch"
-              description="Connect your wallet to launch your ICO and create tokens"
-              actionText="Connect Wallet"
-            />
-          </div>
-          <div className="col-span-1 lg:col-span-4 space-y-1">
-            {/* Market Stats - show even when wallet not connected */}
-            <div className="bg-gray-900 border border-gray-700 p-2">
-              <div className="text-orange-400 mb-2 text-sm sm:text-base">
-                IPO MARKET STATS (YTD)
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
-                <div className="bg-black border border-gray-800 p-2">
-                  <div className="text-gray-400">TOTAL IPOs</div>
-                  <div className="text-white font-mono text-sm sm:text-base">
-                    {marketStats.totalIPOs}
-                  </div>
-                </div>
-                <div className="bg-black border border-gray-800 p-2">
-                  <div className="text-gray-400">TOTAL RAISED</div>
-                  <div className="text-white font-mono text-sm sm:text-base">
-                    ${(marketStats.totalRaised / 1e9).toFixed(1)}B
-                  </div>
-                </div>
-                <div className="bg-black border border-gray-800 p-2">
-                  <div className="text-gray-400">AVG RETURN</div>
-                  <div className="text-green-400 font-mono text-sm sm:text-base">
-                    +{marketStats.avgReturn.toFixed(1)}%
-                  </div>
-                </div>
-                <div className="bg-black border border-gray-800 p-2">
-                  <div className="text-gray-400">SUCCESS RATE</div>
-                  <div className="text-green-400 font-mono text-sm sm:text-base">
-                    {marketStats.successRate.toFixed(1)}%
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="p-1">
+          <WalletConnectionPrompt
+            title="Connect Wallet to Launch"
+            description="Connect your wallet to launch your ICO and create tokens"
+            actionText="Connect Wallet"
+          />
         </div>
       </div>
     );
@@ -519,9 +390,9 @@ export function ICOLaunchpad() {
     <div className="bg-black text-gray-100 text-xs font-mono">
       {isLoading && <LoadingScreen />}{" "}
       {/* Render LoadingScreen when isLoading is true */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 p-1">
-        {/* Left Column - IPO Form */}
-        <div className="col-span-1 lg:col-span-8 space-y-3">
+      <div className="p-1">
+        {/* IPO Form */}
+        <div className="space-y-3">
           {/* Main Form */}
           <div className="bg-gray-900 border border-gray-700 p-3">
             <form onSubmit={handleSubmit}>
@@ -808,169 +679,6 @@ export function ICOLaunchpad() {
                 </button>
               </div>
             </form>
-          </div>
-          {/* Support */}
-          <div className="bg-gray-900 border border-gray-700 p-2">
-            <div className="text-orange-400 mb-2 flex items-center text-sm sm:text-base">
-              <Users className="w-3 h-3 mr-1" />
-              ICO SUPPORT
-            </div>
-            <div className="space-y-1 text-xs sm:text-sm">
-              <div className="text-orange-400 cursor-pointer hover:underline">
-                📋 SEC Filing Guide
-              </div>
-              <div className="text-orange-400 cursor-pointer hover:underline">
-                🏦 Underwriter Network
-              </div>
-              <div className="text-orange-400 cursor-pointer hover:underline">
-                ⚖️ Legal Partner
-              </div>
-              <div className="text-orange-400 cursor-pointer hover:underline">
-                📞 Expert Consultation
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column - Market Data */}
-        <div className="col-span-1 lg:col-span-4 space-y-1">
-          {/* Market Stats */}
-          <div className="bg-gray-900 border border-gray-700 p-2">
-            <div className="text-orange-400 mb-2 text-sm sm:text-base">
-              IPO MARKET STATS (YTD)
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
-              <div className="bg-black border border-gray-800 p-2">
-                <div className="text-gray-400">TOTAL IPOs</div>
-                <div className="text-white font-mono text-sm sm:text-base">
-                  {marketStats.totalIPOs}
-                </div>
-              </div>
-              <div className="bg-black border border-gray-800 p-2">
-                <div className="text-gray-400">TOTAL RAISED</div>
-                <div className="text-white font-mono text-sm sm:text-base">
-                  ${(marketStats.totalRaised / 1e9).toFixed(1)}B
-                </div>
-              </div>
-              <div className="bg-black border border-gray-800 p-2">
-                <div className="text-gray-400">AVG RETURN</div>
-                <div className="text-green-400 font-mono text-sm sm:text-base">
-                  +{marketStats.avgReturn.toFixed(1)}%
-                </div>
-              </div>
-              <div className="bg-black border border-gray-800 p-2">
-                <div className="text-gray-400">SUCCESS RATE</div>
-                <div className="text-green-400 font-mono text-sm sm:text-base">
-                  {marketStats.successRate.toFixed(1)}%
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Recent IPOs */}
-          <div className="bg-gray-900 border border-gray-700 p-2">
-            <div className="text-orange-400 mb-2 text-sm sm:text-base">
-              RECENT IPO PERFORMANCE
-            </div>
-            <div className="space-y-1">
-              {recentIPOs.map((ipo, index) => (
-                <div
-                  key={index}
-                  className="bg-black border border-gray-800 p-2 text-xs sm:text-sm"
-                >
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-orange-400 font-bold">
-                        {ipo.symbol}
-                      </span>
-                      <span className="text-gray-400 truncate">{ipo.name}</span>
-                    </div>
-                    <span className="text-gray-400 text-xs">{ipo.date}</span>
-                  </div>
-                  <div className="flex justify-between items-center mt-1">
-                    <span className="text-white font-mono">
-                      ${ipo.price.toFixed(2)}
-                    </span>
-                    <span
-                      className={`font-mono ${
-                        ipo.change >= 0 ? "text-green-400" : "text-red-400"
-                      }`}
-                    >
-                      {ipo.change >= 0 ? "+" : ""}
-                      {ipo.change.toFixed(1)}%
-                    </span>
-                    <span className="text-gray-400 font-mono text-xs">
-                      Vol: {(ipo.volume / 1e6).toFixed(1)}M
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Upcoming IPOs */}
-          <div className="bg-gray-900 border border-gray-700 p-2">
-            <div className="text-orange-400 mb-2 text-sm sm:text-base">
-              UPCOMING IPOs
-            </div>
-            <div className="space-y-1">
-              {upcomingIPOs.map((ipo, index) => (
-                <div
-                  key={index}
-                  className="bg-black border border-gray-800 p-2 text-xs sm:text-sm"
-                >
-                  <div className="flex justify-between items-start">
-                    <span className="text-orange-400 font-bold">
-                      {ipo.symbol}
-                    </span>
-                    <span className="text-gray-400 text-xs">{ipo.date}</span>
-                  </div>
-                  <div className="text-white truncate">{ipo.company}</div>
-                  <div className="flex flex-col sm:flex-row justify-between mt-1 gap-1">
-                    <span className="text-gray-400">
-                      Range: {ipo.priceRange}
-                    </span>
-                    <span className="text-gray-400">Shares: {ipo.shares}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Launch Costs */}
-          <div className="bg-gray-900 border border-gray-700 p-2">
-            <div className="text-orange-400 mb-2 flex items-center text-sm sm:text-base">
-              <DollarSign className="w-3 h-3 mr-1" />
-              IPO COSTS
-            </div>
-            <div className="space-y-2 text-xs sm:text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-400">SEC Registration</span>
-                <span className="text-white">$250K</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Legal Fees</span>
-                <span className="text-white">$1.5M</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Accounting/Audit</span>
-                <span className="text-white">$800K</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Underwriter Fees</span>
-                <span className="text-white">7.0%</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Printing/Marketing</span>
-                <span className="text-white">$500K</span>
-              </div>
-              <div className="border-t border-gray-700 pt-2">
-                <div className="flex justify-between font-bold">
-                  <span className="text-gray-200">Est. Total Cost</span>
-                  <span className="text-orange-400">$38M+</span>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
