@@ -9,12 +9,11 @@ import { useAppKitAccount } from "@reown/appkit/react";
 
 const DEFAULT_CHAIN: Chain = "SEP";
 
-
 function formatNumber(num: number): string {
   if (num >= 1e9) return parseFloat((num / 1e9).toFixed(2)) + "B";
   if (num >= 1e6) return parseFloat((num / 1e6).toFixed(2)) + "M";
   if (num >= 1e3) return parseFloat((num / 1e3).toFixed(2)) + "K";
-  return parseFloat(num.toFixed(2))+"";
+  return parseFloat(num.toFixed(2)) + "";
 }
 
 function formatTokenAge(timestamp: string, _currentTime?: Date): string {
@@ -86,7 +85,9 @@ export function MarketsDashboard() {
   const [bondingCurveVolumeData, setBondingCurveVolumeData] = useState<any[]>(
     []
   );
-  const [volumePeriod, setVolumePeriod] = useState<"5m" | "1h" | "6h" | "24h">("24h");
+  const [volumePeriod, setVolumePeriod] = useState<"5m" | "1h" | "6h" | "24h">(
+    "24h"
+  );
 
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
@@ -94,9 +95,9 @@ export function MarketsDashboard() {
   const { isInWatchlist, toggleWatchlist } = useWatchlist(address);
 
   useEffect(() => {
-  if (!chainId) {
-    navigate(`/${DEFAULT_CHAIN}`, { replace: true });
-  }
+    if (!chainId) {
+      navigate(`/${DEFAULT_CHAIN}`, { replace: true });
+    }
   }, [chainId, navigate]);
 
   // Update current time every 60 seconds to refresh age displays
@@ -123,33 +124,39 @@ export function MarketsDashboard() {
     fetchTokens();
   }, []);
 
-  const handleMarketsUpdate = useCallback((updatedMarketsOverview: TokenMarketOverview[]) => {
-    setTokens((prev) => {
-      const updatedMarketsMap = new Map(
-        updatedMarketsOverview.map(market => [market.tokenAddress, market])
-      );
+  const handleMarketsUpdate = useCallback(
+    (updatedMarketsOverview: TokenMarketOverview[]) => {
+      setTokens((prev) => {
+        const updatedMarketsMap = new Map(
+          updatedMarketsOverview.map((market) => [market.tokenAddress, market])
+        );
 
-      const existingTokensMap = new Map(prev.map(token => [token.tokenAddress, token]));
+        const existingTokensMap = new Map(
+          prev.map((token) => [token.tokenAddress, token])
+        );
 
-      // Merge existing with updates
-      updatedMarketsMap.forEach((updatedMarket, tokenAddress) => {
-        const existing = existingTokensMap.get(tokenAddress);
-        if (existing) {
-          existingTokensMap.set(tokenAddress, {
-            ...existing,
-            ...updatedMarket
-          });
-        } else {
-          existingTokensMap.set(tokenAddress, updatedMarket);
-        }
+        // Merge existing with updates
+        updatedMarketsMap.forEach((updatedMarket, tokenAddress) => {
+          const existing = existingTokensMap.get(tokenAddress);
+          if (existing) {
+            existingTokensMap.set(tokenAddress, {
+              ...existing,
+              ...updatedMarket,
+            });
+          } else {
+            existingTokensMap.set(tokenAddress, updatedMarket);
+          }
+        });
+
+        // Convert back to array and sort by totalVolume descending
+        return Array.from(existingTokensMap.values()).sort(
+          (a, b) => b.totalVolume - a.totalVolume
+        );
       });
+    },
+    []
+  );
 
-      // Convert back to array and sort by totalVolume descending
-      return Array.from(existingTokensMap.values())
-        .sort((a, b) => b.totalVolume - a.totalVolume);
-    });
-  }, []);
-  
   useMarketsUpdates(chainId, handleMarketsUpdate);
 
   const handleTokenClick = (token: TokenMarketOverview) => {
@@ -186,8 +193,8 @@ export function MarketsDashboard() {
     };
 
     return tokens
-      .map(token => ({ token, volume: getVolumeForPeriod(token) }))
-      .filter(item => item.volume > 0) // Filter non-zero values only
+      .map((token) => ({ token, volume: getVolumeForPeriod(token) }))
+      .filter((item) => item.volume > 0) // Filter non-zero values only
       .sort((a, b) => b.volume - a.volume)
       .slice(0, 6);
   };
@@ -199,10 +206,10 @@ export function MarketsDashboard() {
         {/* Left Column - Terminal Placeholder */}
         <div className="lg:col-span-3 space-y-1">
           <div className="bg-gray-900 border border-gray-700 p-4 h-full flex flex-col items-center justify-center">
-            <div className="text-orange-400 text-lg font-bold mb-2">TERMINAL</div>
-            <div className="text-gray-500 text-xs text-center">
-              Coming Soon
+            <div className="text-orange-400 text-lg font-bold mb-2">
+              TERMINAL
             </div>
+            <div className="text-gray-500 text-xs text-center">Coming Soon</div>
           </div>
         </div>
 
@@ -251,7 +258,11 @@ export function MarketsDashboard() {
                       <td className="p-1 text-center">
                         <button
                           onClick={(e) =>
-                            handleToggleWatchlist(e, token.tokenAddress, token.chain)
+                            handleToggleWatchlist(
+                              e,
+                              token.tokenAddress,
+                              token.chain
+                            )
                           }
                           className="hover:scale-110 transition-transform"
                           title={
@@ -317,23 +328,42 @@ export function MarketsDashboard() {
                       <td className="p-1 text-right text-gray-400 hidden md:table-cell">
                         {formatNumber(token.currentPrice * 1_000_000_000)}
                       </td>
-                      <td className={`p-1 text-right ${formatPriceChange(token.priceChange24h).color}`}>
+                      <td
+                        className={`p-1 text-right ${
+                          formatPriceChange(token.priceChange24h).color
+                        }`}
+                      >
                         {formatPriceChange(token.priceChange24h).text}
                       </td>
-                      <td className={`p-1 text-right ${formatPriceChange(token.priceChange6h).color}`}>
+                      <td
+                        className={`p-1 text-right ${
+                          formatPriceChange(token.priceChange6h).color
+                        }`}
+                      >
                         {formatPriceChange(token.priceChange6h).text}
                       </td>
-                      <td className={`p-1 text-right ${formatPriceChange(token.priceChange1h).color}`}>
+                      <td
+                        className={`p-1 text-right ${
+                          formatPriceChange(token.priceChange1h).color
+                        }`}
+                      >
                         {formatPriceChange(token.priceChange1h).text}
                       </td>
-                      <td className={`p-1 text-right ${formatPriceChange(token.priceChange5m).color}`}>
+                      <td
+                        className={`p-1 text-right ${
+                          formatPriceChange(token.priceChange5m).color
+                        }`}
+                      >
                         {formatPriceChange(token.priceChange5m).text}
                       </td>
                       <td className="p-1 text-right text-gray-400 hidden md:table-cell">
                         {formatNumber(token.totalVolume)}
                       </td>
                       <td className="p-1 text-right text-gray-400 hidden md:table-cell">
-                        {formatTokenAge(token.deploymentTimestamp || "", currentTime)}
+                        {formatTokenAge(
+                          token.deploymentTimestamp || "",
+                          currentTime
+                        )}
                       </td>
                     </tr>
                   ))
@@ -371,9 +401,7 @@ export function MarketsDashboard() {
                 className="flex justify-between text-xs py-0.5 border-b border-gray-800 last:border-0"
               >
                 <span className="text-white">{token.tokenSymbol}</span>
-                <span className="text-gray-400">
-                  {formatNumber(volume)}
-                </span>
+                <span className="text-gray-400">{formatNumber(volume)}</span>
               </div>
             ))}
             {getVolumeLeaders().length === 0 && (
@@ -445,7 +473,10 @@ export function MarketsDashboard() {
                           {formatNumber(token.currentPrice * 1_000_000_000)}
                         </td>
                         <td className="p-1 text-right text-gray-400">
-                          {formatShortSince(token.graduationTimestamp, currentTime)}
+                          {formatShortSince(
+                            token.graduationTimestamp,
+                            currentTime
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -490,7 +521,9 @@ export function MarketsDashboard() {
                       <Circle className="w-3 h-3 text-blue-400" />
                       <span>{token.tokenSymbol}</span>
                     </div>
-                    <div className="text-green-400">{token.progress?.toFixed(1) ?? '0.0'}%</div>
+                    <div className="text-green-400">
+                      {token.progress?.toFixed(1) ?? "0.0"}%
+                    </div>
                     <div className="text-gray-400">
                       {formatNumber(token.totalVolume)}
                     </div>
@@ -506,29 +539,6 @@ export function MarketsDashboard() {
                   No bonding curve tokens found
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Exchange Status */}
-          <div className="bg-gray-900 border border-gray-700 p-1">
-            <div className="text-orange-400 text-xs mb-1">EXCHANGE STATUS</div>
-            <div className="space-y-0.5 text-xs">
-              <div className="flex justify-between">
-                <span className="text-gray-400">NYSE</span>
-                <span className="text-green-400">OPEN</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">NASDAQ</span>
-                <span className="text-green-400">OPEN</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">LSE</span>
-                <span className="text-yellow-400">CLOSED</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">TSE</span>
-                <span className="text-red-400">CLOSED</span>
-              </div>
             </div>
           </div>
         </div>
