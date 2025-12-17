@@ -281,12 +281,12 @@ export function MarketsDashboard() {
                         </button>
                       </td>
                       <td className="p-1">
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-2 whitespace-nowrap">
                           {token.logoUrl ? (
                             <img
                               src={token.logoUrl}
                               alt={`${token.tokenSymbol} logo`}
-                              className="w-4 h-4 rounded-full object-cover"
+                              className="w-4 h-4 rounded-full object-cover flex-shrink-0"
                               onError={(e) => {
                                 // Fallback to circle if image fails to load
                                 e.currentTarget.style.display = "none";
@@ -297,29 +297,29 @@ export function MarketsDashboard() {
                             />
                           ) : null}
                           <Circle
-                            className={`w-4 h-4 text-blue-400 ${
+                            className={`w-4 h-4 text-blue-400 flex-shrink-0 ${
                               token.logoUrl ? "hidden" : ""
                             }`}
                           />
-                          <span className="text-white font-bold">
+                          <span className="text-white font-bold flex-shrink-0">
                             {token.tokenSymbol}
                           </span>
-                          <span className="text-gray-400 text-xs">
+                          <span className="text-gray-400 text-xs flex-shrink-0">
                             {token.chain}
                           </span>
                           {token.graduated && (
-                            <span className="bg-green-600 text-white px-1 py-0.5 rounded text-xs">
+                            <span className="bg-green-600 text-white px-1 py-0.5 rounded text-xs flex-shrink-0">
                               GRAD
                             </span>
                           )}
                           {!token.graduated && (
-                            <span className="bg-purple-600 text-white px-1 py-0.5 rounded text-xs">
+                            <span className="bg-purple-600 text-white px-1 py-0.5 rounded text-xs flex-shrink-0">
                               BOND
                             </span>
                           )}
                         </div>
                       </td>
-                      <td className="p-1 text-gray-400 text-xs">
+                      <td className="p-1 text-gray-400 text-xs max-w-[150px] truncate">
                         {token.tokenName}
                       </td>
                       <td className="p-1 text-right text-white font-mono">
