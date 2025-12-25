@@ -435,14 +435,11 @@ export function MarketsDashboard() {
                       </div>
 
                       {/* Token Info - both rows in one block */}
-                      <div className="flex flex-col min-w-0 flex-1">
-                        {/* Row 1: Symbol, Age, and BOND/GRAD badge */}
+                      <div className="flex flex-col flex-1">
+                        {/* Row 1: Symbol and BOND/GRAD badge */}
                         <div className="flex items-center gap-1.5 mb-0.5">
-                          <span className="text-white font-bold text-sm truncate">
+                          <span className="text-white font-bold text-sm max-w-[120px] overflow-hidden text-ellipsis whitespace-nowrap">
                             {token.tokenSymbol}
-                          </span>
-                          <span className="text-green-400 text-[10px] flex-shrink-0">
-                            ▼{formatShortSince(token.deploymentTimestamp)}
                           </span>
                           {token.graduated ? (
                             <span className="bg-green-600 text-white px-1 py-0.5 rounded text-[9px] flex-shrink-0">
