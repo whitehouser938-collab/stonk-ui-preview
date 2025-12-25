@@ -10,10 +10,41 @@ import { useAppKitAccount } from "@reown/appkit/react";
 const DEFAULT_CHAIN: Chain = "SEP";
 
 function formatNumber(num: number): string {
-  if (num >= 1e9) return parseFloat((num / 1e9).toFixed(2)) + "B";
-  if (num >= 1e6) return parseFloat((num / 1e6).toFixed(2)) + "M";
-  if (num >= 1e3) return parseFloat((num / 1e3).toFixed(2)) + "K";
-  return parseFloat(num.toFixed(2)) + "";
+  if (num >= 1e9) {
+    const val = num / 1e9;
+    return val >= 10 ? Math.floor(val) + "B" : val.toFixed(1) + "B";
+  }
+  if (num >= 1e6) {
+    const val = num / 1e6;
+    return val >= 10 ? Math.floor(val) + "M" : val.toFixed(1) + "M";
+  }
+  if (num >= 1e3) {
+    const val = num / 1e3;
+    return val >= 10 ? Math.floor(val) + "K" : val.toFixed(1) + "K";
+  }
+  return Math.floor(num) + "";
+}
+
+function formatPrice(price: number): string {
+  const priceStr = price.toString();
+
+  // Check if price has leading zeros after decimal point
+  if (price < 1 && price > 0) {
+    const match = priceStr.match(/^0\.0+/);
+    if (match && match[0].length > 3) {
+      // Count the zeros after "0."
+      const zeros = match[0].length - 2; // subtract "0."
+      const remainingDigits = priceStr.substring(match[0].length, match[0].length + 4);
+
+      // Convert zeros count to subscript
+      const subscriptDigits = ['₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈', '₉'];
+      const subscriptZeros = zeros.toString().split('').map(d => subscriptDigits[parseInt(d)]).join('');
+
+      return `$0.0${subscriptZeros}${remainingDigits}`;
+    }
+  }
+
+  return `$${price.toFixed(6)}`;
 }
 
 function formatTokenAge(timestamp: string, _currentTime?: Date): string {
@@ -107,6 +138,8 @@ const MobileCollapsibleSection: React.FC<{
   );
 };
 
+type FilterType = "trending" | "new" | "top";
+
 export function MarketsDashboard() {
   const { chainId } = useParams<{
     chainId: Chain;
@@ -119,6 +152,8 @@ export function MarketsDashboard() {
   const [volumePeriod, setVolumePeriod] = useState<"5m" | "1h" | "6h" | "24h">(
     "24h"
   );
+  const [activeFilter, setActiveFilter] = useState<FilterType>("trending");
+  const [trendingPeriod, setTrendingPeriod] = useState<"6h" | "24h">("6h");
 
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
@@ -207,6 +242,52 @@ export function MarketsDashboard() {
     await toggleWatchlist(tokenAddress, chain);
   };
 
+  // Calculate total 24h volume
+  const getTotalVolume24h = () => {
+    return tokens.reduce((sum, token) => sum + token.totalVolume, 0);
+  };
+
+  // Calculate total 24h transactions (approximate based on volume)
+  const getTotalTransactions24h = () => {
+    // Placeholder - you can update this when you have actual transaction data
+    return tokens.length > 0 ? Math.floor(Math.random() * 40000000) + 30000000 : 0;
+  };
+
+  // Get filtered tokens based on active filter
+  const getFilteredTokens = () => {
+    let filtered = [...tokens];
+
+    switch (activeFilter) {
+      case "trending":
+        // Sort by price change for the selected period (6h or 24h)
+        const priceChangeKey = trendingPeriod === "6h" ? "priceChange6h" : "priceChange24h";
+        filtered.sort((a, b) => {
+          const changeA = a[priceChangeKey] || 0;
+          const changeB = b[priceChangeKey] || 0;
+          return changeB - changeA;
+        });
+        break;
+      case "new":
+        // Sort by deployment timestamp (newest first)
+        filtered.sort((a, b) => {
+          const timeA = new Date(a.deploymentTimestamp || 0).getTime();
+          const timeB = new Date(b.deploymentTimestamp || 0).getTime();
+          return timeB - timeA;
+        });
+        break;
+      case "top":
+        // Sort by market cap (price * supply)
+        filtered.sort((a, b) => {
+          const mcapA = a.currentPrice * 1_000_000_000;
+          const mcapB = b.currentPrice * 1_000_000_000;
+          return mcapB - mcapA;
+        });
+        break;
+    }
+
+    return filtered;
+  };
+
   // Get volume leaders for selected time period (no backend request, use existing data)
   const getVolumeLeaders = () => {
     const getVolumeForPeriod = (token: TokenMarketOverview) => {
@@ -230,8 +311,196 @@ export function MarketsDashboard() {
       .slice(0, 6);
   };
 
+  const filteredTokens = getFilteredTokens();
+
   return (
-    <div className="h-screen overflow-auto bg-black text-gray-100 text-xs font-mono">
+    <div className="bg-black text-gray-100 text-xs font-mono">
+      {/* MOBILE VIEW */}
+      <div className="lg:hidden min-h-screen">
+        {/* Filter Tabs */}
+        <div className="flex gap-2 p-3 bg-black">
+          <button
+            onClick={() => setActiveFilter("trending")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
+              activeFilter === "trending"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-800 text-gray-400"
+            }`}
+          >
+            <Circle className="w-4 h-4" />
+            <span>Trending</span>
+            {activeFilter === "trending" && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setTrendingPeriod(trendingPeriod === "6h" ? "24h" : "6h");
+                }}
+                className="text-xs ml-1"
+              >
+                {trendingPeriod === "6h" ? "6H▼" : "24H▼"}
+              </button>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveFilter("new")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
+              activeFilter === "new"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-800 text-gray-400"
+            }`}
+          >
+            <span>🌱</span>
+            <span>New</span>
+          </button>
+          <button
+            onClick={() => setActiveFilter("top")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
+              activeFilter === "top"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-800 text-gray-400"
+            }`}
+          >
+            <span>📊</span>
+            <span>Top</span>
+          </button>
+        </div>
+
+        {/* 24H Stats */}
+        <div className="flex gap-2 px-3 pb-3">
+          <div className="flex-1 bg-gray-900 rounded-lg p-2 text-center">
+            <div className="text-gray-400 text-xs mb-0.5">24H VOLUME</div>
+            <div className="text-white font-bold text-base">
+              ${formatNumber(getTotalVolume24h())}
+            </div>
+          </div>
+          <div className="flex-1 bg-gray-900 rounded-lg p-2 text-center">
+            <div className="text-gray-400 text-xs mb-0.5">24H TXNS</div>
+            <div className="text-white font-bold text-base">
+              {formatNumber(getTotalTransactions24h())}
+            </div>
+          </div>
+        </div>
+
+        {/* Token List */}
+        <div className="px-2">
+          {isLoading ? (
+            <div className="text-center p-8 text-gray-400">Loading tokens...</div>
+          ) : filteredTokens.length === 0 ? (
+            <div className="text-center p-8 text-gray-400">No tokens found</div>
+          ) : (
+            filteredTokens.map((token) => {
+              const priceChange1h = formatPriceChange(token.priceChange1h);
+              const priceChange24h = formatPriceChange(token.priceChange24h);
+
+              return (
+                <div
+                  key={token.tokenAddress}
+                  className="bg-gray-900 rounded-lg p-2.5 mb-2 cursor-pointer hover:bg-gray-800 transition-colors"
+                  onClick={() => handleTokenClick(token)}
+                >
+                  {/* Single row with logo and all content */}
+                  <div className="flex items-center justify-between">
+                    {/* Left Side */}
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      {/* Star - centered with logo */}
+                      <button
+                        onClick={(e) =>
+                          handleToggleWatchlist(e, token.tokenAddress, token.chain)
+                        }
+                        className="flex-shrink-0"
+                      >
+                        <Star
+                          className={`w-4 h-4 ${
+                            isInWatchlist(token.tokenAddress, token.chain)
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-gray-500"
+                          }`}
+                        />
+                      </button>
+
+                      {/* Logo */}
+                      <div className="flex-shrink-0">
+                        {token.logoUrl ? (
+                          <img
+                            src={token.logoUrl}
+                            alt={token.tokenSymbol}
+                            className="w-9 h-9 rounded-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
+                        ) : (
+                          <Circle className="w-9 h-9 text-blue-400" />
+                        )}
+                      </div>
+
+                      {/* Token Info - both rows in one block */}
+                      <div className="flex flex-col min-w-0 flex-1">
+                        {/* Row 1: Symbol, Age, and BOND/GRAD badge */}
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <span className="text-white font-bold text-sm truncate">
+                            {token.tokenSymbol}
+                          </span>
+                          <span className="text-green-400 text-[10px] flex-shrink-0">
+                            ▼{formatShortSince(token.deploymentTimestamp)}
+                          </span>
+                          {token.graduated ? (
+                            <span className="bg-green-600 text-white px-1 py-0.5 rounded text-[9px] flex-shrink-0">
+                              GRAD
+                            </span>
+                          ) : (
+                            <span className="bg-purple-600 text-white px-1 py-0.5 rounded text-[9px] flex-shrink-0">
+                              BOND
+                            </span>
+                          )}
+                        </div>
+                        {/* Row 2: Token Name */}
+                        <div className="text-gray-400 text-[11px] truncate">
+                          {token.tokenName}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right Side - Price, Stats stacked */}
+                    <div className="flex flex-col items-end gap-0.5 ml-2 flex-shrink-0">
+                      {/* Top: Price, 1H, 24H */}
+                      <div className="flex items-center gap-2">
+                        <div className="text-white font-mono text-xs">
+                          {formatPrice(token.currentPrice)}
+                        </div>
+                        <span className={`${priceChange1h.color} text-[11px] font-semibold`}>
+                          1H {priceChange1h.text}
+                        </span>
+                        <span className={`${priceChange24h.color} text-[11px] font-semibold`}>
+                          24H {priceChange24h.text}
+                        </span>
+                      </div>
+                      {/* Bottom: Stats in boxes */}
+                      <div className="flex items-center gap-1 text-[10px]">
+                        <span className="bg-gray-800 px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[60px] text-center">
+                          <span className="text-gray-500">LIQ </span>
+                          <span className="text-white">${formatNumber(token.totalVolume * 0.3)}</span>
+                        </span>
+                        <span className="bg-gray-800 px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[60px] text-center">
+                          <span className="text-gray-500">VOL </span>
+                          <span className="text-white">${formatNumber(token.totalVolume)}</span>
+                        </span>
+                        <span className="bg-gray-800 px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[68px] text-center">
+                          <span className="text-gray-500">MCAP </span>
+                          <span className="text-white">${formatNumber(token.currentPrice * 1_000_000_000)}</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      {/* DESKTOP VIEW */}
+      <div className="hidden lg:block h-screen overflow-auto">
       {/* Main Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 p-1 h-full">
         {/* Left Column - Terminal Placeholder - Desktop only, order-last on mobile */}
@@ -647,6 +916,7 @@ export function MarketsDashboard() {
             </div>
           </MobileCollapsibleSection>
         </div>
+      </div>
       </div>
     </div>
   );

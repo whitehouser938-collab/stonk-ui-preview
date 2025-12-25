@@ -53,8 +53,8 @@ export function Layout({ children }: LayoutProps) {
     <div className="min-h-screen bg-gray-950 text-gray-100">
       {/* Header */}
       <header className="border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm sticky top-0 z-40">
-        <div className="flex items-center justify-between px-4 sm:px-6 py-4">
-          <div className="flex items-center space-x-4 sm:space-x-8">
+        <div className="flex items-center justify-between px-3 sm:px-6 py-2 sm:py-4">
+          <div className="flex items-center space-x-2 sm:space-x-8">
             <div className="md:hidden">
               <button
                 onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
@@ -67,7 +67,7 @@ export function Layout({ children }: LayoutProps) {
                 )}
               </button>
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-orange-400 font-mono tracking-tight">
+            <h1 className="text-base sm:text-2xl font-bold text-orange-400 font-mono tracking-tight">
               STONK EXCHANGE
             </h1>
             <nav className="hidden md:flex space-x-1">
@@ -120,7 +120,7 @@ export function Layout({ children }: LayoutProps) {
       </header>
 
       {/* Main Content */}
-      <main className="p-4 sm:p-6">{children}</main>
+      <main className="p-0 sm:p-6">{children}</main>
     </div>
   );
 }
