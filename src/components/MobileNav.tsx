@@ -49,7 +49,7 @@ export function MobileNav({
 
   return (
     <div className="w-full md:hidden px-4 sm:px-6 pb-4">
-      <nav className="flex flex-col space-y-2 p-4 bg-gray-900 rounded-lg border border-gray-800">
+      <nav className="flex flex-col space-y-2 p-4">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
@@ -61,7 +61,7 @@ export function MobileNav({
                 "flex items-center space-x-3 px-4 py-3 rounded-lg text-base transition-all duration-200",
                 isActive
                   ? "bg-orange-600/20 text-orange-400"
-                  : "text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"
+                  : "text-gray-400 hover:text-gray-200"
               )}
             >
               <item.icon className="w-5 h-5" />

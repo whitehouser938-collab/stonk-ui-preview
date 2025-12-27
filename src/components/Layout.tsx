@@ -9,11 +9,13 @@ import {
   Menu,
   X,
   LogOut,
+  Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ConnectWallet } from "./ConnectWallet";
 import { MobileNav } from "./MobileNav";
 import SearchBar from "./SearchBar";
+import { SearchModal } from "./SearchModal";
 import GlobalClock from "./GlobalClock";
 import { ProfileDisplay } from "./ProfileDisplay";
 import { Button } from "./ui/button";
@@ -22,7 +24,7 @@ import { useDisconnect } from "wagmi";
 
 const navItems = [
   { path: "/", label: "Markets", icon: BarChart },
-  { path: "/research", label: "Research", icon: Search },
+  { path: "/research", label: "Watchlist", icon: Star },
   { path: "/launchpad", label: "Launchpad", icon: Rocket },
   { path: "/leaderboard", label: "Leaderboard", icon: Trophy },
 ];
@@ -34,6 +36,7 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
   const { disconnect } = useDisconnect();
   const { isConnected } = useAppKitAccount({ namespace: "eip155" });
@@ -93,6 +96,14 @@ export function Layout({ children }: LayoutProps) {
               })}
             </nav>
           </div>
+          {/* Mobile Search Icon - Right Side */}
+          <button
+            onClick={() => setIsSearchModalOpen(true)}
+            className="md:hidden p-2 rounded-md hover:bg-gray-800 text-orange-400"
+          >
+            <Search className="w-5 h-5" />
+          </button>
+          {/* Desktop Right Side */}
           <div className="hidden md:flex items-center space-x-2 sm:space-x-4 text-sm">
             <ProfileDisplay />
             {isConnected && (
@@ -115,9 +126,14 @@ export function Layout({ children }: LayoutProps) {
           onClose={() => setIsMobileNavOpen(false)}
         />
         <GlobalClock />
-        {/* Search Bar */}
-        <SearchBar />
+        {/* Search Bar - Desktop Only */}
+        <div className="hidden md:block">
+          <SearchBar />
+        </div>
       </header>
+
+      {/* Search Modal - Mobile Only */}
+      <SearchModal isOpen={isSearchModalOpen} onClose={() => setIsSearchModalOpen(false)} />
 
       {/* Main Content */}
       <main className="p-0 sm:p-6">{children}</main>

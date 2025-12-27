@@ -318,13 +318,13 @@ export function MarketsDashboard() {
       {/* MOBILE VIEW */}
       <div className="lg:hidden min-h-screen">
         {/* Filter Tabs */}
-        <div className="flex gap-2 p-3 bg-black">
+        <div className="flex justify-center gap-2 p-3 bg-black">
           <button
             onClick={() => setActiveFilter("trending")}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
               activeFilter === "trending"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-800 text-gray-400"
+                ? "bg-gray-900 text-white"
+                : "text-gray-400"
             }`}
           >
             <Circle className="w-4 h-4" />
@@ -345,8 +345,8 @@ export function MarketsDashboard() {
             onClick={() => setActiveFilter("new")}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
               activeFilter === "new"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-800 text-gray-400"
+                ? "bg-gray-900 text-white"
+                : "text-gray-400"
             }`}
           >
             <span>🌱</span>
@@ -356,8 +356,8 @@ export function MarketsDashboard() {
             onClick={() => setActiveFilter("top")}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
               activeFilter === "top"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-800 text-gray-400"
+                ? "bg-gray-900 text-white"
+                : "text-gray-400"
             }`}
           >
             <span>📊</span>
@@ -365,24 +365,8 @@ export function MarketsDashboard() {
           </button>
         </div>
 
-        {/* 24H Stats */}
-        <div className="flex gap-2 px-3 pb-3">
-          <div className="flex-1 bg-gray-900 rounded-lg p-2 text-center">
-            <div className="text-gray-400 text-xs mb-0.5">24H VOLUME</div>
-            <div className="text-white font-bold text-base">
-              ${formatNumber(getTotalVolume24h())}
-            </div>
-          </div>
-          <div className="flex-1 bg-gray-900 rounded-lg p-2 text-center">
-            <div className="text-gray-400 text-xs mb-0.5">24H TXNS</div>
-            <div className="text-white font-bold text-base">
-              {formatNumber(getTotalTransactions24h())}
-            </div>
-          </div>
-        </div>
-
         {/* Token List */}
-        <div className="px-2">
+        <div>
           {isLoading ? (
             <div className="text-center p-8 text-gray-400">Loading tokens...</div>
           ) : filteredTokens.length === 0 ? (
@@ -395,7 +379,7 @@ export function MarketsDashboard() {
               return (
                 <div
                   key={token.tokenAddress}
-                  className="bg-gray-900 rounded-lg p-2.5 mb-2 cursor-pointer hover:bg-gray-800 transition-colors"
+                  className="rounded-lg p-2.5 mb-2 cursor-pointer active:bg-gray-800 transition-colors"
                   onClick={() => handleTokenClick(token)}
                 >
                   {/* Single row with logo and all content */}
@@ -412,8 +396,8 @@ export function MarketsDashboard() {
                         <Star
                           className={`w-4 h-4 ${
                             isInWatchlist(token.tokenAddress, token.chain)
-                              ? "fill-yellow-400 text-yellow-400"
-                              : "text-gray-500"
+                              ? "fill-orange-400 text-orange-400"
+                              : "text-orange-400"
                           }`}
                         />
                       </button>
@@ -475,15 +459,15 @@ export function MarketsDashboard() {
                       {/* Bottom: Stats in boxes */}
                       <div className="flex items-center gap-1 text-[10px]">
                         <span className="bg-gray-800 px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[60px] text-center">
-                          <span className="text-gray-500">LIQ </span>
+                          <span className="text-orange-400">LIQ </span>
                           <span className="text-white">${formatNumber(token.totalVolume * 0.3)}</span>
                         </span>
                         <span className="bg-gray-800 px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[60px] text-center">
-                          <span className="text-gray-500">VOL </span>
+                          <span className="text-orange-400">VOL </span>
                           <span className="text-white">${formatNumber(token.totalVolume)}</span>
                         </span>
                         <span className="bg-gray-800 px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[68px] text-center">
-                          <span className="text-gray-500">MCAP </span>
+                          <span className="text-orange-400">MCAP </span>
                           <span className="text-white">${formatNumber(token.currentPrice * 1_000_000_000)}</span>
                         </span>
                       </div>
