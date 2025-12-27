@@ -138,7 +138,7 @@ const SearchBar = () => {
   };
 
   return (
-    <div className="bg-gray-900 border-b border-gray-700 p-2">
+    <div className="bg-gray-900 p-2">
       <div className="flex items-center space-x-4">
         <div className="relative flex-1 max-w-sm" ref={searchRef}>
           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3" />
