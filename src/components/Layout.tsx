@@ -53,9 +53,9 @@ export function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <div className="h-screen bg-gray-950 text-gray-100 flex flex-col overflow-hidden">
+    <div className="min-h-screen bg-gray-950 text-gray-100">
       {/* Header */}
-      <header className="bg-black/95 backdrop-blur-sm flex-shrink-0 z-40">
+      <header className="bg-black/95 backdrop-blur-sm sticky top-0 z-40">
         <div className="flex items-center justify-between px-3 sm:px-6 py-2 sm:py-4">
           <div className="flex items-center space-x-2 sm:space-x-8">
             <div className="md:hidden">
@@ -136,7 +136,7 @@ export function Layout({ children }: LayoutProps) {
       <SearchModal isOpen={isSearchModalOpen} onClose={() => setIsSearchModalOpen(false)} />
 
       {/* Main Content */}
-      <main className="flex-1 p-0 sm:p-6 overflow-hidden">{children}</main>
+      <main className="p-0 sm:p-6">{children}</main>
     </div>
   );
 }

@@ -154,11 +154,24 @@ export function MarketsDashboard() {
   );
   const [activeFilter, setActiveFilter] = useState<FilterType>("trending");
   const [trendingPeriod, setTrendingPeriod] = useState<"6h" | "24h">("6h");
+  const [headerHeight, setHeaderHeight] = useState(0);
 
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const { address, isConnected } = useAppKitAccount({ namespace: "eip155" });
   const { isInWatchlist, toggleWatchlist } = useWatchlist(address);
+
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      const header = document.querySelector('header');
+      if (header) {
+        setHeaderHeight(header.offsetHeight);
+      }
+    };
+    updateHeaderHeight();
+    window.addEventListener('resize', updateHeaderHeight);
+    return () => window.removeEventListener('resize', updateHeaderHeight);
+  }, []);
 
   useEffect(() => {
     if (!chainId) {
@@ -314,9 +327,9 @@ export function MarketsDashboard() {
   const filteredTokens = getFilteredTokens();
 
   return (
-    <div className="bg-black text-gray-100 text-xs font-mono h-full">
+    <div className="bg-black text-gray-100 text-xs font-mono">
       {/* MOBILE VIEW */}
-      <div className="lg:hidden h-full flex flex-col">
+      <div className="lg:hidden fixed inset-0 flex flex-col" style={{ top: headerHeight }}>
         {/* Filter Tabs */}
         <div className="flex justify-center gap-2 px-3 py-2 bg-black flex-shrink-0">
           <button
