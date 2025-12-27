@@ -349,7 +349,6 @@ export function MarketsDashboard() {
                 : "text-gray-400"
             }`}
           >
-            <span>🌱</span>
             <span>New</span>
           </button>
           <button
@@ -360,7 +359,6 @@ export function MarketsDashboard() {
                 : "text-gray-400"
             }`}
           >
-            <span>📊</span>
             <span>Top</span>
           </button>
         </div>
