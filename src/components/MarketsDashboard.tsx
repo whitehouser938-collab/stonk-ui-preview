@@ -396,8 +396,8 @@ export function MarketsDashboard() {
                         <Star
                           className={`w-4 h-4 ${
                             isInWatchlist(token.tokenAddress, token.chain)
-                              ? "fill-orange-400 text-orange-400"
-                              : "text-orange-400"
+                              ? "fill-gray-500 text-gray-500"
+                              : "text-gray-500"
                           }`}
                         />
                       </button>
@@ -557,7 +557,7 @@ export function MarketsDashboard() {
                           <Star
                             className={`w-4 h-4 ${
                               isInWatchlist(token.tokenAddress, token.chain)
-                                ? "fill-yellow-400 text-yellow-400"
+                                ? "fill-gray-500 text-gray-500"
                                 : "text-gray-500"
                             }`}
                           />
