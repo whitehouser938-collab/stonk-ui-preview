@@ -318,7 +318,7 @@ export function MarketsDashboard() {
       {/* MOBILE VIEW */}
       <div className="lg:hidden min-h-screen">
         {/* Filter Tabs */}
-        <div className="flex justify-center gap-2 p-3 bg-black">
+        <div className="flex justify-center gap-2 p-3 bg-black sticky top-0 z-10">
           <button
             onClick={() => setActiveFilter("trending")}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
