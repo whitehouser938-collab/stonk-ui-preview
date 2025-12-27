@@ -55,7 +55,7 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
       {/* Header */}
-      <header className="border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm sticky top-0 z-40">
+      <header className="border-b border-gray-800 bg-black sticky top-0 z-40">
         <div className="flex items-center justify-between px-3 sm:px-6 py-2 sm:py-4">
           <div className="flex items-center space-x-2 sm:space-x-8">
             <div className="md:hidden">
