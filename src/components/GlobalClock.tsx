@@ -19,7 +19,7 @@ const GlobalClock = () => {
   };
 
   return (
-    <div className="px-2 pb-1 text-xs font-mono">
+    <div className="px-2 text-xs font-mono">
       {/* Top Time Bar */}
       <div className="border-b border-orange-500/30 p-1 flex justify-between items-center">
         {/* Desktop view - original style */}

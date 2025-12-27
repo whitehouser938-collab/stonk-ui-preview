@@ -314,11 +314,11 @@ export function MarketsDashboard() {
   const filteredTokens = getFilteredTokens();
 
   return (
-    <div className="bg-black text-gray-100 text-xs font-mono">
+    <div className="bg-black text-gray-100 text-xs font-mono h-full">
       {/* MOBILE VIEW */}
-      <div className="lg:hidden min-h-screen">
+      <div className="lg:hidden h-full flex flex-col">
         {/* Filter Tabs */}
-        <div className="flex justify-center gap-2 px-3 py-1 bg-black sticky top-[100px] z-30">
+        <div className="flex justify-center gap-2 px-3 py-2 bg-black flex-shrink-0">
           <button
             onClick={() => setActiveFilter("trending")}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
@@ -362,8 +362,8 @@ export function MarketsDashboard() {
           </button>
         </div>
 
-        {/* Token List */}
-        <div className="pt-1">
+        {/* Token List - Scrollable Container */}
+        <div className="flex-1 overflow-y-auto">
           {isLoading ? (
             <div className="text-center p-8 text-gray-400">Loading tokens...</div>
           ) : filteredTokens.length === 0 ? (
