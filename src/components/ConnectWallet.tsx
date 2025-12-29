@@ -8,7 +8,7 @@ export function ConnectWallet() {
     namespace: "eip155",
   });
 
-  const buttonText = isEthConnected ? "Display Connections" : "Connect Wallet";
+  const buttonText = isEthConnected ? "Display Connections" : "Sign In";
 
   return (
     <Button

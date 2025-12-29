@@ -18,9 +18,9 @@ interface WalletConnectionPromptProps {
 }
 
 export function WalletConnectionPrompt({
-  title = "Connect Your Wallet",
-  description = "Connect your wallet to access this feature",
-  actionText = "Connect Wallet",
+  title = "Sign In",
+  description = "Sign in to access this feature",
+  actionText = "Sign In",
   variant = "default",
   className = "",
 }: WalletConnectionPromptProps) {

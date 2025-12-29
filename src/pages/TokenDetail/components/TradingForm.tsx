@@ -6,6 +6,7 @@ import { useLoading } from "@/hooks/use-loading";
 import { sellTokenETH, buyTokenETH } from "../utils/trade-token";
 import { useETHWalletSigner } from "@/hooks/signers/useWalletSigner";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { ethers } from "ethers";
 import {
   WalletConnectionPrompt,
@@ -104,6 +105,7 @@ function abbreviateHash(transactionHash: string): string {
 }
 
 const TradingForm = (props: TradingFormProps) => {
+  const isMobile = useIsMobile();
   const [isBuy, setIsBuy] = useState(true); // "buy" or "sell"
   const [paymentMethod, setPaymentMethod] = useState<"ETH" | "WETH">("ETH"); // Payment method for buy
   const [amount, setAmount] = useState("");
@@ -550,8 +552,8 @@ const TradingForm = (props: TradingFormProps) => {
     }
     if (!isWalletConnected) {
       toast({
-        title: "Wallet Not Connected",
-        description: "Please connect your wallet to trade.",
+        title: "Not Signed In",
+        description: "Please sign in to trade.",
         variant: "destructive",
       });
       return;
@@ -710,11 +712,11 @@ const TradingForm = (props: TradingFormProps) => {
   // Show wallet connection prompt if not connected
   if (!isWalletConnected) {
     return (
-      <div className="p-2 bg-gray-900 border border-gray-700">
+      <div className={`p-2 ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-700`}>
         <WalletConnectionPrompt
-          title="Connect Wallet to Trade"
-          description="Connect your wallet to buy and sell tokens"
-          actionText="Connect Wallet"
+          title="Sign In to Trade"
+          description="Sign in to buy and sell tokens"
+          actionText="Sign In"
           variant="compact"
         />
       </div>
@@ -724,7 +726,7 @@ const TradingForm = (props: TradingFormProps) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="p-2 bg-gray-900 border border-gray-700 space-y-6 text-gray-400"
+      className={`p-2 ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-700 space-y-6 text-gray-400`}
     >
       {/* Buy and Sell Buttons */}
       <div className="flex space-x-4">

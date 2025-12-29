@@ -27,6 +27,7 @@ import {
   Filter,
   X,
   Star,
+  User,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -108,7 +109,7 @@ const TokenPage = () => {
   const [hasMoreTrades, setHasMoreTrades] = useState(true);
   const [isFetchingMoreTrades, setIsFetchingMoreTrades] = useState(false);
   const [filteredTrader, setFilteredTrader] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"trades" | "holders">("trades");
+  const [activeTab, setActiveTab] = useState<"trades" | "holders" | "comments" | "info">("trades");
   const [holdersData, setHoldersData] = useState<TokenHolder[]>([]);
   const [holdersCount, setHoldersCount] = useState<number>(0);
   const [isLoadingHolders, setIsLoadingHolders] = useState(false);
@@ -539,7 +540,7 @@ const TokenPage = () => {
   const tradeRows = React.useMemo(
     () =>
       displayTrades.map((trade, idx) => (
-        <tr key={idx} className="border-b border-gray-800 last:border-0">
+        <tr key={idx} className={isMobile ? "" : "border-b border-gray-800 last:border-0"}>
           <td className="p-1 text-white font-mono">
             <div className="flex items-center space-x-2">
               {trade.makerPfp && (
@@ -610,7 +611,7 @@ const TokenPage = () => {
           </td>
         </tr>
       )),
-    [displayTrades, chainId, filteredTrader]
+    [displayTrades, chainId, filteredTrader, isMobile]
   );
 
   return (
@@ -665,71 +666,249 @@ const TokenPage = () => {
           {/* Left Column - Stock Overview */}
           <div className="col-span-12 lg:col-span-8 space-y-1">
             {/* Stock Header */}
-            <div className="bg-gray-900 border border-gray-700 p-2 overflow-hidden">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 min-w-0">
-                <div className="flex items-center space-x-3 mb-2 sm:mb-0 min-w-0 flex-1">
-                  {/* Token Logo */}
-                  {tokenData?.logoUrl ? (
-                    <img
-                      src={tokenData.logoUrl}
-                      alt={`${tokenData.name} logo`}
-                      className={`w-16 h-16 object-cover ${
-                        isMobile
-                          ? "cursor-pointer hover:opacity-80 transition-opacity"
-                          : ""
-                      }`}
-                      onClick={
-                        isMobile ? () => setIsLogoModalOpen(true) : undefined
-                      }
-                    />
-                  ) : (
+            <div className={`${isMobile ? "bg-black" : "bg-gray-900 border border-gray-700"} p-2 overflow-hidden`}>
+              {isMobile ? (
+                /* Mobile Layout - New Design */
+                <div className="space-y-3">
+                  {/* Token Name, Symbol, and Address */}
+                  <div className="flex items-center flex-wrap gap-x-2 gap-y-1">
+                    <div className="text-white font-bold text-xl leading-tight">
+                      {tokenData?.name && tokenData.name.length > 20
+                        ? tokenData.name.slice(0, 20) + "..."
+                        : tokenData?.name}{" "}
+                      <span className="text-gray-400">
+                        ({tokenData?.symbol})
+                      </span>
+                    </div>
+
+                    {/* Address with Copy */}
                     <div
-                      className={`w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 text-white font-bold text-lg flex items-center justify-center flex-shrink-0 ${
-                        isMobile
-                          ? "cursor-pointer hover:opacity-80 transition-opacity"
-                          : ""
-                      }`}
-                      onClick={
-                        isMobile ? () => setIsLogoModalOpen(true) : undefined
-                      }
+                      className="flex items-center space-x-1 text-gray-400 text-xs cursor-pointer hover:text-orange-400 transition-colors"
+                      onClick={async () => {
+                        if (tokenData?.tokenAddress) {
+                          await navigator.clipboard.writeText(tokenData.tokenAddress);
+                          toast({
+                            title: "Address Copied",
+                            description: "Token address copied to clipboard",
+                            variant: "default",
+                          });
+                        }
+                      }}
                     >
-                      {tokenData?.symbol}
+                      <span>
+                        {tokenData?.tokenAddress
+                          ? `${tokenData.tokenAddress.slice(0, 6)}...${tokenData.tokenAddress.slice(-4)}`
+                          : "N/A"}
+                      </span>
+                      <svg
+                        className="w-3 h-3"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Logo and Progress Bar Row */}
+                  <div className="flex items-start justify-between gap-3">
+                    {/* Token Logo */}
+                    <div className="flex-shrink-0">
+                      {tokenData?.logoUrl ? (
+                        <img
+                          src={tokenData.logoUrl}
+                          alt={`${tokenData.name} logo`}
+                          className="w-28 h-28 object-cover cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => setIsLogoModalOpen(true)}
+                        />
+                      ) : (
+                        <div
+                          className="w-28 h-28 bg-gradient-to-br from-orange-500 to-red-600 text-white font-bold text-3xl flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => setIsLogoModalOpen(true)}
+                        >
+                          {tokenData?.symbol?.slice(0, 3)}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="flex-1 flex flex-col justify-center space-y-2">
+                      <div className="text-xs text-gray-400">
+                        {tokenData?.isGraduated || tokenData?.uniswapPair ? (
+                          <span className="text-green-400 font-bold">Graduated</span>
+                        ) : (
+                          `Progress (${((tokenData?.bondingCurve?.progress ?? tokenData?.progress ?? 0)).toFixed(1)}%)`
+                        )}
+                      </div>
+                      <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full ${
+                            tokenData?.isGraduated || tokenData?.uniswapPair
+                              ? "bg-green-500"
+                              : "bg-yellow-400"
+                          }`}
+                          style={{
+                            width: `${
+                              tokenData?.isGraduated || tokenData?.uniswapPair
+                                ? 100
+                                : Math.min(100, Math.max(0, tokenData?.bondingCurve?.progress ?? tokenData?.progress ?? 0))
+                            }%`,
+                          }}
+                        />
+                      </div>
+                      {/* Social Links - Below Progress Bar with Separate Grey Boxes */}
+                      {(tokenData?.websiteUrl || tokenData?.twitterUrl || tokenData?.telegramUrl) && (
+                        <div className="flex items-center justify-end space-x-2">
+                          {tokenData?.websiteUrl && (
+                            <a
+                              href={tokenData.websiteUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-orange-400 hover:text-orange-300 transition-colors bg-gray-800 rounded p-1.5"
+                              title="Website"
+                            >
+                              <Globe className="w-4 h-4" />
+                            </a>
+                          )}
+                          {tokenData?.twitterUrl && (
+                            <a
+                              href={tokenData.twitterUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-orange-400 hover:text-orange-300 transition-colors bg-gray-800 rounded p-1.5"
+                              title="X (Twitter)"
+                            >
+                              <svg
+                                className="w-4 h-4"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                              >
+                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                              </svg>
+                            </a>
+                          )}
+                          {tokenData?.telegramUrl && (
+                            <a
+                              href={tokenData.telegramUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-orange-400 hover:text-orange-300 transition-colors bg-gray-800 rounded p-1.5"
+                              title="Telegram"
+                            >
+                              <svg
+                                className="w-4 h-4"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  clipRule="evenodd"
+                                  d="M23.1117 4.49449C23.4296 2.94472 21.9074 1.65683 20.4317 2.227L2.3425 9.21601C0.694517 9.85273 0.621087 12.1572 2.22518 12.8975L6.1645 14.7157L8.03849 21.2746C8.13583 21.6153 8.40618 21.8791 8.74917 21.968C9.09216 22.0568 9.45658 21.9576 9.70712 21.707L12.5938 18.8203L16.6375 21.8531C17.8113 22.7334 19.5019 22.0922 19.7967 20.6549L23.1117 4.49449ZM3.0633 11.0816L21.1525 4.0926L17.8375 20.2531L13.1 16.6999C12.7019 16.4013 12.1448 16.4409 11.7929 16.7928L10.5565 18.0292L10.928 15.9861L18.2071 8.70703C18.5614 8.35278 18.5988 7.79106 18.2947 7.39293C17.9906 6.99479 17.4389 6.88312 17.0039 7.13168L6.95124 12.876L3.0633 11.0816ZM8.17695 14.4791L8.78333 16.6015L9.01614 15.321C9.05253 15.1209 9.14908 14.9366 9.29291 14.7928L11.5128 12.573L8.17695 14.4791Z"
+                                />
+                              </svg>
+                            </a>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Market Cap */}
+                  <div className="flex items-baseline space-x-2">
+                    <div className="text-white font-mono text-3xl font-bold">
+                      ${formatNumber(tokenData.price.currentPrice * 1_000_000_000)}
+                    </div>
+                    <div className="text-gray-400 text-xs">Market cap</div>
+                  </div>
+
+                  {/* Liquidity - Only show if graduated */}
+                  {(tokenData?.isGraduated || tokenData?.uniswapPair) && (
+                    <div className="flex items-baseline space-x-2">
+                      <div className="text-white font-mono text-xl">
+                        ${formatNumber(parseFloat(getLiquidityWeth(tokenData)) * 2000)}
+                      </div>
+                      <div className="text-gray-400 text-xs">Liquidity</div>
                     </div>
                   )}
 
-                  <div className="flex-1 min-w-0">
-                    {/* Mobile: Stack vertically, Desktop: Keep horizontal */}
-                    <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-3">
-                      <div className="text-orange-400 font-bold text-2xl sm:text-3xl truncate">
+                  {/* Price Change with Time Selector */}
+                  <div className="flex items-center justify-between">
+                    <div
+                      className={`text-sm font-mono ${
+                        tokenData.price.priceChange24h >= 0
+                          ? "text-green-400"
+                          : "text-red-400"
+                      }`}
+                    >
+                      {tokenData.price.priceChange24h >= 0 ? "+" : ""}
+                      ${((tokenData.price.currentPrice * tokenData.price.priceChange24h) / 100).toFixed(2)}{" "}
+                      ({tokenData.price.priceChange24h >= 0 ? "+" : ""}
+                      {tokenData.price.priceChange24h.toFixed(2)}%) Past 24h
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <button className="px-1.5 py-0.5 text-[10px] bg-gray-800 text-gray-400 rounded">1m</button>
+                      <button className="px-1.5 py-0.5 text-[10px] bg-gray-800 text-gray-400 rounded">5m</button>
+                      <button className="px-1.5 py-0.5 text-[10px] bg-gray-800 text-gray-400 rounded">1h</button>
+                      <button className="px-1.5 py-0.5 text-[10px] bg-orange-600 text-white rounded">24h</button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* Desktop Layout - Keep Original */
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 min-w-0">
+                  <div className="flex items-center space-x-3 mb-2 sm:mb-0 min-w-0 flex-1">
+                    {/* Token Logo */}
+                    {tokenData?.logoUrl ? (
+                      <img
+                        src={tokenData.logoUrl}
+                        alt={`${tokenData.name} logo`}
+                        className="w-16 h-16 object-cover"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 text-white font-bold text-lg flex items-center justify-center flex-shrink-0">
                         {tokenData?.symbol}
                       </div>
-                      <div className="text-gray-300 text-sm sm:text-base truncate">
-                        {tokenData?.name}
+                    )}
+
+                    <div className="flex-1 min-w-0">
+                      {/* Desktop: Keep horizontal */}
+                      <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-3">
+                        <div className="text-orange-400 font-bold text-2xl sm:text-3xl truncate">
+                          {tokenData?.symbol}
+                        </div>
+                        <div className="text-gray-300 text-sm sm:text-base truncate">
+                          {tokenData?.name}
+                        </div>
+                        <span
+                          className="text-gray-400 text-xs cursor-pointer hover:text-orange-400 transition-colors truncate flex-shrink-0"
+                          onClick={async () => {
+                            if (tokenData?.tokenAddress) {
+                              await navigator.clipboard.writeText(
+                                tokenData.tokenAddress
+                              );
+                              toast({
+                                title: "Address Copied",
+                                description: "Token address copied to clipboard",
+                                variant: "default",
+                              });
+                            }
+                          }}
+                          title="Click to copy address"
+                        >
+                          {tokenData?.tokenAddress
+                            ? `${tokenData.tokenAddress.slice(
+                                0,
+                                6
+                              )}...${tokenData.tokenAddress.slice(-4)}`
+                            : "N/A"}
+                        </span>
                       </div>
-                      <span
-                        className="text-gray-400 text-xs cursor-pointer hover:text-orange-400 transition-colors truncate flex-shrink-0"
-                        onClick={async () => {
-                          if (tokenData?.tokenAddress) {
-                            await navigator.clipboard.writeText(
-                              tokenData.tokenAddress
-                            );
-                            toast({
-                              title: "Address Copied",
-                              description: "Token address copied to clipboard",
-                              variant: "default",
-                            });
-                          }
-                        }}
-                        title="Click to copy address"
-                      >
-                        {tokenData?.tokenAddress
-                          ? `${tokenData.tokenAddress.slice(
-                              0,
-                              6
-                            )}...${tokenData.tokenAddress.slice(-4)}`
-                          : "N/A"}
-                      </span>
-                    </div>
 
                     {/* Age and Deployer Row */}
                     <div className="flex items-center space-x-4 mt-2 overflow-hidden">
@@ -888,8 +1067,8 @@ const TokenPage = () => {
                   </div>
                 </div>
 
-                {/* Desktop: Price on the right, Mobile: Hidden (shown below instead) */}
-                <div className="hidden sm:block text-left sm:text-right min-w-0">
+                {/* Desktop: Price on the right */}
+                <div className="text-left sm:text-right min-w-0">
                   <div className="text-xl sm:text-2xl font-mono text-white truncate">
                     $
                     {tokenData.price.currentPrice
@@ -908,32 +1087,11 @@ const TokenPage = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Mobile: Price row underneath */}
-              <div className="sm:hidden mt-3 pt-3 border-t border-gray-700">
-                <div className="flex justify-between items-center min-w-0">
-                  <div className="text-xl font-mono text-white truncate">
-                    $
-                    {tokenData.price.currentPrice
-                      ? parseFloat(tokenData.price.currentPrice.toFixed(7))
-                      : "N/A"}
-                  </div>
-                  <div
-                    className={`text-lg font-mono flex-shrink-0 ml-2 ${
-                      tokenData.price.priceChange24h >= 0
-                        ? "text-green-400"
-                        : "text-red-400"
-                    }`}
-                  >
-                    {tokenData.price.priceChange24h >= 0 ? "+" : ""}
-                    {tokenData.price.priceChange24h.toFixed(2)}%
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Price Chart */}
-            <div className="bg-gray-900 border border-gray-700 p-2">
+            <div className={`${isMobile ? "bg-black" : "bg-gray-900 border border-gray-700"} p-2`}>
               <div className="text-orange-400 mb-2">INTRADAY CHART</div>
               <TradingViewChart
                 tokenSymbol={tokenData.symbol}
@@ -978,29 +1136,30 @@ const TokenPage = () => {
             </div> */}
             </div>
 
-            {/* Financial Metrics */}
+            {/* Financial Metrics - Hidden on Mobile */}
+            {!isMobile && (
             <div className="bg-gray-900 border border-gray-700 p-2">
               <div className="text-orange-400 mb-2">FINANCIAL METRICS</div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 text-xs">
-                <div className="bg-black border border-gray-800 p-2">
+                <div className="bg-black border border-black p-2">
                   <div className="text-gray-400">MARKET CAP</div>
                   <div className="text-white font-mono text-sm">
                     {formatNumber(tokenData.price.currentPrice * 1_000_000_000)}
                   </div>
                 </div>
-                <div className="bg-black border border-gray-800 p-2">
+                <div className="bg-black border border-black p-2">
                   <div className="text-gray-400">LIQUIDITY</div>
                   <div className="text-white font-mono text-sm">
                     {getLiquidityWeth(tokenData)} WETH
                   </div>
                 </div>
-                <div className="bg-black border border-gray-800 p-2">
+                <div className="bg-black border border-black p-2">
                   <div className="text-gray-400">FDV</div>
                   <div className="text-white font-mono text-sm">
                     {formatNumber(tokenData.price.currentPrice * 1_000_000_000)}
                   </div>
                 </div>
-                <div className="bg-black border border-gray-800 p-2">
+                <div className="bg-black border border-black p-2">
                   <div className="text-gray-400">PRICE (USD)</div>
                   <div className="text-white font-mono text-sm">
                     $
@@ -1009,13 +1168,13 @@ const TokenPage = () => {
                       : "N/A"}
                   </div>
                 </div>
-                <div className="bg-black border border-gray-800 p-2">
+                <div className="bg-black border border-black p-2">
                   <div className="text-gray-400">HOLDERS</div>
                   <div className="text-white font-mono text-sm">
                     {holdersCount > 0 ? holdersCount : "Loading..."}
                   </div>
                 </div>
-                <div className="bg-black border border-gray-800 p-2">
+                <div className="bg-black border border-black p-2">
                   <div className="text-gray-400">VOLUME</div>
                   <div className="text-white font-mono text-sm">
                     {formatNumber(tokenData.price.totalVolume)}
@@ -1023,8 +1182,10 @@ const TokenPage = () => {
                 </div>
               </div>
             </div>
+            )}
 
-            {/* Company Info */}
+            {/* Company Info - Hidden on Mobile (shown in INFO tab instead) */}
+            {!isMobile && (
             <div className="bg-gray-900 border border-gray-700 p-2">
               <div className="text-orange-400 mb-2">COMPANY INFO</div>
               <div className="space-y-2 text-xs">
@@ -1044,9 +1205,7 @@ const TokenPage = () => {
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 flex items-center justify-center">
-                    <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                  </div>
+                  <User className={`w-3 h-3 ${tokenData?.deployer ? "text-orange-400" : "text-gray-600"}`} />
                   <span className="text-gray-400">Deployer</span>
                   {tokenData?.deployer ? (
                     <button
@@ -1167,19 +1326,16 @@ const TokenPage = () => {
                 </div>
               </div>
               {/* Bottom Description */}
-              <div className="bg-gray-900 border-t border-orange-500/30 p-2">
-                <div className="text-orange-400 mb-1">COMPANY DESCRIPTION</div>
-                <div className="text-gray-300 text-xs leading-relaxed">
-                  {tokenData?.description}
+              {tokenData?.description && (
+                <div className="border-t border-orange-500/30 pt-2 mt-2">
+                  <div className="text-orange-400 mb-1">COMPANY DESCRIPTION</div>
+                  <div className="text-gray-300 text-xs leading-relaxed">
+                    {tokenData.description}
+                  </div>
                 </div>
-              </div>
-
-              {/* Comments Section */}
-              <CommentsSection
-                tokenAddress={tokenData?.tokenAddress || ""}
-                tokenSymbol={tokenData?.symbol || ""}
-              />
+              )}
             </div>
+            )}
           </div>
 
           {/* Right Column - Trading */}
@@ -1192,16 +1348,8 @@ const TokenPage = () => {
                 tradeConfirmCallbackRef.current = callback;
               }}
             />
-            {/* Bonding Curve Progress & Graduation Badge */}
-            <BondingCurveProgress
-              progress={
-                tokenData?.bondingCurve?.progress ?? tokenData?.progress ?? 0
-              }
-              graduated={tokenData?.isGraduated || !!tokenData?.uniswapPair}
-              uniswapPair={tokenData?.uniswapPair}
-            />
-            {/* Recent Trades / Holders */}
-            <div className="bg-gray-900 border border-gray-700 p-2">
+            {/* Trades / Holders / Comments */}
+            <div className={`${isMobile ? "bg-black" : "bg-gray-900 border border-gray-700"} p-2`}>
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-4">
                   <button
@@ -1212,7 +1360,7 @@ const TokenPage = () => {
                         : "text-gray-400 hover:text-orange-300"
                     }`}
                   >
-                    RECENT TRADES
+                    TRADES
                   </button>
                   <button
                     onClick={() => setActiveTab("holders")}
@@ -1222,7 +1370,27 @@ const TokenPage = () => {
                         : "text-gray-400 hover:text-orange-300"
                     }`}
                   >
-                    HOLDERS{holdersCount > 0 ? ` (${holdersCount})` : ""}
+                    HOLDERS{holdersCount > 0 ? `(${holdersCount})` : ""}
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("comments")}
+                    className={`text-xs font-bold transition-colors ${
+                      activeTab === "comments"
+                        ? "text-orange-400"
+                        : "text-gray-400 hover:text-orange-300"
+                    }`}
+                  >
+                    COMMENTS
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("info")}
+                    className={`text-xs font-bold transition-colors ${
+                      activeTab === "info"
+                        ? "text-orange-400"
+                        : "text-gray-400 hover:text-orange-300"
+                    }`}
+                  >
+                    INFO
                   </button>
                 </div>
                 {activeTab === "trades" && filteredTrader && (
@@ -1247,8 +1415,8 @@ const TokenPage = () => {
                     className="overflow-y-auto h-96 custom-scrollbar"
                   >
                     <table className="w-full text-xs min-w-[400px]">
-                      <thead className="bg-gray-900 sticky top-0 z-10">
-                        <tr className="text-gray-400 border-b border-gray-700">
+                      <thead className={`${isMobile ? "bg-black" : "bg-gray-900"} sticky top-0 z-10`}>
+                        <tr className={`text-gray-400 ${isMobile ? "" : "border-b border-gray-700"}`}>
                           <th className="text-left p-1">
                             <div className="flex items-center space-x-1">
                               <span>TRADER</span>
@@ -1271,11 +1439,11 @@ const TokenPage = () => {
                     </table>
                   </div>
                 )
-              ) : (
+              ) : activeTab === "holders" ? (
                 <div className="overflow-x-auto h-96 custom-scrollbar">
                   <table className="w-full text-xs min-w-[400px]">
-                    <thead className="bg-gray-900 sticky top-0 z-10">
-                      <tr className="text-gray-400 border-b border-gray-700">
+                    <thead className={`${isMobile ? "bg-black" : "bg-gray-900"} sticky top-0 z-10`}>
+                      <tr className={`text-gray-400 ${isMobile ? "" : "border-b border-gray-700"}`}>
                         <th className="text-left p-1">HOLDER</th>
                         <th className="text-right p-1">BALANCE</th>
                         <th className="text-right p-1">PERCENTAGE</th>
@@ -1299,7 +1467,7 @@ const TokenPage = () => {
                         <>
                           {/* Burnt tokens section */}
                           {burntData && (
-                            <tr className="border-b border-gray-800 bg-red-900/20">
+                            <tr className={`${isMobile ? "" : "border-b border-gray-800"} bg-red-900/20`}>
                               <td className="p-1 text-red-400">
                                 <div className="flex items-center space-x-2">
                                   <span className="text-lg">🔥</span>
@@ -1332,7 +1500,7 @@ const TokenPage = () => {
 
                           {/* Uniswap pair section */}
                           {uniswapData && (
-                            <tr className="border-b border-gray-800 bg-blue-900/20">
+                            <tr className={`${isMobile ? "" : "border-b border-gray-800"} bg-blue-900/20`}>
                               <td className="p-1 text-blue-400">
                                 <div className="flex items-center space-x-2">
                                   <span className="text-lg">🏦</span>
@@ -1365,7 +1533,7 @@ const TokenPage = () => {
 
                           {/* Bonding curve section - only for non-graduated tokens */}
                           {bondingCurveData && (
-                            <tr className="border-b border-gray-800 bg-purple-900/20">
+                            <tr className={`${isMobile ? "" : "border-b border-gray-800"} bg-purple-900/20`}>
                               <td className="p-1 text-purple-400">
                                 <div className="flex items-center space-x-2">
                                   <span className="text-lg">🔮</span>
@@ -1410,7 +1578,7 @@ const TokenPage = () => {
                             holdersData.map((holder, idx) => (
                               <tr
                                 key={idx}
-                                className="border-b border-gray-800 last:border-0"
+                                className={isMobile ? "" : "border-b border-gray-800 last:border-0"}
                               >
                                 <td className="p-1 text-white">
                                   <div className="flex items-center space-x-2">
@@ -1463,7 +1631,144 @@ const TokenPage = () => {
                     </tbody>
                   </table>
                 </div>
-              )}
+              ) : activeTab === "comments" ? (
+                <div className="h-96 overflow-y-auto custom-scrollbar">
+                  <CommentsSection
+                    tokenAddress={tokenData?.tokenAddress || ""}
+                    tokenSymbol={tokenData?.symbol || ""}
+                  />
+                </div>
+              ) : activeTab === "info" ? (
+                <div className="h-96 overflow-y-auto custom-scrollbar">
+                  <div className="space-y-3 text-xs p-2">
+                    {/* Age */}
+                    <div className="flex items-center space-x-2">
+                      <Clock className={`w-3 h-3 ${tokenData?.deploymentTimestamp ? "text-orange-400" : "text-gray-600"}`} />
+                      <span className="text-gray-400">Age</span>
+                      <span className="text-white">
+                        {tokenData?.deploymentTimestamp ? formatTokenAge(tokenData.deploymentTimestamp) : "Unknown"}
+                      </span>
+                    </div>
+
+                    {/* Deployer */}
+                    <div className="flex items-center space-x-2">
+                      <User className={`w-3 h-3 ${tokenData?.deployer ? "text-orange-400" : "text-gray-600"}`} />
+                      <span className="text-gray-400">Deployer</span>
+                      {tokenData?.deployer ? (
+                        <button
+                          onClick={() => navigate(`/profile/${tokenData.deployer.address}`)}
+                          className="flex items-center space-x-2 text-orange-400 hover:text-orange-300 transition-colors"
+                        >
+                          {tokenData.deployer.pfp && (
+                            <img
+                              src={tokenData.deployer.pfp}
+                              alt={`${tokenData.deployer.username || tokenData.deployer.address} profile`}
+                              className="w-4 h-4 rounded-full object-cover"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = "none";
+                              }}
+                            />
+                          )}
+                          <span className="truncate max-w-32">
+                            {tokenData.deployer.username || abbreviateAddress(tokenData.deployer.address)}
+                          </span>
+                        </button>
+                      ) : (
+                        <span className="text-gray-600">Unknown</span>
+                      )}
+                    </div>
+
+                    {/* Website */}
+                    <div className="flex items-center space-x-2">
+                      <Globe className={`w-3 h-3 ${tokenData?.websiteUrl ? "text-orange-400" : "text-gray-600"}`} />
+                      <span className="text-gray-400">Website</span>
+                      {tokenData?.websiteUrl ? (
+                        <a
+                          href={tokenData.websiteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-orange-400 hover:text-orange-300 transition-colors flex items-center space-x-1"
+                        >
+                          <span className="truncate max-w-32">{tokenData.websiteUrl}</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      ) : (
+                        <span className="text-gray-600">Not available</span>
+                      )}
+                    </div>
+
+                    {/* Twitter */}
+                    <div className="flex items-center space-x-2">
+                      <svg className={`w-3 h-3 ${tokenData?.twitterUrl ? "text-orange-400" : "text-gray-600"}`} viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                      </svg>
+                      <span className="text-gray-400">X (Twitter)</span>
+                      {tokenData?.twitterUrl ? (
+                        <a
+                          href={tokenData.twitterUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-orange-400 hover:text-orange-300 transition-colors flex items-center space-x-1"
+                        >
+                          <span className="truncate max-w-32">{tokenData.twitterUrl}</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      ) : (
+                        <span className="text-gray-600">Not available</span>
+                      )}
+                    </div>
+
+                    {/* Telegram */}
+                    <div className="flex items-center space-x-2">
+                      <svg className={`w-3 h-3 ${tokenData?.telegramUrl ? "text-orange-400" : "text-gray-600"}`} viewBox="0 0 24 24" fill="currentColor">
+                        <path fillRule="evenodd" clipRule="evenodd" d="M23.1117 4.49449C23.4296 2.94472 21.9074 1.65683 20.4317 2.227L2.3425 9.21601C0.694517 9.85273 0.621087 12.1572 2.22518 12.8975L6.1645 14.7157L8.03849 21.2746C8.13583 21.6153 8.40618 21.8791 8.74917 21.968C9.09216 22.0568 9.45658 21.9576 9.70712 21.707L12.5938 18.8203L16.6375 21.8531C17.8113 22.7334 19.5019 22.0922 19.7967 20.6549L23.1117 4.49449ZM3.0633 11.0816L21.1525 4.0926L17.8375 20.2531L13.1 16.6999C12.7019 16.4013 12.1448 16.4409 11.7929 16.7928L10.5565 18.0292L10.928 15.9861L18.2071 8.70703C18.5614 8.35278 18.5988 7.79106 18.2947 7.39293C17.9906 6.99479 17.4389 6.88312 17.0039 7.13168L6.95124 12.876L3.0633 11.0816ZM8.17695 14.4791L8.78333 16.6015L9.01614 15.321C9.05253 15.1209 9.14908 14.9366 9.29291 14.7928L11.5128 12.573L8.17695 14.4791Z" />
+                      </svg>
+                      <span className="text-gray-400">Telegram</span>
+                      {tokenData?.telegramUrl ? (
+                        <a
+                          href={tokenData.telegramUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-orange-400 hover:text-orange-300 transition-colors flex items-center space-x-1"
+                        >
+                          <span className="truncate max-w-32">{tokenData.telegramUrl}</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      ) : (
+                        <span className="text-gray-600">Not available</span>
+                      )}
+                    </div>
+
+                    {/* Uniswap Pair - if graduated */}
+                    {tokenData?.uniswapPair && (
+                      <div className="flex items-center space-x-2">
+                        <img src="/Uniswap_Logo.svg.png" alt="Uniswap" className="w-5 h-5" />
+                        <span className="text-gray-400">Uniswap Pair</span>
+                        <a
+                          href={`${getExplorer(chainId)}/address/${tokenData.uniswapPair}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-orange-400 hover:text-orange-300 transition-colors flex items-center space-x-1"
+                        >
+                          <span className="truncate max-w-32">{abbreviateAddress(tokenData.uniswapPair)}</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    )}
+
+                    {/* Description */}
+                    {tokenData?.description && (
+                      <div className={`pt-3 ${isMobile ? "" : "border-t border-gray-700"}`}>
+                        <div className="text-orange-400 mb-2">DESCRIPTION</div>
+                        <div className="text-gray-300 leading-relaxed">
+                          {tokenData.description}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
@@ -1472,7 +1777,7 @@ const TokenPage = () => {
       {/* Token Logo Modal - Mobile Only */}
       {isMobile && (
         <Dialog open={isLogoModalOpen} onOpenChange={setIsLogoModalOpen}>
-          <DialogContent className="max-w-sm mx-auto bg-gray-900 border-gray-700">
+          <DialogContent className="max-w-sm mx-auto bg-black border-gray-700">
             <DialogHeader>
               <DialogTitle className="text-center text-orange-400 text-lg">
                 {tokenData?.name || tokenData?.symbol}

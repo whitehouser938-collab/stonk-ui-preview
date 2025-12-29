@@ -41,7 +41,7 @@ export function ProfileDisplay() {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  // Show connect wallet button if not connected
+  // Show sign in button if not connected
   if (!isConnected) {
     return (
       <Button
@@ -50,7 +50,7 @@ export function ProfileDisplay() {
         className="flex items-center space-x-2 border-orange-500/30 bg-orange-600/10 text-orange-400 hover:text-orange-200 hover:bg-orange-800/10 hover:border-orange-300/50 transition-all duration-200"
       >
         <Wallet className="w-4 h-4" />
-        <span className="font-medium">Connect Wallet</span>
+        <span className="font-medium">Sign In</span>
       </Button>
     );
   }

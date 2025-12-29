@@ -1,4 +1,5 @@
 import React from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface BondingCurveProgressProps {
   progress?: number; // Progress value between 0 and 100
@@ -12,6 +13,7 @@ const BondingCurveProgress: React.FC<BondingCurveProgressProps> = ({
   graduated = false,
   uniswapPair,
 }) => {
+  const isMobile = useIsMobile();
   // If graduated or has uniswap pair, show 100% progress
   const isGraduated = graduated || !!uniswapPair;
   const clampedProgress = isGraduated
@@ -28,7 +30,7 @@ const BondingCurveProgress: React.FC<BondingCurveProgressProps> = ({
   }
 
   return (
-    <div className="w-full bg-gray-900 border border-gray-700 p-2">
+    <div className={`w-full ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-700 p-2`}>
       <div className="text-sm text-gray-400 mb-2">
         {isGraduated ? (
           <span className="text-green-400 font-bold">✓ GRADUATED</span>

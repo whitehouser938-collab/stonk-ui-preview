@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/contexts/UserContext";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { WalletConnectionPrompt } from "@/components/WalletConnectionPrompt";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CommentsSectionProps {
   tokenAddress: string;
@@ -19,6 +20,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
   tokenSymbol,
   userId,
 }) => {
+  const isMobile = useIsMobile();
   const [showCommentModal, setShowCommentModal] = useState(false);
   const { toast } = useToast();
   const { user } = useUser();
@@ -165,7 +167,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
   };
 
   return (
-    <div className="bg-gray-900 border border-gray-700 p-4">
+    <div className={`${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-700 p-4`}>
       {/* Section Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
@@ -192,7 +194,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
             <span>Add Comment</span>
           </button>
         ) : (
-          <div className="text-xs text-gray-500">Connect wallet to comment</div>
+          <div className="text-xs text-gray-500">Sign in to comment</div>
         )}
       </div>
 
@@ -215,9 +217,9 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
       {!isConnected ? (
         /* Show wallet connection prompt when not connected */
         <WalletConnectionPrompt
-          title="Connect Wallet to View Comments"
-          description="Connect your wallet to view and participate in discussions about this token."
-          actionText="Connect Wallet"
+          title="Sign In to View Comments"
+          description="Sign in to view and participate in discussions about this token."
+          actionText="Sign In"
           variant="compact"
         />
       ) : !loading ? (

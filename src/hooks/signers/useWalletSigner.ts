@@ -8,7 +8,7 @@ export const useETHWalletSigner = () => {
   const getETHSigner = async () => {
     if (!walletProvider) {
       throw new Error(
-        "Wallet not connected. Please connect your wallet first."
+        "Not signed in. Please sign in first."
       );
     }
     const ethersProvider = new BrowserProvider(walletProvider);

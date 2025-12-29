@@ -80,7 +80,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
       console.error("Error disconnecting wallet:", error);
       toast({
         title: "Disconnect Failed",
-        description: "Failed to disconnect wallet. Please try again.",
+        description: "Failed to disconnect. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -678,9 +678,9 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
           <h1 className="text-3xl font-bold text-orange-400">Profile</h1>
         </div>
         <WalletConnectionPrompt
-          title="Connect Your Wallet"
-          description="Connect your wallet to view and manage your profile. We'll automatically create your account when you connect."
-          actionText="Connect Wallet"
+          title="Sign In"
+          description="Sign in to view and manage your profile. We'll automatically create your account when you sign in."
+          actionText="Sign In"
         />
       </div>
     );

@@ -377,9 +377,9 @@ export function ICOLaunchpad() {
       <div className="bg-black text-gray-100 text-xs font-mono">
         <div className="p-1">
           <WalletConnectionPrompt
-            title="Connect Wallet to Launch"
-            description="Connect your wallet to launch your ICO and create tokens"
-            actionText="Connect Wallet"
+            title="Sign In to Launch"
+            description="Sign in to launch your ICO and create tokens"
+            actionText="Sign In"
           />
         </div>
       </div>

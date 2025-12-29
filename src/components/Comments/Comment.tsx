@@ -10,6 +10,7 @@ import { Reply } from "./Reply";
 import { Comment as CommentType, Reply as ReplyType } from "@/api/comment";
 import { UserAvatar } from "@/components/ui/avatar";
 import { Link } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CommentProps {
   comment: CommentType;
@@ -34,6 +35,7 @@ export const Comment: React.FC<CommentProps> = ({
   currentUserId,
   depth = 0,
 }) => {
+  const isMobile = useIsMobile();
   const [showAllReplies, setShowAllReplies] = useState(false);
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyContent, setReplyContent] = useState("");
@@ -91,7 +93,7 @@ export const Comment: React.FC<CommentProps> = ({
 
   return (
     <div className={`${depth > 0 ? "ml-6 border-l border-gray-700 pl-4" : ""}`}>
-      <div className="bg-gray-800 border border-gray-700 rounded p-3 mb-2">
+      <div className={`${isMobile ? "bg-black" : "bg-gray-800"} border border-gray-700 rounded p-3 mb-2`}>
         {/* Comment Header */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center space-x-2">
@@ -144,7 +146,7 @@ export const Comment: React.FC<CommentProps> = ({
             <textarea
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
-              className="w-full bg-gray-900 border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none"
+              className={`w-full ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none`}
               rows={3}
               maxLength={1000}
             />
@@ -203,7 +205,7 @@ export const Comment: React.FC<CommentProps> = ({
               value={replyContent}
               onChange={(e) => setReplyContent(e.target.value)}
               placeholder="Write a reply..."
-              className="w-full bg-gray-900 border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none"
+              className={`w-full ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none`}
               rows={3}
               maxLength={1000}
             />

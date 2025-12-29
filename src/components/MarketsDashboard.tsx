@@ -389,7 +389,7 @@ export function MarketsDashboard() {
               return (
                 <div
                   key={token.tokenAddress}
-                  className="rounded-lg p-2.5 mb-2 cursor-pointer active:bg-gray-800 transition-colors"
+                  className="bg-black rounded-lg p-2.5 mb-2 cursor-pointer active:bg-gray-800 transition-colors"
                   onClick={() => handleTokenClick(token)}
                 >
                   {/* Single row with logo and all content */}

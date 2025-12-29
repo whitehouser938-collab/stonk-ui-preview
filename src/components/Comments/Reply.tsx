@@ -3,6 +3,7 @@ import { Heart, Edit, Trash2 } from "lucide-react";
 import { Reply as ReplyType } from "@/api/comment";
 import { UserAvatar } from "@/components/ui/avatar";
 import { Link } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ReplyProps {
   reply: ReplyType;
@@ -19,6 +20,7 @@ export const Reply: React.FC<ReplyProps> = ({
   onEdit,
   currentUserId,
 }) => {
+  const isMobile = useIsMobile();
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(reply.content);
 
@@ -64,7 +66,7 @@ export const Reply: React.FC<ReplyProps> = ({
   };
 
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded p-3 mb-2 ml-6">
+    <div className={`${isMobile ? "bg-black" : "bg-gray-800"} border border-gray-700 rounded p-3 mb-2 ml-6`}>
       {/* Reply Header */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-2">
@@ -109,7 +111,7 @@ export const Reply: React.FC<ReplyProps> = ({
           <textarea
             value={editContent}
             onChange={(e) => setEditContent(e.target.value)}
-            className="w-full bg-gray-900 border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none"
+            className={`w-full ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none`}
             rows={3}
             maxLength={1000}
           />

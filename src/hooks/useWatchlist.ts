@@ -77,8 +77,8 @@ export const useWatchlist = (
     async (tokenAddress: string, chain: string): Promise<boolean> => {
       if (!walletAddress) {
         toast({
-          title: "Wallet not connected",
-          description: "Please connect your wallet to add tokens to watchlist",
+          title: "Not signed in",
+          description: "Please sign in to add tokens to watchlist",
           variant: "destructive",
         });
         return false;
@@ -115,8 +115,8 @@ export const useWatchlist = (
     async (tokenAddress: string, chain: string): Promise<boolean> => {
       if (!walletAddress) {
         toast({
-          title: "Wallet not connected",
-          description: "Please connect your wallet to remove tokens from watchlist",
+          title: "Not signed in",
+          description: "Please sign in to remove tokens from watchlist",
           variant: "destructive",
         });
         return false;
