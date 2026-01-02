@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   BarChart,
   Search,
@@ -40,6 +40,21 @@ export function Layout({ children }: LayoutProps) {
   const [disconnecting, setDisconnecting] = useState(false);
   const { disconnect } = useDisconnect();
   const { isConnected } = useAppKitAccount({ namespace: "eip155" });
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatTimeMobile = (timezone: string) => {
+    return currentTime.toLocaleTimeString("en-US", {
+      timeZone: timezone,
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+  };
 
   const handleDisconnect = async () => {
     setDisconnecting(true);
@@ -57,23 +72,64 @@ export function Layout({ children }: LayoutProps) {
       {/* Header */}
       <header className="bg-black/95 backdrop-blur-sm sticky top-0 z-40">
         <div className="flex items-center justify-between px-3 sm:px-6 py-2 sm:py-4">
-          <div className="flex items-center space-x-2 sm:space-x-8">
-            <div className="md:hidden">
-              <button
-                onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
-                className="p-2 rounded-md hover:bg-gray-800"
-              >
-                {isMobileNavOpen ? (
-                  <X className="w-6 h-6" />
-                ) : (
-                  <Menu className="w-6 h-6" />
-                )}
-              </button>
+          {/* Mobile Layout */}
+          <div className="md:hidden flex items-center space-x-2 flex-1 min-w-0">
+            <button
+              onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
+              className="p-2 rounded-md hover:bg-gray-800 flex-shrink-0"
+            >
+              {isMobileNavOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
+            </button>
+            <Link to="/" className="flex-shrink-0">
+              <h1 className="text-sm font-bold text-orange-400 font-mono tracking-tight whitespace-nowrap hover:text-orange-300 transition-colors">
+                STONK EXCHANGE
+              </h1>
+            </Link>
+
+            {/* Mobile: Sliding Time Ticker - between title and search */}
+            <div className="flex-1 overflow-hidden relative h-6 min-w-0 flex items-center">
+              <div className="absolute whitespace-nowrap animate-scroll-left text-[11px] font-mono text-white">
+                <span className="inline-block mx-2">
+                  <span className="text-orange-400">NYC</span> {formatTimeMobile("America/New_York")}
+                </span>
+                <span className="inline-block mx-2">
+                  <span className="text-orange-400">LON</span> {formatTimeMobile("Europe/London")}
+                </span>
+                <span className="inline-block mx-2">
+                  <span className="text-orange-400">TOK</span> {formatTimeMobile("Asia/Tokyo")}
+                </span>
+                <span className="inline-block mx-2">
+                  <span className="text-orange-400">SYD</span> {formatTimeMobile("Australia/Sydney")}
+                </span>
+                {/* Duplicate for seamless loop */}
+                <span className="inline-block mx-2">
+                  <span className="text-orange-400">NYC</span> {formatTimeMobile("America/New_York")}
+                </span>
+                <span className="inline-block mx-2">
+                  <span className="text-orange-400">LON</span> {formatTimeMobile("Europe/London")}
+                </span>
+                <span className="inline-block mx-2">
+                  <span className="text-orange-400">TOK</span> {formatTimeMobile("Asia/Tokyo")}
+                </span>
+                <span className="inline-block mx-2">
+                  <span className="text-orange-400">SYD</span> {formatTimeMobile("Australia/Sydney")}
+                </span>
+              </div>
             </div>
-            <h1 className="text-base sm:text-2xl font-bold text-orange-400 font-mono tracking-tight">
-              STONK EXCHANGE
-            </h1>
-            <nav className="hidden md:flex space-x-1">
+          </div>
+
+          {/* Desktop Layout */}
+          <div className="hidden md:flex items-center space-x-8">
+            <Link to="/">
+              <h1 className="text-2xl font-bold text-orange-400 font-mono tracking-tight whitespace-nowrap hover:text-orange-300 transition-colors cursor-pointer">
+                STONK EXCHANGE
+              </h1>
+            </Link>
+            <nav className="flex space-x-1">
               {navItems.map((item) => {
                 const isActive = location.pathname === item.path;
                 return (
@@ -96,10 +152,11 @@ export function Layout({ children }: LayoutProps) {
               })}
             </nav>
           </div>
+
           {/* Mobile Search Icon - Right Side */}
           <button
             onClick={() => setIsSearchModalOpen(true)}
-            className="md:hidden p-2 rounded-md hover:bg-gray-800 text-orange-400"
+            className="md:hidden p-2 rounded-md hover:bg-gray-800 text-orange-400 flex-shrink-0"
           >
             <Search className="w-5 h-5" />
           </button>
@@ -125,7 +182,10 @@ export function Layout({ children }: LayoutProps) {
           location={location}
           onClose={() => setIsMobileNavOpen(false)}
         />
-        <GlobalClock />
+        {/* Desktop: Show GlobalClock below header */}
+        <div className="hidden md:block">
+          <GlobalClock />
+        </div>
         {/* Search Bar - Desktop Only */}
         <div className="hidden md:block">
           <SearchBar />

@@ -20,6 +20,8 @@ interface TradingFormProps {
   chain?: string;
   symbol?: string;
   tokenAddress?: string;
+  initialMode?: 'buy' | 'sell';
+  lockMode?: boolean;
   onTradeConfirmed?: (
     callback: (txHash: string, tradeType: "BUY" | "SELL") => void
   ) => void;
@@ -106,7 +108,7 @@ function abbreviateHash(transactionHash: string): string {
 
 const TradingForm = (props: TradingFormProps) => {
   const isMobile = useIsMobile();
-  const [isBuy, setIsBuy] = useState(true); // "buy" or "sell"
+  const [isBuy, setIsBuy] = useState(props.initialMode === 'sell' ? false : true); // "buy" or "sell"
   const [paymentMethod, setPaymentMethod] = useState<"ETH" | "WETH">("ETH"); // Payment method for buy
   const [amount, setAmount] = useState("");
   const [slippagePercent, setSlippagePercent] = useState(1); // Default 1% slippage
@@ -728,46 +730,48 @@ const TradingForm = (props: TradingFormProps) => {
       onSubmit={handleSubmit}
       className={`p-2 ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-700 space-y-6 text-gray-400`}
     >
-      {/* Buy and Sell Buttons */}
-      <div className="flex space-x-4">
-        {/* Buy Button */}
-        <button
-          type="button"
-          onClick={() => {
-            setIsBuy(true);
-            setAmount("");
-          }}
-          className={`
-      w-full p-3 text-sm font-bold transition-all duration-200
-      ${
-        isBuy
-          ? "bg-orange-600 text-black"
-          : "bg-transparent border border-gray-700 text-gray-400 hover:bg-gray-800"
-      }
-    `}
-        >
-          Buy
-        </button>
+      {/* Buy and Sell Buttons - Hidden when lockMode is true */}
+      {!props.lockMode && (
+        <div className="flex space-x-4">
+          {/* Buy Button */}
+          <button
+            type="button"
+            onClick={() => {
+              setIsBuy(true);
+              setAmount("");
+            }}
+            className={`
+        w-full p-3 text-sm font-bold transition-all duration-200
+        ${
+          isBuy
+            ? "bg-orange-600 text-black"
+            : "bg-transparent border border-gray-700 text-gray-400 hover:bg-gray-800"
+        }
+      `}
+          >
+            Buy
+          </button>
 
-        {/* Sell Button */}
-        <button
-          type="button"
-          onClick={() => {
-            setIsBuy(false);
-            setAmount("");
-          }}
-          className={`
-      w-full p-3  text-sm font-bold transition-all duration-200
-      ${
-        !isBuy
-          ? "bg-orange-600 text-black"
-          : "bg-transparent border border-gray-700 text-gray-400 hover:bg-gray-800"
-      }
-    `}
-        >
-          Sell
-        </button>
-      </div>
+          {/* Sell Button */}
+          <button
+            type="button"
+            onClick={() => {
+              setIsBuy(false);
+              setAmount("");
+            }}
+            className={`
+        w-full p-3  text-sm font-bold transition-all duration-200
+        ${
+          !isBuy
+            ? "bg-orange-600 text-black"
+            : "bg-transparent border border-gray-700 text-gray-400 hover:bg-gray-800"
+        }
+      `}
+          >
+            Sell
+          </button>
+        </div>
+      )}
 
       {/* Payment Method Selector (only for buy mode) */}
       {isBuy && (

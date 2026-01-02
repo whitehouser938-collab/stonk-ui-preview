@@ -86,6 +86,81 @@ function getLiquidityWeth(tokenData: TokenFullData): string {
   return "N/A";
 }
 
+// Helper function to calculate NYSE trading hours progress
+function getNYSETradingProgress(): {
+  progress: number;
+  status: 'open' | 'closed' | 'pre-market' | 'after-hours';
+  isWeekend: boolean;
+  label: string;
+} {
+  // Get current time in ET timezone
+  const now = new Date();
+  const etTimeString = now.toLocaleString('en-US', { timeZone: 'America/New_York' });
+  const etDate = new Date(etTimeString);
+
+  const dayOfWeek = etDate.getDay(); // 0 = Sunday, 6 = Saturday
+  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+  if (isWeekend) {
+    return {
+      progress: 0,
+      status: 'closed',
+      isWeekend: true,
+      label: 'Market Closed (Weekend)'
+    };
+  }
+
+  // NYSE trading hours: 9:30 AM - 4:00 PM ET
+  const marketOpen = new Date(etDate);
+  marketOpen.setHours(9, 30, 0, 0);
+
+  const marketClose = new Date(etDate);
+  marketClose.setHours(16, 0, 0, 0);
+
+  const currentTime = etDate.getTime();
+  const openTime = marketOpen.getTime();
+  const closeTime = marketClose.getTime();
+
+  // Before market opens
+  if (currentTime < openTime) {
+    const minutesUntilOpen = Math.floor((openTime - currentTime) / 60000);
+    const hours = Math.floor(minutesUntilOpen / 60);
+    const minutes = minutesUntilOpen % 60;
+    return {
+      progress: 0,
+      status: 'pre-market',
+      isWeekend: false,
+      label: `Pre-Market (Opens in ${hours}h ${minutes}m)`
+    };
+  }
+
+  // After market closes
+  if (currentTime > closeTime) {
+    return {
+      progress: 100,
+      status: 'after-hours',
+      isWeekend: false,
+      label: 'After Hours'
+    };
+  }
+
+  // Market is open - calculate progress
+  const totalTradingTime = closeTime - openTime;
+  const elapsedTime = currentTime - openTime;
+  const progress = Math.min(100, Math.max(0, (elapsedTime / totalTradingTime) * 100));
+
+  const remainingTime = closeTime - currentTime;
+  const hoursRemaining = Math.floor(remainingTime / 3600000);
+  const minutesRemaining = Math.floor((remainingTime % 3600000) / 60000);
+
+  return {
+    progress,
+    status: 'open',
+    isWeekend: false,
+    label: `Market Open (${hoursRemaining}h ${minutesRemaining}m remaining)`
+  };
+}
+
 const TokenPage = () => {
   const { chainId, tokenAddress } = useParams<{
     chainId: Chain;
@@ -96,6 +171,8 @@ const TokenPage = () => {
   const [view, setView] = useState("details");
   const [error, setError] = useState<string | null>(null);
   const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
+  const [isTradingModalOpen, setIsTradingModalOpen] = useState(false);
+  const [tradeMode, setTradeMode] = useState<'buy' | 'sell'>('buy');
   const isMobile = useIsMobile();
 
   const { isLoading, startLoading, stopLoading } = useLoading();
@@ -118,6 +195,9 @@ const TokenPage = () => {
   const [bondingCurveData, setBondingCurveData] = useState<TokenHolder | null>(
     null
   );
+
+  // NYSE trading hours progress
+  const [nyseTradingProgress, setNyseTradingProgress] = useState(getNYSETradingProgress());
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -469,6 +549,14 @@ const TokenPage = () => {
     return () => clearInterval(timer);
   }, []);
 
+  // Update NYSE trading progress every minute
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNyseTradingProgress(getNYSETradingProgress());
+    }, 60000); // Update every minute
+    return () => clearInterval(timer);
+  }, []);
+
   function abbreviateNumber(num: string | number): string {
     const n = typeof num === "string" ? parseFloat(num) : num;
     if (n >= 1e9) return (n / 1e9).toFixed(2) + "B";
@@ -662,7 +750,7 @@ const TokenPage = () => {
 
       {/* Main Content - Only show if no error and token data exists */}
       {!error && tokenData && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 p-1">
+        <div className={`grid grid-cols-1 lg:grid-cols-12 gap-1 p-1 ${isMobile ? 'pb-24' : ''}`}>
           {/* Left Column - Stock Overview */}
           <div className="col-span-12 lg:col-span-8 space-y-1">
             {/* Stock Header */}
@@ -739,11 +827,11 @@ const TokenPage = () => {
 
                     {/* Progress Bar */}
                     <div className="flex-1 flex flex-col justify-center space-y-2">
-                      <div className="text-xs text-gray-400">
+                      <div className="text-xs text-gray-400 text-right">
                         {tokenData?.isGraduated || tokenData?.uniswapPair ? (
                           <span className="text-green-400 font-bold">Graduated</span>
                         ) : (
-                          `Progress (${((tokenData?.bondingCurve?.progress ?? tokenData?.progress ?? 0)).toFixed(1)}%)`
+                          `Progress ${((tokenData?.bondingCurve?.progress ?? tokenData?.progress ?? 0)).toFixed(1)}%`
                         )}
                       </div>
                       <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
@@ -762,6 +850,26 @@ const TokenPage = () => {
                           }}
                         />
                       </div>
+
+                      {/* NYSE Trading Hours Progress Bar */}
+                      <div className="text-xs text-gray-400 text-right mt-2">
+                        <span className={`${
+                          nyseTradingProgress.status === 'open' ? 'text-green-400' : 'text-red-400'
+                        } font-bold`}>
+                          {nyseTradingProgress.label}
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full transition-all duration-1000 ${
+                            nyseTradingProgress.status === 'open' ? 'bg-gradient-to-r from-green-500 to-red-500' : 'bg-red-500'
+                          }`}
+                          style={{
+                            width: `${nyseTradingProgress.progress}%`,
+                          }}
+                        />
+                      </div>
+
                       {/* Social Links - Below Progress Bar with Separate Grey Boxes */}
                       {(tokenData?.websiteUrl || tokenData?.twitterUrl || tokenData?.telegramUrl) && (
                         <div className="flex items-center justify-end space-x-2">
@@ -782,7 +890,7 @@ const TokenPage = () => {
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-orange-400 hover:text-orange-300 transition-colors bg-gray-800 rounded p-1.5"
-                              title="X (Twitter)"
+                              title="X"
                             >
                               <svg
                                 className="w-4 h-4"
@@ -968,7 +1076,7 @@ const TokenPage = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-orange-400 hover:text-orange-300 transition-colors"
-                          title="X (Twitter)"
+                          title="X"
                         >
                           <svg
                             className="w-4 h-4"
@@ -1092,7 +1200,7 @@ const TokenPage = () => {
 
             {/* Price Chart */}
             <div className={`${isMobile ? "bg-black" : "bg-gray-900 border border-gray-700"} p-2`}>
-              <div className="text-orange-400 mb-2">INTRADAY CHART</div>
+              {!isMobile && <div className="text-orange-400 mb-2">INTRADAY CHART</div>}
               <TradingViewChart
                 tokenSymbol={tokenData.symbol}
                 tokenAddress={tokenAddress}
@@ -1238,13 +1346,7 @@ const TokenPage = () => {
                   )}
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Globe
-                    className={`w-3 h-3 ${
-                      tokenData?.websiteUrl
-                        ? "text-orange-400"
-                        : "text-gray-600"
-                    }`}
-                  />
+                  <Globe className="w-3 h-3 text-orange-400" />
                   <span className="text-gray-400">Website</span>
                   {tokenData?.websiteUrl ? (
                     <a
@@ -1264,17 +1366,13 @@ const TokenPage = () => {
                 </div>
                 <div className="flex items-center space-x-2">
                   <svg
-                    className={`w-3 h-3 ${
-                      tokenData?.twitterUrl
-                        ? "text-orange-400"
-                        : "text-gray-600"
-                    }`}
+                    className="w-3 h-3 text-orange-400"
                     viewBox="0 0 24 24"
                     fill="currentColor"
                   >
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                   </svg>
-                  <span className="text-gray-400">X (Twitter)</span>
+                  <span className="text-gray-400">X</span>
                   {tokenData?.twitterUrl ? (
                     <a
                       href={tokenData.twitterUrl}
@@ -1293,11 +1391,7 @@ const TokenPage = () => {
                 </div>
                 <div className="flex items-center space-x-2">
                   <svg
-                    className={`w-3 h-3 ${
-                      tokenData?.telegramUrl
-                        ? "text-orange-400"
-                        : "text-gray-600"
-                    }`}
+                    className="w-3 h-3 text-orange-400"
                     viewBox="0 0 24 24"
                     fill="currentColor"
                   >
@@ -1340,14 +1434,19 @@ const TokenPage = () => {
 
           {/* Right Column - Trading */}
           <div className="col-span-12 lg:col-span-4 space-y-1">
-            <TradingForm
-              chain={tokenData?.chain}
-              symbol={tokenData?.symbol}
-              tokenAddress={tokenData?.tokenAddress}
-              onTradeConfirmed={(callback) => {
-                tradeConfirmCallbackRef.current = callback;
-              }}
-            />
+            {/* Desktop: Show TradingForm inline */}
+            {!isMobile && (
+              <TradingForm
+                chain={tokenData?.chain}
+                symbol={tokenData?.symbol}
+                tokenAddress={tokenData?.tokenAddress}
+                onTradeConfirmed={(callback) => {
+                  tradeConfirmCallbackRef.current = callback;
+                }}
+              />
+            )}
+
+
             {/* Trades / Holders / Comments */}
             <div className={`${isMobile ? "bg-black" : "bg-gray-900 border border-gray-700"} p-2`}>
               <div className="flex items-center justify-between mb-2">
@@ -1412,7 +1511,7 @@ const TokenPage = () => {
                 ) : (
                   <div
                     ref={scrollContainerRef}
-                    className="overflow-y-auto h-96 custom-scrollbar"
+                    className="overflow-y-auto max-h-96 custom-scrollbar"
                   >
                     <table className="w-full text-xs min-w-[400px]">
                       <thead className={`${isMobile ? "bg-black" : "bg-gray-900"} sticky top-0 z-10`}>
@@ -1440,7 +1539,7 @@ const TokenPage = () => {
                   </div>
                 )
               ) : activeTab === "holders" ? (
-                <div className="overflow-x-auto h-96 custom-scrollbar">
+                <div className="overflow-x-auto max-h-96 custom-scrollbar">
                   <table className="w-full text-xs min-w-[400px]">
                     <thead className={`${isMobile ? "bg-black" : "bg-gray-900"} sticky top-0 z-10`}>
                       <tr className={`text-gray-400 ${isMobile ? "" : "border-b border-gray-700"}`}>
@@ -1632,14 +1731,14 @@ const TokenPage = () => {
                   </table>
                 </div>
               ) : activeTab === "comments" ? (
-                <div className="h-96 overflow-y-auto custom-scrollbar">
+                <div className="max-h-96 overflow-y-auto custom-scrollbar">
                   <CommentsSection
                     tokenAddress={tokenData?.tokenAddress || ""}
                     tokenSymbol={tokenData?.symbol || ""}
                   />
                 </div>
               ) : activeTab === "info" ? (
-                <div className="h-96 overflow-y-auto custom-scrollbar">
+                <div className="max-h-96 overflow-y-auto custom-scrollbar">
                   <div className="space-y-3 text-xs p-2">
                     {/* Age */}
                     <div className="flex items-center space-x-2">
@@ -1681,7 +1780,7 @@ const TokenPage = () => {
 
                     {/* Website */}
                     <div className="flex items-center space-x-2">
-                      <Globe className={`w-3 h-3 ${tokenData?.websiteUrl ? "text-orange-400" : "text-gray-600"}`} />
+                      <Globe className="w-3 h-3 text-orange-400" />
                       <span className="text-gray-400">Website</span>
                       {tokenData?.websiteUrl ? (
                         <a
@@ -1698,12 +1797,12 @@ const TokenPage = () => {
                       )}
                     </div>
 
-                    {/* Twitter */}
+                    {/* X */}
                     <div className="flex items-center space-x-2">
-                      <svg className={`w-3 h-3 ${tokenData?.twitterUrl ? "text-orange-400" : "text-gray-600"}`} viewBox="0 0 24 24" fill="currentColor">
+                      <svg className="w-3 h-3 text-orange-400" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                       </svg>
-                      <span className="text-gray-400">X (Twitter)</span>
+                      <span className="text-gray-400">X</span>
                       {tokenData?.twitterUrl ? (
                         <a
                           href={tokenData.twitterUrl}
@@ -1721,7 +1820,7 @@ const TokenPage = () => {
 
                     {/* Telegram */}
                     <div className="flex items-center space-x-2">
-                      <svg className={`w-3 h-3 ${tokenData?.telegramUrl ? "text-orange-400" : "text-gray-600"}`} viewBox="0 0 24 24" fill="currentColor">
+                      <svg className="w-3 h-3 text-orange-400" viewBox="0 0 24 24" fill="currentColor">
                         <path fillRule="evenodd" clipRule="evenodd" d="M23.1117 4.49449C23.4296 2.94472 21.9074 1.65683 20.4317 2.227L2.3425 9.21601C0.694517 9.85273 0.621087 12.1572 2.22518 12.8975L6.1645 14.7157L8.03849 21.2746C8.13583 21.6153 8.40618 21.8791 8.74917 21.968C9.09216 22.0568 9.45658 21.9576 9.70712 21.707L12.5938 18.8203L16.6375 21.8531C17.8113 22.7334 19.5019 22.0922 19.7967 20.6549L23.1117 4.49449ZM3.0633 11.0816L21.1525 4.0926L17.8375 20.2531L13.1 16.6999C12.7019 16.4013 12.1448 16.4409 11.7929 16.7928L10.5565 18.0292L10.928 15.9861L18.2071 8.70703C18.5614 8.35278 18.5988 7.79106 18.2947 7.39293C17.9906 6.99479 17.4389 6.88312 17.0039 7.13168L6.95124 12.876L3.0633 11.0816ZM8.17695 14.4791L8.78333 16.6015L9.01614 15.321C9.05253 15.1209 9.14908 14.9366 9.29291 14.7928L11.5128 12.573L8.17695 14.4791Z" />
                       </svg>
                       <span className="text-gray-400">Telegram</span>
@@ -1749,7 +1848,7 @@ const TokenPage = () => {
                           href={`${getExplorer(chainId)}/address/${tokenData.uniswapPair}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-orange-400 hover:text-orange-300 transition-colors flex items-center space-x-1"
+                          className="text-pink-400 hover:text-pink-300 transition-colors flex items-center space-x-1"
                         >
                           <span className="truncate max-w-32">{abbreviateAddress(tokenData.uniswapPair)}</span>
                           <ExternalLink className="w-3 h-3" />
@@ -1814,6 +1913,79 @@ const TokenPage = () => {
             </div>
           </DialogContent>
         </Dialog>
+      )}
+
+      {/* Trading Modal - Mobile Only - Slide Up from Bottom */}
+      {isMobile && (
+        <>
+          {/* Backdrop */}
+          {isTradingModalOpen && (
+            <div
+              className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300"
+              onClick={() => setIsTradingModalOpen(false)}
+            />
+          )}
+          {/* Slide-up Modal */}
+          <div
+            className={`fixed left-0 right-0 bottom-0 bg-black border-t border-gray-700 z-50 transition-transform duration-300 ease-out h-[70vh] ${
+              isTradingModalOpen ? 'translate-y-0' : 'translate-y-full'
+            }`}
+          >
+            <div className="h-full flex flex-col">
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b border-gray-700">
+                <h2 className="text-orange-400 text-lg font-bold">
+                  Trade {tokenData?.symbol}
+                </h2>
+                <button
+                  onClick={() => setIsTradingModalOpen(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              {/* Content - Scrollable */}
+              <div className="flex-1 overflow-y-auto">
+                <TradingForm
+                  chain={tokenData?.chain}
+                  symbol={tokenData?.symbol}
+                  tokenAddress={tokenData?.tokenAddress}
+                  initialMode={tradeMode}
+                  lockMode={true}
+                  onTradeConfirmed={(callback) => {
+                    tradeConfirmCallbackRef.current = callback;
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Fixed Buy/Sell Buttons - Mobile Only - Always at Bottom */}
+      {isMobile && !isTradingModalOpen && (
+        <div className="fixed left-0 right-0 bottom-0 bg-black border-t border-gray-700 p-4 z-30">
+          <div className="flex space-x-2">
+            <button
+              onClick={() => {
+                setTradeMode('buy');
+                setIsTradingModalOpen(true);
+              }}
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-4 transition-all duration-200 rounded"
+            >
+              BUY
+            </button>
+            <button
+              onClick={() => {
+                setTradeMode('sell');
+                setIsTradingModalOpen(true);
+              }}
+              className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-4 transition-all duration-200 rounded"
+            >
+              SELL
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
