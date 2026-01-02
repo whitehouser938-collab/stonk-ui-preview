@@ -418,7 +418,7 @@ export function MarketsDashboard() {
                           <img
                             src={token.logoUrl}
                             alt={token.tokenSymbol}
-                            className="w-9 h-9 rounded-full object-cover"
+                            className="w-9 h-9 rounded object-cover"
                             onError={(e) => {
                               e.currentTarget.style.display = "none";
                             }}
@@ -579,7 +579,7 @@ export function MarketsDashboard() {
                             <img
                               src={token.logoUrl}
                               alt={`${token.tokenSymbol} logo`}
-                              className="w-4 h-4 rounded-full object-cover flex-shrink-0"
+                              className="w-4 h-4 rounded object-cover flex-shrink-0"
                               onError={(e) => {
                                 // Fallback to circle if image fails to load
                                 e.currentTarget.style.display = "none";
@@ -700,7 +700,7 @@ export function MarketsDashboard() {
                       <img
                         src={token.logoUrl}
                         alt={`${token.tokenSymbol} logo`}
-                        className="w-4 h-4 rounded-full object-cover"
+                        className="w-4 h-4 rounded object-cover"
                         onError={(e) => {
                           e.currentTarget.style.display = "none";
                           e.currentTarget.nextElementSibling?.classList.remove(
@@ -771,7 +771,7 @@ export function MarketsDashboard() {
                                 <img
                                   src={token.logoUrl}
                                   alt={`${token.tokenSymbol} logo`}
-                                  className="w-4 h-4 rounded-full object-cover"
+                                  className="w-4 h-4 rounded object-cover"
                                   onError={(e) => {
                                     e.currentTarget.style.display = "none";
                                     e.currentTarget.nextElementSibling?.classList.remove(
@@ -859,7 +859,7 @@ export function MarketsDashboard() {
                                 <img
                                   src={token.logoUrl}
                                   alt={`${token.tokenSymbol} logo`}
-                                  className="w-4 h-4 rounded-full object-cover"
+                                  className="w-4 h-4 rounded object-cover"
                                   onError={(e) => {
                                     e.currentTarget.style.display = "none";
                                     e.currentTarget.nextElementSibling?.classList.remove(

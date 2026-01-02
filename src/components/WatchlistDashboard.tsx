@@ -241,7 +241,7 @@ export function WatchlistDashboard() {
                             <img
                               src={token.logoUrl}
                               alt={`${token.tokenSymbol} logo`}
-                              className="w-4 h-4 rounded-full object-cover"
+                              className="w-4 h-4 rounded object-cover"
                               onError={(e) => {
                                 e.currentTarget.style.display = "none";
                                 e.currentTarget.nextElementSibling?.classList.remove(

@@ -799,7 +799,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                   {(selectedFile || user?.profileImage) && (
                     <div className="mt-3">
                       <div className="text-xs text-gray-400 mb-2">Preview:</div>
-                      <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-gray-600">
+                      <div className="w-20 h-20 rounded overflow-hidden border-2 border-gray-600">
                         <img
                           src={
                             selectedFile

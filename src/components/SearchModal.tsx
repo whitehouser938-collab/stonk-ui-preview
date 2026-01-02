@@ -184,10 +184,10 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
                         <img
                           src={token.logoUrl}
                           alt={token.symbol}
-                          className="w-10 h-10 rounded-full flex-shrink-0"
+                          className="w-10 h-10 rounded flex-shrink-0"
                         />
                       ) : (
-                        <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-full text-white text-sm font-bold flex items-center justify-center flex-shrink-0">
+                        <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded text-white text-sm font-bold flex items-center justify-center flex-shrink-0">
                           {token.symbol.slice(0, 2)}
                         </div>
                       )}

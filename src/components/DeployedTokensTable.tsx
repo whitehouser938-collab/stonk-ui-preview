@@ -237,7 +237,7 @@ const DeployedTokensTable: React.FC<DeployedTokensTableProps> = ({
                       <img
                         src={token.logo}
                         alt={`${token.symbol} logo`}
-                        className="w-4 h-4 rounded-full object-cover"
+                        className="w-4 h-4 rounded object-cover"
                         onError={(e) => {
                           e.currentTarget.style.display = "none";
                           e.currentTarget.nextElementSibling?.classList.remove(

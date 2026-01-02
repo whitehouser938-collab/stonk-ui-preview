@@ -41,10 +41,18 @@ export function Layout({ children }: LayoutProps) {
   const { disconnect } = useDisconnect();
   const { isConnected } = useAppKitAccount({ namespace: "eip155" });
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
+  }, []);
+  // Collapse header text after 2 seconds on mobile
+  useEffect(() => {
+    const collapseTimer = setTimeout(() => {
+      setIsHeaderCollapsed(true);
+    }, 2000);
+    return () => clearTimeout(collapseTimer);
   }, []);
 
   const formatTimeMobile = (timezone: string) => {
@@ -84,14 +92,27 @@ export function Layout({ children }: LayoutProps) {
                 <Menu className="w-6 h-6" />
               )}
             </button>
-            <Link to="/" className="flex-shrink-0">
-              <h1 className="text-sm font-bold text-orange-400 font-mono tracking-tight whitespace-nowrap hover:text-orange-300 transition-colors">
-                STONK EXCHANGE
-              </h1>
+            <Link to="/" className={`flex-shrink-0 relative overflow-hidden transition-all duration-1000 ease-in-out ${
+              isHeaderCollapsed ? 'w-8' : 'w-32'
+            }`}>
+              <div className="relative h-6 flex items-center">
+                <h1 className={`text-sm font-bold text-orange-400 font-mono tracking-tight whitespace-nowrap hover:text-orange-300 transition-all duration-1000 ease-in-out origin-left ${
+                  isHeaderCollapsed ? 'scale-x-0 opacity-0' : 'scale-x-100 opacity-100'
+                }`}>
+                  STONK EXCHANGE
+                </h1>
+                <h1 className={`text-sm font-bold text-orange-400 font-mono tracking-tight whitespace-nowrap hover:text-orange-300 absolute left-0 transition-all duration-1000 ease-in-out origin-left ${
+                  isHeaderCollapsed ? 'scale-x-100 opacity-100' : 'scale-x-0 opacity-0'
+                }`}>
+                  SE
+                </h1>
+              </div>
             </Link>
 
             {/* Mobile: Sliding Time Ticker - between title and search */}
-            <div className="flex-1 overflow-hidden relative h-6 min-w-0 flex items-center">
+            <div className={`overflow-hidden relative h-6 min-w-0 flex items-center transition-all duration-1000 ease-in-out ${
+              isHeaderCollapsed ? 'flex-[2.5]' : 'flex-1'
+            }`}>
               <div className="absolute whitespace-nowrap animate-scroll-left text-[11px] font-mono text-white">
                 <span className="inline-block mx-2">
                   <span className="text-orange-400">NYC</span> {formatTimeMobile("America/New_York")}

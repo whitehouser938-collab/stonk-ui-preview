@@ -635,7 +635,7 @@ const TokenPage = () => {
                 <img
                   src={trade.makerPfp}
                   alt="Profile"
-                  className="w-6 h-6 rounded-full"
+                  className="w-6 h-6 rounded"
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
                   }}
@@ -1042,7 +1042,7 @@ const TokenPage = () => {
                                 tokenData.deployer.username ||
                                 tokenData.deployer.address
                               } profile`}
-                              className="w-5 h-5 rounded-full object-cover"
+                              className="w-5 h-5 rounded object-cover"
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
                                 target.style.display = "none";
@@ -1329,7 +1329,7 @@ const TokenPage = () => {
                             tokenData.deployer.username ||
                             tokenData.deployer.address
                           } profile`}
-                          className="w-4 h-4 rounded-full object-cover"
+                          className="w-4 h-4 rounded object-cover"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.style.display = "none";
@@ -1684,7 +1684,7 @@ const TokenPage = () => {
                                     <img
                                       src={holder.pfp || "/default-pfp.jpeg"}
                                       alt="Profile"
-                                      className="w-6 h-6 rounded-full"
+                                      className="w-6 h-6 rounded"
                                       onError={(e) => {
                                         e.currentTarget.src =
                                           "/default-pfp.jpeg";
@@ -1762,7 +1762,7 @@ const TokenPage = () => {
                             <img
                               src={tokenData.deployer.pfp}
                               alt={`${tokenData.deployer.username || tokenData.deployer.address} profile`}
-                              className="w-4 h-4 rounded-full object-cover"
+                              className="w-4 h-4 rounded object-cover"
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
                                 target.style.display = "none";

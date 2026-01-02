@@ -245,7 +245,7 @@ const HoldingsTable: React.FC<HoldingsTableProps> = ({ holdings }) => {
                       <img
                         src={holding.logo}
                         alt={`${holding.symbol} logo`}
-                        className="w-4 h-4 rounded-full object-cover"
+                        className="w-4 h-4 rounded object-cover"
                         onError={(e) => {
                           e.currentTarget.style.display = "none";
                           e.currentTarget.nextElementSibling?.classList.remove(
