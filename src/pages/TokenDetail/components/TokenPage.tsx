@@ -7,6 +7,7 @@ import {
   getTokenHolders,
   TokenHolder,
 } from "@/api/token";
+import { getComments } from "@/api/comment";
 import LoadingScreen from "@/components/ui/loading";
 import { useLoading } from "@/hooks/use-loading";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -190,6 +191,7 @@ const TokenPage = () => {
   const [holdersData, setHoldersData] = useState<TokenHolder[]>([]);
   const [holdersCount, setHoldersCount] = useState<number>(0);
   const [isLoadingHolders, setIsLoadingHolders] = useState(false);
+  const [commentsCount, setCommentsCount] = useState<number>(0);
   const [burntData, setBurntData] = useState<TokenHolder | null>(null);
   const [uniswapData, setUniswapData] = useState<TokenHolder | null>(null);
   const [bondingCurveData, setBondingCurveData] = useState<TokenHolder | null>(
@@ -459,12 +461,39 @@ const TokenPage = () => {
     }
   }, [tokenAddress, tokenData?.uniswapPair, tokenData?.bondingCurveAddress]);
 
+  // Fetch comments count on page load
+  const fetchCommentsCount = useCallback(async () => {
+    if (!tokenAddress) return;
+
+    try {
+      const response = await getComments({
+        tokenId: tokenAddress,
+        page: 1,
+        limit: 1, // We only need the count, not the actual comments
+      });
+
+      if (response.success && response.data?.pagination) {
+        setCommentsCount(response.data.pagination.total);
+      }
+    } catch (error) {
+      console.error("Error fetching comments count:", error);
+      setCommentsCount(0);
+    }
+  }, [tokenAddress]);
+
   // Fetch holders by default when token data is loaded
   useEffect(() => {
     if (tokenData && holdersData.length === 0) {
       fetchHolders();
     }
   }, [tokenData, fetchHolders, holdersData.length]);
+
+  // Fetch comments count when token data is loaded
+  useEffect(() => {
+    if (tokenData) {
+      fetchCommentsCount();
+    }
+  }, [tokenData, fetchCommentsCount]);
 
   // --- Infinite Scroll Handler ---
   const handleScroll = useCallback(async () => {
@@ -1479,7 +1508,7 @@ const TokenPage = () => {
                         : "text-gray-400 hover:text-orange-300"
                     }`}
                   >
-                    COMMENTS
+                    COMMENTS{commentsCount > 0 ? `(${commentsCount})` : ""}
                   </button>
                   <button
                     onClick={() => setActiveTab("info")}
