@@ -1508,7 +1508,7 @@ const TokenPage = () => {
                         : "text-gray-400 hover:text-orange-300"
                     }`}
                   >
-                    COMMENTS{commentsCount > 0 ? `(${commentsCount})` : ""}
+                    COMMENTS({commentsCount})
                   </button>
                   <button
                     onClick={() => setActiveTab("info")}
