@@ -119,6 +119,11 @@ const TradingForm = (props: TradingFormProps) => {
   React.useEffect(() => {
     getETHSignerRef.current = getETHSigner;
   }, [getETHSigner]);
+
+  // Update isBuy when initialMode prop changes
+  React.useEffect(() => {
+    setIsBuy(props.initialMode === 'sell' ? false : true);
+  }, [props.initialMode]);
   const { toast } = useToast();
   const { isConnected: isEthConnected, address: userAddress } =
     useAppKitAccount({ namespace: "eip155" });
