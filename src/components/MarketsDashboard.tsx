@@ -138,7 +138,7 @@ const MobileCollapsibleSection: React.FC<{
   );
 };
 
-type FilterType = "trending" | "new" | "top";
+type FilterType = "age" | "last_comment" | "last_trade" | "new" | "graduated" | "market_cap" | "liquidity";
 
 export function MarketsDashboard() {
   const { chainId } = useParams<{
@@ -152,8 +152,7 @@ export function MarketsDashboard() {
   const [volumePeriod, setVolumePeriod] = useState<"5m" | "1h" | "6h" | "24h">(
     "24h"
   );
-  const [activeFilter, setActiveFilter] = useState<FilterType>("trending");
-  const [trendingPeriod, setTrendingPeriod] = useState<"6h" | "24h">("6h");
+  const [activeFilter, setActiveFilter] = useState<FilterType>("new");
   const [headerHeight, setHeaderHeight] = useState(0);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -271,14 +270,27 @@ export function MarketsDashboard() {
     let filtered = [...tokens];
 
     switch (activeFilter) {
-      case "trending":
-        // Sort by price change for the selected period (6h or 24h)
-        const priceChangeKey = trendingPeriod === "6h" ? "priceChange6h" : "priceChange24h";
+      case "age":
+        // Sort by deployment timestamp (oldest first)
         filtered.sort((a, b) => {
-          const changeA = a[priceChangeKey] || 0;
-          const changeB = b[priceChangeKey] || 0;
-          return changeB - changeA;
+          const timeA = new Date(a.deploymentTimestamp || 0).getTime();
+          const timeB = new Date(b.deploymentTimestamp || 0).getTime();
+          return timeA - timeB;
         });
+        break;
+      case "last_comment":
+        // TODO: Sort by last comment time when this data is available
+        // For now, sort by deployment time
+        filtered.sort((a, b) => {
+          const timeA = new Date(a.deploymentTimestamp || 0).getTime();
+          const timeB = new Date(b.deploymentTimestamp || 0).getTime();
+          return timeB - timeA;
+        });
+        break;
+      case "last_trade":
+        // TODO: Sort by last trade time when this data is available
+        // For now, sort by volume as proxy for recent activity
+        filtered.sort((a, b) => b.totalVolume - a.totalVolume);
         break;
       case "new":
         // Sort by deployment timestamp (newest first)
@@ -288,12 +300,29 @@ export function MarketsDashboard() {
           return timeB - timeA;
         });
         break;
-      case "top":
+      case "graduated":
+        // Show graduated tokens first, then sort by graduation time
+        filtered = filtered.filter(token => token.graduated);
+        filtered.sort((a, b) => {
+          const timeA = new Date(a.graduationTimestamp || 0).getTime();
+          const timeB = new Date(b.graduationTimestamp || 0).getTime();
+          return timeB - timeA;
+        });
+        break;
+      case "market_cap":
         // Sort by market cap (price * supply)
         filtered.sort((a, b) => {
           const mcapA = a.currentPrice * 1_000_000_000;
           const mcapB = b.currentPrice * 1_000_000_000;
           return mcapB - mcapA;
+        });
+        break;
+      case "liquidity":
+        // Sort by liquidity (approximated as 30% of volume)
+        filtered.sort((a, b) => {
+          const liqA = a.totalVolume * 0.3;
+          const liqB = b.totalVolume * 0.3;
+          return liqB - liqA;
         });
         break;
     }
@@ -330,53 +359,8 @@ export function MarketsDashboard() {
     <div className="bg-black text-gray-100 text-xs font-mono">
       {/* MOBILE VIEW */}
       <div className="lg:hidden fixed inset-0 flex flex-col" style={{ top: headerHeight }}>
-        {/* Filter Tabs */}
-        <div className="flex justify-center gap-2 px-3 py-2 bg-black flex-shrink-0">
-          <button
-            onClick={() => setActiveFilter("trending")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
-              activeFilter === "trending"
-                ? "bg-gray-900 text-white"
-                : "text-gray-400"
-            }`}
-          >
-            <span>Trending</span>
-            {activeFilter === "trending" && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setTrendingPeriod(trendingPeriod === "6h" ? "24h" : "6h");
-                }}
-                className="text-xs ml-1"
-              >
-                {trendingPeriod === "6h" ? "6H▼" : "24H▼"}
-              </button>
-            )}
-          </button>
-          <button
-            onClick={() => setActiveFilter("new")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
-              activeFilter === "new"
-                ? "bg-gray-900 text-white"
-                : "text-gray-400"
-            }`}
-          >
-            <span>New</span>
-          </button>
-          <button
-            onClick={() => setActiveFilter("top")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
-              activeFilter === "top"
-                ? "bg-gray-900 text-white"
-                : "text-gray-400"
-            }`}
-          >
-            <span>Top</span>
-          </button>
-        </div>
-
         {/* Token List - Scrollable Container */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto pb-[72px]">
           {isLoading ? (
             <div className="text-center p-8 text-gray-400">Loading tokens...</div>
           ) : filteredTokens.length === 0 ? (
@@ -487,6 +471,82 @@ export function MarketsDashboard() {
               );
             })
           )}
+        </div>
+
+        {/* Filter Tabs - Fixed at Bottom */}
+        <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-700 p-4 z-30">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+            <button
+              onClick={() => setActiveFilter("age")}
+              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
+                activeFilter === "age"
+                  ? "bg-orange-600 text-white"
+                  : "bg-gray-800 text-gray-400"
+              }`}
+            >
+              AGE
+            </button>
+            <button
+              onClick={() => setActiveFilter("last_comment")}
+              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
+                activeFilter === "last_comment"
+                  ? "bg-orange-600 text-white"
+                  : "bg-gray-800 text-gray-400"
+              }`}
+            >
+              LAST COMMENT
+            </button>
+            <button
+              onClick={() => setActiveFilter("last_trade")}
+              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
+                activeFilter === "last_trade"
+                  ? "bg-orange-600 text-white"
+                  : "bg-gray-800 text-gray-400"
+              }`}
+            >
+              LAST TRADE
+            </button>
+            <button
+              onClick={() => setActiveFilter("new")}
+              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
+                activeFilter === "new"
+                  ? "bg-orange-600 text-white"
+                  : "bg-gray-800 text-gray-400"
+              }`}
+            >
+              NEW
+            </button>
+            <button
+              onClick={() => setActiveFilter("graduated")}
+              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
+                activeFilter === "graduated"
+                  ? "bg-orange-600 text-white"
+                  : "bg-gray-800 text-gray-400"
+              }`}
+            >
+              GRADUATED
+            </button>
+            <button
+              onClick={() => setActiveFilter("market_cap")}
+              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
+                activeFilter === "market_cap"
+                  ? "bg-orange-600 text-white"
+                  : "bg-gray-800 text-gray-400"
+              }`}
+            >
+              MARKET CAP
+            </button>
+            <button
+              onClick={() => setActiveFilter("liquidity")}
+              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
+                activeFilter === "liquidity"
+                  ? "bg-orange-600 text-white"
+                  : "bg-gray-800 text-gray-400"
+              }`}
+            >
+              LIQUIDITY
+            </button>
+          </div>
         </div>
       </div>
 

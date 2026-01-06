@@ -1,4 +1,4 @@
-te quiero enzo fernandez
+te quiero enzo
 
 # Welcome to your Lovable project
 

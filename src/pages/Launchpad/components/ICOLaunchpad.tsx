@@ -54,11 +54,76 @@ export function ICOLaunchpad() {
     Record<string, string>
   >({});
   const [isValidating, setIsValidating] = useState(false);
+  const [animatedPlaceholder, setAnimatedPlaceholder] = useState("");
+  const [currentAnimatingField, setCurrentAnimatingField] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Determine which field should be animated (next unfilled field)
+  useEffect(() => {
+    const getNextUnfilledField = () => {
+      if (!formData.name) return { field: "name", placeholder: "e.g., TechCorp Inc" };
+      if (!formData.symbol) return { field: "symbol", placeholder: "e.g., TECH" };
+      if (!formData.description) return { field: "description", placeholder: "Describe your company's business model, competitive advantages, and market opportunity..." };
+      // Skip logoFile - it's not a text input
+      if (!formData.website) return { field: "website", placeholder: "https://yourcompany.com" };
+      if (!formData.twitterUrl) return { field: "twitterUrl", placeholder: "https://x.com/your_company" };
+      if (!formData.telegramUrl) return { field: "telegramUrl", placeholder: "https://t.me/your_company" };
+      return null;
+    };
+
+    const nextField = getNextUnfilledField();
+    setCurrentAnimatingField(nextField?.field || null);
+
+    if (!nextField) {
+      setAnimatedPlaceholder("");
+      return;
+    }
+
+    // Typing animation effect with repeat
+    let currentIndex = 0;
+    const fullText = nextField.placeholder;
+    let typingInterval: NodeJS.Timeout | null = null;
+    let pauseTimeout: NodeJS.Timeout | null = null;
+    let isActive = true;
+    setAnimatedPlaceholder("");
+
+    const typeText = () => {
+      if (!isActive) return;
+
+      typingInterval = setInterval(() => {
+        if (!isActive) {
+          if (typingInterval) clearInterval(typingInterval);
+          return;
+        }
+
+        if (currentIndex <= fullText.length) {
+          setAnimatedPlaceholder(fullText.slice(0, currentIndex));
+          currentIndex++;
+        } else {
+          if (typingInterval) clearInterval(typingInterval);
+          // Wait, then restart the animation
+          pauseTimeout = setTimeout(() => {
+            if (!isActive) return;
+            currentIndex = 0;
+            setAnimatedPlaceholder("");
+            typeText();
+          }, 1500); // Pause before restarting
+        }
+      }, 30); // Faster typing speed
+    };
+
+    typeText();
+
+    return () => {
+      isActive = false;
+      if (typingInterval) clearInterval(typingInterval);
+      if (pauseTimeout) clearTimeout(pauseTimeout);
+    };
+  }, [formData]);
 
   const handleInputChange = (key: keyof ICOLaunchData, value: string) => {
     // Handle boolean conversion for useETH field
@@ -129,8 +194,8 @@ export function ICOLaunchpad() {
         if (!value || (typeof value === "string" && !value.trim())) {
           return "Name is required";
         }
-        if (typeof value === "string" && value.length < 2) {
-          return "Name must be at least 2 characters";
+        if (typeof value === "string" && value.length < 3) {
+          return "Name must be at least 3 characters";
         }
         return "";
 
@@ -394,7 +459,7 @@ export function ICOLaunchpad() {
         {/* IPO Form */}
         <div className="space-y-3">
           {/* Main Form */}
-          <div className="bg-gray-900 border border-gray-700 p-3">
+          <div className="sm:bg-gray-900 sm:border sm:border-gray-700 p-3">
             <form onSubmit={handleSubmit}>
               {/* Information */}
               <div className="space-y-3">
@@ -404,18 +469,18 @@ export function ICOLaunchpad() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <div className="text-gray-400 mb-1">Name *</div>
+                    <div className="text-gray-400 mb-1">Name<span className="hidden sm:inline"> *</span></div>
                     <input
-                      placeholder="e.g., TechCorp Inc"
+                      placeholder={currentAnimatingField === "name" ? animatedPlaceholder : "e.g., TechCorp Inc"}
                       value={formData.name}
                       required
                       onChange={(e) =>
                         handleInputChange("name", e.target.value)
                       }
-                      className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono ${
+                      className={`w-full p-2 bg-black text-white text-xs sm:text-sm font-mono italic placeholder:italic ${
                         validationErrors.name
-                          ? "border-red-500"
-                          : "border-gray-600"
+                          ? "border border-red-500"
+                          : "border-none sm:border sm:border-gray-600"
                       }`}
                     />
                     {validationErrors.name && (
@@ -425,18 +490,18 @@ export function ICOLaunchpad() {
                     )}
                   </div>
                   <div className="mb-6">
-                    <div className="text-gray-400 mb-1">Ticker Symbol *</div>
+                    <div className="text-gray-400 mb-1">Ticker Symbol<span className="hidden sm:inline"> *</span></div>
                     <input
-                      placeholder="e.g., TECH"
+                      placeholder={currentAnimatingField === "symbol" ? animatedPlaceholder : "e.g., TECH"}
                       value={formData.symbol}
                       required
                       onChange={(e) =>
                         handleInputChange("symbol", e.target.value)
                       }
-                      className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono ${
+                      className={`w-full p-2 bg-black text-white text-xs sm:text-sm font-mono italic placeholder:italic ${
                         validationErrors.symbol
-                          ? "border-red-500"
-                          : "border-gray-600"
+                          ? "border border-red-500"
+                          : "border-none sm:border sm:border-gray-600"
                       }`}
                     />
                     {validationErrors.symbol && (
@@ -449,18 +514,18 @@ export function ICOLaunchpad() {
               </div>
               {/* Description*/}
               <div className="mb-6">
-                <div className="text-gray-400 mb-1">Company Description *</div>
+                <div className="text-gray-400 mb-1">Company Description<span className="hidden sm:inline"> *</span></div>
                 <textarea
                   required
-                  placeholder="Describe your company's business model, competitive advantages, and market opportunity..."
+                  placeholder={currentAnimatingField === "description" ? animatedPlaceholder : "Describe your company's business model, competitive advantages, and market opportunity..."}
                   value={formData.description}
                   onChange={(e) =>
                     handleInputChange("description", e.target.value)
                   }
-                  className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono h-20 sm:h-24 ${
+                  className={`w-full p-2 bg-black text-white text-xs sm:text-sm font-mono h-20 sm:h-24 italic placeholder:italic ${
                     validationErrors.description
-                      ? "border-red-500"
-                      : "border-gray-600"
+                      ? "border border-red-500"
+                      : "border-none sm:border sm:border-gray-600"
                   }`}
                 />
                 {validationErrors.description && (
@@ -473,7 +538,7 @@ export function ICOLaunchpad() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
                 <div>
                   <div className="text-gray-400 mb-1">
-                    Logo Upload (Image/GIF) *
+                    Logo Upload (Image/GIF)<span className="hidden sm:inline"> *</span>
                   </div>
                   <div className="space-y-2">
                     <input
@@ -483,10 +548,10 @@ export function ICOLaunchpad() {
                         const file = e.target.files?.[0];
                         handleFileChange(file || null);
                       }}
-                      className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-orange-600 file:text-white hover:file:bg-orange-700 ${
+                      className={`w-full p-2 bg-black text-white text-xs sm:text-sm font-mono file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-orange-600 file:text-white hover:file:bg-orange-700 ${
                         validationErrors.logoFile
-                          ? "border-red-500"
-                          : "border-gray-600"
+                          ? "border border-red-500"
+                          : "border-none sm:border sm:border-gray-600"
                       }`}
                     />
                     {validationErrors.logoFile && (
@@ -502,7 +567,7 @@ export function ICOLaunchpad() {
                             URL.createObjectURL(formData.logoFile)
                           }
                           alt="Logo preview"
-                          className="w-16 h-16 object-cover border border-gray-600 rounded"
+                          className="w-16 h-16 object-cover border-none sm:border sm:border-gray-600 rounded"
                         />
                         <button
                           type="button"
@@ -518,15 +583,15 @@ export function ICOLaunchpad() {
                 <div>
                   <div className="text-gray-400 mb-1">Website URL</div>
                   <input
-                    placeholder="https://yourcompany.com"
+                    placeholder={currentAnimatingField === "website" ? animatedPlaceholder : "https://yourcompany.com"}
                     value={formData.website}
                     onChange={(e) =>
                       handleInputChange("website", e.target.value)
                     }
-                    className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono ${
+                    className={`w-full p-2 bg-black text-white text-xs sm:text-sm font-mono italic placeholder:italic ${
                       validationErrors.website
-                        ? "border-red-500"
-                        : "border-gray-600"
+                        ? "border border-red-500"
+                        : "border-none sm:border sm:border-gray-600"
                     }`}
                   />
                   {validationErrors.website && (
@@ -538,15 +603,15 @@ export function ICOLaunchpad() {
                 <div>
                   <div className="text-gray-400 mb-1">Twitter URL</div>
                   <input
-                    placeholder="https://x.com/your_company"
+                    placeholder={currentAnimatingField === "twitterUrl" ? animatedPlaceholder : "https://x.com/your_company"}
                     value={formData.twitterUrl}
                     onChange={(e) =>
                       handleInputChange("twitterUrl", e.target.value)
                     }
-                    className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono ${
+                    className={`w-full p-2 bg-black text-white text-xs sm:text-sm font-mono italic placeholder:italic ${
                       validationErrors.twitterUrl
-                        ? "border-red-500"
-                        : "border-gray-600"
+                        ? "border border-red-500"
+                        : "border-none sm:border sm:border-gray-600"
                     }`}
                   />
                   {validationErrors.twitterUrl && (
@@ -558,15 +623,15 @@ export function ICOLaunchpad() {
                 <div>
                   <div className="text-gray-400 mb-1">Telegram URL</div>
                   <input
-                    placeholder="https://t.me/your_company"
+                    placeholder={currentAnimatingField === "telegramUrl" ? animatedPlaceholder : "https://t.me/your_company"}
                     value={formData.telegramUrl}
                     onChange={(e) =>
                       handleInputChange("telegramUrl", e.target.value)
                     }
-                    className={`w-full p-2 bg-black border text-white text-xs sm:text-sm font-mono ${
+                    className={`w-full p-2 bg-black text-white text-xs sm:text-sm font-mono italic placeholder:italic ${
                       validationErrors.telegramUrl
-                        ? "border-red-500"
-                        : "border-gray-600"
+                        ? "border border-red-500"
+                        : "border-none sm:border sm:border-gray-600"
                     }`}
                   />
                   {validationErrors.telegramUrl && (
@@ -598,7 +663,7 @@ export function ICOLaunchpad() {
               <div className="mb-6">
                 <div className="text-gray-400 mb-1">
                   Initial Buy Amount (Optional)
-                  <span className="text-xs ml-2 text-gray-500">
+                  <span className="text-xs ml-2 text-gray-500 hidden sm:inline">
                     Buy tokens immediately after deployment
                   </span>
                 </div>
@@ -612,7 +677,7 @@ export function ICOLaunchpad() {
                     onChange={(e) =>
                       handleInputChange("initialBuyAmount", e.target.value)
                     }
-                    className="w-full p-2 bg-black border border-gray-600 text-white text-xs sm:text-sm font-mono"
+                    className="w-full p-2 bg-black border-none sm:border sm:border-gray-600 text-white text-xs sm:text-sm font-mono italic placeholder:italic"
                   />
                   <div className="flex items-center space-x-4">
                     <label className="flex items-center space-x-2">
@@ -665,7 +730,7 @@ export function ICOLaunchpad() {
                 <button
                   type="submit"
                   disabled={isValidating || isLoading}
-                  className={`px-4 py-2 text-black text-xs sm:text-sm font-bold order-1 sm:order-2 ${
+                  className={`px-4 py-4 text-black text-xs sm:text-sm font-bold order-1 sm:order-2 transition-all duration-200 rounded ${
                     isValidating || isLoading
                       ? "bg-gray-600 cursor-not-allowed"
                       : "bg-green-600 hover:bg-green-700"
