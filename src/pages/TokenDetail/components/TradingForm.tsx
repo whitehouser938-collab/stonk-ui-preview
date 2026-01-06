@@ -746,7 +746,7 @@ const TradingForm = (props: TradingFormProps) => {
               setAmount("");
             }}
             className={`
-        w-full p-3 text-sm font-bold transition-all duration-200
+        w-full p-3 text-sm font-bold transition-all duration-200 rounded
         ${
           isBuy
             ? "bg-orange-600 text-black"
@@ -765,7 +765,7 @@ const TradingForm = (props: TradingFormProps) => {
               setAmount("");
             }}
             className={`
-        w-full p-3  text-sm font-bold transition-all duration-200
+        w-full p-3  text-sm font-bold transition-all duration-200 rounded
         ${
           !isBuy
             ? "bg-orange-600 text-black"
@@ -791,7 +791,7 @@ const TradingForm = (props: TradingFormProps) => {
             <button
               type="button"
               onClick={() => setPaymentMethod("ETH")}
-              className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${
+              className={`px-4 py-2 text-sm font-medium transition-all duration-200 rounded ${
                 paymentMethod === "ETH"
                   ? "bg-orange-600 text-black"
                   : "bg-gray-800 hover:bg-gray-700 text-gray-300"
@@ -802,7 +802,7 @@ const TradingForm = (props: TradingFormProps) => {
             <button
               type="button"
               onClick={() => setPaymentMethod("WETH")}
-              className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${
+              className={`px-4 py-2 text-sm font-medium transition-all duration-200 rounded ${
                 paymentMethod === "WETH"
                   ? "bg-orange-600 text-black"
                   : "bg-gray-800 hover:bg-gray-700 text-gray-300"
@@ -850,7 +850,7 @@ const TradingForm = (props: TradingFormProps) => {
                   setSlippagePercent(preset);
                   setCustomSlippage("");
                 }}
-                className={`px-3 py-2 text-xs font-medium transition-all duration-200 ${
+                className={`px-3 py-2 text-xs font-medium transition-all duration-200 rounded ${
                   slippagePercent === preset && !customSlippage
                     ? "bg-orange-600 text-black"
                     : "bg-gray-800 hover:bg-gray-700 text-gray-300"
@@ -871,7 +871,7 @@ const TradingForm = (props: TradingFormProps) => {
                     setSlippagePercent(Number(value));
                   }
                 }}
-                className="w-16 px-2 py-1 bg-gray-800 border border-gray-700 text-xs text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-orange-400"
+                className="w-16 px-2 py-1 bg-gray-800 border border-gray-700 text-xs text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-orange-400 rounded"
                 min="0"
                 max="50"
                 step="0.1"
@@ -953,7 +953,7 @@ const TradingForm = (props: TradingFormProps) => {
                 onClick={() => {
                   setAmount(value.toString());
                 }}
-                className="px-3 py-2 text-xs font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300"
+                className="px-3 py-2 text-xs font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded"
               >
                 {value}
               </button>
@@ -1005,7 +1005,7 @@ const TradingForm = (props: TradingFormProps) => {
                   // Set the amount (removing trailing zeros for cleaner display)
                   setAmount(sellAmountString || "0");
                 }}
-                className="px-3 py-2 text-xs font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300"
+                className="px-3 py-2 text-xs font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded"
               >
                 {percentage}%
               </button>
@@ -1025,7 +1025,7 @@ const TradingForm = (props: TradingFormProps) => {
           type="button"
           disabled={isApproving || !isWalletConnected || !amount}
           onClick={handleApprove}
-          className="w-full p-3 text-sm font-bold transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white"
+          className="w-full p-3 text-sm font-bold transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white rounded"
         >
           {isApproving ? "Approving..." : "Approve WETH"}
         </button>
@@ -1047,7 +1047,7 @@ const TradingForm = (props: TradingFormProps) => {
           type="button"
           disabled={isApproving || !isWalletConnected || !amount}
           onClick={handleTokenApprove}
-          className="w-full p-3 text-sm font-bold transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white"
+          className="w-full p-3 text-sm font-bold transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white rounded"
         >
           {isApproving ? "Approving..." : `Approve ${props.symbol}`}
         </button>
@@ -1055,7 +1055,7 @@ const TradingForm = (props: TradingFormProps) => {
         <button
           type="submit"
           disabled={isLoading || pendingTxHash !== null}
-          className={`w-full p-3 text-sm font-bold transition-all duration-200 ${
+          className={`w-full p-3 text-sm font-bold transition-all duration-200 rounded ${
             isBuy
               ? "bg-green-600 hover:bg-green-700 text-black"
               : "bg-red-600 hover:bg-red-700 text-white"
