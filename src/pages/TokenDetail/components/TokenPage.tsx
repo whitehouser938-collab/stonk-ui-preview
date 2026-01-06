@@ -1927,8 +1927,8 @@ const TokenPage = () => {
           )}
           {/* Slide-up Modal */}
           <div
-            className={`fixed left-0 right-0 bottom-0 bg-black border-t border-gray-700 z-50 transition-transform duration-300 ease-out h-[70vh] ${
-              isTradingModalOpen ? 'translate-y-0' : 'translate-y-full'
+            className={`fixed left-0 right-0 bottom-[88px] bg-black border-t border-gray-700 rounded-t-lg z-50 transition-transform duration-300 ease-out max-h-[calc(100vh-200px)] ${
+              isTradingModalOpen ? 'translate-y-0' : 'translate-y-[calc(100%+88px)]'
             }`}
           >
             <div className="h-full flex flex-col">
@@ -1963,8 +1963,8 @@ const TokenPage = () => {
       )}
 
       {/* Fixed Buy/Sell Buttons - Mobile Only - Always at Bottom */}
-      {isMobile && !isTradingModalOpen && (
-        <div className="fixed left-0 right-0 bottom-0 bg-black border-t border-gray-700 p-4 z-30">
+      {isMobile && (
+        <div className="fixed left-0 right-0 bottom-0 bg-black border-t border-gray-700 p-4 z-50">
           <div className="flex space-x-2">
             <button
               onClick={() => {
