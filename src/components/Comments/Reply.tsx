@@ -132,16 +132,12 @@ export const Reply: React.FC<ReplyProps> = ({
           </div>
         </div>
       ) : (
-        <div className="text-gray-200 text-sm mb-3">{reply.content}</div>
-      )}
-
-      {/* Reply Actions */}
-      {!isEditing && (
-        <div className="flex items-center space-x-4">
+        <div className="flex items-start space-x-2 mb-3">
+          {/* Like count on left */}
           {currentUserId && currentUserId !== "skip" ? (
             <button
               onClick={handleLike}
-              className={`flex items-center space-x-1 transition-colors ${
+              className={`flex items-center space-x-1 transition-colors flex-shrink-0 ${
                 reply.isLiked
                   ? "text-red-400"
                   : "text-gray-400 hover:text-red-400"
@@ -153,11 +149,13 @@ export const Reply: React.FC<ReplyProps> = ({
               <span className="text-xs">{reply._count?.likes || 0}</span>
             </button>
           ) : (
-            <div className="flex items-center space-x-1 text-gray-500">
+            <div className="flex items-center space-x-1 text-gray-500 flex-shrink-0">
               <Heart className="w-4 h-4" />
               <span className="text-xs">{reply._count?.likes || 0}</span>
             </div>
           )}
+          {/* Content on right */}
+          <div className="text-gray-200 text-sm flex-1">{reply.content}</div>
         </div>
       )}
     </div>

@@ -169,41 +169,42 @@ export const Comment: React.FC<CommentProps> = ({
             </div>
           </div>
         ) : (
-          <div className="text-gray-200 text-sm mb-3">{comment.content}</div>
-        )}
-
-        {/* Comment Actions */}
-        {!isEditing && (
-          <div className="flex items-center space-x-4">
+          <div className="flex items-start space-x-2 mb-3">
+            {/* Like count on left */}
             {currentUserId && currentUserId !== "skip" ? (
-              <>
-                <button
-                  onClick={handleLike}
-                  className={`flex items-center space-x-1 transition-colors ${
-                    comment.isLiked
-                      ? "text-red-400"
-                      : "text-gray-400 hover:text-red-400"
-                  }`}
-                >
-                  <Heart
-                    className={`w-4 h-4 ${comment.isLiked ? "fill-current" : ""}`}
-                  />
-                  <span className="text-xs">{comment._count?.likes || 0}</span>
-                </button>
-
-                <button
-                  onClick={() => setShowReplyForm(!showReplyForm)}
-                  className="text-gray-400 hover:text-orange-400 transition-colors text-xs"
-                >
-                  Reply
-                </button>
-              </>
+              <button
+                onClick={handleLike}
+                className={`flex items-center space-x-1 transition-colors flex-shrink-0 ${
+                  comment.isLiked
+                    ? "text-red-400"
+                    : "text-gray-400 hover:text-red-400"
+                }`}
+              >
+                <Heart
+                  className={`w-4 h-4 ${comment.isLiked ? "fill-current" : ""}`}
+                />
+                <span className="text-xs">{comment._count?.likes || 0}</span>
+              </button>
             ) : (
-              <div className="flex items-center space-x-1 text-gray-500">
+              <div className="flex items-center space-x-1 text-gray-500 flex-shrink-0">
                 <Heart className="w-4 h-4" />
                 <span className="text-xs">{comment._count?.likes || 0}</span>
               </div>
             )}
+            {/* Content on right */}
+            <div className="text-gray-200 text-sm flex-1">{comment.content}</div>
+          </div>
+        )}
+
+        {/* Reply Button */}
+        {!isEditing && currentUserId && currentUserId !== "skip" && (
+          <div className="mb-3">
+            <button
+              onClick={() => setShowReplyForm(!showReplyForm)}
+              className="text-gray-400 hover:text-orange-400 transition-colors text-xs"
+            >
+              Reply
+            </button>
           </div>
         )}
 

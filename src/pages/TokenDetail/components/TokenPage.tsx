@@ -1764,6 +1764,7 @@ const TokenPage = () => {
                   <CommentsSection
                     tokenAddress={tokenData?.tokenAddress || ""}
                     tokenSymbol={tokenData?.symbol || ""}
+                    onCommentsChange={setCommentsCount}
                   />
                 </div>
               ) : activeTab === "info" ? (

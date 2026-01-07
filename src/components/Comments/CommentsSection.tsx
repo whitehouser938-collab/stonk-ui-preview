@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { MessageSquare, Plus } from "lucide-react";
 import { Comment } from "./Comment";
 import { CommentModal } from "./CommentModal";
@@ -13,12 +13,14 @@ interface CommentsSectionProps {
   tokenAddress: string;
   tokenSymbol: string;
   userId?: string;
+  onCommentsChange?: (count: number) => void;
 }
 
 export const CommentsSection: React.FC<CommentsSectionProps> = ({
   tokenAddress,
   tokenSymbol,
   userId,
+  onCommentsChange,
 }) => {
   const isMobile = useIsMobile();
   const [showCommentModal, setShowCommentModal] = useState(false);
@@ -47,6 +49,17 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
     tokenId: tokenAddress,
     userId: currentUserId,
   });
+
+  // Notify parent when comments count changes
+  useEffect(() => {
+    if (onCommentsChange && comments) {
+      const totalCount = comments.length + comments.reduce(
+        (total, comment) => total + (comment._count?.replies || 0),
+        0
+      );
+      onCommentsChange(totalCount);
+    }
+  }, [comments, onCommentsChange]);
 
   const handleAddComment = async (content: string) => {
     try {
@@ -168,23 +181,8 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
 
   return (
     <div className={`${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-700 p-4`}>
-      {/* Section Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-2">
-          <MessageSquare className="w-5 h-5 text-orange-400" />
-          <h3 className="text-orange-400 font-mono text-sm font-bold">
-            COMMENTS
-          </h3>
-          <span className="text-gray-500 text-xs">
-            (
-            {comments.length +
-              comments.reduce(
-                (total, comment) => total + (comment._count?.replies || 0),
-                0
-              )}
-            )
-          </span>
-        </div>
+      {/* Add Comment Button */}
+      <div className="flex items-center justify-end mb-4">
         {isConnected && currentUserId ? (
           <button
             onClick={() => setShowCommentModal(true)}
@@ -194,7 +192,18 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
             <span>Add Comment</span>
           </button>
         ) : (
-          <div className="text-xs text-gray-500">Sign in to comment</div>
+          <button
+            onClick={() => {
+              // Trigger AppKit modal
+              const modal = document.querySelector('appkit-button');
+              if (modal) {
+                (modal as HTMLElement).click();
+              }
+            }}
+            className="px-3 py-1 bg-gray-700 text-gray-300 text-xs rounded hover:bg-gray-600 transition-colors"
+          >
+            Sign in to comment
+          </button>
         )}
       </div>
 
