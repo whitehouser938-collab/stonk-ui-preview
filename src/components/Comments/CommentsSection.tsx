@@ -181,32 +181,6 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
 
   return (
     <div className={`${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-700 p-4`}>
-      {/* Add Comment Button */}
-      <div className="flex items-center justify-end mb-4">
-        {isConnected && currentUserId ? (
-          <button
-            onClick={() => setShowCommentModal(true)}
-            className="flex items-center space-x-1 px-3 py-1 bg-orange-600 text-white text-xs rounded hover:bg-orange-700 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Comment</span>
-          </button>
-        ) : (
-          <button
-            onClick={() => {
-              // Trigger AppKit modal
-              const modal = document.querySelector('appkit-button');
-              if (modal) {
-                (modal as HTMLElement).click();
-              }
-            }}
-            className="px-3 py-1 bg-gray-700 text-gray-300 text-xs rounded hover:bg-gray-600 transition-colors"
-          >
-            Sign in to comment
-          </button>
-        )}
-      </div>
-
       {/* Error Display */}
       {error && (
         <div className="mb-4 p-3 bg-red-900/20 border border-red-700 rounded text-red-400 text-sm">
@@ -252,6 +226,32 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
           )}
         </div>
       ) : null}
+
+      {/* Add Comment Button at Bottom */}
+      <div className="flex items-center justify-end mt-4">
+        {isConnected && currentUserId ? (
+          <button
+            onClick={() => setShowCommentModal(true)}
+            className="flex items-center space-x-1 px-3 py-1 bg-orange-600 text-white text-xs rounded hover:bg-orange-700 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Comment</span>
+          </button>
+        ) : (
+          <button
+            onClick={() => {
+              // Trigger AppKit modal
+              const modal = document.querySelector('appkit-button');
+              if (modal) {
+                (modal as HTMLElement).click();
+              }
+            }}
+            className="px-3 py-1 bg-gray-700 text-gray-300 text-xs rounded hover:bg-gray-600 transition-colors"
+          >
+            Sign in to comment
+          </button>
+        )}
+      </div>
 
       {/* Comment Modal */}
       <CommentModal
