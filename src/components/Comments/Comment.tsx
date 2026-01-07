@@ -175,26 +175,35 @@ export const Comment: React.FC<CommentProps> = ({
         {/* Comment Actions */}
         {!isEditing && (
           <div className="flex items-center space-x-4">
-            <button
-              onClick={handleLike}
-              className={`flex items-center space-x-1 transition-colors ${
-                comment.isLiked
-                  ? "text-red-400"
-                  : "text-gray-400 hover:text-red-400"
-              }`}
-            >
-              <Heart
-                className={`w-4 h-4 ${comment.isLiked ? "fill-current" : ""}`}
-              />
-              <span className="text-xs">{comment._count?.likes || 0}</span>
-            </button>
+            {currentUserId && currentUserId !== "skip" ? (
+              <>
+                <button
+                  onClick={handleLike}
+                  className={`flex items-center space-x-1 transition-colors ${
+                    comment.isLiked
+                      ? "text-red-400"
+                      : "text-gray-400 hover:text-red-400"
+                  }`}
+                >
+                  <Heart
+                    className={`w-4 h-4 ${comment.isLiked ? "fill-current" : ""}`}
+                  />
+                  <span className="text-xs">{comment._count?.likes || 0}</span>
+                </button>
 
-            <button
-              onClick={() => setShowReplyForm(!showReplyForm)}
-              className="text-gray-400 hover:text-orange-400 transition-colors text-xs"
-            >
-              Reply
-            </button>
+                <button
+                  onClick={() => setShowReplyForm(!showReplyForm)}
+                  className="text-gray-400 hover:text-orange-400 transition-colors text-xs"
+                >
+                  Reply
+                </button>
+              </>
+            ) : (
+              <div className="flex items-center space-x-1 text-gray-500">
+                <Heart className="w-4 h-4" />
+                <span className="text-xs">{comment._count?.likes || 0}</span>
+              </div>
+            )}
           </div>
         )}
 

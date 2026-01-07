@@ -214,21 +214,17 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
       )}
 
       {/* Comments List */}
-      {!isConnected ? (
-        /* Show wallet connection prompt when not connected */
-        <WalletConnectionPrompt
-          title="Sign In to View Comments"
-          description="Sign in to view and participate in discussions about this token."
-          actionText="Sign In"
-          variant="compact"
-        />
-      ) : !loading ? (
+      {!loading ? (
         <div className="max-h-96 overflow-y-auto custom-scrollbar space-y-3">
           {comments.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <MessageSquare className="w-12 h-12 mx-auto mb-3 text-gray-600" />
               <p className="text-sm">No comments yet</p>
-              <p className="text-xs">Be the first to share your thoughts!</p>
+              <p className="text-xs">
+                {isConnected
+                  ? "Be the first to share your thoughts!"
+                  : "Sign in to be the first to comment!"}
+              </p>
             </div>
           ) : (
             comments.map((comment) => (

@@ -138,19 +138,26 @@ export const Reply: React.FC<ReplyProps> = ({
       {/* Reply Actions */}
       {!isEditing && (
         <div className="flex items-center space-x-4">
-          <button
-            onClick={handleLike}
-            className={`flex items-center space-x-1 transition-colors ${
-              reply.isLiked
-                ? "text-red-400"
-                : "text-gray-400 hover:text-red-400"
-            }`}
-          >
-            <Heart
-              className={`w-4 h-4 ${reply.isLiked ? "fill-current" : ""}`}
-            />
-            <span className="text-xs">{reply._count?.likes || 0}</span>
-          </button>
+          {currentUserId && currentUserId !== "skip" ? (
+            <button
+              onClick={handleLike}
+              className={`flex items-center space-x-1 transition-colors ${
+                reply.isLiked
+                  ? "text-red-400"
+                  : "text-gray-400 hover:text-red-400"
+              }`}
+            >
+              <Heart
+                className={`w-4 h-4 ${reply.isLiked ? "fill-current" : ""}`}
+              />
+              <span className="text-xs">{reply._count?.likes || 0}</span>
+            </button>
+          ) : (
+            <div className="flex items-center space-x-1 text-gray-500">
+              <Heart className="w-4 h-4" />
+              <span className="text-xs">{reply._count?.likes || 0}</span>
+            </div>
+          )}
         </div>
       )}
     </div>
