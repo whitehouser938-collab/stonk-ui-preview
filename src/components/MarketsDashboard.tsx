@@ -387,12 +387,21 @@ export function MarketsDashboard() {
           {/* Trending Section - Horizontal Scroll */}
           <div className="bg-black">
             <div className="flex items-center justify-between p-3">
-              <h2 className="text-white font-bold text-sm">Now trending</h2>
+              <h2 className="text-white font-bold text-sm">
+                Now trending <span className="rocket-blink">🚀</span>
+              </h2>
             </div>
             <div className="overflow-x-auto pb-3 px-3" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               <style>{`
                 .trending-scroll::-webkit-scrollbar {
                   display: none;
+                }
+                @keyframes blink {
+                  0%, 49% { opacity: 1; }
+                  50%, 100% { opacity: 0; }
+                }
+                .rocket-blink {
+                  animation: blink 1s infinite;
                 }
               `}</style>
               <div className="flex gap-3 trending-scroll">
