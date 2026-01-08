@@ -196,7 +196,7 @@ export function Layout({ children }: LayoutProps) {
       <main className="p-0 sm:p-6 pb-20 lg:pb-6">{children}</main>
 
       {/* Bottom Navigation - Mobile Only */}
-      <div className="fixed bottom-0 left-0 right-0 bg-bg-footer border-t border-gray-800 p-2 z-30 lg:hidden safe-area-inset-bottom">
+      <div className="fixed bottom-0 left-0 right-0 bg-bg-footer p-2 z-30 lg:hidden safe-area-inset-bottom">
         <div className="flex items-center justify-around gap-1">
           <Link
             to="/"
