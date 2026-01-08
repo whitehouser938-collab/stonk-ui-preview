@@ -565,7 +565,7 @@ export function MarketsDashboard() {
               className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                 viewMode === "card"
                   ? "bg-orange-500 text-black"
-                  : "bg-gray-900 text-gray-400"
+                  : "text-gray-400"
               }`}
             >
               <LayoutGrid className="w-5 h-5" />
@@ -575,7 +575,7 @@ export function MarketsDashboard() {
               className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                 viewMode === "list"
                   ? "bg-orange-500 text-black"
-                  : "bg-gray-900 text-gray-400"
+                  : "text-gray-400"
               }`}
             >
               <List className="w-5 h-5" />
@@ -588,7 +588,7 @@ export function MarketsDashboard() {
                 className={`flex-shrink-0 p-2 rounded transition-all duration-300 font-mono ${
                   isFiltersExpanded
                     ? "bg-orange-500 text-black"
-                    : "bg-gray-900 text-gray-400"
+                    : "text-gray-400"
                 }`}
               >
                 <Filter className="w-5 h-5" />
@@ -611,7 +611,7 @@ export function MarketsDashboard() {
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "age"
                       ? "bg-orange-500 text-black"
-                      : "bg-gray-900 text-gray-400"
+                      : "text-gray-400"
                   }`}
                 >
                   AGE
@@ -621,7 +621,7 @@ export function MarketsDashboard() {
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "last_comment"
                       ? "bg-orange-500 text-black"
-                      : "bg-gray-900 text-gray-400"
+                      : "text-gray-400"
                   }`}
                 >
                   LAST COMMENT
@@ -631,7 +631,7 @@ export function MarketsDashboard() {
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "last_trade"
                       ? "bg-orange-500 text-black"
-                      : "bg-gray-900 text-gray-400"
+                      : "text-gray-400"
                   }`}
                 >
                   LAST TRADE
@@ -641,7 +641,7 @@ export function MarketsDashboard() {
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "new"
                       ? "bg-orange-500 text-black"
-                      : "bg-gray-900 text-gray-400"
+                      : "text-gray-400"
                   }`}
                 >
                   NEW
@@ -651,7 +651,7 @@ export function MarketsDashboard() {
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "graduated"
                       ? "bg-orange-500 text-black"
-                      : "bg-gray-900 text-gray-400"
+                      : "text-gray-400"
                   }`}
                 >
                   GRADUATED
@@ -661,7 +661,7 @@ export function MarketsDashboard() {
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "market_cap"
                       ? "bg-orange-500 text-black"
-                      : "bg-gray-900 text-gray-400"
+                      : "text-gray-400"
                   }`}
                 >
                   MARKET CAP
@@ -671,7 +671,7 @@ export function MarketsDashboard() {
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "liquidity"
                       ? "bg-orange-500 text-black"
-                      : "bg-gray-900 text-gray-400"
+                      : "text-gray-400"
                   }`}
                 >
                   LIQUIDITY
