@@ -746,19 +746,19 @@ export function MarketsDashboard() {
                       {/* Bottom: Stats in boxes */}
                       <div className="flex items-center gap-1 text-[10px]">
                         <span className="bg-gray-800 px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[60px] text-center">
-                          <span className="text-orange-400">LIQ </span>
+                          <span className="text-white">LIQ </span>
                           <span className="text-white">
                             ${formatNumber(token.totalVolume * 0.3)}
                           </span>
                         </span>
                         <span className="bg-gray-800 px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[60px] text-center">
-                          <span className="text-orange-400">VOL </span>
+                          <span className="text-white">VOL </span>
                           <span className="text-white">
                             ${formatNumber(token.totalVolume)}
                           </span>
                         </span>
                         <span className="bg-gray-800 px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[68px] text-center">
-                          <span className="text-orange-400">MCAP </span>
+                          <span className="text-white">MCAP </span>
                           <span className="text-white">
                             ${formatNumber(token.currentPrice * 1_000_000_000)}
                           </span>
