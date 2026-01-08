@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useAtom } from "jotai";
 import {
   BarChart,
   Search,
@@ -19,6 +20,7 @@ import { ProfileDisplay } from "./ProfileDisplay";
 import { Button } from "./ui/button";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useDisconnect } from "wagmi";
+import { isSearchModalOpenAtom } from "@/state/app";
 
 const navItems = [
   { path: "/", label: "Markets", icon: BarChart },
@@ -33,12 +35,15 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   const location = useLocation();
-  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useAtom(isSearchModalOpenAtom);
   const [disconnecting, setDisconnecting] = useState(false);
   const { disconnect } = useDisconnect();
   const { isConnected } = useAppKitAccount({ namespace: "eip155" });
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
+  
+  // Check if we're on a token page
+  const isTokenPage = location.pathname.match(/^\/token\/[^/]+\/[^/]+$/);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -128,6 +133,16 @@ export function Layout({ children }: LayoutProps) {
                   <span className="text-orange-500">SYD</span> {formatTimeMobile("Australia/Sydney")}
                 </span>
               </div>
+              {/* Search icon - only on token pages */}
+              {isTokenPage && (
+                <button
+                  onClick={() => setIsSearchModalOpen(true)}
+                  className="absolute right-0 top-0 h-6 w-6 flex items-center justify-center z-10 bg-bg-header/80 hover:bg-bg-header transition-colors rounded"
+                  aria-label="Search"
+                >
+                  <Search className="w-4 h-4 text-orange-500 hover:text-orange-400 transition-colors" />
+                </button>
+              )}
             </div>
           </div>
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Search, X, ExternalLink, TrendingUp } from "lucide-react";
 import { useAtom } from "jotai";
-import { searchTermAtom } from "@/state/app";
+import { searchTermAtom, isSearchModalOpenAtom } from "@/state/app";
 import { useNavigate } from "react-router-dom";
 import { searchTokens as apiSearchTokens } from "@/api/token";
 
@@ -23,11 +23,17 @@ interface SearchModalProps {
 
 export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const [storedSearchTerm, setStoredSearchTerm] = useAtom(searchTermAtom);
+  const [, setIsSearchModalOpen] = useAtom(isSearchModalOpenAtom);
   const [searchResults, setSearchResults] = useState<TokenSearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  
+  // Sync local isOpen prop with global atom
+  useEffect(() => {
+    setIsSearchModalOpen(isOpen);
+  }, [isOpen, setIsSearchModalOpen]);
 
   // Focus input when modal opens
   useEffect(() => {
@@ -123,6 +129,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
     setStoredSearchTerm("");
     setSearchResults([]);
     setSelectedIndex(-1);
+    setIsSearchModalOpen(false);
     onClose();
   };
 

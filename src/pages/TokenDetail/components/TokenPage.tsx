@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useAtom } from "jotai";
+import { isSearchModalOpenAtom } from "@/state/app";
 import {
   getExplorer,
   getToken,
@@ -180,6 +182,7 @@ const TokenPage = () => {
   const [isTradingModalOpen, setIsTradingModalOpen] = useState(false);
   const [tradeMode, setTradeMode] = useState<"buy" | "sell">("buy");
   const isMobile = useIsMobile();
+  const [isSearchModalOpen] = useAtom(isSearchModalOpenAtom);
 
   const { isLoading, startLoading, stopLoading } = useLoading();
   const { toast } = useToast();
@@ -2170,7 +2173,7 @@ const TokenPage = () => {
       )}
 
       {/* Fixed Buy/Sell Buttons - Mobile Only - Always at Bottom */}
-      {isMobile && (
+      {isMobile && !isSearchModalOpen && (
         <div className="fixed left-0 right-0 bottom-0 bg-black border-t border-gray-700 p-4 z-50">
           <div className="flex space-x-2">
             <button
