@@ -57,11 +57,11 @@ export const CommentModal: React.FC<CommentModalProps> = ({
             onChange={(e) => setContent(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className="w-full bg-gray-800 border border-gray-600 rounded p-3 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none"
+            className="w-full bg-gray-800 border border-gray-600 rounded p-3 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none font-mono"
             rows={6}
             autoFocus
           />
-          <div className="text-xs text-gray-500 mt-2">
+          <div className="text-xs text-gray-500 mt-2 font-mono">
             Press Ctrl+Enter to submit
           </div>
         </div>
@@ -70,17 +70,17 @@ export const CommentModal: React.FC<CommentModalProps> = ({
         <div className="flex justify-end space-x-2 p-4 border-t border-gray-700">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm text-gray-400 hover:text-gray-300 transition-colors"
+            className="px-4 py-2 text-sm text-gray-400 hover:text-gray-300 transition-colors font-mono"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={!content.trim()}
-            className="flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white text-sm rounded hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center space-x-2 px-4 py-2 bg-orange-500 text-black text-sm rounded hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-mono"
           >
             <Send className="w-4 h-4" />
-            <span>Submit</span>
+            <span className="font-mono">Submit</span>
           </button>
         </div>
       </div>

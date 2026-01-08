@@ -237,17 +237,17 @@ export function TopPerformers() {
             <Card key={performer.symbol} className="bg-gray-900 border-gray-700 p-3">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-2">
-                  <span className="text-yellow-400 font-bold text-sm">#{index + 1}</span>
+                  <span className="text-yellow-400 font-bold text-sm font-mono">#{index + 1}</span>
                   <span className="text-xs">{performer.icon}</span>
                   <div>
-                    <div className="text-white font-bold text-sm">{performer.symbol}</div>
-                    <div className="text-gray-400 text-xs truncate">{performer.name}</div>
+                    <div className="text-white font-bold text-sm font-mono">{performer.symbol}</div>
+                    <div className="text-gray-400 text-xs truncate font-mono">{performer.name}</div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-white font-bold text-sm">${formatPrice(performer.price)}</div>
+                  <div className="text-white font-bold text-sm font-mono">${formatPrice(performer.price)}</div>
                   <div className={cn(
-                    "text-xs font-bold",
+                    "text-xs font-bold font-mono",
                     (performer[currentField] as number) >= 0 ? "text-green-400" : "text-red-400"
                   )}>
                     {formatChange(performer[currentField] as number)}%
@@ -255,7 +255,7 @@ export function TopPerformers() {
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="grid grid-cols-2 gap-2 text-xs font-mono">
                 <div className="flex justify-between">
                   <span className="text-gray-400">24H:</span>
                   <span className={cn(

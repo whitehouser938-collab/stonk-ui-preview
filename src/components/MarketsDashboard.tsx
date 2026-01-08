@@ -429,7 +429,7 @@ export function MarketsDashboard() {
           {/* Trending Section - Horizontal Scroll */}
           <div className="bg-black">
             <div className="flex items-center justify-between p-3">
-              <h2 className="text-white font-bold text-sm">
+              <h2 className="text-white font-bold text-sm font-mono">
                 Now trending <span className="rocket-blink">🚀</span>
               </h2>
             </div>
@@ -487,28 +487,28 @@ export function MarketsDashboard() {
                     {/* Token Info */}
                     <div className="p-3">
                       <div className="flex items-center gap-1.5 mb-1">
-                        <span className="text-white font-bold text-sm truncate">
+                        <span className="text-white font-bold text-sm truncate font-mono">
                           {token.tokenName && token.tokenName.length > 12
                             ? `${token.tokenName.slice(0, 12)}...`
                             : token.tokenName}
                         </span>
                         {token.graduated ? (
-                          <span className="bg-green-600 text-white px-1 py-0.5 rounded text-[9px] flex-shrink-0">
+                          <span className="bg-green-600 text-black px-1 py-0.5 rounded text-[9px] flex-shrink-0 font-mono">
                             GRAD
                           </span>
                         ) : (
-                          <span className="bg-purple-600 text-white px-1 py-0.5 rounded text-[9px] flex-shrink-0">
+                          <span className="bg-purple-600 text-black px-1 py-0.5 rounded text-[9px] flex-shrink-0 font-mono">
                             BOND
                           </span>
                         )}
                       </div>
                       <div className="text-gray-400 text-[11px] mb-2">
                         <span className="text-orange-500">market cap: </span>
-                        <span className="text-white font-bold">
+                        <span className="text-white font-bold font-mono">
                           ${formatNumber(token.currentPrice * 1_000_000_000)}
                         </span>
                       </div>
-                      <div className="text-gray-400 text-[10px]">
+                      <div className="text-gray-400 text-[10px] font-mono">
                         {token.tokenSymbol} •{" "}
                         {formatTokenAge(
                           token.deploymentTimestamp || "",
@@ -526,9 +526,9 @@ export function MarketsDashboard() {
           <div className="bg-black px-3 py-2 flex gap-2">
             <button
               onClick={() => handleViewModeChange("card")}
-              className={`p-2 rounded transition-colors ${
+              className={`p-2 rounded transition-colors font-mono ${
                 viewMode === "card"
-                  ? "bg-orange-500 text-white"
+                  ? "bg-orange-500 text-black"
                   : "bg-gray-900 text-gray-400"
               }`}
             >
@@ -536,9 +536,9 @@ export function MarketsDashboard() {
             </button>
             <button
               onClick={() => handleViewModeChange("list")}
-              className={`p-2 rounded transition-colors ${
+              className={`p-2 rounded transition-colors font-mono ${
                 viewMode === "list"
-                  ? "bg-orange-500 text-white"
+                  ? "bg-orange-500 text-black"
                   : "bg-gray-900 text-gray-400"
               }`}
             >
@@ -583,15 +583,15 @@ export function MarketsDashboard() {
                   {/* Token Info - Right Side */}
                   <div className="flex-1 min-w-0 flex flex-col justify-center">
                     <div className="flex items-center gap-1.5 mb-1">
-                      <span className="text-white font-bold text-sm truncate">
+                      <span className="text-white font-bold text-sm truncate font-mono">
                         {token.tokenName}
                       </span>
                       {token.graduated ? (
-                        <span className="bg-green-600 text-white px-1 py-0.5 rounded text-[9px] flex-shrink-0">
+                        <span className="bg-green-600 text-black px-1 py-0.5 rounded text-[9px] flex-shrink-0 font-mono">
                           GRAD
                         </span>
                       ) : (
-                        <span className="bg-purple-600 text-white px-1 py-0.5 rounded text-[9px] flex-shrink-0">
+                        <span className="bg-purple-600 text-black px-1 py-0.5 rounded text-[9px] flex-shrink-0 font-mono">
                           BOND
                         </span>
                       )}
@@ -609,11 +609,11 @@ export function MarketsDashboard() {
                       ) : (
                         <Circle className="w-3 h-3 text-blue-400" />
                       )}
-                      <span className="text-gray-400 text-[10px] truncate">
+                      <span className="text-gray-400 text-[10px] truncate font-mono">
                         {token.tokenSymbol}
                       </span>
                     </div>
-                    <div className="text-gray-400 text-xs mb-1">
+                    <div className="text-gray-400 text-xs mb-1 font-mono">
                       <span className="text-orange-500">MC: </span>
                       <span className="text-white font-semibold">
                         ${formatNumber(token.currentPrice * 1_000_000_000)}
@@ -707,15 +707,15 @@ export function MarketsDashboard() {
                       <div className="flex flex-col flex-1">
                         {/* Row 1: Symbol and BOND/GRAD badge */}
                         <div className="flex items-center gap-1.5 mb-0.5">
-                          <span className="text-white font-bold text-sm max-w-[120px] overflow-hidden text-ellipsis whitespace-nowrap">
+                          <span className="text-white font-bold text-sm max-w-[120px] overflow-hidden text-ellipsis whitespace-nowrap font-mono">
                             {token.tokenSymbol}
                           </span>
                           {token.graduated ? (
-                            <span className="bg-green-600 text-white px-1 py-0.5 rounded text-[9px] flex-shrink-0">
+                            <span className="bg-green-600 text-black px-1 py-0.5 rounded text-[9px] flex-shrink-0 font-mono">
                               GRAD
                             </span>
                           ) : (
-                            <span className="bg-purple-600 text-white px-1 py-0.5 rounded text-[9px] flex-shrink-0">
+                            <span className="bg-purple-600 text-black px-1 py-0.5 rounded text-[9px] flex-shrink-0 font-mono">
                               BOND
                             </span>
                           )}
@@ -737,12 +737,12 @@ export function MarketsDashboard() {
                           {formatPrice(token.currentPrice)}
                         </div>
                         <span
-                          className={`${priceChange1h.color} text-[11px] font-semibold`}
+                          className={`${priceChange1h.color} text-[11px] font-semibold font-mono`}
                         >
                           1H {priceChange1h.text}
                         </span>
                         <span
-                          className={`${priceChange24h.color} text-[11px] font-semibold`}
+                          className={`${priceChange24h.color} text-[11px] font-semibold font-mono`}
                         >
                           24H {priceChange24h.text}
                         </span>
@@ -781,9 +781,9 @@ export function MarketsDashboard() {
           <div className="flex gap-2 overflow-x-auto scrollbar-hide">
             <button
               onClick={() => setActiveFilter("age")}
-              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
+              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded font-mono ${
                 activeFilter === "age"
-                  ? "bg-orange-500 text-white"
+                  ? "bg-orange-500 text-black"
                   : "bg-gray-900 text-gray-400"
               }`}
             >
@@ -791,9 +791,9 @@ export function MarketsDashboard() {
             </button>
             <button
               onClick={() => setActiveFilter("last_comment")}
-              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
+              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded font-mono ${
                 activeFilter === "last_comment"
-                  ? "bg-orange-500 text-white"
+                  ? "bg-orange-500 text-black"
                   : "bg-gray-900 text-gray-400"
               }`}
             >
@@ -801,9 +801,9 @@ export function MarketsDashboard() {
             </button>
             <button
               onClick={() => setActiveFilter("last_trade")}
-              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
+              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded font-mono ${
                 activeFilter === "last_trade"
-                  ? "bg-orange-500 text-white"
+                  ? "bg-orange-500 text-black"
                   : "bg-gray-900 text-gray-400"
               }`}
             >
@@ -811,9 +811,9 @@ export function MarketsDashboard() {
             </button>
             <button
               onClick={() => setActiveFilter("new")}
-              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
+              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded font-mono ${
                 activeFilter === "new"
-                  ? "bg-orange-500 text-white"
+                  ? "bg-orange-500 text-black"
                   : "bg-gray-900 text-gray-400"
               }`}
             >
@@ -821,9 +821,9 @@ export function MarketsDashboard() {
             </button>
             <button
               onClick={() => setActiveFilter("graduated")}
-              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
+              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded font-mono ${
                 activeFilter === "graduated"
-                  ? "bg-orange-500 text-white"
+                  ? "bg-orange-500 text-black"
                   : "bg-gray-900 text-gray-400"
               }`}
             >
@@ -831,9 +831,9 @@ export function MarketsDashboard() {
             </button>
             <button
               onClick={() => setActiveFilter("market_cap")}
-              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
+              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded font-mono ${
                 activeFilter === "market_cap"
-                  ? "bg-orange-500 text-white"
+                  ? "bg-orange-500 text-black"
                   : "bg-gray-900 text-gray-400"
               }`}
             >
@@ -841,9 +841,9 @@ export function MarketsDashboard() {
             </button>
             <button
               onClick={() => setActiveFilter("liquidity")}
-              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
+              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded font-mono ${
                 activeFilter === "liquidity"
-                  ? "bg-orange-500 text-white"
+                  ? "bg-orange-500 text-black"
                   : "bg-gray-900 text-gray-400"
               }`}
             >
@@ -972,12 +972,12 @@ export function MarketsDashboard() {
                               {token.chain}
                             </span>
                             {token.graduated && (
-                              <span className="bg-green-600 text-white px-1 py-0.5 rounded text-xs flex-shrink-0">
+                              <span className="bg-green-600 text-black px-1 py-0.5 rounded text-xs flex-shrink-0 font-mono">
                                 GRAD
                               </span>
                             )}
                             {!token.graduated && (
-                              <span className="bg-purple-600 text-white px-1 py-0.5 rounded text-xs flex-shrink-0">
+                              <span className="bg-purple-600 text-black px-1 py-0.5 rounded text-xs flex-shrink-0 font-mono">
                                 BOND
                               </span>
                             )}

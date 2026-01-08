@@ -675,7 +675,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-orange-500">Profile</h1>
+          <h1 className="text-3xl font-bold text-orange-500 font-mono">Profile</h1>
         </div>
         <WalletConnectionPrompt
           title="Sign In"
@@ -691,10 +691,10 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-orange-500">Profile</h1>
+          <h1 className="text-3xl font-bold text-orange-500 font-mono">Profile</h1>
         </div>
         <div className="flex items-center justify-center py-12">
-          <div className="text-gray-400">Loading...</div>
+          <div className="text-gray-400 font-mono">Loading...</div>
         </div>
       </div>
     );
@@ -705,7 +705,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-orange-500">Profile</h1>
+          <h1 className="text-3xl font-bold text-orange-500 font-mono">Profile</h1>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2 space-y-6">
@@ -737,7 +737,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-orange-500">
+        <h1 className="text-3xl font-bold text-orange-500 font-mono">
           {isOwnProfile
             ? ""
             : `${
@@ -756,7 +756,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2 text-gray-200">
                 <Edit3 className="w-4 h-4" />
-                <span>Edit Profile</span>
+                <span className="font-mono">Edit Profile</span>
               </div>
               <button
                 onClick={closeEditModal}
@@ -768,7 +768,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
 
             <div className="space-y-4">
               <div>
-                <Label htmlFor="modal-username" className="text-sm">
+                <Label htmlFor="modal-username" className="text-sm font-mono">
                   Username
                 </Label>
                 <Input
@@ -782,7 +782,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                 />
               </div>
               <div>
-                <Label className="text-sm">Profile Image</Label>
+                <Label className="text-sm font-mono">Profile Image</Label>
                 <div className="mt-2 space-y-2">
                   <input
                     type="file"
@@ -790,15 +790,15 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                     onChange={(e) =>
                       handleModalFileChange(e.target.files?.[0] || null)
                     }
-                    className="w-full p-2 bg-black border text-white text-xs font-mono file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-orange-600 file:text-white hover:file:bg-orange-700 border-gray-600"
+                    className="w-full p-2 bg-black border text-white text-xs font-mono file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-orange-600 file:text-black hover:file:bg-orange-700 border-gray-600"
                   />
                   {fileError && (
-                    <div className="text-red-400 text-xs">{fileError}</div>
+                    <div className="text-red-400 text-xs font-mono">{fileError}</div>
                   )}
                   {/* Image Preview */}
                   {(selectedFile || user?.profileImage) && (
                     <div className="mt-3">
-                      <div className="text-xs text-gray-400 mb-2">Preview:</div>
+                      <div className="text-xs text-gray-400 mb-2 font-mono">Preview:</div>
                       <div className="w-20 h-20 rounded overflow-hidden border-2 border-gray-600">
                         <img
                           src={
@@ -814,7 +814,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                         <button
                           type="button"
                           onClick={() => handleModalFileChange(null)}
-                          className="mt-2 text-xs text-red-400 hover:text-red-300"
+                          className="mt-2 text-xs text-red-400 hover:text-red-300 font-mono"
                         >
                           Remove selected image
                         </button>
@@ -826,10 +826,10 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
             </div>
 
             <div className="flex items-center justify-end gap-2 mt-6">
-              <Button variant="outline" onClick={closeEditModal}>
+              <Button variant="outline" onClick={closeEditModal} className="font-mono">
                 Cancel
               </Button>
-              <Button onClick={saveProfileEdits} disabled={loading}>
+              <Button onClick={saveProfileEdits} disabled={loading} className="font-mono">
                 {loading ? "Saving..." : "Save"}
               </Button>
             </div>
@@ -858,10 +858,10 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold text-gray-200">
+                  <h3 className="text-xl font-semibold text-gray-200 font-mono">
                     {user?.username || "Anonymous User"}
                   </h3>
-                  <p className="text-gray-400 flex items-center space-x-2">
+                  <p className="text-gray-400 flex items-center space-x-2 font-mono">
                     <Wallet className="w-4 h-4" />
                     <span className="font-mono">
                       {formatAddress(targetAddress || "")}
@@ -893,7 +893,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                       <Copy className="w-4 h-4" />
                     </Button>
                   </p>
-                  <div className="flex items-center space-x-4 text-sm text-gray-400 mt-1">
+                  <div className="flex items-center space-x-4 text-sm text-gray-400 mt-1 font-mono">
                     <span className="flex items-center space-x-1">
                       <Calendar className="w-4 h-4" />
                       <span>Joined {formatDate(user?.createdAt || "")}</span>
@@ -910,14 +910,14 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                       className="text-orange-500"
                     >
                       <Edit3 className="w-4 h-4 mr-2 text-orange-500" />
-                      Edit Profile
+                      <span className="font-mono">Edit Profile</span>
                     </Button>
                     <Button
                       onClick={handleDisconnect}
                       disabled={disconnecting}
                       variant="outline"
                       size="sm"
-                      className="text-red-400 border-red-500/30 hover:bg-red-900/20 hover:border-red-400/50 disabled:opacity-50"
+                      className="text-red-400 border-red-500/30 hover:bg-red-900/20 hover:border-red-400/50 disabled:opacity-50 font-mono"
                     >
                       <LogOut className="w-4 h-4 mr-2" />
                       {disconnecting ? "Disconnecting..." : "Disconnect"}
@@ -929,28 +929,28 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
               {/* Stats (desktop) */}
               <div className="hidden md:flex space-x-8">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-500">
+                  <div className="text-2xl font-bold text-orange-500 font-mono">
                     {profileStats.deployer.tokensDeployed}
                   </div>
-                  <div className="text-sm text-gray-400">Tokens Deployed</div>
+                  <div className="text-sm text-gray-400 font-mono">Tokens Deployed</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-500">
+                  <div className="text-2xl font-bold text-orange-500 font-mono">
                     {profileStats.deployer.graduatedTokens}
                   </div>
-                  <div className="text-sm text-gray-400">Graduated</div>
+                  <div className="text-sm text-gray-400 font-mono">Graduated</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-500">
+                  <div className="text-2xl font-bold text-orange-500 font-mono">
                     {profileStats.social.likesReceived}
                   </div>
-                  <div className="text-sm text-gray-400">Likes Received</div>
+                  <div className="text-sm text-gray-400 font-mono">Likes Received</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-500">
+                  <div className="text-2xl font-bold text-orange-500 font-mono">
                     {profileStats.social.commentsMade}
                   </div>
-                  <div className="text-sm text-gray-400">Comments</div>
+                  <div className="text-sm text-gray-400 font-mono">Comments</div>
                 </div>
               </div>
             </div>
@@ -958,28 +958,28 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
             {/* Stats (mobile) */}
             <div className="mt-4 grid grid-cols-2 gap-4 md:hidden">
               <div className="text-center">
-                <div className="text-xl font-bold text-orange-500">
+                <div className="text-xl font-bold text-orange-500 font-mono">
                   {profileStats.deployer.tokensDeployed}
                 </div>
-                <div className="text-xs text-gray-400">Tokens</div>
+                <div className="text-xs text-gray-400 font-mono">Tokens</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-orange-500">
+                <div className="text-xl font-bold text-orange-500 font-mono">
                   {profileStats.deployer.graduatedTokens}
                 </div>
-                <div className="text-xs text-gray-400">Graduated</div>
+                <div className="text-xs text-gray-400 font-mono">Graduated</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-orange-500">
+                <div className="text-xl font-bold text-orange-500 font-mono">
                   {profileStats.social.likesReceived}
                 </div>
-                <div className="text-xs text-gray-400">Likes</div>
+                <div className="text-xs text-gray-400 font-mono">Likes</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-orange-500">
+                <div className="text-xl font-bold text-orange-500 font-mono">
                   {profileStats.social.commentsMade}
                 </div>
-                <div className="text-xs text-gray-400">Comments</div>
+                <div className="text-xs text-gray-400 font-mono">Comments</div>
               </div>
             </div>
 
@@ -992,14 +992,14 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                   size="sm"
                   className="flex-1 text-orange-500"
                 >
-                  <Edit3 className="w-4 h-4 mr-2" /> Edit
+                  <Edit3 className="w-4 h-4 mr-2" /> <span className="font-mono">Edit</span>
                 </Button>
                 <Button
                   onClick={handleDisconnect}
                   disabled={disconnecting}
                   variant="outline"
                   size="sm"
-                  className="flex-1 text-red-400 border-red-500/30 hover:bg-red-900/20 hover:border-red-400/50 disabled:opacity-50"
+                  className="flex-1 text-red-400 border-red-500/30 hover:bg-red-900/20 hover:border-red-400/50 disabled:opacity-50 font-mono"
                 >
                   <LogOut className="w-4 h-4 mr-2" />{" "}
                   {disconnecting ? "..." : "Disconnect"}
@@ -1028,14 +1028,14 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <MessageSquareHeart className="w-5 h-5" />
-                  <span>Comments</span>
+                  <span className="font-mono">Comments</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {profileComments.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     <MessageCircle className="w-12 h-12 mx-auto mb-3 text-gray-600" />
-                    <p className="text-sm">
+                    <p className="text-sm font-mono">
                       You haven't posted any comments yet
                     </p>
                   </div>
@@ -1047,7 +1047,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                         className="bg-gray-800 border border-gray-700 rounded p-4"
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2 text-xs">
+                          <div className="flex items-center gap-2 text-xs font-mono">
                             <span className="text-gray-400">On</span>
                             <Link
                               to={`/token/SEP/${c.token.address}`}
@@ -1062,13 +1062,13 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                               ) : (
                                 <Coins className="w-3.5 h-3.5 text-orange-500" />
                               )}
-                              <span>{c.token.symbol}</span>
+                              <span className="font-mono">{c.token.symbol}</span>
                             </Link>
-                            <span className="text-gray-500">
+                            <span className="text-gray-500 font-mono">
                               {formatTimeAgo(c.createdAt)}
                             </span>
                           </div>
-                          <div className="flex items-center space-x-3 text-xs text-gray-400">
+                          <div className="flex items-center space-x-3 text-xs text-gray-400 font-mono">
                             <button
                               onClick={() => toggleCommentLike(c.id)}
                               className={`flex items-center space-x-1 transition-colors ${
@@ -1093,7 +1093,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                           </div>
                         </div>
 
-                        <div className="text-gray-200 text-sm mb-3">
+                        <div className="text-gray-200 text-sm mb-3 font-mono">
                           {c.content}
                         </div>
 
@@ -1114,7 +1114,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                                       {r.user.username ||
                                         formatAddress(r.user.walletAddress)}
                                     </Link>
-                                    <div className="flex items-center gap-3 text-xs text-gray-400">
+                                    <div className="flex items-center gap-3 text-xs text-gray-400 font-mono">
                                       <span>{formatTimeAgo(r.createdAt)}</span>
                                       <button
                                         onClick={() =>
@@ -1131,11 +1131,11 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                                             r.isLiked ? "fill-current" : ""
                                           }`}
                                         />
-                                        <span>{r._count?.likes || 0}</span>
+                                        <span className="font-mono">{r._count?.likes || 0}</span>
                                       </button>
                                     </div>
                                   </div>
-                                  <div className="text-gray-300 text-sm">
+                                  <div className="text-gray-300 text-sm font-mono">
                                     {r.content}
                                   </div>
                                 </div>
@@ -1145,7 +1145,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                             {!expandedComments.has(c.id) && (
                               <button
                                 onClick={() => toggleExpandReplies(c.id)}
-                                className="text-xs text-orange-500 hover:text-orange-300 transition-colors ml-4 mt-1"
+                                className="text-xs text-orange-500 hover:text-orange-300 transition-colors ml-4 mt-1 font-mono"
                               >
                                 Show {c.replyCount}
                                 {c.replyCount === 1 ? " reply" : " replies"}
@@ -1154,7 +1154,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                             {expandedComments.has(c.id) && (
                               <button
                                 onClick={() => toggleExpandReplies(c.id)}
-                                className="text-xs text-gray-400 hover:text-gray-300 transition-colors ml-4 mt-1"
+                                className="text-xs text-gray-400 hover:text-gray-300 transition-colors ml-4 mt-1 font-mono"
                               >
                                 Show less
                               </button>
@@ -1173,14 +1173,14 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <MessageCircle className="w-5 h-5" />
-                  <span>Replies</span>
+                  <span className="font-mono">Replies</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {profileReplies.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     <MessageCircle className="w-12 h-12 mx-auto mb-3 text-gray-600" />
-                    <p className="text-sm">No replies yet</p>
+                    <p className="text-sm font-mono">No replies yet</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -1192,10 +1192,10 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                         {/* Original comment with token indicator at top-left */}
                         <div className="p-4">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-gray-400 text-xs">On</span>
+                            <span className="text-gray-400 text-xs font-mono">On</span>
                             <Link
                               to={`/token/SEP/${r.token.address}`}
-                              className="px-2 py-0.5 rounded bg-orange-500/10 text-orange-500 border border-orange-500/30 hover:bg-orange-600/10 flex items-center gap-1 text-xs"
+                              className="px-2 py-0.5 rounded bg-orange-500/10 text-orange-500 border border-orange-500/30 hover:bg-orange-600/10 flex items-center gap-1 text-xs font-mono"
                             >
                               {r.token.logoUrl ? (
                                 <img
@@ -1219,7 +1219,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 text-xs text-gray-400">
+                              <div className="flex items-center gap-2 text-xs text-gray-400 font-mono">
                                 <Link
                                   to={`/profile/${r.parentCommentUser.walletAddress}`}
                                   className="text-orange-500 hover:text-white font-mono"
@@ -1236,7 +1236,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                                 )}
                               </div>
                               {r.parentCommentContent && (
-                                <div className="text-gray-300 text-sm mt-1">
+                                <div className="text-gray-300 text-sm mt-1 font-mono">
                                   {r.parentCommentContent}
                                 </div>
                               )}
@@ -1256,7 +1256,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between text-xs text-gray-400">
+                              <div className="flex items-center justify-between text-xs text-gray-400 font-mono">
                                 <div className="flex items-center gap-2">
                                   <span className="text-orange-500 font-mono">
                                     {user?.username ||
@@ -1277,10 +1277,10 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                                       r.isLiked ? "fill-current" : ""
                                     }`}
                                   />
-                                  <span>{r._count?.likes || 0}</span>
+                                  <span className="font-mono">{r._count?.likes || 0}</span>
                                 </button>
                               </div>
-                              <div className="text-gray-200 text-sm mt-1">
+                              <div className="text-gray-200 text-sm mt-1 font-mono">
                                 {r.content}
                               </div>
 

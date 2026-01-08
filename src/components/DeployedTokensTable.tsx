@@ -266,11 +266,11 @@ const DeployedTokensTable: React.FC<DeployedTokensTableProps> = ({
                 </td>
                 <td className="p-1 text-right">
                   {token.isGraduated ? (
-                    <span className="bg-green-600 text-white px-1 py-0.5 rounded text-xs">
+                    <span className="bg-green-600 text-black px-1 py-0.5 rounded text-xs font-mono">
                       GRAD
                     </span>
                   ) : (
-                    <span className="bg-purple-600 text-white px-1 py-0.5 rounded text-xs">
+                    <span className="bg-purple-600 text-black px-1 py-0.5 rounded text-xs font-mono">
                       BOND
                     </span>
                   )}

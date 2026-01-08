@@ -78,11 +78,11 @@ export const Reply: React.FC<ReplyProps> = ({
           >
             {getDisplayName(reply.user)}
           </Link>
-          <span className="text-gray-500 text-xs">
+          <span className="text-gray-500 text-xs font-mono">
             {formatTimeAgo(reply.createdAt)}
           </span>
           {reply.updatedAt !== reply.createdAt && (
-            <span className="text-gray-600 text-xs">(edited)</span>
+            <span className="text-gray-600 text-xs font-mono">(edited)</span>
           )}
         </div>
         {isOwner && (
@@ -111,21 +111,21 @@ export const Reply: React.FC<ReplyProps> = ({
           <textarea
             value={editContent}
             onChange={(e) => setEditContent(e.target.value)}
-            className={`w-full ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none`}
+            className={`w-full ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none font-mono`}
             rows={3}
             maxLength={1000}
           />
           <div className="flex justify-end space-x-2 mt-2">
             <button
               onClick={handleCancelEdit}
-              className="px-3 py-1 text-xs text-gray-400 hover:text-gray-300 transition-colors"
+              className="px-3 py-1 text-xs text-gray-400 hover:text-gray-300 transition-colors font-mono"
             >
               Cancel
             </button>
             <button
               onClick={handleEdit}
               disabled={!editContent.trim() || editContent === reply.content}
-              className="px-3 py-1 bg-orange-500 text-white text-xs rounded hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-1 bg-orange-500 text-black text-xs rounded hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-mono"
             >
               Save
             </button>
@@ -146,16 +146,16 @@ export const Reply: React.FC<ReplyProps> = ({
               <Heart
                 className={`w-4 h-4 ${reply.isLiked ? "fill-current" : ""}`}
               />
-              <span className="text-xs">{reply._count?.likes || 0}</span>
+              <span className="text-xs font-mono">{reply._count?.likes || 0}</span>
             </button>
           ) : (
             <div className="flex items-center space-x-1 text-gray-500 flex-shrink-0">
               <Heart className="w-4 h-4" />
-              <span className="text-xs">{reply._count?.likes || 0}</span>
+              <span className="text-xs font-mono">{reply._count?.likes || 0}</span>
             </div>
           )}
           {/* Content on right */}
-          <div className="text-gray-200 text-sm flex-1">{reply.content}</div>
+          <div className="text-gray-200 text-sm flex-1 font-mono">{reply.content}</div>
         </div>
       )}
     </div>

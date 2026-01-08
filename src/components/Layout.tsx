@@ -165,7 +165,7 @@ export function Layout({ children }: LayoutProps) {
                     )}
                   >
                     <item.icon className="w-4 h-4" />
-                    <span className="font-medium hidden lg:inline">
+                    <span className="font-medium hidden lg:inline font-mono">
                       {item.label}
                     </span>
                   </Link>

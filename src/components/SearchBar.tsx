@@ -160,7 +160,7 @@ const SearchBar = () => {
           {showPreview && (
             <div className="absolute top-full left-0 right-0 bg-gray-800 border border-gray-600 border-t-0 max-h-80 overflow-y-auto z-50">
               {isLoading ? (
-                <div className="p-3 text-center text-gray-400 text-xs">
+                <div className="p-3 text-center text-gray-400 text-xs font-mono">
                   Searching...
                 </div>
               ) : searchResults.length > 0 ? (
@@ -190,31 +190,31 @@ const SearchBar = () => {
                         {/* Token Info */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center space-x-2">
-                            <span className="text-orange-500 font-bold text-xs">
+                            <span className="text-orange-500 font-bold text-xs font-mono">
                               {token.symbol}
                             </span>
-                            <span className="text-gray-300 text-xs truncate">
+                            <span className="text-gray-300 text-xs truncate font-mono">
                               {token.name}
                             </span>
                             {token.graduated && (
                               <div className="flex items-center space-x-1">
                                 <TrendingUp className="w-3 h-3 text-green-400" />
-                                <span className="text-green-400 text-xs font-bold">
-                                  GRAD
-                                </span>
+                            <span className="text-green-400 text-xs font-bold font-mono">
+                              GRAD
+                            </span>
                               </div>
                             )}
                           </div>
                           <div className="flex items-center space-x-2 mt-1">
-                            <span className="text-gray-400 text-xs">
+                            <span className="text-gray-400 text-xs font-mono">
                               {token.chain}
                             </span>
-                            <span className="text-gray-500 text-xs">
+                            <span className="text-gray-500 text-xs font-mono">
                               {formatAddress(token.tokenAddress)}
                             </span>
                           </div>
                           {token.description && (
-                            <div className="text-gray-400 text-xs mt-1 truncate">
+                            <div className="text-gray-400 text-xs mt-1 truncate font-mono">
                               {token.description}
                             </div>
                           )}
@@ -227,7 +227,7 @@ const SearchBar = () => {
                   ))}
                 </div>
               ) : storedSearchTerm.trim().length >= 2 ? (
-                <div className="p-3 text-center text-gray-400 text-xs">
+                <div className="p-3 text-center text-gray-400 text-xs font-mono">
                   No tokens found for "{storedSearchTerm}"
                 </div>
               ) : null}
@@ -235,7 +235,7 @@ const SearchBar = () => {
               {/* Search Tip */}
               {searchResults.length > 0 && (
                 <div className="border-t border-gray-700 px-3 py-2 bg-gray-900">
-                  <div className="text-gray-500 text-xs flex items-center justify-between">
+                  <div className="text-gray-500 text-xs flex items-center justify-between font-mono">
                     <span>↑↓ Navigate • Enter Select • Esc Close</span>
                     <span>
                       {searchResults.length} result

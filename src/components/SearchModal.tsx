@@ -165,7 +165,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
           {/* Results */}
           <div className="max-h-[60vh] overflow-y-auto">
             {isLoading ? (
-              <div className="p-8 text-center text-gray-400">
+              <div className="p-8 text-center text-gray-400 font-mono">
                 Searching...
               </div>
             ) : searchResults.length > 0 ? (
@@ -195,31 +195,31 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
                       {/* Token Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-orange-500 font-bold text-sm">
+                          <span className="text-orange-500 font-bold text-sm font-mono">
                             {token.symbol}
                           </span>
-                          <span className="text-gray-300 text-sm truncate">
+                          <span className="text-gray-300 text-sm truncate font-mono">
                             {token.name}
                           </span>
                           {token.graduated && (
                             <div className="flex items-center gap-1">
                               <TrendingUp className="w-3 h-3 text-green-400" />
-                              <span className="text-green-400 text-xs font-bold">
+                              <span className="text-green-400 text-xs font-bold font-mono">
                                 GRAD
                               </span>
                             </div>
                           )}
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-gray-400 text-xs">
+                          <span className="text-gray-400 text-xs font-mono">
                             {token.chain}
                           </span>
-                          <span className="text-gray-500 text-xs">
+                          <span className="text-gray-500 text-xs font-mono">
                             {formatAddress(token.tokenAddress)}
                           </span>
                         </div>
                         {token.description && (
-                          <div className="text-gray-400 text-xs mt-1 truncate">
+                          <div className="text-gray-400 text-xs mt-1 truncate font-mono">
                             {token.description}
                           </div>
                         )}
@@ -232,11 +232,11 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
                 ))}
               </div>
             ) : storedSearchTerm.trim().length >= 2 ? (
-              <div className="p-8 text-center text-gray-400">
+              <div className="p-8 text-center text-gray-400 font-mono">
                 No tokens found for "{storedSearchTerm}"
               </div>
             ) : (
-              <div className="p-8 text-center text-gray-500">
+              <div className="p-8 text-center text-gray-500 font-mono">
                 Start typing to search tokens...
               </div>
             )}

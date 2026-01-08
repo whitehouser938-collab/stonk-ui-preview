@@ -105,18 +105,18 @@ export const Comment: React.FC<CommentProps> = ({
             >
               {getDisplayName(comment.user)}
             </Link>
-            <span className="text-gray-500 text-xs">
+            <span className="text-gray-500 text-xs font-mono">
               {formatTimeAgo(comment.createdAt)}
             </span>
             {comment.updatedAt !== comment.createdAt && (
-              <span className="text-gray-600 text-xs">(edited)</span>
+              <span className="text-gray-600 text-xs font-mono">(edited)</span>
             )}
           </div>
           <div className="flex items-center space-x-2">
             {comment.replies.length > 0 && (
-              <div className="flex items-center space-x-1 text-gray-500 text-xs">
+              <div className="flex items-center space-x-1 text-gray-500 text-xs font-mono">
                 <MessageCircle className="w-3 h-3" />
-                <span>{comment.replies.length}</span>
+                <span className="font-mono">{comment.replies.length}</span>
               </div>
             )}
             {isOwner && (
@@ -146,14 +146,14 @@ export const Comment: React.FC<CommentProps> = ({
             <textarea
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
-              className={`w-full ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none`}
+              className={`w-full ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none font-mono`}
               rows={3}
               maxLength={1000}
             />
             <div className="flex justify-end space-x-2 mt-2">
               <button
                 onClick={handleCancelEdit}
-                className="px-3 py-1 text-xs text-gray-400 hover:text-gray-300 transition-colors"
+                className="px-3 py-1 text-xs text-gray-400 hover:text-gray-300 transition-colors font-mono"
               >
                 Cancel
               </button>
@@ -162,7 +162,7 @@ export const Comment: React.FC<CommentProps> = ({
                 disabled={
                   !editContent.trim() || editContent === comment.content
                 }
-                className="px-3 py-1 bg-orange-500 text-white text-xs rounded hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1 bg-orange-500 text-black text-xs rounded hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-mono"
               >
                 Save
               </button>
@@ -183,16 +183,16 @@ export const Comment: React.FC<CommentProps> = ({
                 <Heart
                   className={`w-4 h-4 ${comment.isLiked ? "fill-current" : ""}`}
                 />
-                <span className="text-xs">{comment._count?.likes || 0}</span>
+                <span className="text-xs font-mono">{comment._count?.likes || 0}</span>
               </button>
             ) : (
-              <div className="flex items-center space-x-1 text-gray-500 flex-shrink-0">
+              <div className="flex items-center space-x-1 text-gray-500 flex-shrink-0 font-mono">
                 <Heart className="w-4 h-4" />
-                <span className="text-xs">{comment._count?.likes || 0}</span>
+                <span className="text-xs font-mono">{comment._count?.likes || 0}</span>
               </div>
             )}
             {/* Content on right */}
-            <div className="text-gray-200 text-sm flex-1">{comment.content}</div>
+            <div className="text-gray-200 text-sm flex-1 font-mono">{comment.content}</div>
           </div>
         )}
 
@@ -201,7 +201,7 @@ export const Comment: React.FC<CommentProps> = ({
           <div className="mb-3">
             <button
               onClick={() => setShowReplyForm(!showReplyForm)}
-              className="text-gray-400 hover:text-orange-500 transition-colors text-xs"
+              className="text-gray-400 hover:text-orange-500 transition-colors text-xs font-mono"
             >
               Reply
             </button>
@@ -215,7 +215,7 @@ export const Comment: React.FC<CommentProps> = ({
               value={replyContent}
               onChange={(e) => setReplyContent(e.target.value)}
               placeholder="Write a reply..."
-              className={`w-full ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none`}
+              className={`w-full ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none font-mono`}
               rows={3}
               maxLength={1000}
             />
@@ -225,14 +225,14 @@ export const Comment: React.FC<CommentProps> = ({
                   setShowReplyForm(false);
                   setReplyContent("");
                 }}
-                className="px-3 py-1 text-xs text-gray-400 hover:text-gray-300 transition-colors"
+                className="px-3 py-1 text-xs text-gray-400 hover:text-gray-300 transition-colors font-mono"
               >
                 Cancel
               </button>
               <button
                 onClick={handleReply}
                 disabled={!replyContent.trim()}
-                className="px-3 py-1 bg-orange-500 text-white text-xs rounded hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1 bg-orange-500 text-black text-xs rounded hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-mono"
               >
                 Reply
               </button>
@@ -264,7 +264,7 @@ export const Comment: React.FC<CommentProps> = ({
           {comment.replies.length > 1 && !showAllReplies && (
             <button
               onClick={() => setShowAllReplies(true)}
-              className="text-xs text-orange-500 hover:text-orange-400 transition-colors ml-6"
+              className="text-xs text-orange-500 hover:text-orange-400 transition-colors ml-6 font-mono"
             >
               Show all {comment.replies.length} replies
             </button>
@@ -274,7 +274,7 @@ export const Comment: React.FC<CommentProps> = ({
           {comment.replies.length > 1 && showAllReplies && (
             <button
               onClick={() => setShowAllReplies(false)}
-              className="text-xs text-gray-400 hover:text-gray-300 transition-colors ml-6"
+              className="text-xs text-gray-400 hover:text-gray-300 transition-colors ml-6 font-mono"
             >
               Show less
             </button>

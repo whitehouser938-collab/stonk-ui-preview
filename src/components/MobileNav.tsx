@@ -65,7 +65,7 @@ export function MobileNav({
               )}
             >
               <item.icon className="w-5 h-5" />
-              <span className="font-medium">{item.label}</span>
+              <span className="font-medium font-mono">{item.label}</span>
             </Link>
           );
         })}

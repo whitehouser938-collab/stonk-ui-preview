@@ -1055,7 +1055,7 @@ const TokenPage = () => {
                       <button className="px-1.5 py-0.5 text-[10px] bg-gray-800 text-gray-400 rounded">
                         1h
                       </button>
-                      <button className="px-1.5 py-0.5 text-[10px] bg-orange-500 text-white rounded">
+                      <button className="px-1.5 py-0.5 text-[10px] bg-orange-500 text-black rounded font-mono">
                         24h
                       </button>
                     </div>

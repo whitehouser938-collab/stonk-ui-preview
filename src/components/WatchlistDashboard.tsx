@@ -98,8 +98,8 @@ export function WatchlistDashboard() {
       <div className="h-screen overflow-auto bg-black text-gray-100 text-xs font-mono flex items-center justify-center">
         <div className="text-center p-8 bg-gray-900 border border-gray-700 rounded max-w-md">
           <AlertCircle className="w-12 h-12 text-orange-500 mx-auto mb-4" />
-          <h2 className="text-lg text-white mb-2">Connect Your Wallet</h2>
-          <p className="text-gray-400">
+          <h2 className="text-lg text-white mb-2 font-mono">Connect Your Wallet</h2>
+          <p className="text-gray-400 font-mono">
             Please connect your wallet to view your watchlist
           </p>
         </div>
@@ -112,21 +112,21 @@ export function WatchlistDashboard() {
       <div className="p-4">
         <div className="bg-gray-900 border border-gray-700">
           <div className="text-orange-500 text-sm p-2 border-b border-gray-700 flex items-center justify-between">
-            <span>MY WATCHLIST</span>
-            <span className="text-gray-400">
+            <span className="font-mono">MY WATCHLIST</span>
+            <span className="text-gray-400 font-mono">
               {watchlist.length} {watchlist.length === 1 ? "token" : "tokens"}
             </span>
           </div>
 
           {isLoading ? (
-            <div className="text-center p-8 text-gray-400">
+            <div className="text-center p-8 text-gray-400 font-mono">
               Loading watchlist...
             </div>
           ) : watchlist.length === 0 ? (
             <div className="text-center p-8">
               <Star className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-              <p className="text-gray-400 mb-2">Your watchlist is empty</p>
-              <p className="text-gray-500 text-xs">
+              <p className="text-gray-400 mb-2 font-mono">Your watchlist is empty</p>
+              <p className="text-gray-500 text-xs font-mono">
                 Click the star icon on any token to add it to your watchlist
               </p>
             </div>
@@ -255,19 +255,19 @@ export function WatchlistDashboard() {
                               token.logoUrl ? "hidden" : ""
                             }`}
                           />
-                          <span className="text-white font-bold">
+                          <span className="text-white font-bold font-mono">
                             {token.tokenSymbol}
                           </span>
-                          <span className="text-gray-400 text-xs">
+                          <span className="text-gray-400 text-xs font-mono">
                             {token.chain}
                           </span>
                           {token.graduated && (
-                            <span className="bg-green-600 text-white px-1 py-0.5 rounded text-xs">
+                            <span className="bg-green-600 text-black px-1 py-0.5 rounded text-xs font-mono">
                               GRAD
                             </span>
                           )}
                           {!token.graduated && (
-                            <span className="bg-purple-600 text-white px-1 py-0.5 rounded text-xs">
+                            <span className="bg-purple-600 text-black px-1 py-0.5 rounded text-xs font-mono">
                               BOND
                             </span>
                           )}
