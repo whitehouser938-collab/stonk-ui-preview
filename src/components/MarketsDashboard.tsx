@@ -355,10 +355,82 @@ export function MarketsDashboard() {
 
   const filteredTokens = getFilteredTokens();
 
+  // Get top trending tokens based on volume and recent activity
+  const getTrendingTokens = () => {
+    return tokens
+      .slice()
+      .sort((a, b) => {
+        // Sort by combination of 24h volume and price change
+        const scoreA = a.totalVolume * (1 + Math.abs(a.priceChange24h) / 100);
+        const scoreB = b.totalVolume * (1 + Math.abs(b.priceChange24h) / 100);
+        return scoreB - scoreA;
+      })
+      .slice(0, 10); // Top 10 trending
+  };
+
   return (
     <div className="bg-black text-gray-100 text-xs font-mono">
       {/* MOBILE VIEW */}
       <div className="lg:hidden fixed inset-0 flex flex-col" style={{ top: headerHeight }}>
+        {/* Trending Section - Horizontal Scroll */}
+        <div className="bg-black border-b border-gray-800">
+          <div className="flex items-center justify-between p-3">
+            <h2 className="text-white font-bold text-sm">Now trending</h2>
+          </div>
+          <div className="overflow-x-auto pb-3 px-3" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <style>{`
+              .trending-scroll::-webkit-scrollbar {
+                display: none;
+              }
+            `}</style>
+            <div className="flex gap-3 trending-scroll">
+              {getTrendingTokens().map((token) => (
+                <div
+                  key={token.tokenAddress}
+                  onClick={() => handleTokenClick(token)}
+                  className="flex-shrink-0 w-[280px] bg-gray-900 rounded-lg overflow-hidden cursor-pointer hover:bg-gray-800 transition-colors"
+                >
+                  {/* Token Image */}
+                  <div className="relative h-[140px] bg-gray-800">
+                    {token.logoUrl ? (
+                      <img
+                        src={token.logoUrl}
+                        alt={token.tokenSymbol}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Circle className="w-16 h-16 text-blue-400" />
+                      </div>
+                    )}
+                    {/* Market cap overlay */}
+                    <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-[10px]">
+                      <span className="text-gray-400">market cap: </span>
+                      <span className="text-white font-bold">${formatNumber(token.currentPrice * 1_000_000_000)}</span>
+                    </div>
+                  </div>
+                  {/* Token Info */}
+                  <div className="p-3">
+                    <div className="text-white font-bold text-sm mb-1">
+                      {token.tokenName}
+                    </div>
+                    <div className="text-gray-400 text-[11px] mb-2">
+                      <span className="text-orange-400">market cap: </span>
+                      <span className="text-white font-bold">${formatNumber(token.currentPrice * 1_000_000_000)}</span>
+                    </div>
+                    <div className="text-gray-400 text-[10px]">
+                      {token.tokenSymbol} • {formatTokenAge(token.deploymentTimestamp || "", currentTime)}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* Token List - Scrollable Container */}
         <div className="flex-1 overflow-y-auto pb-[72px]" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
           {isLoading ? (
