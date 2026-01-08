@@ -1,5 +1,12 @@
 import React, { useState, useEffect, Fragment, useCallback } from "react";
-import { Circle, Star, ChevronDown, ChevronUp, LayoutGrid, List } from "lucide-react";
+import {
+  Circle,
+  Star,
+  ChevronDown,
+  ChevronUp,
+  LayoutGrid,
+  List,
+} from "lucide-react";
 import { getAllTokens } from "@/api/token";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Chain, TokenMarketOverview } from "@/types";
@@ -34,11 +41,29 @@ function formatPrice(price: number): string {
     if (match && match[0].length > 3) {
       // Count the zeros after "0."
       const zeros = match[0].length - 2; // subtract "0."
-      const remainingDigits = priceStr.substring(match[0].length, match[0].length + 4);
+      const remainingDigits = priceStr.substring(
+        match[0].length,
+        match[0].length + 4
+      );
 
       // Convert zeros count to subscript
-      const subscriptDigits = ['₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈', '₉'];
-      const subscriptZeros = zeros.toString().split('').map(d => subscriptDigits[parseInt(d)]).join('');
+      const subscriptDigits = [
+        "₀",
+        "₁",
+        "₂",
+        "₃",
+        "₄",
+        "₅",
+        "₆",
+        "₇",
+        "₈",
+        "₉",
+      ];
+      const subscriptZeros = zeros
+        .toString()
+        .split("")
+        .map((d) => subscriptDigits[parseInt(d)])
+        .join("");
 
       return `$0.0${subscriptZeros}${remainingDigits}`;
     }
@@ -138,7 +163,14 @@ const MobileCollapsibleSection: React.FC<{
   );
 };
 
-type FilterType = "age" | "last_comment" | "last_trade" | "new" | "graduated" | "market_cap" | "liquidity";
+type FilterType =
+  | "age"
+  | "last_comment"
+  | "last_trade"
+  | "new"
+  | "graduated"
+  | "market_cap"
+  | "liquidity";
 
 export function MarketsDashboard() {
   const { chainId } = useParams<{
@@ -154,7 +186,9 @@ export function MarketsDashboard() {
   );
   const [activeFilter, setActiveFilter] = useState<FilterType>("new");
   const [searchParams, setSearchParams] = useSearchParams();
-  const viewMode = (searchParams.get("view") === "table" ? "list" : "card") as "card" | "list";
+  const viewMode = (searchParams.get("view") === "table" ? "list" : "card") as
+    | "card"
+    | "list";
   const [headerHeight, setHeaderHeight] = useState(0);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -172,14 +206,14 @@ export function MarketsDashboard() {
 
   useEffect(() => {
     const updateHeaderHeight = () => {
-      const header = document.querySelector('header');
+      const header = document.querySelector("header");
       if (header) {
         setHeaderHeight(header.offsetHeight);
       }
     };
     updateHeaderHeight();
-    window.addEventListener('resize', updateHeaderHeight);
-    return () => window.removeEventListener('resize', updateHeaderHeight);
+    window.addEventListener("resize", updateHeaderHeight);
+    return () => window.removeEventListener("resize", updateHeaderHeight);
   }, []);
 
   useEffect(() => {
@@ -272,7 +306,9 @@ export function MarketsDashboard() {
   // Calculate total 24h transactions (approximate based on volume)
   const getTotalTransactions24h = () => {
     // Placeholder - you can update this when you have actual transaction data
-    return tokens.length > 0 ? Math.floor(Math.random() * 40000000) + 30000000 : 0;
+    return tokens.length > 0
+      ? Math.floor(Math.random() * 40000000) + 30000000
+      : 0;
   };
 
   // Get filtered tokens based on active filter
@@ -312,7 +348,7 @@ export function MarketsDashboard() {
         break;
       case "graduated":
         // Show graduated tokens first, then sort by graduation time
-        filtered = filtered.filter(token => token.graduated);
+        filtered = filtered.filter((token) => token.graduated);
         filtered.sort((a, b) => {
           const timeA = new Date(a.graduationTimestamp || 0).getTime();
           const timeB = new Date(b.graduationTimestamp || 0).getTime();
@@ -381,9 +417,15 @@ export function MarketsDashboard() {
   return (
     <div className="bg-black text-gray-100 text-xs font-mono">
       {/* MOBILE VIEW */}
-      <div className="lg:hidden fixed inset-0 flex flex-col" style={{ top: headerHeight }}>
+      <div
+        className="lg:hidden fixed inset-0 flex flex-col"
+        style={{ top: headerHeight }}
+      >
         {/* Scrollable Container - includes trending and tokens */}
-        <div className="flex-1 overflow-y-auto pb-[72px] bg-black" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
+        <div
+          className="flex-1 overflow-y-auto pb-[72px] bg-black"
+          style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
+        >
           {/* Trending Section - Horizontal Scroll */}
           <div className="bg-black">
             <div className="flex items-center justify-between p-3">
@@ -391,7 +433,14 @@ export function MarketsDashboard() {
                 Now trending <span className="rocket-blink">🚀</span>
               </h2>
             </div>
-            <div className="overflow-x-auto pb-3 px-3" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div
+              className="overflow-x-auto pb-3 px-3"
+              style={{
+                WebkitOverflowScrolling: "touch",
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+              }}
+            >
               <style>{`
                 .trending-scroll::-webkit-scrollbar {
                   display: none;
@@ -430,7 +479,9 @@ export function MarketsDashboard() {
                       {/* Market cap overlay */}
                       <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-[10px]">
                         <span className="text-gray-400">market cap: </span>
-                        <span className="text-white font-bold">${formatNumber(token.currentPrice * 1_000_000_000)}</span>
+                        <span className="text-white font-bold">
+                          ${formatNumber(token.currentPrice * 1_000_000_000)}
+                        </span>
                       </div>
                     </div>
                     {/* Token Info */}
@@ -451,10 +502,16 @@ export function MarketsDashboard() {
                       </div>
                       <div className="text-gray-400 text-[11px] mb-2">
                         <span className="text-orange-400">market cap: </span>
-                        <span className="text-white font-bold">${formatNumber(token.currentPrice * 1_000_000_000)}</span>
+                        <span className="text-white font-bold">
+                          ${formatNumber(token.currentPrice * 1_000_000_000)}
+                        </span>
                       </div>
                       <div className="text-gray-400 text-[10px]">
-                        {token.tokenSymbol} • {formatTokenAge(token.deploymentTimestamp || "", currentTime)}
+                        {token.tokenSymbol} •{" "}
+                        {formatTokenAge(
+                          token.deploymentTimestamp || "",
+                          currentTime
+                        )}
                       </div>
                     </div>
                   </div>
@@ -470,7 +527,7 @@ export function MarketsDashboard() {
               className={`p-2 rounded transition-colors ${
                 viewMode === "card"
                   ? "bg-orange-600 text-white"
-                  : "bg-gray-800 text-gray-400"
+                  : "bg-gray-900 text-gray-400"
               }`}
             >
               <LayoutGrid className="w-5 h-5" />
@@ -480,7 +537,7 @@ export function MarketsDashboard() {
               className={`p-2 rounded transition-colors ${
                 viewMode === "list"
                   ? "bg-orange-600 text-white"
-                  : "bg-gray-800 text-gray-400"
+                  : "bg-gray-900 text-gray-400"
               }`}
             >
               <List className="w-5 h-5" />
@@ -489,7 +546,9 @@ export function MarketsDashboard() {
 
           {/* Token List/Grid */}
           {isLoading ? (
-            <div className="text-center p-8 text-gray-400">Loading tokens...</div>
+            <div className="text-center p-8 text-gray-400">
+              Loading tokens...
+            </div>
           ) : filteredTokens.length === 0 ? (
             <div className="text-center p-8 text-gray-400">No tokens found</div>
           ) : viewMode === "card" ? (
@@ -554,22 +613,33 @@ export function MarketsDashboard() {
                     </div>
                     <div className="text-gray-400 text-xs mb-1">
                       <span className="text-orange-400">MC: </span>
-                      <span className="text-white font-semibold">${formatNumber(token.currentPrice * 1_000_000_000)}</span>
+                      <span className="text-white font-semibold">
+                        ${formatNumber(token.currentPrice * 1_000_000_000)}
+                      </span>
                     </div>
                     <div className="text-gray-400 text-[10px] mb-2">
-                      {formatTokenAge(token.deploymentTimestamp || "", currentTime)}
+                      {formatTokenAge(
+                        token.deploymentTimestamp || "",
+                        currentTime
+                      )}
                     </div>
                     {/* Progress Bar for Bonding Curve Tokens */}
                     {!token.graduated && (
                       <div className="w-full">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-gray-400 text-[10px]">Progress</span>
-                          <span className="text-white text-[10px] font-semibold">TODO%</span>
+                          <span className="text-gray-400 text-[10px]">
+                            Progress
+                          </span>
+                          <span className="text-white text-[10px] font-semibold">
+                            TODO%
+                          </span>
                         </div>
                         <div className="w-full bg-gray-800 rounded-full h-2">
                           <div
                             className="bg-purple-600 h-2 rounded-full transition-all duration-300"
-                            style={{ width: `${Math.floor(Math.random() * 100)}%` }}
+                            style={{
+                              width: `${Math.floor(Math.random() * 100)}%`,
+                            }}
                           />
                         </div>
                       </div>
@@ -589,7 +659,7 @@ export function MarketsDashboard() {
                   key={token.tokenAddress}
                   className="bg-black rounded-lg p-2.5 cursor-pointer hover:bg-gray-900 transition-colors"
                   onClick={() => handleTokenClick(token)}
-                  style={{ touchAction: 'manipulation' }}
+                  style={{ touchAction: "manipulation" }}
                 >
                   {/* Single row with logo and all content */}
                   <div className="flex items-center justify-between">
@@ -598,7 +668,11 @@ export function MarketsDashboard() {
                       {/* Star - centered with logo */}
                       <button
                         onClick={(e) =>
-                          handleToggleWatchlist(e, token.tokenAddress, token.chain)
+                          handleToggleWatchlist(
+                            e,
+                            token.tokenAddress,
+                            token.chain
+                          )
                         }
                         className="flex-shrink-0"
                       >
@@ -658,10 +732,14 @@ export function MarketsDashboard() {
                         <div className="text-white font-mono text-xs">
                           {formatPrice(token.currentPrice)}
                         </div>
-                        <span className={`${priceChange1h.color} text-[11px] font-semibold`}>
+                        <span
+                          className={`${priceChange1h.color} text-[11px] font-semibold`}
+                        >
                           1H {priceChange1h.text}
                         </span>
-                        <span className={`${priceChange24h.color} text-[11px] font-semibold`}>
+                        <span
+                          className={`${priceChange24h.color} text-[11px] font-semibold`}
+                        >
                           24H {priceChange24h.text}
                         </span>
                       </div>
@@ -669,15 +747,21 @@ export function MarketsDashboard() {
                       <div className="flex items-center gap-1 text-[10px]">
                         <span className="bg-gray-800 px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[60px] text-center">
                           <span className="text-orange-400">LIQ </span>
-                          <span className="text-white">${formatNumber(token.totalVolume * 0.3)}</span>
+                          <span className="text-white">
+                            ${formatNumber(token.totalVolume * 0.3)}
+                          </span>
                         </span>
                         <span className="bg-gray-800 px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[60px] text-center">
                           <span className="text-orange-400">VOL </span>
-                          <span className="text-white">${formatNumber(token.totalVolume)}</span>
+                          <span className="text-white">
+                            ${formatNumber(token.totalVolume)}
+                          </span>
                         </span>
                         <span className="bg-gray-800 px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[68px] text-center">
                           <span className="text-orange-400">MCAP </span>
-                          <span className="text-white">${formatNumber(token.currentPrice * 1_000_000_000)}</span>
+                          <span className="text-white">
+                            ${formatNumber(token.currentPrice * 1_000_000_000)}
+                          </span>
                         </span>
                       </div>
                     </div>
@@ -696,7 +780,7 @@ export function MarketsDashboard() {
               className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
                 activeFilter === "age"
                   ? "bg-orange-600 text-white"
-                  : "bg-gray-800 text-gray-400"
+                  : "bg-gray-900 text-gray-400"
               }`}
             >
               AGE
@@ -706,7 +790,7 @@ export function MarketsDashboard() {
               className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
                 activeFilter === "last_comment"
                   ? "bg-orange-600 text-white"
-                  : "bg-gray-800 text-gray-400"
+                  : "bg-gray-900 text-gray-400"
               }`}
             >
               LAST COMMENT
@@ -716,7 +800,7 @@ export function MarketsDashboard() {
               className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
                 activeFilter === "last_trade"
                   ? "bg-orange-600 text-white"
-                  : "bg-gray-800 text-gray-400"
+                  : "bg-gray-900 text-gray-400"
               }`}
             >
               LAST TRADE
@@ -726,7 +810,7 @@ export function MarketsDashboard() {
               className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
                 activeFilter === "new"
                   ? "bg-orange-600 text-white"
-                  : "bg-gray-800 text-gray-400"
+                  : "bg-gray-900 text-gray-400"
               }`}
             >
               NEW
@@ -736,7 +820,7 @@ export function MarketsDashboard() {
               className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
                 activeFilter === "graduated"
                   ? "bg-orange-600 text-white"
-                  : "bg-gray-800 text-gray-400"
+                  : "bg-gray-900 text-gray-400"
               }`}
             >
               GRADUATED
@@ -746,7 +830,7 @@ export function MarketsDashboard() {
               className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
                 activeFilter === "market_cap"
                   ? "bg-orange-600 text-white"
-                  : "bg-gray-800 text-gray-400"
+                  : "bg-gray-900 text-gray-400"
               }`}
             >
               MARKET CAP
@@ -756,7 +840,7 @@ export function MarketsDashboard() {
               className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
                 activeFilter === "liquidity"
                   ? "bg-orange-600 text-white"
-                  : "bg-gray-800 text-gray-400"
+                  : "bg-gray-900 text-gray-400"
               }`}
             >
               LIQUIDITY
@@ -767,422 +851,444 @@ export function MarketsDashboard() {
 
       {/* DESKTOP VIEW */}
       <div className="hidden lg:block h-screen overflow-auto">
-      {/* Main Grid Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 p-1 h-full">
-        {/* Left Column - Terminal Placeholder - Desktop only, order-last on mobile */}
-        <div className="lg:col-span-3 space-y-1 order-last lg:order-first">
-          <MobileCollapsibleSection title="TERMINAL">
-            <div className="bg-gray-900 p-4 h-full flex flex-col items-center justify-center">
-              <div className="text-orange-400 text-lg font-bold mb-2 lg:block hidden">
-                TERMINAL
-              </div>
-              <div className="text-gray-500 text-xs text-center">Coming Soon</div>
-            </div>
-          </MobileCollapsibleSection>
-        </div>
-
-        {/* Center Column - Main Trading Data */}
-        <div className="lg:col-span-6 bg-gray-900 order-first lg:order-none">
-          <div className="text-orange-400 text-xs p-1">
-            ACTIVE TRADING PAIRS
-          </div>
-          <div className="overflow-x-auto h-full">
-            <table className="w-full text-xs min-w-[640px]">
-              <thead className="bg-gray-800 sticky top-0">
-                <tr className="text-gray-400">
-                  <th className="text-center p-1 w-8"></th>
-                  <th className="text-left p-1">Symbol</th>
-                  <th className="text-left p-1 hidden md:table-cell">Name</th>
-                  <th className="text-right p-1">PRICE</th>
-                  <th className="text-right p-1">MCAP</th>
-                  <th className="text-right p-1">24H</th>
-                  <th className="text-right p-1">6H</th>
-                  <th className="text-right p-1">1H</th>
-                  <th className="text-right p-1">5M</th>
-                  <th className="text-right p-1">VOL</th>
-                  <th className="text-right p-1 hidden md:table-cell">AGE</th>
-                </tr>
-              </thead>
-              <tbody>
-                {isLoading ? (
-                  <tr>
-                    <td colSpan={11} className="text-center p-4 text-gray-400">
-                      Loading tokens...
-                    </td>
-                  </tr>
-                ) : tokens.length === 0 ? (
-                  <tr>
-                    <td colSpan={11} className="text-center p-4 text-gray-400">
-                      No tokens found
-                    </td>
-                  </tr>
-                ) : (
-                  tokens.map((token) => (
-                    <tr
-                      key={token.tokenAddress}
-                      className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors cursor-pointer"
-                      onClick={() => handleTokenClick(token)}
-                    >
-                      <td className="p-1 text-center">
-                        <button
-                          onClick={(e) =>
-                            handleToggleWatchlist(
-                              e,
-                              token.tokenAddress,
-                              token.chain
-                            )
-                          }
-                          className="hover:scale-110 transition-transform"
-                          title={
-                            isInWatchlist(token.tokenAddress, token.chain)
-                              ? "Remove from watchlist"
-                              : "Add to watchlist"
-                          }
-                        >
-                          <Star
-                            className={`w-4 h-4 ${
-                              isInWatchlist(token.tokenAddress, token.chain)
-                                ? "fill-gray-500 text-gray-500"
-                                : "text-gray-500"
-                            }`}
-                          />
-                        </button>
-                      </td>
-                      <td className="p-1">
-                        <div className="flex items-center space-x-2 whitespace-nowrap">
-                          {token.logoUrl ? (
-                            <img
-                              src={token.logoUrl}
-                              alt={`${token.tokenSymbol} logo`}
-                              className="w-4 h-4 rounded object-cover flex-shrink-0"
-                              onError={(e) => {
-                                // Fallback to circle if image fails to load
-                                e.currentTarget.style.display = "none";
-                                e.currentTarget.nextElementSibling?.classList.remove(
-                                  "hidden"
-                                );
-                              }}
-                            />
-                          ) : null}
-                          <Circle
-                            className={`w-4 h-4 text-blue-400 flex-shrink-0 ${
-                              token.logoUrl ? "hidden" : ""
-                            }`}
-                          />
-                          <span className="text-white font-bold flex-shrink-0">
-                            {token.tokenSymbol}
-                          </span>
-                          <span className="text-gray-400 text-xs flex-shrink-0">
-                            {token.chain}
-                          </span>
-                          {token.graduated && (
-                            <span className="bg-green-600 text-white px-1 py-0.5 rounded text-xs flex-shrink-0">
-                              GRAD
-                            </span>
-                          )}
-                          {!token.graduated && (
-                            <span className="bg-purple-600 text-white px-1 py-0.5 rounded text-xs flex-shrink-0">
-                              BOND
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="p-1 text-gray-400 text-xs max-w-[150px] truncate">
-                        {token.tokenName}
-                      </td>
-                      <td className="p-1 text-right text-white font-mono">
-                        {`$${Number(token.currentPrice).toFixed(6)}`}
-                      </td>
-                      <td className="p-1 text-right text-gray-400 hidden md:table-cell">
-                        {formatNumber(token.currentPrice * 1_000_000_000)}
-                      </td>
-                      <td
-                        className={`p-1 text-right ${
-                          formatPriceChange(token.priceChange24h).color
-                        }`}
-                      >
-                        {formatPriceChange(token.priceChange24h).text}
-                      </td>
-                      <td
-                        className={`p-1 text-right ${
-                          formatPriceChange(token.priceChange6h).color
-                        }`}
-                      >
-                        {formatPriceChange(token.priceChange6h).text}
-                      </td>
-                      <td
-                        className={`p-1 text-right ${
-                          formatPriceChange(token.priceChange1h).color
-                        }`}
-                      >
-                        {formatPriceChange(token.priceChange1h).text}
-                      </td>
-                      <td
-                        className={`p-1 text-right ${
-                          formatPriceChange(token.priceChange5m).color
-                        }`}
-                      >
-                        {formatPriceChange(token.priceChange5m).text}
-                      </td>
-                      <td className="p-1 text-right text-gray-400 hidden md:table-cell">
-                        {formatNumber(token.totalVolume)}
-                      </td>
-                      <td className="p-1 text-right text-gray-400 hidden md:table-cell">
-                        {formatTokenAge(
-                          token.deploymentTimestamp || "",
-                          currentTime
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Right Column - Additional Data */}
-        <div className="lg:col-span-3 space-y-1">
-          {/* Volume Leaders */}
-          <MobileCollapsibleSection title="VOLUME LEADERS">
-            <div className="bg-gray-900 p-1">
-              <div className="flex justify-between items-center mb-2">
-                <div className="text-orange-400 text-xs hidden lg:block">VOLUME LEADERS</div>
-                <div className="flex gap-1 w-full lg:w-auto">
-                  {(["5m", "1h", "6h", "24h"] as const).map((period) => (
-                    <button
-                      key={period}
-                      onClick={() => setVolumePeriod(period)}
-                      className={`px-2 py-0.5 text-xs rounded transition-colors ${
-                        volumePeriod === period
-                          ? "bg-orange-400 text-black font-bold"
-                          : "bg-gray-800 text-gray-400 hover:bg-gray-700"
-                      }`}
-                    >
-                      {period.toUpperCase()}
-                    </button>
-                  ))}
+        {/* Main Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 p-1 h-full">
+          {/* Left Column - Terminal Placeholder - Desktop only, order-last on mobile */}
+          <div className="lg:col-span-3 space-y-1 order-last lg:order-first">
+            <MobileCollapsibleSection title="TERMINAL">
+              <div className="bg-gray-900 p-4 h-full flex flex-col items-center justify-center">
+                <div className="text-orange-400 text-lg font-bold mb-2 lg:block hidden">
+                  TERMINAL
+                </div>
+                <div className="text-gray-500 text-xs text-center">
+                  Coming Soon
                 </div>
               </div>
-              {getVolumeLeaders().map(({ token, volume }) => (
-                <div
-                  key={token.tokenAddress}
-                  className="flex justify-between items-center text-xs py-1 border-b border-gray-800 last:border-0 hover:bg-gray-800/30 transition-colors cursor-pointer"
-                  onClick={() => handleTokenClick(token)}
-                >
-                  <div className="flex items-center space-x-2">
-                    {token.logoUrl ? (
-                      <img
-                        src={token.logoUrl}
-                        alt={`${token.tokenSymbol} logo`}
-                        className="w-4 h-4 rounded object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none";
-                          e.currentTarget.nextElementSibling?.classList.remove(
-                            "hidden"
-                          );
-                        }}
+            </MobileCollapsibleSection>
+          </div>
+
+          {/* Center Column - Main Trading Data */}
+          <div className="lg:col-span-6 bg-gray-900 order-first lg:order-none">
+            <div className="text-orange-400 text-xs p-1">
+              ACTIVE TRADING PAIRS
+            </div>
+            <div className="overflow-x-auto h-full">
+              <table className="w-full text-xs min-w-[640px]">
+                <thead className="bg-gray-800 sticky top-0">
+                  <tr className="text-gray-400">
+                    <th className="text-center p-1 w-8"></th>
+                    <th className="text-left p-1">Symbol</th>
+                    <th className="text-left p-1 hidden md:table-cell">Name</th>
+                    <th className="text-right p-1">PRICE</th>
+                    <th className="text-right p-1">MCAP</th>
+                    <th className="text-right p-1">24H</th>
+                    <th className="text-right p-1">6H</th>
+                    <th className="text-right p-1">1H</th>
+                    <th className="text-right p-1">5M</th>
+                    <th className="text-right p-1">VOL</th>
+                    <th className="text-right p-1 hidden md:table-cell">AGE</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {isLoading ? (
+                    <tr>
+                      <td
+                        colSpan={11}
+                        className="text-center p-4 text-gray-400"
+                      >
+                        Loading tokens...
+                      </td>
+                    </tr>
+                  ) : tokens.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={11}
+                        className="text-center p-4 text-gray-400"
+                      >
+                        No tokens found
+                      </td>
+                    </tr>
+                  ) : (
+                    tokens.map((token) => (
+                      <tr
+                        key={token.tokenAddress}
+                        className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors cursor-pointer"
+                        onClick={() => handleTokenClick(token)}
+                      >
+                        <td className="p-1 text-center">
+                          <button
+                            onClick={(e) =>
+                              handleToggleWatchlist(
+                                e,
+                                token.tokenAddress,
+                                token.chain
+                              )
+                            }
+                            className="hover:scale-110 transition-transform"
+                            title={
+                              isInWatchlist(token.tokenAddress, token.chain)
+                                ? "Remove from watchlist"
+                                : "Add to watchlist"
+                            }
+                          >
+                            <Star
+                              className={`w-4 h-4 ${
+                                isInWatchlist(token.tokenAddress, token.chain)
+                                  ? "fill-gray-500 text-gray-500"
+                                  : "text-gray-500"
+                              }`}
+                            />
+                          </button>
+                        </td>
+                        <td className="p-1">
+                          <div className="flex items-center space-x-2 whitespace-nowrap">
+                            {token.logoUrl ? (
+                              <img
+                                src={token.logoUrl}
+                                alt={`${token.tokenSymbol} logo`}
+                                className="w-4 h-4 rounded object-cover flex-shrink-0"
+                                onError={(e) => {
+                                  // Fallback to circle if image fails to load
+                                  e.currentTarget.style.display = "none";
+                                  e.currentTarget.nextElementSibling?.classList.remove(
+                                    "hidden"
+                                  );
+                                }}
+                              />
+                            ) : null}
+                            <Circle
+                              className={`w-4 h-4 text-blue-400 flex-shrink-0 ${
+                                token.logoUrl ? "hidden" : ""
+                              }`}
+                            />
+                            <span className="text-white font-bold flex-shrink-0">
+                              {token.tokenSymbol}
+                            </span>
+                            <span className="text-gray-400 text-xs flex-shrink-0">
+                              {token.chain}
+                            </span>
+                            {token.graduated && (
+                              <span className="bg-green-600 text-white px-1 py-0.5 rounded text-xs flex-shrink-0">
+                                GRAD
+                              </span>
+                            )}
+                            {!token.graduated && (
+                              <span className="bg-purple-600 text-white px-1 py-0.5 rounded text-xs flex-shrink-0">
+                                BOND
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="p-1 text-gray-400 text-xs max-w-[150px] truncate">
+                          {token.tokenName}
+                        </td>
+                        <td className="p-1 text-right text-white font-mono">
+                          {`$${Number(token.currentPrice).toFixed(6)}`}
+                        </td>
+                        <td className="p-1 text-right text-gray-400 hidden md:table-cell">
+                          {formatNumber(token.currentPrice * 1_000_000_000)}
+                        </td>
+                        <td
+                          className={`p-1 text-right ${
+                            formatPriceChange(token.priceChange24h).color
+                          }`}
+                        >
+                          {formatPriceChange(token.priceChange24h).text}
+                        </td>
+                        <td
+                          className={`p-1 text-right ${
+                            formatPriceChange(token.priceChange6h).color
+                          }`}
+                        >
+                          {formatPriceChange(token.priceChange6h).text}
+                        </td>
+                        <td
+                          className={`p-1 text-right ${
+                            formatPriceChange(token.priceChange1h).color
+                          }`}
+                        >
+                          {formatPriceChange(token.priceChange1h).text}
+                        </td>
+                        <td
+                          className={`p-1 text-right ${
+                            formatPriceChange(token.priceChange5m).color
+                          }`}
+                        >
+                          {formatPriceChange(token.priceChange5m).text}
+                        </td>
+                        <td className="p-1 text-right text-gray-400 hidden md:table-cell">
+                          {formatNumber(token.totalVolume)}
+                        </td>
+                        <td className="p-1 text-right text-gray-400 hidden md:table-cell">
+                          {formatTokenAge(
+                            token.deploymentTimestamp || "",
+                            currentTime
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Right Column - Additional Data */}
+          <div className="lg:col-span-3 space-y-1">
+            {/* Volume Leaders */}
+            <MobileCollapsibleSection title="VOLUME LEADERS">
+              <div className="bg-gray-900 p-1">
+                <div className="flex justify-between items-center mb-2">
+                  <div className="text-orange-400 text-xs hidden lg:block">
+                    VOLUME LEADERS
+                  </div>
+                  <div className="flex gap-1 w-full lg:w-auto">
+                    {(["5m", "1h", "6h", "24h"] as const).map((period) => (
+                      <button
+                        key={period}
+                        onClick={() => setVolumePeriod(period)}
+                        className={`px-2 py-0.5 text-xs rounded transition-colors ${
+                          volumePeriod === period
+                            ? "bg-orange-400 text-black font-bold"
+                            : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+                        }`}
+                      >
+                        {period.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {getVolumeLeaders().map(({ token, volume }) => (
+                  <div
+                    key={token.tokenAddress}
+                    className="flex justify-between items-center text-xs py-1 border-b border-gray-800 last:border-0 hover:bg-gray-800/30 transition-colors cursor-pointer"
+                    onClick={() => handleTokenClick(token)}
+                  >
+                    <div className="flex items-center space-x-2">
+                      {token.logoUrl ? (
+                        <img
+                          src={token.logoUrl}
+                          alt={`${token.tokenSymbol} logo`}
+                          className="w-4 h-4 rounded object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                            e.currentTarget.nextElementSibling?.classList.remove(
+                              "hidden"
+                            );
+                          }}
+                        />
+                      ) : null}
+                      <Circle
+                        className={`w-4 h-4 text-blue-400 ${
+                          token.logoUrl ? "hidden" : ""
+                        }`}
                       />
-                    ) : null}
-                    <Circle
-                      className={`w-4 h-4 text-blue-400 ${
-                        token.logoUrl ? "hidden" : ""
-                      }`}
-                    />
-                    <span className="text-white font-bold">
-                      {token.tokenSymbol}
-                    </span>
-                    <span className="text-gray-400 text-xs">
-                      {token.tokenName.length > 15
-                        ? `${token.tokenName.substring(0, 15)}...`
-                        : token.tokenName}
+                      <span className="text-white font-bold">
+                        {token.tokenSymbol}
+                      </span>
+                      <span className="text-gray-400 text-xs">
+                        {token.tokenName.length > 15
+                          ? `${token.tokenName.substring(0, 15)}...`
+                          : token.tokenName}
+                      </span>
+                    </div>
+                    <span className="text-gray-400">
+                      {formatNumber(volume)}
                     </span>
                   </div>
-                  <span className="text-gray-400">{formatNumber(volume)}</span>
-                </div>
-              ))}
-              {getVolumeLeaders().length === 0 && (
-                <div className="text-center text-gray-400 py-2 text-xs">
-                  No volume data for {volumePeriod}
-                </div>
-              )}
-            </div>
-          </MobileCollapsibleSection>
+                ))}
+                {getVolumeLeaders().length === 0 && (
+                  <div className="text-center text-gray-400 py-2 text-xs">
+                    No volume data for {volumePeriod}
+                  </div>
+                )}
+              </div>
+            </MobileCollapsibleSection>
 
-          {/* Graduated Tokens */}
-          <MobileCollapsibleSection title="GRADUATED TOKENS">
-            <div className="bg-gray-900 p-1">
-              <div className="text-orange-400 text-xs mb-1 hidden lg:block">GRADUATED TOKENS</div>
-              <div className="overflow-y-auto max-h-48">
-                <table className="w-full text-xs">
-                  <thead className="bg-gray-800 sticky top-0">
-                    <tr className="text-gray-400">
-                      <th className="text-left p-1">Token</th>
-                      <th className="text-right p-1">MCAP</th>
-                      <th className="text-right p-1">GRAD TIME</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tokens
-                      .filter((token) => token.graduated)
-                      .sort((a, b) => {
-                        if (!a.graduationTimestamp || !b.graduationTimestamp)
-                          return 0;
-                        return (
-                          new Date(b.graduationTimestamp).getTime() -
-                          new Date(a.graduationTimestamp).getTime()
-                        );
-                      })
-                      .slice(0, 10)
-                      .map((token) => (
-                        <tr
-                          key={token.tokenAddress}
-                          className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors cursor-pointer"
-                          onClick={() => handleTokenClick(token)}
-                        >
-                          <td className="p-1">
-                            <div className="flex items-center space-x-2">
-                              {token.logoUrl ? (
-                                <img
-                                  src={token.logoUrl}
-                                  alt={`${token.tokenSymbol} logo`}
-                                  className="w-4 h-4 rounded object-cover"
-                                  onError={(e) => {
-                                    e.currentTarget.style.display = "none";
-                                    e.currentTarget.nextElementSibling?.classList.remove(
-                                      "hidden"
-                                    );
-                                  }}
+            {/* Graduated Tokens */}
+            <MobileCollapsibleSection title="GRADUATED TOKENS">
+              <div className="bg-gray-900 p-1">
+                <div className="text-orange-400 text-xs mb-1 hidden lg:block">
+                  GRADUATED TOKENS
+                </div>
+                <div className="overflow-y-auto max-h-48">
+                  <table className="w-full text-xs">
+                    <thead className="bg-gray-800 sticky top-0">
+                      <tr className="text-gray-400">
+                        <th className="text-left p-1">Token</th>
+                        <th className="text-right p-1">MCAP</th>
+                        <th className="text-right p-1">GRAD TIME</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tokens
+                        .filter((token) => token.graduated)
+                        .sort((a, b) => {
+                          if (!a.graduationTimestamp || !b.graduationTimestamp)
+                            return 0;
+                          return (
+                            new Date(b.graduationTimestamp).getTime() -
+                            new Date(a.graduationTimestamp).getTime()
+                          );
+                        })
+                        .slice(0, 10)
+                        .map((token) => (
+                          <tr
+                            key={token.tokenAddress}
+                            className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors cursor-pointer"
+                            onClick={() => handleTokenClick(token)}
+                          >
+                            <td className="p-1">
+                              <div className="flex items-center space-x-2">
+                                {token.logoUrl ? (
+                                  <img
+                                    src={token.logoUrl}
+                                    alt={`${token.tokenSymbol} logo`}
+                                    className="w-4 h-4 rounded object-cover"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = "none";
+                                      e.currentTarget.nextElementSibling?.classList.remove(
+                                        "hidden"
+                                      );
+                                    }}
+                                  />
+                                ) : null}
+                                <Circle
+                                  className={`w-4 h-4 text-green-400 ${
+                                    token.logoUrl ? "hidden" : ""
+                                  }`}
                                 />
-                              ) : null}
-                              <Circle
-                                className={`w-4 h-4 text-green-400 ${
-                                  token.logoUrl ? "hidden" : ""
-                                }`}
-                              />
-                              <span className="text-white font-bold">
-                                {token.tokenSymbol}
-                              </span>
-                              <span className="text-gray-400 text-xs">
-                                {token.tokenName.length > 15
-                                  ? `${token.tokenName.substring(0, 15)}...`
-                                  : token.tokenName}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="p-1 text-right text-gray-400">
-                            {formatNumber(token.currentPrice * 1_000_000_000)}
-                          </td>
-                          <td className="p-1 text-right text-gray-400">
-                            {formatShortSince(
-                              token.graduationTimestamp,
-                              currentTime
-                            )}
+                                <span className="text-white font-bold">
+                                  {token.tokenSymbol}
+                                </span>
+                                <span className="text-gray-400 text-xs">
+                                  {token.tokenName.length > 15
+                                    ? `${token.tokenName.substring(0, 15)}...`
+                                    : token.tokenName}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="p-1 text-right text-gray-400">
+                              {formatNumber(token.currentPrice * 1_000_000_000)}
+                            </td>
+                            <td className="p-1 text-right text-gray-400">
+                              {formatShortSince(
+                                token.graduationTimestamp,
+                                currentTime
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      {tokens.filter((token) => token.graduated).length ===
+                        0 && (
+                        <tr>
+                          <td
+                            colSpan={3}
+                            className="text-center p-4 text-gray-400"
+                          >
+                            No graduated tokens found
                           </td>
                         </tr>
-                      ))}
-                    {tokens.filter((token) => token.graduated).length === 0 && (
-                      <tr>
-                        <td colSpan={3} className="text-center p-4 text-gray-400">
-                          No graduated tokens found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
-          </MobileCollapsibleSection>
+            </MobileCollapsibleSection>
 
-          {/* Bonding Curve Progress */}
-          <MobileCollapsibleSection title="BONDING CURVE PROGRESS">
-            <div className="bg-gray-900 p-1">
-              <div className="text-orange-400 text-xs mb-1 hidden lg:block">
-                BONDING CURVE PROGRESS
-              </div>
-              <div className="overflow-y-auto max-h-48">
-                <table className="w-full text-xs">
-                  <thead className="bg-gray-800 sticky top-0">
-                    <tr className="text-gray-400">
-                      <th className="text-left p-1">Token</th>
-                      <th className="text-right p-1">PROGRESS</th>
-                      <th className="text-right p-1">VOL</th>
-                      <th className="text-right p-1">MCAP</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tokens
-                      .filter((token) => !token.graduated)
-                      .sort((a, b) => {
-                        if (!a.deploymentTimestamp || !b.deploymentTimestamp)
-                          return 0;
-                        return (
-                          new Date(b.deploymentTimestamp).getTime() -
-                          new Date(a.deploymentTimestamp).getTime()
-                        );
-                      })
-                      .slice(0, 6)
-                      .map((token) => (
-                        <tr
-                          key={token.tokenAddress}
-                          className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors cursor-pointer"
-                          onClick={() => handleTokenClick(token)}
-                        >
-                          <td className="p-1">
-                            <div className="flex items-center space-x-2">
-                              {token.logoUrl ? (
-                                <img
-                                  src={token.logoUrl}
-                                  alt={`${token.tokenSymbol} logo`}
-                                  className="w-4 h-4 rounded object-cover"
-                                  onError={(e) => {
-                                    e.currentTarget.style.display = "none";
-                                    e.currentTarget.nextElementSibling?.classList.remove(
-                                      "hidden"
-                                    );
-                                  }}
+            {/* Bonding Curve Progress */}
+            <MobileCollapsibleSection title="BONDING CURVE PROGRESS">
+              <div className="bg-gray-900 p-1">
+                <div className="text-orange-400 text-xs mb-1 hidden lg:block">
+                  BONDING CURVE PROGRESS
+                </div>
+                <div className="overflow-y-auto max-h-48">
+                  <table className="w-full text-xs">
+                    <thead className="bg-gray-800 sticky top-0">
+                      <tr className="text-gray-400">
+                        <th className="text-left p-1">Token</th>
+                        <th className="text-right p-1">PROGRESS</th>
+                        <th className="text-right p-1">VOL</th>
+                        <th className="text-right p-1">MCAP</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tokens
+                        .filter((token) => !token.graduated)
+                        .sort((a, b) => {
+                          if (!a.deploymentTimestamp || !b.deploymentTimestamp)
+                            return 0;
+                          return (
+                            new Date(b.deploymentTimestamp).getTime() -
+                            new Date(a.deploymentTimestamp).getTime()
+                          );
+                        })
+                        .slice(0, 6)
+                        .map((token) => (
+                          <tr
+                            key={token.tokenAddress}
+                            className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors cursor-pointer"
+                            onClick={() => handleTokenClick(token)}
+                          >
+                            <td className="p-1">
+                              <div className="flex items-center space-x-2">
+                                {token.logoUrl ? (
+                                  <img
+                                    src={token.logoUrl}
+                                    alt={`${token.tokenSymbol} logo`}
+                                    className="w-4 h-4 rounded object-cover"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = "none";
+                                      e.currentTarget.nextElementSibling?.classList.remove(
+                                        "hidden"
+                                      );
+                                    }}
+                                  />
+                                ) : null}
+                                <Circle
+                                  className={`w-4 h-4 text-blue-400 ${
+                                    token.logoUrl ? "hidden" : ""
+                                  }`}
                                 />
-                              ) : null}
-                              <Circle
-                                className={`w-4 h-4 text-blue-400 ${
-                                  token.logoUrl ? "hidden" : ""
-                                }`}
-                              />
-                              <span className="text-white font-bold">
-                                {token.tokenSymbol}
-                              </span>
-                              <span className="text-gray-400 text-xs">
-                                {token.tokenName.length > 15
-                                  ? `${token.tokenName.substring(0, 15)}...`
-                                  : token.tokenName}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="p-1 text-right text-green-400">
-                            {token.progress?.toFixed(1) ?? "0.0"}%
-                          </td>
-                          <td className="p-1 text-right text-gray-400">
-                            {formatNumber(token.totalVolume)}
-                          </td>
-                          <td className="p-1 text-right text-gray-400">
-                            {formatNumber(token.currentPrice * 1_000_000_000)}
+                                <span className="text-white font-bold">
+                                  {token.tokenSymbol}
+                                </span>
+                                <span className="text-gray-400 text-xs">
+                                  {token.tokenName.length > 15
+                                    ? `${token.tokenName.substring(0, 15)}...`
+                                    : token.tokenName}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="p-1 text-right text-green-400">
+                              {token.progress?.toFixed(1) ?? "0.0"}%
+                            </td>
+                            <td className="p-1 text-right text-gray-400">
+                              {formatNumber(token.totalVolume)}
+                            </td>
+                            <td className="p-1 text-right text-gray-400">
+                              {formatNumber(token.currentPrice * 1_000_000_000)}
+                            </td>
+                          </tr>
+                        ))}
+                      {tokens.filter((token) => !token.graduated).length ===
+                        0 && (
+                        <tr>
+                          <td
+                            colSpan={4}
+                            className="text-center p-4 text-gray-400"
+                          >
+                            No bonding curve tokens found
                           </td>
                         </tr>
-                      ))}
-                    {tokens.filter((token) => !token.graduated).length === 0 && (
-                      <tr>
-                        <td colSpan={4} className="text-center p-4 text-gray-400">
-                          No bonding curve tokens found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
-          </MobileCollapsibleSection>
+            </MobileCollapsibleSection>
+          </div>
         </div>
-      </div>
       </div>
     </div>
   );
