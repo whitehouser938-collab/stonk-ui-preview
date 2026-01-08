@@ -218,11 +218,18 @@ export const getTokenOHLCVBars = async (
   }
 };
 
-export const getAllTokens = async (chain?: string): Promise<any[]> => {
+export const getAllTokens = async (
+  chain?: string,
+  page: number = 1,
+  limit: number = 20
+): Promise<{ tokens: any[]; pagination: any }> => {
   try {
-    const url = chain
-      ? `${API_BASE_URL}/token/all?chain=${chain}`
-      : `${API_BASE_URL}/token/all`;
+    const params = new URLSearchParams();
+    if (chain) params.append("chain", chain);
+    params.append("page", page.toString());
+    params.append("limit", limit.toString());
+
+    const url = `${API_BASE_URL}/token/all?${params.toString()}`;
 
     const response = await fetch(url);
     if (!response.ok) {
@@ -230,12 +237,15 @@ export const getAllTokens = async (chain?: string): Promise<any[]> => {
     }
     const data = await response.json();
     if (!data || !data.success || !data.data.tokens) {
-      return [];
+      return { tokens: [], pagination: null };
     }
-    return data.data.tokens;
+    return {
+      tokens: data.data.tokens,
+      pagination: data.data.pagination,
+    };
   } catch (error) {
     console.error("Error fetching all tokens:", error);
-    return [];
+    return { tokens: [], pagination: null };
   }
 };
 

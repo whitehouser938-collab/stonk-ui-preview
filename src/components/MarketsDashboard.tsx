@@ -72,6 +72,11 @@ function formatPrice(price: number): string {
   return `$${price.toFixed(6)}`;
 }
 
+function formatAddress(address: string): string {
+  if (!address) return "";
+  return `${address.slice(0, 5)}...${address.slice(-3)}`;
+}
+
 function formatTokenAge(timestamp: string, _currentTime?: Date): string {
   if (!timestamp) return "N/A";
 
@@ -192,6 +197,8 @@ export function MarketsDashboard() {
   const [headerHeight, setHeaderHeight] = useState(0);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<any>(null);
   const navigate = useNavigate();
   const { address, isConnected } = useAppKitAccount({ namespace: "eip155" });
   const { isInWatchlist, toggleWatchlist } = useWatchlist(address);
@@ -232,8 +239,10 @@ export function MarketsDashboard() {
     const fetchTokens = async () => {
       try {
         setIsLoading(true);
-        const tokenData = await getAllTokens();
+        const { tokens: tokenData, pagination: paginationData } =
+          await getAllTokens(chainId, currentPage, 20);
         setTokens(tokenData);
+        setPagination(paginationData);
       } catch (error) {
         console.error("Error fetching tokens:", error);
         setTokens([]);
@@ -244,7 +253,7 @@ export function MarketsDashboard() {
     };
 
     fetchTokens();
-  }, []);
+  }, [chainId, currentPage]);
 
   const handleMarketsUpdate = useCallback(
     (updatedMarketsOverview: TokenMarketOverview[]) => {
@@ -486,22 +495,40 @@ export function MarketsDashboard() {
                     </div>
                     {/* Token Info */}
                     <div className="p-3">
-                      <div className="flex items-center gap-1.5 mb-1">
+                      <div className="mb-1">
                         <span className="text-white font-bold text-sm truncate font-mono">
                           {token.tokenName && token.tokenName.length > 12
                             ? `${token.tokenName.slice(0, 12)}...`
                             : token.tokenName}
                         </span>
-                        {token.graduated ? (
-                          <span className="bg-green-600 text-black px-1 py-0.5 rounded text-[9px] flex-shrink-0 font-mono">
-                            GRAD
-                          </span>
-                        ) : (
-                          <span className="bg-purple-600 text-black px-1 py-0.5 rounded text-[9px] flex-shrink-0 font-mono">
-                            BOND
-                          </span>
-                        )}
                       </div>
+                      {/* Deployer Info */}
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <img
+                          src={token.pfp || "/default-pfp-clear.png"}
+                          alt="Deployer"
+                          className="w-4 h-4 rounded-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = "/default-pfp-clear.png";
+                          }}
+                        />
+                        <a
+                          href={`/profile/${token.deployerAddress || ""}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-gray-400 text-[10px] truncate font-mono underline hover:text-white"
+                        >
+                          {token.username ||
+                            (token.deployerAddress
+                              ? formatAddress(token.deployerAddress)
+                              : "Unknown")}
+                        </a>
+                      </div>
+                      {/* Description */}
+                      {token.description && (
+                        <div className="text-gray-400 text-[10px] mb-2 line-clamp-2">
+                          {token.description}
+                        </div>
+                      )}
                       <div className="text-gray-400 text-[11px] mb-2">
                         <span className="text-orange-500">market cap: </span>
                         <span className="text-white font-bold font-mono">
@@ -509,7 +536,6 @@ export function MarketsDashboard() {
                         </span>
                       </div>
                       <div className="text-gray-400 text-[10px] font-mono">
-                        {token.tokenSymbol} •{" "}
                         {formatTokenAge(
                           token.deploymentTimestamp || "",
                           currentTime
@@ -582,52 +608,50 @@ export function MarketsDashboard() {
 
                   {/* Token Info - Right Side */}
                   <div className="flex-1 min-w-0 flex flex-col justify-center">
-                    <div className="flex items-center gap-1.5 mb-1">
+                    {/* Full Name */}
+                    <div className="mb-1">
                       <span className="text-white font-bold text-sm truncate font-mono">
                         {token.tokenName}
                       </span>
-                      {token.graduated ? (
-                        <span className="bg-green-600 text-black px-1 py-0.5 rounded text-[9px] flex-shrink-0 font-mono">
-                          GRAD
-                        </span>
-                      ) : (
-                        <span className="bg-purple-600 text-black px-1 py-0.5 rounded text-[9px] flex-shrink-0 font-mono">
-                          BOND
-                        </span>
-                      )}
                     </div>
+
+                    {/* Symbol */}
+                    <div className="text-gray-400 text-[10px] mb-2 font-mono">
+                      {token.tokenSymbol}
+                    </div>
+
+                    {/* Deployer Info + Age */}
                     <div className="flex items-center gap-1.5 mb-2">
-                      {token.logoUrl ? (
-                        <img
-                          src={token.logoUrl}
-                          alt={token.tokenSymbol}
-                          className="w-3 h-3 rounded-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.style.display = "none";
-                          }}
-                        />
-                      ) : (
-                        <Circle className="w-3 h-3 text-blue-400" />
-                      )}
-                      <span className="text-gray-400 text-[10px] truncate font-mono">
-                        {token.tokenSymbol}
+                      <img
+                        src={token.pfp || "/default-pfp-clear.png"}
+                        alt="Deployer"
+                        className="w-4 h-4 rounded-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = "/default-pfp-clear.png";
+                        }}
+                      />
+                      <a
+                        href={`/profile/${token.deployerAddress || ""}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-gray-400 text-[10px] truncate font-mono underline hover:text-white"
+                      >
+                        {token.username ||
+                          (token.deployerAddress
+                            ? formatAddress(token.deployerAddress)
+                            : "Unknown")}
+                      </a>
+                      <span className="text-gray-400 text-[10px]">•</span>
+                      <span className="text-gray-400 text-[10px]">
+                        {formatTokenAge(
+                          token.deploymentTimestamp || "",
+                          currentTime
+                        )}
                       </span>
                     </div>
-                    <div className="text-gray-400 text-xs mb-1 font-mono">
-                      <span className="text-orange-500">MC: </span>
-                      <span className="text-white font-semibold">
-                        ${formatNumber(token.currentPrice * 1_000_000_000)}
-                      </span>
-                    </div>
-                    <div className="text-gray-400 text-[10px] mb-2">
-                      {formatTokenAge(
-                        token.deploymentTimestamp || "",
-                        currentTime
-                      )}
-                    </div>
+
                     {/* Progress Bar for Bonding Curve Tokens */}
                     {!token.graduated && (
-                      <div className="w-full">
+                      <div className="w-full mb-2">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-gray-400 text-[10px]">
                             Progress
@@ -644,6 +668,13 @@ export function MarketsDashboard() {
                             }}
                           />
                         </div>
+                      </div>
+                    )}
+
+                    {/* Description */}
+                    {token.description && (
+                      <div className="text-gray-400 text-[10px] line-clamp-2">
+                        {token.description}
                       </div>
                     )}
                   </div>
@@ -705,20 +736,11 @@ export function MarketsDashboard() {
 
                       {/* Token Info - both rows in one block */}
                       <div className="flex flex-col flex-1">
-                        {/* Row 1: Symbol and BOND/GRAD badge */}
-                        <div className="flex items-center gap-1.5 mb-0.5">
+                        {/* Row 1: Symbol */}
+                        <div className="mb-0.5">
                           <span className="text-white font-bold text-sm max-w-[120px] overflow-hidden text-ellipsis whitespace-nowrap font-mono">
                             {token.tokenSymbol}
                           </span>
-                          {token.graduated ? (
-                            <span className="bg-green-600 text-black px-1 py-0.5 rounded text-[9px] flex-shrink-0 font-mono">
-                              GRAD
-                            </span>
-                          ) : (
-                            <span className="bg-purple-600 text-black px-1 py-0.5 rounded text-[9px] flex-shrink-0 font-mono">
-                              BOND
-                            </span>
-                          )}
                         </div>
                         {/* Row 2: Token Name */}
                         <div className="text-gray-400 text-[11px] truncate">
@@ -776,8 +798,45 @@ export function MarketsDashboard() {
           )}
         </div>
 
+        {/* Pagination Controls - Mobile */}
+        {pagination && pagination.totalPages > 1 && (
+          <div className="bg-black p-3 pb-24 lg:pb-3">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                disabled={!pagination.hasPreviousPage}
+                className={`px-4 py-2 rounded font-mono text-sm ${
+                  pagination.hasPreviousPage
+                    ? "bg-orange-500 text-black"
+                    : "bg-gray-800 text-gray-600 cursor-not-allowed"
+                }`}
+              >
+                PREV
+              </button>
+              <div className="text-gray-400 text-sm font-mono">
+                Page {pagination.currentPage} of {pagination.totalPages}
+              </div>
+              <button
+                onClick={() =>
+                  setCurrentPage((prev) =>
+                    Math.min(pagination.totalPages, prev + 1)
+                  )
+                }
+                disabled={!pagination.hasNextPage}
+                className={`px-4 py-2 rounded font-mono text-sm ${
+                  pagination.hasNextPage
+                    ? "bg-orange-500 text-black"
+                    : "bg-gray-800 text-gray-600 cursor-not-allowed"
+                }`}
+              >
+                NEXT
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Filter Tabs - Fixed at Bottom */}
-        <div className="fixed bottom-0 left-0 right-0 bg-black p-4 z-30">
+        <div className="fixed bottom-0 left-0 right-0 bg-black p-4 z-30 lg:hidden">
           <div className="flex gap-2 overflow-x-auto scrollbar-hide">
             <button
               onClick={() => setActiveFilter("age")}

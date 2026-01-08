@@ -44,6 +44,10 @@ export interface TokenMarketOverview extends TokenVolumeSummary {
   uniswapPairAddress: string | null;
   liquidityWeth?: string;
   progress?: number;
+  description?: string | null;
+  deployerAddress?: string | null;
+  username?: string | null;
+  pfp?: string | null;
   bondingCurve?: {
     assetBalance: string;
     graduationThreshold: string;
