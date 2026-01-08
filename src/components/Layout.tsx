@@ -73,9 +73,9 @@ export function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <div className="min-h-screen lg:min-h-screen mobile-viewport-fix bg-gray-950 text-gray-100">
+    <div className="min-h-screen lg:min-h-screen mobile-viewport-fix bg-bg-main text-gray-100">
       {/* Header */}
-      <header className="bg-black/95 backdrop-blur-sm z-40">
+      <header className="bg-bg-header/95 backdrop-blur-sm z-40">
         <div className="flex items-center justify-between px-3 sm:px-6 py-2 sm:py-4">
           {/* Mobile Layout */}
           <div className="md:hidden flex items-center space-x-2 flex-1 min-w-0">
@@ -196,7 +196,7 @@ export function Layout({ children }: LayoutProps) {
       <main className="p-0 sm:p-6 pb-20 lg:pb-6">{children}</main>
 
       {/* Bottom Navigation - Mobile Only */}
-      <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 p-2 z-30 lg:hidden safe-area-inset-bottom">
+      <div className="fixed bottom-0 left-0 right-0 bg-bg-footer border-t border-gray-800 p-2 z-30 lg:hidden safe-area-inset-bottom">
         <div className="flex items-center justify-around gap-1">
           <Link
             to="/"

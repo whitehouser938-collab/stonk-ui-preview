@@ -138,9 +138,9 @@ export function TopPerformers() {
   });
 
   return (
-    <div className="bg-black text-gray-100 text-xs font-mono">
+    <div className="text-gray-100 text-xs font-mono">
       {/* Top Time Bar */}
-      <div className="bg-gray-900 border-b border-orange-500/30 p-2 flex flex-wrap justify-between items-center gap-2">
+      <div className="bg-bg-card border-b border-orange-500/30 p-2 flex flex-wrap justify-between items-center gap-2">
         <div className="flex items-center space-x-2 sm:space-x-4">
           {/* Desktop View */}
           <span className="text-orange-500 font-bold whitespace-nowrap hidden md:inline">CRYPTO PERFORMANCE MONITOR</span>
@@ -154,7 +154,7 @@ export function TopPerformers() {
                 <span>{selectedView}</span>
                 <ChevronDown className="w-4 h-4" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-gray-900 border-gray-700 text-gray-400">
+              <DropdownMenuContent className="bg-bg-card border-gray-700 text-gray-400">
                 <DropdownMenuItem onClick={() => setSelectedView("CRYPTO PERFORMANCE MONITOR")} className="cursor-pointer hover:!bg-orange-700/10 hover:!text-gray-100">CRYPTO PERFORMANCE MONITOR</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setSelectedView("TOP PERFORMERS")} className="cursor-pointer hover:!bg-orange-700/10 hover:!text-gray-100">TOP PERFORMERS</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setSelectedView("REAL-TIME")} className="cursor-pointer hover:!bg-orange-700/10 hover:!text-gray-100">REAL-TIME</DropdownMenuItem>
@@ -173,7 +173,7 @@ export function TopPerformers() {
 
       <div className="space-y-2 p-1">
         {/* Header Controls */}
-        <div className="bg-gray-900 border border-gray-700 p-3">
+        <div className="bg-bg-card border border-gray-700 p-3">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex items-center space-x-2 sm:space-x-4">
               <h2 className="text-base sm:text-xl font-bold text-orange-500 font-mono">LEADERBOARD</h2>
@@ -234,7 +234,7 @@ export function TopPerformers() {
         {/* Mobile Card View */}
         <div className="block md:hidden space-y-1">
           {sortedPerformers.slice(0, 20).map((performer, index) => (
-            <Card key={performer.symbol} className="bg-gray-900 border-gray-700 p-3">
+            <Card key={performer.symbol} className="bg-bg-card border-gray-700 p-3">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-2">
                   <span className="text-yellow-400 font-bold text-sm font-mono">#{index + 1}</span>
@@ -288,10 +288,10 @@ export function TopPerformers() {
         </div>
 
         {/* Desktop Table View */}
-        <div className="hidden md:block bg-black border border-gray-700 overflow-auto">
+        <div className="hidden md:block bg-bg-card border border-gray-700 overflow-auto">
           <Table className="w-full text-xs font-mono min-w-[1200px]">
             <TableHeader>
-              <TableRow className="border-b border-gray-700 bg-gray-900">
+              <TableRow className="border-b border-gray-700 bg-bg-card">
                 <TableHead className="text-orange-500 p-1 text-xs">RNK</TableHead>
                 <TableHead className="text-orange-500 p-1 text-xs">SYMBOL</TableHead>
                 <TableHead className="text-orange-500 p-1 text-xs">NAME</TableHead>
@@ -316,7 +316,7 @@ export function TopPerformers() {
               {sortedPerformers.slice(0, 20).map((performer, index) => (
                 <TableRow 
                   key={performer.symbol} 
-                  className="border-b border-gray-800 hover:bg-gray-900/30 transition-colors"
+                  className="border-b border-gray-800 hover:bg-bg-card-hover/30 transition-colors"
                 >
                   <TableCell className="p-1 text-yellow-400 font-bold">
                     {index + 1}
@@ -409,7 +409,7 @@ export function TopPerformers() {
         </div>
 
         {/* Bottom Stats Bar */}
-        <div className="bg-gray-900 p-2 sm:p-3 text-xs font-mono border border-gray-700">
+        <div className="bg-bg-card p-2 sm:p-3 text-xs font-mono border border-gray-700">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-6 text-xs sm:text-sm">
               <span className="text-gray-400">TOTAL TRACKED: <span className="text-orange-500">1,247</span></span>

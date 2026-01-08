@@ -439,7 +439,7 @@ export function ICOLaunchpad() {
   // Show wallet connection prompt if not connected
   if (!isEthConnected) {
     return (
-      <div className="bg-black text-gray-100 text-xs font-mono">
+      <div className="text-gray-100 text-xs font-mono">
         <div className="p-1">
           <WalletConnectionPrompt
             title="Sign In to Launch"
@@ -452,14 +452,14 @@ export function ICOLaunchpad() {
   }
 
   return (
-    <div className="bg-black text-gray-100 text-xs font-mono">
+    <div className="text-gray-100 text-xs font-mono">
       {isLoading && <LoadingScreen />}{" "}
       {/* Render LoadingScreen when isLoading is true */}
       <div className="p-1">
         {/* IPO Form */}
         <div className="space-y-3">
           {/* Main Form */}
-          <div className="sm:bg-gray-900 sm:border sm:border-gray-700 p-3">
+          <div className="sm:bg-bg-card sm:border sm:border-gray-700 p-3">
             <form onSubmit={handleSubmit}>
               {/* Information */}
               <div className="space-y-3">
@@ -477,7 +477,7 @@ export function ICOLaunchpad() {
                       onChange={(e) =>
                         handleInputChange("name", e.target.value)
                       }
-                      className={`w-full p-2 bg-black text-white text-xs sm:text-sm font-mono italic placeholder:italic ${
+                      className={`w-full p-2 bg-bg-card text-white text-xs sm:text-sm font-mono italic placeholder:italic ${
                         validationErrors.name
                           ? "border border-red-500"
                           : "border-none sm:border sm:border-gray-600"
@@ -498,7 +498,7 @@ export function ICOLaunchpad() {
                       onChange={(e) =>
                         handleInputChange("symbol", e.target.value)
                       }
-                      className={`w-full p-2 bg-black text-white text-xs sm:text-sm font-mono italic placeholder:italic ${
+                      className={`w-full p-2 bg-bg-card text-white text-xs sm:text-sm font-mono italic placeholder:italic ${
                         validationErrors.symbol
                           ? "border border-red-500"
                           : "border-none sm:border sm:border-gray-600"
@@ -522,7 +522,7 @@ export function ICOLaunchpad() {
                   onChange={(e) =>
                     handleInputChange("description", e.target.value)
                   }
-                  className={`w-full p-2 bg-black text-white text-xs sm:text-sm font-mono h-20 sm:h-24 italic placeholder:italic ${
+                  className={`w-full p-2 bg-bg-card text-white text-xs sm:text-sm font-mono h-20 sm:h-24 italic placeholder:italic ${
                     validationErrors.description
                       ? "border border-red-500"
                       : "border-none sm:border sm:border-gray-600"
@@ -548,7 +548,7 @@ export function ICOLaunchpad() {
                         const file = e.target.files?.[0];
                         handleFileChange(file || null);
                       }}
-                      className={`w-full p-2 bg-black text-white text-xs sm:text-sm font-mono file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-orange-500 file:text-black hover:file:bg-orange-600 ${
+                      className={`w-full p-2 bg-bg-card text-white text-xs sm:text-sm font-mono file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-orange-500 file:text-black hover:file:bg-orange-600 ${
                         validationErrors.logoFile
                           ? "border border-red-500"
                           : "border-none sm:border sm:border-gray-600"
@@ -588,7 +588,7 @@ export function ICOLaunchpad() {
                     onChange={(e) =>
                       handleInputChange("website", e.target.value)
                     }
-                    className={`w-full p-2 bg-black text-white text-xs sm:text-sm font-mono italic placeholder:italic ${
+                      className={`w-full p-2 bg-bg-card text-white text-xs sm:text-sm font-mono italic placeholder:italic ${
                       validationErrors.website
                         ? "border border-red-500"
                         : "border-none sm:border sm:border-gray-600"
@@ -608,7 +608,7 @@ export function ICOLaunchpad() {
                     onChange={(e) =>
                       handleInputChange("twitterUrl", e.target.value)
                     }
-                    className={`w-full p-2 bg-black text-white text-xs sm:text-sm font-mono italic placeholder:italic ${
+                      className={`w-full p-2 bg-bg-card text-white text-xs sm:text-sm font-mono italic placeholder:italic ${
                       validationErrors.twitterUrl
                         ? "border border-red-500"
                         : "border-none sm:border sm:border-gray-600"
@@ -628,7 +628,7 @@ export function ICOLaunchpad() {
                     onChange={(e) =>
                       handleInputChange("telegramUrl", e.target.value)
                     }
-                    className={`w-full p-2 bg-black text-white text-xs sm:text-sm font-mono italic placeholder:italic ${
+                      className={`w-full p-2 bg-bg-card text-white text-xs sm:text-sm font-mono italic placeholder:italic ${
                       validationErrors.telegramUrl
                         ? "border border-red-500"
                         : "border-none sm:border sm:border-gray-600"
@@ -655,7 +655,7 @@ export function ICOLaunchpad() {
                       onChange={(e) =>
                         handleInputChange("totalSupply", e.target.value)
                       }
-                      className="w-full p-2 bg-black border border-gray-600 text-white text-xs sm:text-sm font-mono"
+                      className="w-full p-2 bg-bg-card border border-gray-600 text-white text-xs sm:text-sm font-mono"
                     />
                   </div>
                 </div> */}
@@ -677,7 +677,7 @@ export function ICOLaunchpad() {
                     onChange={(e) =>
                       handleInputChange("initialBuyAmount", e.target.value)
                     }
-                    className="w-full p-2 bg-black border-none sm:border sm:border-gray-600 text-white text-xs sm:text-sm font-mono italic placeholder:italic"
+                    className="w-full p-2 bg-bg-card border-none sm:border sm:border-gray-600 text-white text-xs sm:text-sm font-mono italic placeholder:italic"
                   />
                   <div className="flex items-center space-x-4">
                     <label className="flex items-center space-x-2">

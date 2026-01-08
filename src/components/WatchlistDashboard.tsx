@@ -95,8 +95,8 @@ export function WatchlistDashboard() {
 
   if (!isConnected) {
     return (
-      <div className="h-screen overflow-auto bg-black text-gray-100 text-xs font-mono flex items-center justify-center">
-        <div className="text-center p-8 bg-gray-900 border border-gray-700 rounded max-w-md">
+      <div className="h-screen overflow-auto text-gray-100 text-xs font-mono flex items-center justify-center">
+        <div className="text-center p-8 bg-bg-card border border-gray-700 rounded max-w-md">
           <AlertCircle className="w-12 h-12 text-orange-500 mx-auto mb-4" />
           <h2 className="text-lg text-white mb-2 font-mono">Connect Your Wallet</h2>
           <p className="text-gray-400 font-mono">
@@ -108,9 +108,9 @@ export function WatchlistDashboard() {
   }
 
   return (
-    <div className="h-screen overflow-auto bg-black text-gray-100 text-xs font-mono">
+    <div className="h-screen overflow-auto text-gray-100 text-xs font-mono">
       <div className="p-4">
-        <div className="bg-gray-900 border border-gray-700">
+        <div className="bg-bg-card border border-gray-700">
           <div className="text-orange-500 text-sm p-2 border-b border-gray-700 flex items-center justify-between">
             <span className="font-mono">MY WATCHLIST</span>
             <span className="text-gray-400 font-mono">

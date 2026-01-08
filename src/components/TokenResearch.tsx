@@ -147,13 +147,13 @@ export function TokenResearch() {
   const chartAvg = (chartMax + chartMin) / 2;
 
   return (
-    <div className="bg-black text-gray-100 text-xs font-mono">
+    <div className="text-gray-100 text-xs font-mono">
       {/* Main Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 p-1">
         {/* Left Column - Stock Overview */}
         <div className="col-span-12 lg:col-span-8 space-y-1">
           {/* Stock Header */}
-          <div className="bg-gray-900 border border-gray-700 p-2">
+          <div className="bg-bg-card border border-gray-700 p-2">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2">
               <div className="flex items-center space-x-3 mb-2 sm:mb-0">
                 <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded text-white font-bold text-sm flex items-center justify-center flex-shrink-0">
@@ -185,9 +185,9 @@ export function TokenResearch() {
           </div>
 
           {/* Price Chart */}
-          <div className="bg-gray-900 border border-gray-700 p-2">
+          <div className="bg-bg-card border border-gray-700 p-2">
             <div className="text-orange-500 mb-2">INTRADAY CHART</div>
-            <div className="bg-black border border-gray-800 p-2 h-48 flex">
+            <div className="bg-bg-card border border-gray-800 p-2 h-48 flex">
               <div className="flex flex-col justify-between h-full text-xs text-gray-500 pr-2 border-r border-gray-700 text-right">
                 <span>${chartMax.toFixed(2)}</span>
                 <span>${chartAvg.toFixed(2)}</span>
@@ -224,52 +224,52 @@ export function TokenResearch() {
           </div>
 
           {/* Financial Metrics */}
-          <div className="bg-gray-900 border border-gray-700 p-2">
+          <div className="bg-bg-card border border-gray-700 p-2">
             <div className="text-orange-500 mb-2">FINANCIAL METRICS</div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 text-xs">
-              <div className="bg-black border border-gray-800 p-2">
+              <div className="bg-bg-card border border-gray-800 p-2">
                 <div className="text-gray-400">REVENUE (TTM)</div>
                 <div className="text-white font-mono text-sm">
                   ${formatNumber(financialData.revenue)}
                 </div>
               </div>
-              <div className="bg-black border border-gray-800 p-2">
+              <div className="bg-bg-card border border-gray-800 p-2">
                 <div className="text-gray-400">NET INCOME</div>
                 <div className="text-white font-mono text-sm">
                   ${formatNumber(financialData.netIncome)}
                 </div>
               </div>
-              <div className="bg-black border border-gray-800 p-2">
+              <div className="bg-bg-card border border-gray-800 p-2">
                 <div className="text-gray-400">GROSS MARGIN</div>
                 <div className="text-white font-mono text-sm">
                   {financialData.grossMargin.toFixed(2)}%
                 </div>
               </div>
-              <div className="bg-black border border-gray-800 p-2">
+              <div className="bg-bg-card border border-gray-800 p-2">
                 <div className="text-gray-400">PROFIT MARGIN</div>
                 <div className="text-white font-mono text-sm">
                   {financialData.profitMargin.toFixed(2)}%
                 </div>
               </div>
-              <div className="bg-black border border-gray-800 p-2">
+              <div className="bg-bg-card border border-gray-800 p-2">
                 <div className="text-gray-400">ROE</div>
                 <div className="text-white font-mono text-sm">
                   {financialData.roe.toFixed(2)}%
                 </div>
               </div>
-              <div className="bg-black border border-gray-800 p-2">
+              <div className="bg-bg-card border border-gray-800 p-2">
                 <div className="text-gray-400">ROA</div>
                 <div className="text-white font-mono text-sm">
                   {financialData.roa.toFixed(2)}%
                 </div>
               </div>
-              <div className="bg-black border border-gray-800 p-2">
+              <div className="bg-bg-card border border-gray-800 p-2">
                 <div className="text-gray-400">DEBT/EQUITY</div>
                 <div className="text-white font-mono text-sm">
                   {financialData.debtToEquity.toFixed(2)}
                 </div>
               </div>
-              <div className="bg-black border border-gray-800 p-2">
+              <div className="bg-bg-card border border-gray-800 p-2">
                 <div className="text-gray-400">FREE CASH FLOW</div>
                 <div className="text-white font-mono text-sm">
                   ${formatNumber(financialData.freeCashFlow)}
@@ -279,9 +279,9 @@ export function TokenResearch() {
           </div>
 
           {/* Analyst Ratings */}
-          <div className="bg-gray-900 border border-gray-700 p-2">
+          <div className="bg-bg-card border border-gray-700 p-2">
             <div className="text-orange-500 mb-2">ANALYST RATINGS</div>
-            <div className="overflow-x-auto bg-black border border-gray-800 p-1">
+            <div className="overflow-x-auto bg-bg-card border border-gray-800 p-1">
               <table className="w-full text-xs min-w-[400px]">
                 <thead>
                   <tr className="text-gray-400 border-b border-gray-700">
@@ -325,7 +325,7 @@ export function TokenResearch() {
         {/* Right Column - Market Data & News */}
         <div className="col-span-12 lg:col-span-4 space-y-1">
           {/* Market Data */}
-          <div className="bg-gray-900 border border-gray-700 p-2">
+          <div className="bg-bg-card border border-gray-700 p-2">
             <div className="text-orange-500 mb-2">MARKET DATA</div>
             <div className="space-y-2 text-xs">
               <div className="flex justify-between items-start gap-2">
@@ -374,7 +374,7 @@ export function TokenResearch() {
           </div>
 
           {/* Company Info */}
-          <div className="bg-gray-900 border border-gray-700 p-2">
+          <div className="bg-bg-card border border-gray-700 p-2">
             <div className="text-orange-500 mb-2">COMPANY INFO</div>
             <div className="space-y-2 text-xs">
               <div className="flex items-center space-x-2">
@@ -396,7 +396,7 @@ export function TokenResearch() {
           </div>
 
           {/* Recent News */}
-          <div className="bg-gray-900 border border-gray-700 p-2">
+          <div className="bg-bg-card border border-gray-700 p-2">
             <div className="text-orange-500 mb-2">RECENT NEWS</div>
             <div className="space-y-2">
               {newsData.map((news, index) => (
@@ -422,7 +422,7 @@ export function TokenResearch() {
           </div>
 
           {/* Technical Indicators */}
-          <div className="bg-gray-900 border border-gray-700 p-2">
+          <div className="bg-bg-card border border-gray-700 p-2">
             <div className="text-orange-500 mb-2">TECHNICAL INDICATORS</div>
             <div className="space-y-1 text-xs">
               <div className="flex justify-between">

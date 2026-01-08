@@ -154,7 +154,7 @@ const MobileCollapsibleSection: React.FC<{
       <div className="lg:hidden">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full flex justify-between items-center bg-gray-900 p-2 mb-1"
+          className="w-full flex justify-between items-center bg-bg-card p-2 mb-1"
         >
           <div className="text-orange-500 text-xs">{title}</div>
           {isOpen ? (
@@ -437,11 +437,11 @@ export function MarketsDashboard() {
   };
 
   return (
-    <div className="bg-black text-gray-100 text-xs font-mono">
+    <div className="text-gray-100 text-xs font-mono">
       {/* MOBILE VIEW */}
       <div className="lg:hidden">
         {/* Trending Section - Horizontal Scroll */}
-        <div className="bg-black">
+        <div>
           <div className="flex items-center justify-between p-3">
             <h2 className="text-white font-bold text-sm font-mono">
               Now trending <span className="rocket-blink">🚀</span>
@@ -472,7 +472,7 @@ export function MarketsDashboard() {
                 <div
                   key={token.tokenAddress}
                   onClick={() => handleTokenClick(token)}
-                  className="flex-shrink-0 w-[280px] bg-gray-900 rounded-lg overflow-hidden cursor-pointer hover:bg-gray-800 transition-colors"
+                  className="flex-shrink-0 w-[280px] bg-bg-card rounded-lg overflow-hidden cursor-pointer hover:bg-bg-card-hover transition-colors"
                 >
                   {/* Token Image */}
                   <div className="relative h-[140px] bg-gray-800">
@@ -557,7 +557,7 @@ export function MarketsDashboard() {
         {/* View Toggle and Filter Buttons - Sticky at Top */}
         <div 
           ref={stickyRowRef}
-          className="sticky top-0 z-20 bg-black px-3 py-2 flex gap-2 items-center overflow-x-auto scrollbar-hide"
+          className="sticky top-0 z-20 bg-bg-card px-3 py-2 flex gap-2 items-center overflow-x-auto scrollbar-hide"
         >
             {/* View Toggle Buttons */}
             <button
@@ -688,7 +688,7 @@ export function MarketsDashboard() {
             <div className="text-center p-8 text-gray-400">No tokens found</div>
           ) : viewMode === "card" ? (
             /* Card Grid View */
-            <div className="grid grid-cols-1 gap-3 p-3 bg-black pb-0">
+            <div className="grid grid-cols-1 gap-3 p-3 pb-0">
               {filteredTokens.map((token) => (
                 <div
                   key={token.tokenAddress}
@@ -807,7 +807,7 @@ export function MarketsDashboard() {
               return (
                 <div
                   key={token.tokenAddress}
-                  className="bg-black rounded-lg p-2.5 cursor-pointer hover:bg-gray-900 transition-colors"
+                  className="bg-bg-card rounded-lg p-2.5 cursor-pointer hover:bg-bg-card-hover transition-colors"
                   onClick={() => handleTokenClick(token)}
                   style={{ touchAction: "manipulation" }}
                 >
@@ -916,21 +916,21 @@ export function MarketsDashboard() {
 
         {/* Pagination Controls - Mobile */}
         {pagination && (
-          <div className="bg-black p-3 lg:pb-3">
-            <div className="flex items-center justify-between">
+          <div className="p-3 lg:pb-3">
+            <div className="flex items-center justify-center gap-4 font-mono text-sm text-gray-400">
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={!pagination.hasPreviousPage}
-                className={`flex items-center gap-1 px-3 py-2 rounded font-mono text-sm transition-all ${
+                className={`transition-all ${
                   pagination.hasPreviousPage
-                    ? "bg-orange-500 text-black hover:bg-orange-600"
-                    : "bg-gray-800 text-gray-600 cursor-not-allowed opacity-50"
+                    ? "text-gray-400 hover:text-white cursor-pointer"
+                    : "text-gray-600 cursor-not-allowed opacity-50"
                 }`}
               >
-                <ChevronLeft className="w-4 h-4" />
+                [ &lt;&lt; ]
               </button>
-              <div className="text-gray-400 text-sm font-mono">
-                {pagination.currentPage} / {pagination.totalPages}
+              <div className="text-gray-400">
+                {pagination.currentPage}
               </div>
               <button
                 onClick={() =>
@@ -939,13 +939,13 @@ export function MarketsDashboard() {
                   )
                 }
                 disabled={!pagination.hasNextPage}
-                className={`flex items-center gap-1 px-3 py-2 rounded font-mono text-sm transition-all ${
+                className={`transition-all ${
                   pagination.hasNextPage
-                    ? "bg-orange-500 text-black hover:bg-orange-600"
-                    : "bg-gray-800 text-gray-600 cursor-not-allowed opacity-50"
+                    ? "text-gray-400 hover:text-white cursor-pointer"
+                    : "text-gray-600 cursor-not-allowed opacity-50"
                 }`}
               >
-                <ChevronRight className="w-4 h-4" />
+                [ &gt;&gt; ]
               </button>
             </div>
           </div>
@@ -960,7 +960,7 @@ export function MarketsDashboard() {
           {/* Left Column - Terminal Placeholder - Desktop only, order-last on mobile */}
           <div className="lg:col-span-3 space-y-1 order-last lg:order-first">
             <MobileCollapsibleSection title="TERMINAL">
-              <div className="bg-gray-900 p-4 h-full flex flex-col items-center justify-center">
+              <div className="bg-bg-card p-4 h-full flex flex-col items-center justify-center">
                 <div className="text-orange-500 text-lg font-bold mb-2 lg:block hidden">
                   TERMINAL
                 </div>
@@ -972,7 +972,7 @@ export function MarketsDashboard() {
           </div>
 
           {/* Center Column - Main Trading Data */}
-          <div className="lg:col-span-6 bg-gray-900 order-first lg:order-none">
+          <div className="lg:col-span-6 bg-bg-card order-first lg:order-none">
             <div className="text-orange-500 text-xs p-1">
               ACTIVE TRADING PAIRS
             </div>
@@ -1141,7 +1141,7 @@ export function MarketsDashboard() {
           <div className="lg:col-span-3 space-y-1">
             {/* Volume Leaders */}
             <MobileCollapsibleSection title="VOLUME LEADERS">
-              <div className="bg-gray-900 p-1">
+              <div className="bg-bg-card p-1">
                 <div className="flex justify-between items-center mb-2">
                   <div className="text-orange-500 text-xs hidden lg:block">
                     VOLUME LEADERS
@@ -1211,7 +1211,7 @@ export function MarketsDashboard() {
 
             {/* Graduated Tokens */}
             <MobileCollapsibleSection title="GRADUATED TOKENS">
-              <div className="bg-gray-900 p-1">
+              <div className="bg-bg-card p-1">
                 <div className="text-orange-500 text-xs mb-1 hidden lg:block">
                   GRADUATED TOKENS
                 </div>
@@ -1302,7 +1302,7 @@ export function MarketsDashboard() {
 
             {/* Bonding Curve Progress */}
             <MobileCollapsibleSection title="BONDING CURVE PROGRESS">
-              <div className="bg-gray-900 p-1">
+              <div className="bg-bg-card p-1">
                 <div className="text-orange-500 text-xs mb-1 hidden lg:block">
                   BONDING CURVE PROGRESS
                 </div>

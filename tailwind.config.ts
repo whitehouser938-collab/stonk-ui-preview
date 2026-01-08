@@ -19,6 +19,14 @@ export default {
 		},
 		extend: {
 			colors: {
+				// Theme colors - centralized from theme.ts
+				'bg-main': '#121216', // Softer black for main content
+				'bg-header': '#000000', // Pure black for header
+				'bg-footer': '#000000', // Pure black for footer
+				'bg-card': '#1a1a1e', // Card background
+				'bg-card-hover': '#1f1f23', // Card hover state
+				
+				// Existing shadcn/ui colors
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
