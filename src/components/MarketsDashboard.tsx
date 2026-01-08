@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment, useCallback } from "react";
+import React, { useState, useEffect, Fragment, useCallback, useRef } from "react";
 import {
   Circle,
   Star,
@@ -6,13 +6,10 @@ import {
   ChevronUp,
   LayoutGrid,
   List,
-  BarChart,
-  Rocket,
-  Trophy,
-  User,
+  Filter,
 } from "lucide-react";
 import { getAllTokens } from "@/api/token";
-import { useNavigate, useParams, useSearchParams, Link, useLocation } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Chain, TokenMarketOverview } from "@/types";
 import { useMarketsUpdates } from "@/hooks/useMarketsUpdate";
 import { useWatchlist } from "@/hooks/useWatchlist";
@@ -185,7 +182,6 @@ export function MarketsDashboard() {
   const { chainId } = useParams<{
     chainId: Chain;
   }>();
-  const location = useLocation();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [tokens, setTokens] = useState<TokenMarketOverview[]>([]);
   const [bondingCurveVolumeData, setBondingCurveVolumeData] = useState<any[]>(
@@ -200,6 +196,9 @@ export function MarketsDashboard() {
     | "card"
     | "list";
   const [headerHeight, setHeaderHeight] = useState(0);
+  const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
+  const [isStickyRowActive, setIsStickyRowActive] = useState(false);
+  const stickyRowRef = useRef<HTMLDivElement>(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -227,6 +226,26 @@ export function MarketsDashboard() {
     window.addEventListener("resize", updateHeaderHeight);
     return () => window.removeEventListener("resize", updateHeaderHeight);
   }, []);
+
+  // Detect when sticky row becomes active (scrolled past initial position)
+  useEffect(() => {
+    const scrollContainer = document.querySelector('.flex-1.overflow-y-auto');
+    if (!scrollContainer || !stickyRowRef.current) return;
+
+    const handleScroll = () => {
+      const scrollTop = scrollContainer.scrollTop;
+      // Check if scrolled past the initial position (approximately when trending section is out of view)
+      const isSticky = scrollTop > 200;
+      setIsStickyRowActive(isSticky);
+      // Auto-collapse filters when scrolling back to top
+      if (!isSticky && isFiltersExpanded) {
+        setIsFiltersExpanded(false);
+      }
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll);
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+  }, [isFiltersExpanded]);
 
   useEffect(() => {
     if (!chainId) {
@@ -432,12 +451,12 @@ export function MarketsDashboard() {
     <div className="bg-black text-gray-100 text-xs font-mono">
       {/* MOBILE VIEW */}
       <div
-        className="lg:hidden fixed inset-0 flex flex-col"
-        style={{ top: headerHeight }}
+        className="lg:hidden fixed inset-0 flex flex-col mobile-viewport-fix"
+        style={{ top: headerHeight, height: `calc(100dvh - ${headerHeight}px)` }}
       >
         {/* Scrollable Container - includes trending and tokens */}
         <div
-          className="flex-1 overflow-y-auto pb-[64px] bg-black"
+          className="flex-1 overflow-y-auto pb-28 bg-black"
           style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
         >
           {/* Trending Section - Horizontal Scroll */}
@@ -554,8 +573,11 @@ export function MarketsDashboard() {
             </div>
           </div>
 
-          {/* View Toggle and Filter Buttons */}
-          <div className="bg-black px-3 py-2 flex gap-2 items-center overflow-x-auto scrollbar-hide">
+          {/* View Toggle and Filter Buttons - Sticky at Top */}
+          <div 
+            ref={stickyRowRef}
+            className="sticky top-0 z-20 bg-black px-3 py-2 flex gap-2 items-center overflow-x-auto scrollbar-hide"
+          >
             {/* View Toggle Buttons */}
             <button
               onClick={() => handleViewModeChange("card")}
@@ -577,77 +599,124 @@ export function MarketsDashboard() {
             >
               <List className="w-5 h-5" />
             </button>
-            {/* Filter Buttons - Horizontally Scrollable */}
-            <button
-              onClick={() => setActiveFilter("age")}
-              className={`flex-shrink-0 p-2 rounded transition-colors font-mono text-xs ${
-                activeFilter === "age"
-                  ? "bg-orange-500 text-black"
-                  : "bg-gray-900 text-gray-400"
+            
+            {/* Filter Icon (always visible when sticky, next to card/list toggles) */}
+            {isStickyRowActive && (
+              <button
+                onClick={() => setIsFiltersExpanded(!isFiltersExpanded)}
+                className={`flex-shrink-0 p-2 rounded transition-all duration-300 font-mono ${
+                  isFiltersExpanded
+                    ? "bg-orange-500 text-black"
+                    : "bg-orange-500 text-black"
+                }`}
+              >
+                <Filter className="w-5 h-5" />
+              </button>
+            )}
+
+            {/* Filter Buttons (shown when not sticky OR when sticky and expanded) */}
+            <div
+              className={`flex gap-2 items-center transition-all duration-300 ease-in-out overflow-x-auto scrollbar-hide flex-1 ${
+                isStickyRowActive && !isFiltersExpanded
+                  ? "max-w-0 opacity-0 overflow-hidden"
+                  : "opacity-100"
               }`}
+              style={{
+                minWidth: isStickyRowActive && !isFiltersExpanded ? 0 : 'auto',
+              }}
             >
-              AGE
-            </button>
-            <button
-              onClick={() => setActiveFilter("last_comment")}
-              className={`flex-shrink-0 p-2 rounded transition-colors font-mono text-xs ${
-                activeFilter === "last_comment"
-                  ? "bg-orange-500 text-black"
-                  : "bg-gray-900 text-gray-400"
-              }`}
-            >
-              LAST COMMENT
-            </button>
-            <button
-              onClick={() => setActiveFilter("last_trade")}
-              className={`flex-shrink-0 p-2 rounded transition-colors font-mono text-xs ${
-                activeFilter === "last_trade"
-                  ? "bg-orange-500 text-black"
-                  : "bg-gray-900 text-gray-400"
-              }`}
-            >
-              LAST TRADE
-            </button>
-            <button
-              onClick={() => setActiveFilter("new")}
-              className={`flex-shrink-0 p-2 rounded transition-colors font-mono text-xs ${
-                activeFilter === "new"
-                  ? "bg-orange-500 text-black"
-                  : "bg-gray-900 text-gray-400"
-              }`}
-            >
-              NEW
-            </button>
-            <button
-              onClick={() => setActiveFilter("graduated")}
-              className={`flex-shrink-0 p-2 rounded transition-colors font-mono text-xs ${
-                activeFilter === "graduated"
-                  ? "bg-orange-500 text-black"
-                  : "bg-gray-900 text-gray-400"
-              }`}
-            >
-              GRADUATED
-            </button>
-            <button
-              onClick={() => setActiveFilter("market_cap")}
-              className={`flex-shrink-0 p-2 rounded transition-colors font-mono text-xs ${
-                activeFilter === "market_cap"
-                  ? "bg-orange-500 text-black"
-                  : "bg-gray-900 text-gray-400"
-              }`}
-            >
-              MARKET CAP
-            </button>
-            <button
-              onClick={() => setActiveFilter("liquidity")}
-              className={`flex-shrink-0 p-2 rounded transition-colors font-mono text-xs ${
-                activeFilter === "liquidity"
-                  ? "bg-orange-500 text-black"
-                  : "bg-gray-900 text-gray-400"
-              }`}
-            >
-              LIQUIDITY
-            </button>
+                <button
+                  onClick={() => {
+                    setActiveFilter("age");
+                    if (isStickyRowActive) setIsFiltersExpanded(false);
+                  }}
+                  className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
+                    activeFilter === "age"
+                      ? "bg-orange-500 text-black"
+                      : "bg-gray-900 text-gray-400"
+                  }`}
+                >
+                  AGE
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveFilter("last_comment");
+                    if (isStickyRowActive) setIsFiltersExpanded(false);
+                  }}
+                  className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
+                    activeFilter === "last_comment"
+                      ? "bg-orange-500 text-black"
+                      : "bg-gray-900 text-gray-400"
+                  }`}
+                >
+                  LAST COMMENT
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveFilter("last_trade");
+                    if (isStickyRowActive) setIsFiltersExpanded(false);
+                  }}
+                  className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
+                    activeFilter === "last_trade"
+                      ? "bg-orange-500 text-black"
+                      : "bg-gray-900 text-gray-400"
+                  }`}
+                >
+                  LAST TRADE
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveFilter("new");
+                    if (isStickyRowActive) setIsFiltersExpanded(false);
+                  }}
+                  className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
+                    activeFilter === "new"
+                      ? "bg-orange-500 text-black"
+                      : "bg-gray-900 text-gray-400"
+                  }`}
+                >
+                  NEW
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveFilter("graduated");
+                    if (isStickyRowActive) setIsFiltersExpanded(false);
+                  }}
+                  className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
+                    activeFilter === "graduated"
+                      ? "bg-orange-500 text-black"
+                      : "bg-gray-900 text-gray-400"
+                  }`}
+                >
+                  GRADUATED
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveFilter("market_cap");
+                    if (isStickyRowActive) setIsFiltersExpanded(false);
+                  }}
+                  className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
+                    activeFilter === "market_cap"
+                      ? "bg-orange-500 text-black"
+                      : "bg-gray-900 text-gray-400"
+                  }`}
+                >
+                  MARKET CAP
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveFilter("liquidity");
+                    if (isStickyRowActive) setIsFiltersExpanded(false);
+                  }}
+                  className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
+                    activeFilter === "liquidity"
+                      ? "bg-orange-500 text-black"
+                      : "bg-gray-900 text-gray-400"
+                  }`}
+                >
+                  LIQUIDITY
+                </button>
+            </div>
           </div>
 
           {/* Token List/Grid */}
@@ -923,66 +992,6 @@ export function MarketsDashboard() {
           </div>
         )}
 
-        {/* Bottom Navigation - Mobile Only */}
-        <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 p-2 z-30 lg:hidden">
-          <div className="flex items-center justify-around gap-1">
-            <Link
-              to="/"
-              className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded transition-all duration-200 ${
-                location.pathname === "/" || location.pathname.match(/^\/[A-Z]+$/)
-                  ? "text-orange-500"
-                  : "text-gray-400"
-              }`}
-            >
-              <BarChart className="w-5 h-5 mb-1" />
-              <span className="text-[10px] font-mono">Markets</span>
-            </Link>
-            <Link
-              to="/research"
-              className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded transition-all duration-200 ${
-                location.pathname === "/research"
-                  ? "text-orange-500"
-                  : "text-gray-400"
-              }`}
-            >
-              <Star className="w-5 h-5 mb-1" />
-              <span className="text-[10px] font-mono">Watchlist</span>
-            </Link>
-            <Link
-              to="/launchpad"
-              className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded transition-all duration-200 ${
-                location.pathname === "/launchpad"
-                  ? "text-orange-500"
-                  : "text-gray-400"
-              }`}
-            >
-              <Rocket className="w-5 h-5 mb-1" />
-              <span className="text-[10px] font-mono">Launchpad</span>
-            </Link>
-            <Link
-              to="/leaderboard"
-              className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded transition-all duration-200 ${
-                location.pathname === "/leaderboard"
-                  ? "text-orange-500"
-                  : "text-gray-400"
-              }`}
-            >
-              <Trophy className="w-5 h-5 mb-1" />
-              <span className="text-[10px] font-mono">Leaderboard</span>
-            </Link>
-            <Link
-              to="/profile"
-              className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded transition-all duration-200 ${
-                location.pathname === "/profile" || location.pathname.startsWith("/profile/")
-                  ? "text-orange-500"
-                  : "text-gray-400"
-              }`}
-            >
-              <User className="w-5 h-5 mb-1" />
-              <span className="text-[10px] font-mono">Profile</span>
-            </Link>
-          </div>
-        </div>
       </div>
 
       {/* DESKTOP VIEW */}

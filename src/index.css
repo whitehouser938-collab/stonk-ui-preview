@@ -98,4 +98,32 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  html {
+    /* Prevent mobile browsers from adjusting font size */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Mobile viewport height fix - prevents URL bar from shrinking content */
+  @supports (-webkit-touch-callout: none) {
+    /* iOS Safari */
+    html, body {
+      height: -webkit-fill-available;
+    }
+    .mobile-viewport-fix {
+      min-height: -webkit-fill-available;
+    }
+  }
+
+  /* Use dynamic viewport height for mobile */
+  @media (max-width: 1023px) {
+    html, body {
+      height: 100dvh;
+      height: 100vh; /* Fallback for browsers that don't support dvh */
+    }
+    .mobile-viewport-fix {
+      min-height: 100dvh;
+      min-height: 100vh; /* Fallback */
+    }
+  }
 }
