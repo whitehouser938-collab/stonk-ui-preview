@@ -373,30 +373,6 @@ export function MarketsDashboard() {
     <div className="bg-black text-gray-100 text-xs font-mono">
       {/* MOBILE VIEW */}
       <div className="lg:hidden fixed inset-0 flex flex-col" style={{ top: headerHeight }}>
-        {/* View Toggle - Fixed */}
-        <div className="bg-black px-3 py-2 flex gap-2 border-b border-gray-800">
-          <button
-            onClick={() => setViewMode("card")}
-            className={`p-2 rounded transition-colors ${
-              viewMode === "card"
-                ? "bg-orange-600 text-white"
-                : "bg-gray-800 text-gray-400"
-            }`}
-          >
-            <LayoutGrid className="w-5 h-5" />
-          </button>
-          <button
-            onClick={() => setViewMode("list")}
-            className={`p-2 rounded transition-colors ${
-              viewMode === "list"
-                ? "bg-orange-600 text-white"
-                : "bg-gray-800 text-gray-400"
-            }`}
-          >
-            <List className="w-5 h-5" />
-          </button>
-        </div>
-
         {/* Scrollable Container - includes trending and tokens */}
         <div className="flex-1 overflow-y-auto pb-[72px]" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
           {/* Trending Section - Horizontal Scroll */}
@@ -458,6 +434,30 @@ export function MarketsDashboard() {
             </div>
           </div>
 
+          {/* View Toggle */}
+          <div className="bg-black px-3 py-2 flex gap-2">
+            <button
+              onClick={() => setViewMode("card")}
+              className={`p-2 rounded transition-colors ${
+                viewMode === "card"
+                  ? "bg-orange-600 text-white"
+                  : "bg-gray-800 text-gray-400"
+              }`}
+            >
+              <LayoutGrid className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={`p-2 rounded transition-colors ${
+                viewMode === "list"
+                  ? "bg-orange-600 text-white"
+                  : "bg-gray-800 text-gray-400"
+              }`}
+            >
+              <List className="w-5 h-5" />
+            </button>
+          </div>
+
           {/* Token List/Grid */}
           {isLoading ? (
             <div className="text-center p-8 text-gray-400">Loading tokens...</div>
@@ -470,7 +470,7 @@ export function MarketsDashboard() {
                 <div
                   key={token.tokenAddress}
                   onClick={() => handleTokenClick(token)}
-                  className="bg-gray-900 rounded-lg p-3 cursor-pointer hover:bg-gray-800 transition-colors flex gap-3"
+                  className="rounded-lg p-3 cursor-pointer transition-colors flex gap-3"
                 >
                   {/* Token Image - Left Side */}
                   <div className="flex-shrink-0">
@@ -478,14 +478,14 @@ export function MarketsDashboard() {
                       <img
                         src={token.logoUrl}
                         alt={token.tokenSymbol}
-                        className="w-20 h-20 rounded-lg object-cover"
+                        className="w-28 h-28 rounded-lg object-cover"
                         onError={(e) => {
                           e.currentTarget.style.display = "none";
                         }}
                       />
                     ) : (
-                      <div className="w-20 h-20 rounded-lg bg-gray-800 flex items-center justify-center">
-                        <Circle className="w-10 h-10 text-blue-400" />
+                      <div className="w-28 h-28 rounded-lg bg-gray-800 flex items-center justify-center">
+                        <Circle className="w-14 h-14 text-blue-400" />
                       </div>
                     )}
                   </div>
