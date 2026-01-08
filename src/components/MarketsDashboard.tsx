@@ -4,6 +4,8 @@ import {
   Star,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   LayoutGrid,
   List,
   Filter,
@@ -198,6 +200,7 @@ export function MarketsDashboard() {
   const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
   const [isStickyRowActive, setIsStickyRowActive] = useState(false);
   const stickyRowRef = useRef<HTMLDivElement>(null);
+  const [isTrendingCollapsed, setIsTrendingCollapsed] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -214,6 +217,14 @@ export function MarketsDashboard() {
     }
   };
 
+
+  // Collapse trending text after 2 seconds on mobile (same timing as header collapse)
+  useEffect(() => {
+    const collapseTimer = setTimeout(() => {
+      setIsTrendingCollapsed(true);
+    }, 2000);
+    return () => clearTimeout(collapseTimer);
+  }, []);
 
   // Detect when sticky row becomes active (scrolled past initial position)
   useEffect(() => {
@@ -437,12 +448,24 @@ export function MarketsDashboard() {
   return (
     <div className="bg-black text-gray-100 text-xs font-mono">
       {/* MOBILE VIEW */}
-      <div className="lg:hidden pb-28">
+      <div className="lg:hidden">
         {/* Trending Section - Horizontal Scroll */}
         <div className="bg-black">
           <div className="flex items-center justify-between p-3">
-            <h2 className="text-white font-bold text-sm font-mono">
-              Now trending <span className="rocket-blink">🚀</span>
+            <h2 className="text-white font-bold text-sm font-mono relative overflow-hidden h-6 flex items-center">
+              <span
+                className={`inline-block transition-all duration-1000 ease-in-out whitespace-nowrap ${
+                  isTrendingCollapsed
+                    ? "scale-x-0 opacity-0 max-w-0"
+                    : "scale-x-100 opacity-100 max-w-full"
+                }`}
+                style={{
+                  animation: !isTrendingCollapsed ? "shake 0.5s ease-in-out 1.5s" : "none",
+                }}
+              >
+                Now trending{" "}
+              </span>
+              <span className="rocket-blink inline-block">🚀</span>
             </h2>
           </div>
           <div
@@ -707,7 +730,7 @@ export function MarketsDashboard() {
             <div className="text-center p-8 text-gray-400">No tokens found</div>
           ) : viewMode === "card" ? (
             /* Card Grid View */
-            <div className="grid grid-cols-1 gap-3 p-3 bg-black">
+            <div className="grid grid-cols-1 gap-3 p-3 bg-black pb-0">
               {filteredTokens.map((token) => (
                 <div
                   key={token.tokenAddress}
@@ -934,22 +957,22 @@ export function MarketsDashboard() {
           )}
 
         {/* Pagination Controls - Mobile */}
-        {pagination && pagination.totalPages > 1 && (
-          <div className="bg-black p-3 pb-20 lg:pb-3">
+        {pagination && (
+          <div className="bg-black p-3 lg:pb-3">
             <div className="flex items-center justify-between">
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={!pagination.hasPreviousPage}
-                className={`px-4 py-2 rounded font-mono text-sm ${
+                className={`flex items-center gap-1 px-3 py-2 rounded font-mono text-sm transition-all ${
                   pagination.hasPreviousPage
-                    ? "bg-orange-500 text-black"
-                    : "bg-gray-800 text-gray-600 cursor-not-allowed"
+                    ? "bg-orange-500 text-black hover:bg-orange-600"
+                    : "bg-gray-800 text-gray-600 cursor-not-allowed opacity-50"
                 }`}
               >
-                PREV
+                <ChevronLeft className="w-4 h-4" />
               </button>
               <div className="text-gray-400 text-sm font-mono">
-                Page {pagination.currentPage} of {pagination.totalPages}
+                {pagination.currentPage} / {pagination.totalPages}
               </div>
               <button
                 onClick={() =>
@@ -958,13 +981,13 @@ export function MarketsDashboard() {
                   )
                 }
                 disabled={!pagination.hasNextPage}
-                className={`px-4 py-2 rounded font-mono text-sm ${
+                className={`flex items-center gap-1 px-3 py-2 rounded font-mono text-sm transition-all ${
                   pagination.hasNextPage
-                    ? "bg-orange-500 text-black"
-                    : "bg-gray-800 text-gray-600 cursor-not-allowed"
+                    ? "bg-orange-500 text-black hover:bg-orange-600"
+                    : "bg-gray-800 text-gray-600 cursor-not-allowed opacity-50"
                 }`}
               >
-                NEXT
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           </div>
