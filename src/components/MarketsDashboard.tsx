@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Fragment, useCallback } from "react";
 import { Circle, Star, ChevronDown, ChevronUp, LayoutGrid, List } from "lucide-react";
 import { getAllTokens } from "@/api/token";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Chain, TokenMarketOverview } from "@/types";
 import { useMarketsUpdates } from "@/hooks/useMarketsUpdate";
 import { useWatchlist } from "@/hooks/useWatchlist";
@@ -153,13 +153,22 @@ export function MarketsDashboard() {
     "24h"
   );
   const [activeFilter, setActiveFilter] = useState<FilterType>("new");
-  const [viewMode, setViewMode] = useState<"card" | "list">("list");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const viewMode = (searchParams.get("view") === "table" ? "list" : "card") as "card" | "list";
   const [headerHeight, setHeaderHeight] = useState(0);
 
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const { address, isConnected } = useAppKitAccount({ namespace: "eip155" });
   const { isInWatchlist, toggleWatchlist } = useWatchlist(address);
+
+  const handleViewModeChange = (mode: "card" | "list") => {
+    if (mode === "list") {
+      setSearchParams({ view: "table" });
+    } else {
+      setSearchParams({});
+    }
+  };
 
   useEffect(() => {
     const updateHeaderHeight = () => {
@@ -448,7 +457,7 @@ export function MarketsDashboard() {
           {/* View Toggle */}
           <div className="bg-black px-3 py-2 flex gap-2">
             <button
-              onClick={() => setViewMode("card")}
+              onClick={() => handleViewModeChange("card")}
               className={`p-2 rounded transition-colors ${
                 viewMode === "card"
                   ? "bg-orange-600 text-white"
@@ -458,7 +467,7 @@ export function MarketsDashboard() {
               <LayoutGrid className="w-5 h-5" />
             </button>
             <button
-              onClick={() => setViewMode("list")}
+              onClick={() => handleViewModeChange("list")}
               className={`p-2 rounded transition-colors ${
                 viewMode === "list"
                   ? "bg-orange-600 text-white"
