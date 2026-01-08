@@ -195,7 +195,6 @@ export function MarketsDashboard() {
   const viewMode = (searchParams.get("view") === "table" ? "list" : "card") as
     | "card"
     | "list";
-  const [headerHeight, setHeaderHeight] = useState(0);
   const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
   const [isStickyRowActive, setIsStickyRowActive] = useState(false);
   const stickyRowRef = useRef<HTMLDivElement>(null);
@@ -215,25 +214,13 @@ export function MarketsDashboard() {
     }
   };
 
-  useEffect(() => {
-    const updateHeaderHeight = () => {
-      const header = document.querySelector("header");
-      if (header) {
-        setHeaderHeight(header.offsetHeight);
-      }
-    };
-    updateHeaderHeight();
-    window.addEventListener("resize", updateHeaderHeight);
-    return () => window.removeEventListener("resize", updateHeaderHeight);
-  }, []);
 
   // Detect when sticky row becomes active (scrolled past initial position)
   useEffect(() => {
-    const scrollContainer = document.querySelector('.flex-1.overflow-y-auto');
-    if (!scrollContainer || !stickyRowRef.current) return;
+    if (!stickyRowRef.current) return;
 
     const handleScroll = () => {
-      const scrollTop = scrollContainer.scrollTop;
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
       // Check if scrolled past the initial position (approximately when trending section is out of view)
       const isSticky = scrollTop > 200;
       setIsStickyRowActive(isSticky);
@@ -243,8 +230,8 @@ export function MarketsDashboard() {
       }
     };
 
-    scrollContainer.addEventListener('scroll', handleScroll);
-    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [isFiltersExpanded]);
 
   useEffect(() => {
@@ -450,134 +437,126 @@ export function MarketsDashboard() {
   return (
     <div className="bg-black text-gray-100 text-xs font-mono">
       {/* MOBILE VIEW */}
-      <div
-        className="lg:hidden fixed inset-0 flex flex-col mobile-viewport-fix"
-        style={{ top: headerHeight, height: `calc(100dvh - ${headerHeight}px)` }}
-      >
-        {/* Scrollable Container - includes trending and tokens */}
-        <div
-          className="flex-1 overflow-y-auto pb-28 bg-black"
-          style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
-        >
-          {/* Trending Section - Horizontal Scroll */}
-          <div className="bg-black">
-            <div className="flex items-center justify-between p-3">
-              <h2 className="text-white font-bold text-sm font-mono">
-                Now trending <span className="rocket-blink">🚀</span>
-              </h2>
-            </div>
-            <div
-              className="overflow-x-auto pb-3 px-3"
-              style={{
-                WebkitOverflowScrolling: "touch",
-                scrollbarWidth: "none",
-                msOverflowStyle: "none",
-              }}
-            >
-              <style>{`
-                .trending-scroll::-webkit-scrollbar {
-                  display: none;
-                }
-                @keyframes blink {
-                  0%, 49% { opacity: 1; }
-                  50%, 100% { opacity: 0; }
-                }
-                .rocket-blink {
-                  animation: blink 1s infinite;
-                }
-              `}</style>
-              <div className="flex gap-3 trending-scroll">
-                {getTrendingTokens().map((token) => (
-                  <div
-                    key={token.tokenAddress}
-                    onClick={() => handleTokenClick(token)}
-                    className="flex-shrink-0 w-[280px] bg-gray-900 rounded-lg overflow-hidden cursor-pointer hover:bg-gray-800 transition-colors"
-                  >
-                    {/* Token Image */}
-                    <div className="relative h-[140px] bg-gray-800">
-                      {token.logoUrl ? (
-                        <img
-                          src={token.logoUrl}
-                          alt={token.tokenSymbol}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.style.display = "none";
-                          }}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Circle className="w-16 h-16 text-blue-400" />
-                        </div>
-                      )}
-                      {/* Market cap overlay */}
-                      <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-[10px]">
-                        <span className="text-gray-400">market cap: </span>
-                        <span className="text-white font-bold">
-                          ${formatNumber(token.currentPrice * 1_000_000_000)}
-                        </span>
+      <div className="lg:hidden pb-28">
+        {/* Trending Section - Horizontal Scroll */}
+        <div className="bg-black">
+          <div className="flex items-center justify-between p-3">
+            <h2 className="text-white font-bold text-sm font-mono">
+              Now trending <span className="rocket-blink">🚀</span>
+            </h2>
+          </div>
+          <div
+            className="overflow-x-auto pb-3 px-3"
+            style={{
+              WebkitOverflowScrolling: "touch",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+            }}
+          >
+            <style>{`
+              .trending-scroll::-webkit-scrollbar {
+                display: none;
+              }
+              @keyframes blink {
+                0%, 49% { opacity: 1; }
+                50%, 100% { opacity: 0; }
+              }
+              .rocket-blink {
+                animation: blink 1s infinite;
+              }
+            `}</style>
+            <div className="flex gap-3 trending-scroll">
+              {getTrendingTokens().map((token) => (
+                <div
+                  key={token.tokenAddress}
+                  onClick={() => handleTokenClick(token)}
+                  className="flex-shrink-0 w-[280px] bg-gray-900 rounded-lg overflow-hidden cursor-pointer hover:bg-gray-800 transition-colors"
+                >
+                  {/* Token Image */}
+                  <div className="relative h-[140px] bg-gray-800">
+                    {token.logoUrl ? (
+                      <img
+                        src={token.logoUrl}
+                        alt={token.tokenSymbol}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Circle className="w-16 h-16 text-blue-400" />
                       </div>
-                    </div>
-                    {/* Token Info */}
-                    <div className="p-3">
-                      <div className="mb-1">
-                        <span className="text-white font-bold text-sm truncate font-mono">
-                          {token.tokenName && token.tokenName.length > 12
-                            ? `${token.tokenName.slice(0, 12)}...`
-                            : token.tokenName}
-                        </span>
-                      </div>
-                      {/* Deployer Info + Age */}
-                      <div className="flex items-center gap-1.5 mb-2">
-                        <img
-                          src={token.pfp || "/default-pfp-clear.png"}
-                          alt="Deployer"
-                          className="w-4 h-4 rounded-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.src = "/default-pfp-clear.png";
-                          }}
-                        />
-                        <a
-                          href={`/profile/${token.deployerAddress || ""}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-gray-400 text-[10px] truncate font-mono underline hover:text-white"
-                        >
-                          {token.username ||
-                            (token.deployerAddress
-                              ? formatAddress(token.deployerAddress)
-                              : "Unknown")}
-                        </a>
-                        <span className="text-gray-400 text-[10px]">•</span>
-                        <span className="text-gray-400 text-[10px]">
-                          {formatTokenAge(
-                            token.deploymentTimestamp || "",
-                            currentTime
-                          )}
-                        </span>
-                      </div>
-                      {/* Description */}
-                      {token.description && (
-                        <div className="text-gray-400 text-[10px] mb-2 line-clamp-2">
-                          {token.description}
-                        </div>
-                      )}
-                      <div className="text-gray-400 text-[11px] mb-2">
-                        <span className="text-orange-500">market cap: </span>
-                        <span className="text-white font-bold font-mono">
-                          ${formatNumber(token.currentPrice * 1_000_000_000)}
-                        </span>
-                      </div>
+                    )}
+                    {/* Market cap overlay */}
+                    <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-[10px]">
+                      <span className="text-gray-400">market cap: </span>
+                      <span className="text-white font-bold">
+                        ${formatNumber(token.currentPrice * 1_000_000_000)}
+                      </span>
                     </div>
                   </div>
-                ))}
-              </div>
+                  {/* Token Info */}
+                  <div className="p-3">
+                    <div className="mb-1">
+                      <span className="text-white font-bold text-sm truncate font-mono">
+                        {token.tokenName && token.tokenName.length > 12
+                          ? `${token.tokenName.slice(0, 12)}...`
+                          : token.tokenName}
+                      </span>
+                    </div>
+                    {/* Deployer Info + Age */}
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <img
+                        src={token.pfp || "/default-pfp-clear.png"}
+                        alt="Deployer"
+                        className="w-4 h-4 rounded-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = "/default-pfp-clear.png";
+                        }}
+                      />
+                      <a
+                        href={`/profile/${token.deployerAddress || ""}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-gray-400 text-[10px] truncate font-mono underline hover:text-white"
+                      >
+                        {token.username ||
+                          (token.deployerAddress
+                            ? formatAddress(token.deployerAddress)
+                            : "Unknown")}
+                      </a>
+                      <span className="text-gray-400 text-[10px]">•</span>
+                      <span className="text-gray-400 text-[10px]">
+                        {formatTokenAge(
+                          token.deploymentTimestamp || "",
+                          currentTime
+                        )}
+                      </span>
+                    </div>
+                    {/* Description */}
+                    {token.description && (
+                      <div className="text-gray-400 text-[10px] mb-2 line-clamp-2">
+                        {token.description}
+                      </div>
+                    )}
+                    <div className="text-gray-400 text-[11px] mb-2">
+                      <span className="text-orange-500">market cap: </span>
+                      <span className="text-white font-bold font-mono">
+                        ${formatNumber(token.currentPrice * 1_000_000_000)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
+        </div>
 
-          {/* View Toggle and Filter Buttons - Sticky at Top */}
-          <div 
-            ref={stickyRowRef}
-            className="sticky top-0 z-20 bg-black px-3 py-2 flex gap-2 items-center overflow-x-auto scrollbar-hide"
-          >
+        {/* View Toggle and Filter Buttons - Sticky at Top */}
+        <div 
+          ref={stickyRowRef}
+          className="sticky top-0 z-20 bg-black px-3 py-2 flex gap-2 items-center overflow-x-auto scrollbar-hide"
+        >
             {/* View Toggle Buttons */}
             <button
               onClick={() => handleViewModeChange("card")}
@@ -607,7 +586,7 @@ export function MarketsDashboard() {
                 className={`flex-shrink-0 p-2 rounded transition-all duration-300 font-mono ${
                   isFiltersExpanded
                     ? "bg-orange-500 text-black"
-                    : "bg-orange-500 text-black"
+                    : "bg-gray-900 text-gray-400"
                 }`}
               >
                 <Filter className="w-5 h-5" />
@@ -717,9 +696,9 @@ export function MarketsDashboard() {
                   LIQUIDITY
                 </button>
             </div>
-          </div>
+        </div>
 
-          {/* Token List/Grid */}
+        {/* Token List/Grid */}
           {isLoading ? (
             <div className="text-center p-8 text-gray-400">
               Loading tokens...
@@ -953,7 +932,6 @@ export function MarketsDashboard() {
               );
             })
           )}
-        </div>
 
         {/* Pagination Controls - Mobile */}
         {pagination && pagination.totalPages > 1 && (

@@ -75,7 +75,7 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen lg:min-h-screen mobile-viewport-fix bg-gray-950 text-gray-100">
       {/* Header */}
-      <header className="bg-black/95 backdrop-blur-sm sticky top-0 z-40">
+      <header className="bg-black/95 backdrop-blur-sm z-40">
         <div className="flex items-center justify-between px-3 sm:px-6 py-2 sm:py-4">
           {/* Mobile Layout */}
           <div className="md:hidden flex items-center space-x-2 flex-1 min-w-0">
@@ -162,13 +162,6 @@ export function Layout({ children }: LayoutProps) {
             </nav>
           </div>
 
-          {/* Mobile Search Icon - Right Side */}
-          <button
-            onClick={() => setIsSearchModalOpen(true)}
-            className="md:hidden p-2 rounded-md hover:bg-gray-800 text-orange-500 flex-shrink-0"
-          >
-            <Search className="w-5 h-5" />
-          </button>
           {/* Desktop Right Side */}
           <div className="hidden md:flex items-center space-x-2 sm:space-x-4 text-sm">
             <ProfileDisplay />
@@ -238,17 +231,13 @@ export function Layout({ children }: LayoutProps) {
             <Rocket className="w-5 h-5 mb-1" />
             <span className="text-[10px] font-mono">Launchpad</span>
           </Link>
-          <Link
-            to="/leaderboard"
-            className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded transition-all duration-200 ${
-              location.pathname === "/leaderboard"
-                ? "text-orange-500"
-                : "text-gray-400"
-            }`}
+          <button
+            onClick={() => setIsSearchModalOpen(true)}
+            className="flex flex-col items-center justify-center flex-1 py-2 px-1 rounded transition-all duration-200 text-gray-400"
           >
-            <Trophy className="w-5 h-5 mb-1" />
-            <span className="text-[10px] font-mono">Leaderboard</span>
-          </Link>
+            <Search className="w-5 h-5 mb-1" />
+            <span className="text-[10px] font-mono">Search</span>
+          </button>
           <Link
             to="/profile"
             className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded transition-all duration-200 ${
