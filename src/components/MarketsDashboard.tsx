@@ -365,15 +365,15 @@ export function MarketsDashboard() {
 
   const filteredTokens = getFilteredTokens();
 
-  // Get top trending tokens based on volume and recent activity
+  // Get top trending tokens based on market cap
   const getTrendingTokens = () => {
     return tokens
       .slice()
       .sort((a, b) => {
-        // Sort by combination of 24h volume and price change
-        const scoreA = a.totalVolume * (1 + Math.abs(a.priceChange24h) / 100);
-        const scoreB = b.totalVolume * (1 + Math.abs(b.priceChange24h) / 100);
-        return scoreB - scoreA;
+        // Sort by market cap (price * supply)
+        const marketCapA = a.currentPrice * 1_000_000_000;
+        const marketCapB = b.currentPrice * 1_000_000_000;
+        return marketCapB - marketCapA;
       })
       .slice(0, 10); // Top 10 trending
   };
@@ -547,9 +547,24 @@ export function MarketsDashboard() {
                       <span className="text-orange-400">MC: </span>
                       <span className="text-white font-semibold">${formatNumber(token.currentPrice * 1_000_000_000)}</span>
                     </div>
-                    <div className="text-gray-400 text-[10px]">
+                    <div className="text-gray-400 text-[10px] mb-2">
                       {formatTokenAge(token.deploymentTimestamp || "", currentTime)}
                     </div>
+                    {/* Progress Bar for Bonding Curve Tokens */}
+                    {!token.graduated && (
+                      <div className="w-full">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-gray-400 text-[10px]">Progress</span>
+                          <span className="text-white text-[10px] font-semibold">TODO%</span>
+                        </div>
+                        <div className="w-full bg-gray-800 rounded-full h-2">
+                          <div
+                            className="bg-purple-600 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${Math.floor(Math.random() * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
