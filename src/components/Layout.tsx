@@ -6,14 +6,11 @@ import {
   TrendingUp,
   Rocket,
   Trophy,
-  Menu,
-  X,
   LogOut,
   Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ConnectWallet } from "./ConnectWallet";
-import { MobileNav } from "./MobileNav";
 import SearchBar from "./SearchBar";
 import { SearchModal } from "./SearchModal";
 import GlobalClock from "./GlobalClock";
@@ -35,7 +32,6 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   const location = useLocation();
-  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
   const { disconnect } = useDisconnect();
@@ -82,16 +78,7 @@ export function Layout({ children }: LayoutProps) {
         <div className="flex items-center justify-between px-3 sm:px-6 py-2 sm:py-4">
           {/* Mobile Layout */}
           <div className="md:hidden flex items-center space-x-2 flex-1 min-w-0">
-            <button
-              onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
-              className="p-2 rounded-md hover:bg-gray-800 flex-shrink-0"
-            >
-              {isMobileNavOpen ? (
-                <X className="w-6 h-6" />
-              ) : (
-                <Menu className="w-6 h-6" />
-              )}
-            </button>
+            {/* Hamburger menu removed - navigation now at bottom */}
             <Link to="/" className={`flex-shrink-0 relative overflow-hidden transition-all duration-1000 ease-in-out ${
               isHeaderCollapsed ? 'w-8' : 'w-32'
             }`}>
@@ -197,12 +184,7 @@ export function Layout({ children }: LayoutProps) {
             )}
           </div>
         </div>
-        <MobileNav
-          isOpen={isMobileNavOpen}
-          navItems={navItems}
-          location={location}
-          onClose={() => setIsMobileNavOpen(false)}
-        />
+        {/* MobileNav removed - navigation now at bottom on mobile */}
         {/* Desktop: Show GlobalClock below header */}
         <div className="hidden md:block">
           <GlobalClock />

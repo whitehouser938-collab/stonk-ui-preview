@@ -6,9 +6,13 @@ import {
   ChevronUp,
   LayoutGrid,
   List,
+  BarChart,
+  Rocket,
+  Trophy,
+  User,
 } from "lucide-react";
 import { getAllTokens } from "@/api/token";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams, Link, useLocation } from "react-router-dom";
 import { Chain, TokenMarketOverview } from "@/types";
 import { useMarketsUpdates } from "@/hooks/useMarketsUpdate";
 import { useWatchlist } from "@/hooks/useWatchlist";
@@ -181,6 +185,7 @@ export function MarketsDashboard() {
   const { chainId } = useParams<{
     chainId: Chain;
   }>();
+  const location = useLocation();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [tokens, setTokens] = useState<TokenMarketOverview[]>([]);
   const [bondingCurveVolumeData, setBondingCurveVolumeData] = useState<any[]>(
@@ -432,7 +437,7 @@ export function MarketsDashboard() {
       >
         {/* Scrollable Container - includes trending and tokens */}
         <div
-          className="flex-1 overflow-y-auto pb-[72px] bg-black"
+          className="flex-1 overflow-y-auto pb-[64px] bg-black"
           style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
         >
           {/* Trending Section - Horizontal Scroll */}
@@ -549,11 +554,12 @@ export function MarketsDashboard() {
             </div>
           </div>
 
-          {/* View Toggle */}
-          <div className="bg-black px-3 py-2 flex gap-2">
+          {/* View Toggle and Filter Buttons */}
+          <div className="bg-black px-3 py-2 flex gap-2 items-center overflow-x-auto scrollbar-hide">
+            {/* View Toggle Buttons */}
             <button
               onClick={() => handleViewModeChange("card")}
-              className={`p-2 rounded transition-colors font-mono ${
+              className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                 viewMode === "card"
                   ? "bg-orange-500 text-black"
                   : "bg-gray-900 text-gray-400"
@@ -563,13 +569,84 @@ export function MarketsDashboard() {
             </button>
             <button
               onClick={() => handleViewModeChange("list")}
-              className={`p-2 rounded transition-colors font-mono ${
+              className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                 viewMode === "list"
                   ? "bg-orange-500 text-black"
                   : "bg-gray-900 text-gray-400"
               }`}
             >
               <List className="w-5 h-5" />
+            </button>
+            {/* Filter Buttons - Horizontally Scrollable */}
+            <button
+              onClick={() => setActiveFilter("age")}
+              className={`flex-shrink-0 p-2 rounded transition-colors font-mono text-xs ${
+                activeFilter === "age"
+                  ? "bg-orange-500 text-black"
+                  : "bg-gray-900 text-gray-400"
+              }`}
+            >
+              AGE
+            </button>
+            <button
+              onClick={() => setActiveFilter("last_comment")}
+              className={`flex-shrink-0 p-2 rounded transition-colors font-mono text-xs ${
+                activeFilter === "last_comment"
+                  ? "bg-orange-500 text-black"
+                  : "bg-gray-900 text-gray-400"
+              }`}
+            >
+              LAST COMMENT
+            </button>
+            <button
+              onClick={() => setActiveFilter("last_trade")}
+              className={`flex-shrink-0 p-2 rounded transition-colors font-mono text-xs ${
+                activeFilter === "last_trade"
+                  ? "bg-orange-500 text-black"
+                  : "bg-gray-900 text-gray-400"
+              }`}
+            >
+              LAST TRADE
+            </button>
+            <button
+              onClick={() => setActiveFilter("new")}
+              className={`flex-shrink-0 p-2 rounded transition-colors font-mono text-xs ${
+                activeFilter === "new"
+                  ? "bg-orange-500 text-black"
+                  : "bg-gray-900 text-gray-400"
+              }`}
+            >
+              NEW
+            </button>
+            <button
+              onClick={() => setActiveFilter("graduated")}
+              className={`flex-shrink-0 p-2 rounded transition-colors font-mono text-xs ${
+                activeFilter === "graduated"
+                  ? "bg-orange-500 text-black"
+                  : "bg-gray-900 text-gray-400"
+              }`}
+            >
+              GRADUATED
+            </button>
+            <button
+              onClick={() => setActiveFilter("market_cap")}
+              className={`flex-shrink-0 p-2 rounded transition-colors font-mono text-xs ${
+                activeFilter === "market_cap"
+                  ? "bg-orange-500 text-black"
+                  : "bg-gray-900 text-gray-400"
+              }`}
+            >
+              MARKET CAP
+            </button>
+            <button
+              onClick={() => setActiveFilter("liquidity")}
+              className={`flex-shrink-0 p-2 rounded transition-colors font-mono text-xs ${
+                activeFilter === "liquidity"
+                  ? "bg-orange-500 text-black"
+                  : "bg-gray-900 text-gray-400"
+              }`}
+            >
+              LIQUIDITY
             </button>
           </div>
 
@@ -811,7 +888,7 @@ export function MarketsDashboard() {
 
         {/* Pagination Controls - Mobile */}
         {pagination && pagination.totalPages > 1 && (
-          <div className="bg-black p-3 pb-24 lg:pb-3">
+          <div className="bg-black p-3 pb-20 lg:pb-3">
             <div className="flex items-center justify-between">
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
@@ -846,79 +923,64 @@ export function MarketsDashboard() {
           </div>
         )}
 
-        {/* Filter Tabs - Fixed at Bottom */}
-        <div className="fixed bottom-0 left-0 right-0 bg-black p-4 z-30 lg:hidden">
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-            <button
-              onClick={() => setActiveFilter("age")}
-              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded font-mono ${
-                activeFilter === "age"
-                  ? "bg-orange-500 text-black"
-                  : "bg-gray-900 text-gray-400"
+        {/* Bottom Navigation - Mobile Only */}
+        <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 p-2 z-30 lg:hidden">
+          <div className="flex items-center justify-around gap-1">
+            <Link
+              to="/"
+              className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded transition-all duration-200 ${
+                location.pathname === "/" || location.pathname.match(/^\/[A-Z]+$/)
+                  ? "text-orange-500"
+                  : "text-gray-400"
               }`}
             >
-              AGE
-            </button>
-            <button
-              onClick={() => setActiveFilter("last_comment")}
-              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded font-mono ${
-                activeFilter === "last_comment"
-                  ? "bg-orange-500 text-black"
-                  : "bg-gray-900 text-gray-400"
+              <BarChart className="w-5 h-5 mb-1" />
+              <span className="text-[10px] font-mono">Markets</span>
+            </Link>
+            <Link
+              to="/research"
+              className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded transition-all duration-200 ${
+                location.pathname === "/research"
+                  ? "text-orange-500"
+                  : "text-gray-400"
               }`}
             >
-              LAST COMMENT
-            </button>
-            <button
-              onClick={() => setActiveFilter("last_trade")}
-              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded font-mono ${
-                activeFilter === "last_trade"
-                  ? "bg-orange-500 text-black"
-                  : "bg-gray-900 text-gray-400"
+              <Star className="w-5 h-5 mb-1" />
+              <span className="text-[10px] font-mono">Watchlist</span>
+            </Link>
+            <Link
+              to="/launchpad"
+              className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded transition-all duration-200 ${
+                location.pathname === "/launchpad"
+                  ? "text-orange-500"
+                  : "text-gray-400"
               }`}
             >
-              LAST TRADE
-            </button>
-            <button
-              onClick={() => setActiveFilter("new")}
-              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded font-mono ${
-                activeFilter === "new"
-                  ? "bg-orange-500 text-black"
-                  : "bg-gray-900 text-gray-400"
+              <Rocket className="w-5 h-5 mb-1" />
+              <span className="text-[10px] font-mono">Launchpad</span>
+            </Link>
+            <Link
+              to="/leaderboard"
+              className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded transition-all duration-200 ${
+                location.pathname === "/leaderboard"
+                  ? "text-orange-500"
+                  : "text-gray-400"
               }`}
             >
-              NEW
-            </button>
-            <button
-              onClick={() => setActiveFilter("graduated")}
-              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded font-mono ${
-                activeFilter === "graduated"
-                  ? "bg-orange-500 text-black"
-                  : "bg-gray-900 text-gray-400"
+              <Trophy className="w-5 h-5 mb-1" />
+              <span className="text-[10px] font-mono">Leaderboard</span>
+            </Link>
+            <Link
+              to="/profile"
+              className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded transition-all duration-200 ${
+                location.pathname === "/profile" || location.pathname.startsWith("/profile/")
+                  ? "text-orange-500"
+                  : "text-gray-400"
               }`}
             >
-              GRADUATED
-            </button>
-            <button
-              onClick={() => setActiveFilter("market_cap")}
-              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded font-mono ${
-                activeFilter === "market_cap"
-                  ? "bg-orange-500 text-black"
-                  : "bg-gray-900 text-gray-400"
-              }`}
-            >
-              MARKET CAP
-            </button>
-            <button
-              onClick={() => setActiveFilter("liquidity")}
-              className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded font-mono ${
-                activeFilter === "liquidity"
-                  ? "bg-orange-500 text-black"
-                  : "bg-gray-900 text-gray-400"
-              }`}
-            >
-              LIQUIDITY
-            </button>
+              <User className="w-5 h-5 mb-1" />
+              <span className="text-[10px] font-mono">Profile</span>
+            </Link>
           </div>
         </div>
       </div>
