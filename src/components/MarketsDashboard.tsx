@@ -679,13 +679,15 @@ export function MarketsDashboard() {
                       </div>
                     )}
 
-                    {/* Market Cap */}
-                    <div className="text-gray-400 text-xs font-mono">
-                      <span className="text-orange-500">MC: </span>
-                      <span className="text-white font-semibold">
-                        ${formatNumber(token.currentPrice * 1_000_000_000)}
-                      </span>
-                    </div>
+                    {/* Market Cap - Only for Graduated Tokens */}
+                    {token.graduated && (
+                      <div className="text-gray-400 text-xs font-mono">
+                        <span className="text-orange-500">MC: </span>
+                        <span className="text-white font-semibold">
+                          ${formatNumber(token.currentPrice * 1_000_000_000)}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
