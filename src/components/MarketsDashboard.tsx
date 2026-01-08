@@ -9,6 +9,8 @@ import {
   LayoutGrid,
   List,
   Filter,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { getAllTokens } from "@/api/token";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -490,12 +492,28 @@ export function MarketsDashboard() {
                         <Circle className="w-16 h-16 text-blue-400" />
                       </div>
                     )}
-                    {/* Market cap overlay */}
-                    <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-[10px]">
-                      <span className="text-gray-400">market cap: </span>
-                      <span className="text-white font-bold">
-                        ${formatNumber(token.currentPrice * 1_000_000_000)}
-                      </span>
+                    {/* Volume and Price Change overlay */}
+                    <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-[10px] flex items-center gap-2">
+                      <div>
+                        <span className="text-gray-400">vol: </span>
+                        <span className="text-white font-bold">
+                          ${formatNumber((token.buyVolume1h || 0) + (token.sellVolume1h || 0))}
+                        </span>
+                      </div>
+                      {token.priceChange1h !== undefined && token.priceChange1h !== null && (
+                        <div className={`flex items-center gap-0.5 ${
+                          token.priceChange1h >= 0 ? "text-green-400" : "text-red-400"
+                        }`}>
+                          {token.priceChange1h >= 0 ? (
+                            <ArrowUp className="w-3 h-3" />
+                          ) : (
+                            <ArrowDown className="w-3 h-3" />
+                          )}
+                          <span className="font-bold">
+                            {token.priceChange1h >= 0 ? "+" : ""}{token.priceChange1h.toFixed(2)}%
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                   {/* Token Info */}
