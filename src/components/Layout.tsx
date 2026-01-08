@@ -208,61 +208,56 @@ export function Layout({ children }: LayoutProps) {
       <SearchModal isOpen={isSearchModalOpen} onClose={() => setIsSearchModalOpen(false)} />
 
       {/* Main Content */}
-      <main className="p-0 sm:p-6 pb-20 lg:pb-6">{children}</main>
+      <main className="p-0 sm:p-6 pb-14 lg:pb-6">{children}</main>
 
       {/* Bottom Navigation - Mobile Only */}
-      <div className="fixed bottom-0 left-0 right-0 bg-bg-footer p-2 z-30 lg:hidden safe-area-inset-bottom">
+      <div className="fixed bottom-0 left-0 right-0 bg-bg-footer p-1.5 z-30 lg:hidden safe-area-inset-bottom">
         <div className="flex items-center justify-around gap-1">
           <Link
             to="/"
-            className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded transition-all duration-200 ${
+            className={`flex items-center justify-center flex-1 py-1.5 px-1 rounded transition-all duration-200 ${
               location.pathname === "/" || location.pathname.match(/^\/[A-Z]+$/)
                 ? "text-orange-500"
                 : "text-gray-400"
             }`}
           >
-            <BarChart className="w-5 h-5 mb-1" />
-            <span className="text-[10px] font-mono">Markets</span>
+            <BarChart className="w-5 h-5" />
           </Link>
           <Link
             to="/research"
-            className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded transition-all duration-200 ${
+            className={`flex items-center justify-center flex-1 py-1.5 px-1 rounded transition-all duration-200 ${
               location.pathname === "/research"
                 ? "text-orange-500"
                 : "text-gray-400"
             }`}
           >
-            <Star className="w-5 h-5 mb-1" />
-            <span className="text-[10px] font-mono">Watchlist</span>
+            <Star className="w-5 h-5" />
           </Link>
           <Link
             to="/launchpad"
-            className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded transition-all duration-200 ${
+            className={`flex items-center justify-center flex-1 py-1.5 px-1 rounded transition-all duration-200 ${
               location.pathname === "/launchpad"
                 ? "text-orange-500"
                 : "text-gray-400"
             }`}
           >
-            <Rocket className="w-5 h-5 mb-1" />
-            <span className="text-[10px] font-mono">Launchpad</span>
+            <Rocket className="w-5 h-5" />
           </Link>
           <button
             onClick={() => setIsSearchModalOpen(true)}
-            className="flex flex-col items-center justify-center flex-1 py-2 px-1 rounded transition-all duration-200 text-gray-400"
+            className="flex items-center justify-center flex-1 py-1.5 px-1 rounded transition-all duration-200 text-gray-400"
           >
-            <Search className="w-5 h-5 mb-1" />
-            <span className="text-[10px] font-mono">Search</span>
+            <Search className="w-5 h-5" />
           </button>
           <Link
             to="/profile"
-            className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded transition-all duration-200 ${
+            className={`flex items-center justify-center flex-1 py-1.5 px-1 rounded transition-all duration-200 ${
               location.pathname === "/profile" || location.pathname.startsWith("/profile/")
                 ? "text-orange-500"
                 : "text-gray-400"
             }`}
           >
-            <User className="w-5 h-5 mb-1" />
-            <span className="text-[10px] font-mono">Profile</span>
+            <User className="w-5 h-5" />
           </Link>
         </div>
       </div>
