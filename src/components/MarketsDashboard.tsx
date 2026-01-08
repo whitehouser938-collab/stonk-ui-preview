@@ -417,8 +417,19 @@ export function MarketsDashboard() {
                     </div>
                     {/* Token Info */}
                     <div className="p-3">
-                      <div className="text-white font-bold text-sm mb-1">
-                        {token.tokenName}
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="text-white font-bold text-sm truncate">
+                          {token.tokenName}
+                        </span>
+                        {token.graduated ? (
+                          <span className="bg-green-600 text-white px-1 py-0.5 rounded text-[9px] flex-shrink-0">
+                            GRAD
+                          </span>
+                        ) : (
+                          <span className="bg-purple-600 text-white px-1 py-0.5 rounded text-[9px] flex-shrink-0">
+                            BOND
+                          </span>
+                        )}
                       </div>
                       <div className="text-gray-400 text-[11px] mb-2">
                         <span className="text-orange-400">market cap: </span>
@@ -492,8 +503,19 @@ export function MarketsDashboard() {
 
                   {/* Token Info - Right Side */}
                   <div className="flex-1 min-w-0 flex flex-col justify-center">
-                    <div className="text-white font-bold text-sm mb-1 truncate">
-                      {token.tokenName}
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="text-white font-bold text-sm truncate">
+                        {token.tokenName}
+                      </span>
+                      {token.graduated ? (
+                        <span className="bg-green-600 text-white px-1 py-0.5 rounded text-[9px] flex-shrink-0">
+                          GRAD
+                        </span>
+                      ) : (
+                        <span className="bg-purple-600 text-white px-1 py-0.5 rounded text-[9px] flex-shrink-0">
+                          BOND
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-1.5 mb-2">
                       {token.logoUrl ? (
