@@ -383,7 +383,7 @@ export function MarketsDashboard() {
       {/* MOBILE VIEW */}
       <div className="lg:hidden fixed inset-0 flex flex-col" style={{ top: headerHeight }}>
         {/* Scrollable Container - includes trending and tokens */}
-        <div className="flex-1 overflow-y-auto pb-[72px]" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
+        <div className="flex-1 overflow-y-auto pb-[72px] bg-black" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
           {/* Trending Section - Horizontal Scroll */}
           <div className="bg-black">
             <div className="flex items-center justify-between p-3">
@@ -485,7 +485,7 @@ export function MarketsDashboard() {
             <div className="text-center p-8 text-gray-400">No tokens found</div>
           ) : viewMode === "card" ? (
             /* Card Grid View */
-            <div className="grid grid-cols-1 gap-3 p-3">
+            <div className="grid grid-cols-1 gap-3 p-3 bg-black">
               {filteredTokens.map((token) => (
                 <div
                   key={token.tokenAddress}
