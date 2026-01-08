@@ -373,67 +373,8 @@ export function MarketsDashboard() {
     <div className="bg-black text-gray-100 text-xs font-mono">
       {/* MOBILE VIEW */}
       <div className="lg:hidden fixed inset-0 flex flex-col" style={{ top: headerHeight }}>
-        {/* Trending Section - Horizontal Scroll */}
-        <div className="bg-black">
-          <div className="flex items-center justify-between p-3">
-            <h2 className="text-white font-bold text-sm">Now trending</h2>
-          </div>
-          <div className="overflow-x-auto pb-3 px-3" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-            <style>{`
-              .trending-scroll::-webkit-scrollbar {
-                display: none;
-              }
-            `}</style>
-            <div className="flex gap-3 trending-scroll">
-              {getTrendingTokens().map((token) => (
-                <div
-                  key={token.tokenAddress}
-                  onClick={() => handleTokenClick(token)}
-                  className="flex-shrink-0 w-[280px] bg-gray-900 rounded-lg overflow-hidden cursor-pointer hover:bg-gray-800 transition-colors"
-                >
-                  {/* Token Image */}
-                  <div className="relative h-[140px] bg-gray-800">
-                    {token.logoUrl ? (
-                      <img
-                        src={token.logoUrl}
-                        alt={token.tokenSymbol}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none";
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Circle className="w-16 h-16 text-blue-400" />
-                      </div>
-                    )}
-                    {/* Market cap overlay */}
-                    <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-[10px]">
-                      <span className="text-gray-400">market cap: </span>
-                      <span className="text-white font-bold">${formatNumber(token.currentPrice * 1_000_000_000)}</span>
-                    </div>
-                  </div>
-                  {/* Token Info */}
-                  <div className="p-3">
-                    <div className="text-white font-bold text-sm mb-1">
-                      {token.tokenName}
-                    </div>
-                    <div className="text-gray-400 text-[11px] mb-2">
-                      <span className="text-orange-400">market cap: </span>
-                      <span className="text-white font-bold">${formatNumber(token.currentPrice * 1_000_000_000)}</span>
-                    </div>
-                    <div className="text-gray-400 text-[10px]">
-                      {token.tokenSymbol} • {formatTokenAge(token.deploymentTimestamp || "", currentTime)}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* View Toggle */}
-        <div className="bg-black px-3 py-2 flex gap-2">
+        {/* View Toggle - Fixed */}
+        <div className="bg-black px-3 py-2 flex gap-2 border-b border-gray-800">
           <button
             onClick={() => setViewMode("card")}
             className={`p-2 rounded transition-colors ${
@@ -456,44 +397,105 @@ export function MarketsDashboard() {
           </button>
         </div>
 
-        {/* Token List/Grid - Scrollable Container */}
+        {/* Scrollable Container - includes trending and tokens */}
         <div className="flex-1 overflow-y-auto pb-[72px]" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
+          {/* Trending Section - Horizontal Scroll */}
+          <div className="bg-black">
+            <div className="flex items-center justify-between p-3">
+              <h2 className="text-white font-bold text-sm">Now trending</h2>
+            </div>
+            <div className="overflow-x-auto pb-3 px-3" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              <style>{`
+                .trending-scroll::-webkit-scrollbar {
+                  display: none;
+                }
+              `}</style>
+              <div className="flex gap-3 trending-scroll">
+                {getTrendingTokens().map((token) => (
+                  <div
+                    key={token.tokenAddress}
+                    onClick={() => handleTokenClick(token)}
+                    className="flex-shrink-0 w-[280px] bg-gray-900 rounded-lg overflow-hidden cursor-pointer hover:bg-gray-800 transition-colors"
+                  >
+                    {/* Token Image */}
+                    <div className="relative h-[140px] bg-gray-800">
+                      {token.logoUrl ? (
+                        <img
+                          src={token.logoUrl}
+                          alt={token.tokenSymbol}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Circle className="w-16 h-16 text-blue-400" />
+                        </div>
+                      )}
+                      {/* Market cap overlay */}
+                      <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-[10px]">
+                        <span className="text-gray-400">market cap: </span>
+                        <span className="text-white font-bold">${formatNumber(token.currentPrice * 1_000_000_000)}</span>
+                      </div>
+                    </div>
+                    {/* Token Info */}
+                    <div className="p-3">
+                      <div className="text-white font-bold text-sm mb-1">
+                        {token.tokenName}
+                      </div>
+                      <div className="text-gray-400 text-[11px] mb-2">
+                        <span className="text-orange-400">market cap: </span>
+                        <span className="text-white font-bold">${formatNumber(token.currentPrice * 1_000_000_000)}</span>
+                      </div>
+                      <div className="text-gray-400 text-[10px]">
+                        {token.tokenSymbol} • {formatTokenAge(token.deploymentTimestamp || "", currentTime)}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Token List/Grid */}
           {isLoading ? (
             <div className="text-center p-8 text-gray-400">Loading tokens...</div>
           ) : filteredTokens.length === 0 ? (
             <div className="text-center p-8 text-gray-400">No tokens found</div>
           ) : viewMode === "card" ? (
             /* Card Grid View */
-            <div className="grid grid-cols-2 gap-3 p-3">
+            <div className="grid grid-cols-1 gap-3 p-3">
               {filteredTokens.map((token) => (
                 <div
                   key={token.tokenAddress}
                   onClick={() => handleTokenClick(token)}
-                  className="bg-gray-900 rounded-lg overflow-hidden cursor-pointer hover:bg-gray-800 transition-colors"
+                  className="bg-gray-900 rounded-lg p-3 cursor-pointer hover:bg-gray-800 transition-colors flex gap-3"
                 >
-                  {/* Token Image */}
-                  <div className="relative h-[120px] bg-gray-800">
+                  {/* Token Image - Left Side */}
+                  <div className="flex-shrink-0">
                     {token.logoUrl ? (
                       <img
                         src={token.logoUrl}
                         alt={token.tokenSymbol}
-                        className="w-full h-full object-cover"
+                        className="w-20 h-20 rounded-lg object-cover"
                         onError={(e) => {
                           e.currentTarget.style.display = "none";
                         }}
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Circle className="w-12 h-12 text-blue-400" />
+                      <div className="w-20 h-20 rounded-lg bg-gray-800 flex items-center justify-center">
+                        <Circle className="w-10 h-10 text-blue-400" />
                       </div>
                     )}
                   </div>
-                  {/* Token Info */}
-                  <div className="p-2">
-                    <div className="text-white font-bold text-xs mb-1 truncate">
+
+                  {/* Token Info - Right Side */}
+                  <div className="flex-1 min-w-0 flex flex-col justify-center">
+                    <div className="text-white font-bold text-sm mb-1 truncate">
                       {token.tokenName}
                     </div>
-                    <div className="flex items-center gap-1 mb-1">
+                    <div className="flex items-center gap-1.5 mb-2">
                       {token.logoUrl ? (
                         <img
                           src={token.logoUrl}
@@ -510,11 +512,11 @@ export function MarketsDashboard() {
                         {token.tokenSymbol}
                       </span>
                     </div>
-                    <div className="text-gray-400 text-[10px] mb-1">
+                    <div className="text-gray-400 text-xs mb-1">
                       <span className="text-orange-400">MC: </span>
-                      <span className="text-white">${formatNumber(token.currentPrice * 1_000_000_000)}</span>
+                      <span className="text-white font-semibold">${formatNumber(token.currentPrice * 1_000_000_000)}</span>
                     </div>
-                    <div className="text-gray-400 text-[9px]">
+                    <div className="text-gray-400 text-[10px]">
                       {formatTokenAge(token.deploymentTimestamp || "", currentTime)}
                     </div>
                   </div>
