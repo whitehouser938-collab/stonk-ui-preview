@@ -360,7 +360,7 @@ export function MarketsDashboard() {
       {/* MOBILE VIEW */}
       <div className="lg:hidden fixed inset-0 flex flex-col" style={{ top: headerHeight }}>
         {/* Token List - Scrollable Container */}
-        <div className="flex-1 overflow-y-auto pb-[72px]">
+        <div className="flex-1 overflow-y-auto pb-[72px]" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
           {isLoading ? (
             <div className="text-center p-8 text-gray-400">Loading tokens...</div>
           ) : filteredTokens.length === 0 ? (
@@ -373,8 +373,9 @@ export function MarketsDashboard() {
               return (
                 <div
                   key={token.tokenAddress}
-                  className="bg-black rounded-lg p-2.5 cursor-pointer active:bg-gray-800 transition-colors"
+                  className="bg-black rounded-lg p-2.5 cursor-pointer hover:bg-gray-900 transition-colors"
                   onClick={() => handleTokenClick(token)}
+                  style={{ touchAction: 'manipulation' }}
                 >
                   {/* Single row with logo and all content */}
                   <div className="flex items-center justify-between">
