@@ -607,10 +607,7 @@ export function MarketsDashboard() {
               }}
             >
                 <button
-                  onClick={() => {
-                    setActiveFilter("age");
-                    if (isStickyRowActive) setIsFiltersExpanded(false);
-                  }}
+                  onClick={() => setActiveFilter("age")}
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "age"
                       ? "bg-orange-500 text-black"
@@ -620,10 +617,7 @@ export function MarketsDashboard() {
                   AGE
                 </button>
                 <button
-                  onClick={() => {
-                    setActiveFilter("last_comment");
-                    if (isStickyRowActive) setIsFiltersExpanded(false);
-                  }}
+                  onClick={() => setActiveFilter("last_comment")}
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "last_comment"
                       ? "bg-orange-500 text-black"
@@ -633,10 +627,7 @@ export function MarketsDashboard() {
                   LAST COMMENT
                 </button>
                 <button
-                  onClick={() => {
-                    setActiveFilter("last_trade");
-                    if (isStickyRowActive) setIsFiltersExpanded(false);
-                  }}
+                  onClick={() => setActiveFilter("last_trade")}
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "last_trade"
                       ? "bg-orange-500 text-black"
@@ -646,10 +637,7 @@ export function MarketsDashboard() {
                   LAST TRADE
                 </button>
                 <button
-                  onClick={() => {
-                    setActiveFilter("new");
-                    if (isStickyRowActive) setIsFiltersExpanded(false);
-                  }}
+                  onClick={() => setActiveFilter("new")}
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "new"
                       ? "bg-orange-500 text-black"
@@ -659,10 +647,7 @@ export function MarketsDashboard() {
                   NEW
                 </button>
                 <button
-                  onClick={() => {
-                    setActiveFilter("graduated");
-                    if (isStickyRowActive) setIsFiltersExpanded(false);
-                  }}
+                  onClick={() => setActiveFilter("graduated")}
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "graduated"
                       ? "bg-orange-500 text-black"
@@ -672,10 +657,7 @@ export function MarketsDashboard() {
                   GRADUATED
                 </button>
                 <button
-                  onClick={() => {
-                    setActiveFilter("market_cap");
-                    if (isStickyRowActive) setIsFiltersExpanded(false);
-                  }}
+                  onClick={() => setActiveFilter("market_cap")}
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "market_cap"
                       ? "bg-orange-500 text-black"
@@ -685,10 +667,7 @@ export function MarketsDashboard() {
                   MARKET CAP
                 </button>
                 <button
-                  onClick={() => {
-                    setActiveFilter("liquidity");
-                    if (isStickyRowActive) setIsFiltersExpanded(false);
-                  }}
+                  onClick={() => setActiveFilter("liquidity")}
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "liquidity"
                       ? "bg-orange-500 text-black"
