@@ -502,7 +502,7 @@ export function MarketsDashboard() {
                             : token.tokenName}
                         </span>
                       </div>
-                      {/* Deployer Info */}
+                      {/* Deployer Info + Age */}
                       <div className="flex items-center gap-1.5 mb-2">
                         <img
                           src={token.pfp || "/default-pfp-clear.png"}
@@ -522,6 +522,13 @@ export function MarketsDashboard() {
                               ? formatAddress(token.deployerAddress)
                               : "Unknown")}
                         </a>
+                        <span className="text-gray-400 text-[10px]">•</span>
+                        <span className="text-gray-400 text-[10px]">
+                          {formatTokenAge(
+                            token.deploymentTimestamp || "",
+                            currentTime
+                          )}
+                        </span>
                       </div>
                       {/* Description */}
                       {token.description && (
@@ -534,12 +541,6 @@ export function MarketsDashboard() {
                         <span className="text-white font-bold font-mono">
                           ${formatNumber(token.currentPrice * 1_000_000_000)}
                         </span>
-                      </div>
-                      <div className="text-gray-400 text-[10px] font-mono">
-                        {formatTokenAge(
-                          token.deploymentTimestamp || "",
-                          currentTime
-                        )}
                       </div>
                     </div>
                   </div>
@@ -673,10 +674,18 @@ export function MarketsDashboard() {
 
                     {/* Description */}
                     {token.description && (
-                      <div className="text-gray-400 text-[10px] line-clamp-2">
+                      <div className="text-gray-400 text-[10px] mb-2 line-clamp-2">
                         {token.description}
                       </div>
                     )}
+
+                    {/* Market Cap */}
+                    <div className="text-gray-400 text-xs font-mono">
+                      <span className="text-orange-500">MC: </span>
+                      <span className="text-white font-semibold">
+                        ${formatNumber(token.currentPrice * 1_000_000_000)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               ))}
