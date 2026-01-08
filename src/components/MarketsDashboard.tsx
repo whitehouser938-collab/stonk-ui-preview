@@ -786,9 +786,9 @@ export function MarketsDashboard() {
                             TODO%
                           </span>
                         </div>
-                        <div className="w-full bg-gray-800 rounded-full h-2">
+                        <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
                           <div
-                            className="bg-purple-600 h-2 rounded-full transition-all duration-300"
+                            className="progress-bar-glow h-2 rounded-full transition-all duration-300"
                             style={{
                               width: `${Math.floor(Math.random() * 100)}%`,
                             }}
