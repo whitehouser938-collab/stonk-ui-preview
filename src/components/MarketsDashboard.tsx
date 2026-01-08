@@ -200,7 +200,6 @@ export function MarketsDashboard() {
   const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
   const [isStickyRowActive, setIsStickyRowActive] = useState(false);
   const stickyRowRef = useRef<HTMLDivElement>(null);
-  const [isTrendingCollapsed, setIsTrendingCollapsed] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -217,14 +216,6 @@ export function MarketsDashboard() {
     }
   };
 
-
-  // Collapse trending text after 2 seconds on mobile (same timing as header collapse)
-  useEffect(() => {
-    const collapseTimer = setTimeout(() => {
-      setIsTrendingCollapsed(true);
-    }, 2000);
-    return () => clearTimeout(collapseTimer);
-  }, []);
 
   // Detect when sticky row becomes active (scrolled past initial position)
   useEffect(() => {
@@ -452,20 +443,8 @@ export function MarketsDashboard() {
         {/* Trending Section - Horizontal Scroll */}
         <div className="bg-black">
           <div className="flex items-center justify-between p-3">
-            <h2 className="text-white font-bold text-sm font-mono relative overflow-hidden h-6 flex items-center">
-              <span
-                className={`inline-block transition-all duration-1000 ease-in-out whitespace-nowrap ${
-                  isTrendingCollapsed
-                    ? "scale-x-0 opacity-0 max-w-0"
-                    : "scale-x-100 opacity-100 max-w-full"
-                }`}
-                style={{
-                  animation: !isTrendingCollapsed ? "shake 0.5s ease-in-out 1.5s" : "none",
-                }}
-              >
-                Now trending{" "}
-              </span>
-              <span className="rocket-blink inline-block">🚀</span>
+            <h2 className="text-white font-bold text-sm font-mono">
+              Now trending <span className="rocket-blink">🚀</span>
             </h2>
           </div>
           <div
