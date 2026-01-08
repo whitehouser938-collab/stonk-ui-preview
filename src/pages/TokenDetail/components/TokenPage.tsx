@@ -90,13 +90,15 @@ function getLiquidityWeth(tokenData: TokenFullData): string {
 // Helper function to calculate NYSE trading hours progress
 function getNYSETradingProgress(): {
   progress: number;
-  status: 'open' | 'closed' | 'pre-market' | 'after-hours';
+  status: "open" | "closed" | "pre-market" | "after-hours";
   isWeekend: boolean;
   label: string;
 } {
   // Get current time in ET timezone
   const now = new Date();
-  const etTimeString = now.toLocaleString('en-US', { timeZone: 'America/New_York' });
+  const etTimeString = now.toLocaleString("en-US", {
+    timeZone: "America/New_York",
+  });
   const etDate = new Date(etTimeString);
 
   const dayOfWeek = etDate.getDay(); // 0 = Sunday, 6 = Saturday
@@ -105,9 +107,9 @@ function getNYSETradingProgress(): {
   if (isWeekend) {
     return {
       progress: 0,
-      status: 'closed',
+      status: "closed",
       isWeekend: true,
-      label: 'Market Closed (Weekend)'
+      label: "Market Closed (Weekend)",
     };
   }
 
@@ -129,9 +131,9 @@ function getNYSETradingProgress(): {
     const minutes = minutesUntilOpen % 60;
     return {
       progress: 0,
-      status: 'pre-market',
+      status: "pre-market",
       isWeekend: false,
-      label: `Pre-Market (Opens in ${hours}h ${minutes}m)`
+      label: `Pre-Market (Opens in ${hours}h ${minutes}m)`,
     };
   }
 
@@ -139,16 +141,19 @@ function getNYSETradingProgress(): {
   if (currentTime > closeTime) {
     return {
       progress: 100,
-      status: 'after-hours',
+      status: "after-hours",
       isWeekend: false,
-      label: 'After Hours'
+      label: "After Hours",
     };
   }
 
   // Market is open - calculate progress
   const totalTradingTime = closeTime - openTime;
   const elapsedTime = currentTime - openTime;
-  const progress = Math.min(100, Math.max(0, (elapsedTime / totalTradingTime) * 100));
+  const progress = Math.min(
+    100,
+    Math.max(0, (elapsedTime / totalTradingTime) * 100)
+  );
 
   const remainingTime = closeTime - currentTime;
   const hoursRemaining = Math.floor(remainingTime / 3600000);
@@ -156,9 +161,9 @@ function getNYSETradingProgress(): {
 
   return {
     progress,
-    status: 'open',
+    status: "open",
     isWeekend: false,
-    label: `Market Open (${hoursRemaining}h ${minutesRemaining}m remaining)`
+    label: `Market Open (${hoursRemaining}h ${minutesRemaining}m remaining)`,
   };
 }
 
@@ -173,7 +178,7 @@ const TokenPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
   const [isTradingModalOpen, setIsTradingModalOpen] = useState(false);
-  const [tradeMode, setTradeMode] = useState<'buy' | 'sell'>('buy');
+  const [tradeMode, setTradeMode] = useState<"buy" | "sell">("buy");
   const isMobile = useIsMobile();
 
   const { isLoading, startLoading, stopLoading } = useLoading();
@@ -187,7 +192,9 @@ const TokenPage = () => {
   const [hasMoreTrades, setHasMoreTrades] = useState(true);
   const [isFetchingMoreTrades, setIsFetchingMoreTrades] = useState(false);
   const [filteredTrader, setFilteredTrader] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"trades" | "holders" | "comments" | "info">("trades");
+  const [activeTab, setActiveTab] = useState<
+    "trades" | "holders" | "comments" | "info"
+  >("trades");
   const [holdersData, setHoldersData] = useState<TokenHolder[]>([]);
   const [holdersCount, setHoldersCount] = useState<number>(0);
   const [isLoadingHolders, setIsLoadingHolders] = useState(false);
@@ -199,7 +206,9 @@ const TokenPage = () => {
   );
 
   // NYSE trading hours progress
-  const [nyseTradingProgress, setNyseTradingProgress] = useState(getNYSETradingProgress());
+  const [nyseTradingProgress, setNyseTradingProgress] = useState(
+    getNYSETradingProgress()
+  );
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -657,7 +666,10 @@ const TokenPage = () => {
   const tradeRows = React.useMemo(
     () =>
       displayTrades.map((trade, idx) => (
-        <tr key={idx} className={isMobile ? "" : "border-b border-gray-800 last:border-0"}>
+        <tr
+          key={idx}
+          className={isMobile ? "" : "border-b border-gray-800 last:border-0"}
+        >
           <td className="p-1 text-white font-mono">
             <div className="flex items-center space-x-2">
               {trade.makerPfp && (
@@ -672,7 +684,7 @@ const TokenPage = () => {
               )}
               <button
                 onClick={() => navigate(`/profile/${trade.maker}`)}
-                className="hover:text-orange-400 underline text-left"
+                className="hover:text-orange-500 underline text-left"
               >
                 {trade.makerUsername || abbreviateAddress(trade.maker)}
               </button>
@@ -687,7 +699,7 @@ const TokenPage = () => {
               ) : (
                 <button
                   onClick={() => setFilteredTrader(trade.maker)}
-                  className="text-gray-400 hover:text-orange-400 transition-colors"
+                  className="text-gray-400 hover:text-orange-500 transition-colors"
                   title="Filter by this trader"
                 >
                   <Filter className="w-3 h-3" />
@@ -720,7 +732,7 @@ const TokenPage = () => {
               href={`${getExplorer(chainId)}/tx/${trade.transactionHash}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-orange-400"
+              className="hover:text-orange-500"
               title="View on Etherscan"
             >
               <ArrowUpRight className="w-4 h-4 inline" />
@@ -740,8 +752,8 @@ const TokenPage = () => {
         <div className="min-h-screen flex items-center justify-center p-4">
           <div className="bg-gray-900 border border-gray-700 p-8 max-w-md w-full text-center">
             <div className="mb-6">
-              <AlertTriangle className="w-16 h-16 text-orange-400 mx-auto mb-4" />
-              <h1 className="text-2xl font-bold text-orange-400 mb-2">
+              <AlertTriangle className="w-16 h-16 text-orange-500 mx-auto mb-4" />
+              <h1 className="text-2xl font-bold text-orange-500 mb-2">
                 Token Not Found
               </h1>
               <p className="text-gray-400 text-sm leading-relaxed">
@@ -754,7 +766,7 @@ const TokenPage = () => {
             <div className="space-y-3">
               <button
                 onClick={() => navigate("/")}
-                className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-orange-600 hover:bg-orange-700 text-black font-bold text-sm transition-all duration-200"
+                className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-orange-500 hover:bg-orange-600 text-black font-bold text-sm transition-all duration-200"
               >
                 <Home className="w-4 h-4" />
                 <span>Back to Homepage</span>
@@ -779,11 +791,19 @@ const TokenPage = () => {
 
       {/* Main Content - Only show if no error and token data exists */}
       {!error && tokenData && (
-        <div className={`grid grid-cols-1 lg:grid-cols-12 gap-1 p-1 ${isMobile ? 'pb-24' : ''}`}>
+        <div
+          className={`grid grid-cols-1 lg:grid-cols-12 gap-1 p-1 ${
+            isMobile ? "pb-24" : ""
+          }`}
+        >
           {/* Left Column - Stock Overview */}
           <div className="col-span-12 lg:col-span-8 space-y-1">
             {/* Stock Header */}
-            <div className={`${isMobile ? "bg-black" : "bg-gray-900 border border-gray-700"} p-2 overflow-hidden`}>
+            <div
+              className={`${
+                isMobile ? "bg-black" : "bg-gray-900 border border-gray-700"
+              } p-2 overflow-hidden`}
+            >
               {isMobile ? (
                 /* Mobile Layout - New Design */
                 <div className="space-y-3">
@@ -800,10 +820,12 @@ const TokenPage = () => {
 
                     {/* Address with Copy */}
                     <div
-                      className="flex items-center space-x-1 text-gray-400 text-xs cursor-pointer hover:text-orange-400 transition-colors"
+                      className="flex items-center space-x-1 text-gray-400 text-xs cursor-pointer hover:text-orange-500 transition-colors"
                       onClick={async () => {
                         if (tokenData?.tokenAddress) {
-                          await navigator.clipboard.writeText(tokenData.tokenAddress);
+                          await navigator.clipboard.writeText(
+                            tokenData.tokenAddress
+                          );
                           toast({
                             title: "Address Copied",
                             description: "Token address copied to clipboard",
@@ -814,7 +836,10 @@ const TokenPage = () => {
                     >
                       <span>
                         {tokenData?.tokenAddress
-                          ? `${tokenData.tokenAddress.slice(0, 6)}...${tokenData.tokenAddress.slice(-4)}`
+                          ? `${tokenData.tokenAddress.slice(
+                              0,
+                              6
+                            )}...${tokenData.tokenAddress.slice(-4)}`
                           : "N/A"}
                       </span>
                       <svg
@@ -858,9 +883,15 @@ const TokenPage = () => {
                     <div className="flex-1 flex flex-col justify-center space-y-2">
                       <div className="text-xs text-gray-400 text-right">
                         {tokenData?.isGraduated || tokenData?.uniswapPair ? (
-                          <span className="text-green-400 font-bold">Graduated</span>
+                          <span className="text-green-400 font-bold">
+                            Graduated
+                          </span>
                         ) : (
-                          `Progress ${((tokenData?.bondingCurve?.progress ?? tokenData?.progress ?? 0)).toFixed(1)}%`
+                          `Progress ${(
+                            tokenData?.bondingCurve?.progress ??
+                            tokenData?.progress ??
+                            0
+                          ).toFixed(1)}%`
                         )}
                       </div>
                       <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
@@ -874,7 +905,15 @@ const TokenPage = () => {
                             width: `${
                               tokenData?.isGraduated || tokenData?.uniswapPair
                                 ? 100
-                                : Math.min(100, Math.max(0, tokenData?.bondingCurve?.progress ?? tokenData?.progress ?? 0))
+                                : Math.min(
+                                    100,
+                                    Math.max(
+                                      0,
+                                      tokenData?.bondingCurve?.progress ??
+                                        tokenData?.progress ??
+                                        0
+                                    )
+                                  )
                             }%`,
                           }}
                         />
@@ -882,16 +921,22 @@ const TokenPage = () => {
 
                       {/* NYSE Trading Hours Progress Bar */}
                       <div className="text-xs text-gray-400 text-right mt-2">
-                        <span className={`${
-                          nyseTradingProgress.status === 'open' ? 'text-green-400' : 'text-red-400'
-                        } font-bold`}>
+                        <span
+                          className={`${
+                            nyseTradingProgress.status === "open"
+                              ? "text-green-400"
+                              : "text-red-400"
+                          } font-bold`}
+                        >
                           {nyseTradingProgress.label}
                         </span>
                       </div>
                       <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
                         <div
                           className={`h-full transition-all duration-1000 ${
-                            nyseTradingProgress.status === 'open' ? 'bg-gradient-to-r from-green-500 to-red-500' : 'bg-red-500'
+                            nyseTradingProgress.status === "open"
+                              ? "bg-gradient-to-r from-green-500 to-red-500"
+                              : "bg-red-500"
                           }`}
                           style={{
                             width: `${nyseTradingProgress.progress}%`,
@@ -900,14 +945,16 @@ const TokenPage = () => {
                       </div>
 
                       {/* Social Links - Below Progress Bar with Separate Grey Boxes */}
-                      {(tokenData?.websiteUrl || tokenData?.twitterUrl || tokenData?.telegramUrl) && (
+                      {(tokenData?.websiteUrl ||
+                        tokenData?.twitterUrl ||
+                        tokenData?.telegramUrl) && (
                         <div className="flex items-center justify-end space-x-2">
                           {tokenData?.websiteUrl && (
                             <a
                               href={tokenData.websiteUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-orange-400 hover:text-orange-300 transition-colors bg-gray-800 rounded p-1.5"
+                              className="text-orange-500 hover:text-orange-400 transition-colors bg-gray-800 rounded p-1.5"
                               title="Website"
                             >
                               <Globe className="w-4 h-4" />
@@ -918,7 +965,7 @@ const TokenPage = () => {
                               href={tokenData.twitterUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-orange-400 hover:text-orange-300 transition-colors bg-gray-800 rounded p-1.5"
+                              className="text-orange-500 hover:text-orange-400 transition-colors bg-gray-800 rounded p-1.5"
                               title="X"
                             >
                               <svg
@@ -935,7 +982,7 @@ const TokenPage = () => {
                               href={tokenData.telegramUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-orange-400 hover:text-orange-300 transition-colors bg-gray-800 rounded p-1.5"
+                              className="text-orange-500 hover:text-orange-400 transition-colors bg-gray-800 rounded p-1.5"
                               title="Telegram"
                             >
                               <svg
@@ -959,7 +1006,10 @@ const TokenPage = () => {
                   {/* Market Cap */}
                   <div className="flex items-baseline space-x-2">
                     <div className="text-white font-mono text-3xl font-bold">
-                      ${formatNumber(tokenData.price.currentPrice * 1_000_000_000)}
+                      $
+                      {formatNumber(
+                        tokenData.price.currentPrice * 1_000_000_000
+                      )}
                     </div>
                     <div className="text-gray-400 text-xs">Market cap</div>
                   </div>
@@ -968,7 +1018,10 @@ const TokenPage = () => {
                   {(tokenData?.isGraduated || tokenData?.uniswapPair) && (
                     <div className="flex items-baseline space-x-2">
                       <div className="text-white font-mono text-xl">
-                        ${formatNumber(parseFloat(getLiquidityWeth(tokenData)) * 2000)}
+                        $
+                        {formatNumber(
+                          parseFloat(getLiquidityWeth(tokenData)) * 2000
+                        )}
                       </div>
                       <div className="text-gray-400 text-xs">Liquidity</div>
                     </div>
@@ -983,16 +1036,28 @@ const TokenPage = () => {
                           : "text-red-400"
                       }`}
                     >
-                      {tokenData.price.priceChange24h >= 0 ? "+" : ""}
-                      ${((tokenData.price.currentPrice * tokenData.price.priceChange24h) / 100).toFixed(2)}{" "}
+                      {tokenData.price.priceChange24h >= 0 ? "+" : ""}$
+                      {(
+                        (tokenData.price.currentPrice *
+                          tokenData.price.priceChange24h) /
+                        100
+                      ).toFixed(2)}{" "}
                       ({tokenData.price.priceChange24h >= 0 ? "+" : ""}
                       {tokenData.price.priceChange24h.toFixed(2)}%) Past 24h
                     </div>
                     <div className="flex items-center space-x-1">
-                      <button className="px-1.5 py-0.5 text-[10px] bg-gray-800 text-gray-400 rounded">1m</button>
-                      <button className="px-1.5 py-0.5 text-[10px] bg-gray-800 text-gray-400 rounded">5m</button>
-                      <button className="px-1.5 py-0.5 text-[10px] bg-gray-800 text-gray-400 rounded">1h</button>
-                      <button className="px-1.5 py-0.5 text-[10px] bg-orange-600 text-white rounded">24h</button>
+                      <button className="px-1.5 py-0.5 text-[10px] bg-gray-800 text-gray-400 rounded">
+                        1m
+                      </button>
+                      <button className="px-1.5 py-0.5 text-[10px] bg-gray-800 text-gray-400 rounded">
+                        5m
+                      </button>
+                      <button className="px-1.5 py-0.5 text-[10px] bg-gray-800 text-gray-400 rounded">
+                        1h
+                      </button>
+                      <button className="px-1.5 py-0.5 text-[10px] bg-orange-500 text-white rounded">
+                        24h
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -1016,14 +1081,14 @@ const TokenPage = () => {
                     <div className="flex-1 min-w-0">
                       {/* Desktop: Keep horizontal */}
                       <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-3">
-                        <div className="text-orange-400 font-bold text-2xl sm:text-3xl truncate">
+                        <div className="text-orange-500 font-bold text-2xl sm:text-3xl truncate">
                           {tokenData?.symbol}
                         </div>
                         <div className="text-gray-300 text-sm sm:text-base truncate">
                           {tokenData?.name}
                         </div>
                         <span
-                          className="text-gray-400 text-xs cursor-pointer hover:text-orange-400 transition-colors truncate flex-shrink-0"
+                          className="text-gray-400 text-xs cursor-pointer hover:text-orange-500 transition-colors truncate flex-shrink-0"
                           onClick={async () => {
                             if (tokenData?.tokenAddress) {
                               await navigator.clipboard.writeText(
@@ -1031,7 +1096,8 @@ const TokenPage = () => {
                               );
                               toast({
                                 title: "Address Copied",
-                                description: "Token address copied to clipboard",
+                                description:
+                                  "Token address copied to clipboard",
                                 variant: "default",
                               });
                             }
@@ -1047,110 +1113,85 @@ const TokenPage = () => {
                         </span>
                       </div>
 
-                    {/* Age and Deployer Row */}
-                    <div className="flex items-center space-x-4 mt-2 overflow-hidden">
-                      <div className="flex items-center space-x-2">
-                        <Clock className="w-3 h-3 text-orange-400" />
-                        <span className="text-white text-sm">
-                          {tokenData?.deploymentTimestamp
-                            ? formatTokenAge(tokenData.deploymentTimestamp)
-                            : "Unknown"}
-                        </span>
-                      </div>
-                      {tokenData?.deployer && (
-                        <button
-                          onClick={() =>
-                            navigate(`/profile/${tokenData.deployer.address}`)
-                          }
-                          className="flex items-center space-x-2 text-orange-400 hover:text-orange-300 transition-colors"
-                        >
-                          {tokenData.deployer.pfp && (
-                            <img
-                              src={tokenData.deployer.pfp}
-                              alt={`${
-                                tokenData.deployer.username ||
-                                tokenData.deployer.address
-                              } profile`}
-                              className="w-5 h-5 rounded object-cover"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = "none";
-                              }}
-                            />
-                          )}
-                          <span className="text-sm truncate max-w-32">
-                            {tokenData.deployer.username ||
-                              abbreviateAddress(tokenData.deployer.address)}
+                      {/* Age and Deployer Row */}
+                      <div className="flex items-center space-x-4 mt-2 overflow-hidden">
+                        <div className="flex items-center space-x-2">
+                          <Clock className="w-3 h-3 text-orange-500" />
+                          <span className="text-white text-sm">
+                            {tokenData?.deploymentTimestamp
+                              ? formatTokenAge(tokenData.deploymentTimestamp)
+                              : "Unknown"}
                           </span>
-                        </button>
-                      )}
-                    </div>
+                        </div>
+                        {tokenData?.deployer && (
+                          <button
+                            onClick={() =>
+                              navigate(`/profile/${tokenData.deployer.address}`)
+                            }
+                            className="flex items-center space-x-2 text-orange-500 hover:text-orange-400 transition-colors"
+                          >
+                            {tokenData.deployer.pfp && (
+                              <img
+                                src={tokenData.deployer.pfp}
+                                alt={`${
+                                  tokenData.deployer.username ||
+                                  tokenData.deployer.address
+                                } profile`}
+                                className="w-5 h-5 rounded object-cover"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = "none";
+                                }}
+                              />
+                            )}
+                            <span className="text-sm truncate max-w-32">
+                              {tokenData.deployer.username ||
+                                abbreviateAddress(tokenData.deployer.address)}
+                            </span>
+                          </button>
+                        )}
+                      </div>
 
-                    {/* Social Links Row */}
-                    <div className="flex items-center space-x-2 mt-2 overflow-hidden">
-                      {tokenData?.websiteUrl && (
-                        <a
-                          href={tokenData.websiteUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-orange-400 hover:text-orange-300 transition-colors"
-                          title="Website"
-                        >
-                          <Globe className="w-4 h-4" />
-                        </a>
-                      )}
-                      {tokenData?.twitterUrl && (
-                        <a
-                          href={tokenData.twitterUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-orange-400 hover:text-orange-300 transition-colors"
-                          title="X"
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
+                      {/* Social Links Row */}
+                      <div className="flex items-center space-x-2 mt-2 overflow-hidden">
+                        {tokenData?.websiteUrl && (
+                          <a
+                            href={tokenData.websiteUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-orange-500 hover:text-orange-400 transition-colors"
+                            title="Website"
                           >
-                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                          </svg>
-                        </a>
-                      )}
-                      {tokenData?.telegramUrl && (
-                        <a
-                          href={tokenData.telegramUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-orange-400 hover:text-orange-300 transition-colors"
-                          title="Telegram"
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
+                            <Globe className="w-4 h-4" />
+                          </a>
+                        )}
+                        {tokenData?.twitterUrl && (
+                          <a
+                            href={tokenData.twitterUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-orange-500 hover:text-orange-400 transition-colors"
+                            title="X"
                           >
-                            <path
-                              fillRule="evenodd"
-                              clipRule="evenodd"
-                              d="M23.1117 4.49449C23.4296 2.94472 21.9074 1.65683 20.4317 2.227L2.3425 9.21601C0.694517 9.85273 0.621087 12.1572 2.22518 12.8975L6.1645 14.7157L8.03849 21.2746C8.13583 21.6153 8.40618 21.8791 8.74917 21.968C9.09216 22.0568 9.45658 21.9576 9.70712 21.707L12.5938 18.8203L16.6375 21.8531C17.8113 22.7334 19.5019 22.0922 19.7967 20.6549L23.1117 4.49449ZM3.0633 11.0816L21.1525 4.0926L17.8375 20.2531L13.1 16.6999C12.7019 16.4013 12.1448 16.4409 11.7929 16.7928L10.5565 18.0292L10.928 15.9861L18.2071 8.70703C18.5614 8.35278 18.5988 7.79106 18.2947 7.39293C17.9906 6.99479 17.4389 6.88312 17.0039 7.13168L6.95124 12.876L3.0633 11.0816ZM8.17695 14.4791L8.78333 16.6015L9.01614 15.321C9.05253 15.1209 9.14908 14.9366 9.29291 14.7928L11.5128 12.573L8.17695 14.4791Z"
-                            />
-                          </svg>
-                        </a>
-                      )}
-                      {!tokenData?.websiteUrl &&
-                        !tokenData?.twitterUrl &&
-                        !tokenData?.telegramUrl && (
-                          <div className="flex items-center space-x-2">
-                            <Globe className="w-4 h-4 text-gray-600" />
                             <svg
-                              className="w-4 h-4 text-gray-600"
+                              className="w-4 h-4"
                               viewBox="0 0 24 24"
                               fill="currentColor"
                             >
                               <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                             </svg>
+                          </a>
+                        )}
+                        {tokenData?.telegramUrl && (
+                          <a
+                            href={tokenData.telegramUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-orange-500 hover:text-orange-400 transition-colors"
+                            title="Telegram"
+                          >
                             <svg
-                              className="w-4 h-4 text-gray-600"
+                              className="w-4 h-4"
                               viewBox="0 0 24 24"
                               fill="currentColor"
                             >
@@ -1160,76 +1201,113 @@ const TokenPage = () => {
                                 d="M23.1117 4.49449C23.4296 2.94472 21.9074 1.65683 20.4317 2.227L2.3425 9.21601C0.694517 9.85273 0.621087 12.1572 2.22518 12.8975L6.1645 14.7157L8.03849 21.2746C8.13583 21.6153 8.40618 21.8791 8.74917 21.968C9.09216 22.0568 9.45658 21.9576 9.70712 21.707L12.5938 18.8203L16.6375 21.8531C17.8113 22.7334 19.5019 22.0922 19.7967 20.6549L23.1117 4.49449ZM3.0633 11.0816L21.1525 4.0926L17.8375 20.2531L13.1 16.6999C12.7019 16.4013 12.1448 16.4409 11.7929 16.7928L10.5565 18.0292L10.928 15.9861L18.2071 8.70703C18.5614 8.35278 18.5988 7.79106 18.2947 7.39293C17.9906 6.99479 17.4389 6.88312 17.0039 7.13168L6.95124 12.876L3.0633 11.0816ZM8.17695 14.4791L8.78333 16.6015L9.01614 15.321C9.05253 15.1209 9.14908 14.9366 9.29291 14.7928L11.5128 12.573L8.17695 14.4791Z"
                               />
                             </svg>
-                          </div>
+                          </a>
                         )}
+                        {!tokenData?.websiteUrl &&
+                          !tokenData?.twitterUrl &&
+                          !tokenData?.telegramUrl && (
+                            <div className="flex items-center space-x-2">
+                              <Globe className="w-4 h-4 text-gray-600" />
+                              <svg
+                                className="w-4 h-4 text-gray-600"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                              >
+                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                              </svg>
+                              <svg
+                                className="w-4 h-4 text-gray-600"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  clipRule="evenodd"
+                                  d="M23.1117 4.49449C23.4296 2.94472 21.9074 1.65683 20.4317 2.227L2.3425 9.21601C0.694517 9.85273 0.621087 12.1572 2.22518 12.8975L6.1645 14.7157L8.03849 21.2746C8.13583 21.6153 8.40618 21.8791 8.74917 21.968C9.09216 22.0568 9.45658 21.9576 9.70712 21.707L12.5938 18.8203L16.6375 21.8531C17.8113 22.7334 19.5019 22.0922 19.7967 20.6549L23.1117 4.49449ZM3.0633 11.0816L21.1525 4.0926L17.8375 20.2531L13.1 16.6999C12.7019 16.4013 12.1448 16.4409 11.7929 16.7928L10.5565 18.0292L10.928 15.9861L18.2071 8.70703C18.5614 8.35278 18.5988 7.79106 18.2947 7.39293C17.9906 6.99479 17.4389 6.88312 17.0039 7.13168L6.95124 12.876L3.0633 11.0816ZM8.17695 14.4791L8.78333 16.6015L9.01614 15.321C9.05253 15.1209 9.14908 14.9366 9.29291 14.7928L11.5128 12.573L8.17695 14.4791Z"
+                                />
+                              </svg>
+                            </div>
+                          )}
 
-                      {/* Watchlist Star - Only show if wallet connected */}
-                      {isConnected && tokenData?.tokenAddress && (
-                        <>
-                          <div className="w-px h-4 bg-gray-600 mx-1"></div>
-                          <button
-                            onClick={async () => {
-                              await toggleWatchlist(
-                                tokenData.tokenAddress,
-                                chainId
-                              );
-                              toast({
-                                title: isInWatchlist(tokenData.tokenAddress, chainId)
-                                  ? "Removed from Watchlist"
-                                  : "Added to Watchlist",
-                                description: isInWatchlist(tokenData.tokenAddress, chainId)
-                                  ? "Token removed from your watchlist"
-                                  : "Token added to your watchlist",
-                                variant: "default",
-                              });
-                            }}
-                            className="hover:scale-110 transition-transform"
-                            title={
-                              isInWatchlist(tokenData.tokenAddress, chainId)
-                                ? "Remove from watchlist"
-                                : "Add to watchlist"
-                            }
-                          >
-                            <Star
-                              className={`w-5 h-5 ${
+                        {/* Watchlist Star - Only show if wallet connected */}
+                        {isConnected && tokenData?.tokenAddress && (
+                          <>
+                            <div className="w-px h-4 bg-gray-600 mx-1"></div>
+                            <button
+                              onClick={async () => {
+                                await toggleWatchlist(
+                                  tokenData.tokenAddress,
+                                  chainId
+                                );
+                                toast({
+                                  title: isInWatchlist(
+                                    tokenData.tokenAddress,
+                                    chainId
+                                  )
+                                    ? "Removed from Watchlist"
+                                    : "Added to Watchlist",
+                                  description: isInWatchlist(
+                                    tokenData.tokenAddress,
+                                    chainId
+                                  )
+                                    ? "Token removed from your watchlist"
+                                    : "Token added to your watchlist",
+                                  variant: "default",
+                                });
+                              }}
+                              className="hover:scale-110 transition-transform"
+                              title={
                                 isInWatchlist(tokenData.tokenAddress, chainId)
-                                  ? "fill-yellow-400 text-yellow-400"
-                                  : "text-orange-400 hover:text-orange-300"
-                              }`}
-                            />
-                          </button>
-                        </>
-                      )}
+                                  ? "Remove from watchlist"
+                                  : "Add to watchlist"
+                              }
+                            >
+                              <Star
+                                className={`w-5 h-5 ${
+                                  isInWatchlist(tokenData.tokenAddress, chainId)
+                                    ? "fill-yellow-400 text-yellow-400"
+                                    : "text-orange-500 hover:text-orange-400"
+                                }`}
+                              />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Desktop: Price on the right */}
+                  <div className="text-left sm:text-right min-w-0">
+                    <div className="text-xl sm:text-2xl font-mono text-white truncate">
+                      $
+                      {tokenData.price.currentPrice
+                        ? parseFloat(tokenData.price.currentPrice.toFixed(7))
+                        : "N/A"}
+                    </div>
+                    <div
+                      className={`text-base sm:text-lg font-mono truncate ${
+                        tokenData.price.priceChange24h >= 0
+                          ? "text-green-400"
+                          : "text-red-400"
+                      }`}
+                    >
+                      {tokenData.price.priceChange24h >= 0 ? "+" : ""}
+                      {tokenData.price.priceChange24h.toFixed(2)}%
                     </div>
                   </div>
                 </div>
-
-                {/* Desktop: Price on the right */}
-                <div className="text-left sm:text-right min-w-0">
-                  <div className="text-xl sm:text-2xl font-mono text-white truncate">
-                    $
-                    {tokenData.price.currentPrice
-                      ? parseFloat(tokenData.price.currentPrice.toFixed(7))
-                      : "N/A"}
-                  </div>
-                  <div
-                    className={`text-base sm:text-lg font-mono truncate ${
-                      tokenData.price.priceChange24h >= 0
-                        ? "text-green-400"
-                        : "text-red-400"
-                    }`}
-                  >
-                    {tokenData.price.priceChange24h >= 0 ? "+" : ""}
-                    {tokenData.price.priceChange24h.toFixed(2)}%
-                  </div>
-                </div>
-              </div>
               )}
             </div>
 
             {/* Price Chart */}
-            <div className={`${isMobile ? "bg-black" : "bg-gray-900 border border-gray-700"} p-2`}>
-              {!isMobile && <div className="text-orange-400 mb-2">INTRADAY CHART</div>}
+            <div
+              className={`${
+                isMobile ? "bg-black" : "bg-gray-900 border border-gray-700"
+              } p-2`}
+            >
+              {!isMobile && (
+                <div className="text-orange-500 mb-2">INTRADAY CHART</div>
+              )}
               <TradingViewChart
                 tokenSymbol={tokenData.symbol}
                 tokenAddress={tokenAddress}
@@ -1275,189 +1353,201 @@ const TokenPage = () => {
 
             {/* Financial Metrics - Hidden on Mobile */}
             {!isMobile && (
-            <div className="bg-gray-900 border border-gray-700 p-2">
-              <div className="text-orange-400 mb-2">FINANCIAL METRICS</div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 text-xs">
-                <div className="bg-black border border-black p-2">
-                  <div className="text-gray-400">MARKET CAP</div>
-                  <div className="text-white font-mono text-sm">
-                    {formatNumber(tokenData.price.currentPrice * 1_000_000_000)}
+              <div className="bg-gray-900 border border-gray-700 p-2">
+                <div className="text-orange-500 mb-2">FINANCIAL METRICS</div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 text-xs">
+                  <div className="bg-black border border-black p-2">
+                    <div className="text-gray-400">MARKET CAP</div>
+                    <div className="text-white font-mono text-sm">
+                      {formatNumber(
+                        tokenData.price.currentPrice * 1_000_000_000
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div className="bg-black border border-black p-2">
-                  <div className="text-gray-400">LIQUIDITY</div>
-                  <div className="text-white font-mono text-sm">
-                    {getLiquidityWeth(tokenData)} WETH
+                  <div className="bg-black border border-black p-2">
+                    <div className="text-gray-400">LIQUIDITY</div>
+                    <div className="text-white font-mono text-sm">
+                      {getLiquidityWeth(tokenData)} WETH
+                    </div>
                   </div>
-                </div>
-                <div className="bg-black border border-black p-2">
-                  <div className="text-gray-400">FDV</div>
-                  <div className="text-white font-mono text-sm">
-                    {formatNumber(tokenData.price.currentPrice * 1_000_000_000)}
+                  <div className="bg-black border border-black p-2">
+                    <div className="text-gray-400">FDV</div>
+                    <div className="text-white font-mono text-sm">
+                      {formatNumber(
+                        tokenData.price.currentPrice * 1_000_000_000
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div className="bg-black border border-black p-2">
-                  <div className="text-gray-400">PRICE (USD)</div>
-                  <div className="text-white font-mono text-sm">
-                    $
-                    {tokenData.price.currentPrice
-                      ? parseFloat(tokenData.price.currentPrice.toFixed(7))
-                      : "N/A"}
+                  <div className="bg-black border border-black p-2">
+                    <div className="text-gray-400">PRICE (USD)</div>
+                    <div className="text-white font-mono text-sm">
+                      $
+                      {tokenData.price.currentPrice
+                        ? parseFloat(tokenData.price.currentPrice.toFixed(7))
+                        : "N/A"}
+                    </div>
                   </div>
-                </div>
-                <div className="bg-black border border-black p-2">
-                  <div className="text-gray-400">HOLDERS</div>
-                  <div className="text-white font-mono text-sm">
-                    {holdersCount > 0 ? holdersCount : "Loading..."}
+                  <div className="bg-black border border-black p-2">
+                    <div className="text-gray-400">HOLDERS</div>
+                    <div className="text-white font-mono text-sm">
+                      {holdersCount > 0 ? holdersCount : "Loading..."}
+                    </div>
                   </div>
-                </div>
-                <div className="bg-black border border-black p-2">
-                  <div className="text-gray-400">VOLUME</div>
-                  <div className="text-white font-mono text-sm">
-                    {formatNumber(tokenData.price.totalVolume)}
+                  <div className="bg-black border border-black p-2">
+                    <div className="text-gray-400">VOLUME</div>
+                    <div className="text-white font-mono text-sm">
+                      {formatNumber(tokenData.price.totalVolume)}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
             )}
 
             {/* Company Info - Hidden on Mobile (shown in INFO tab instead) */}
             {!isMobile && (
-            <div className="bg-gray-900 border border-gray-700 p-2">
-              <div className="text-orange-400 mb-2">COMPANY INFO</div>
-              <div className="space-y-2 text-xs">
-                <div className="flex items-center space-x-2">
-                  <Clock
-                    className={`w-3 h-3 ${
-                      tokenData?.deploymentTimestamp
-                        ? "text-orange-400"
-                        : "text-gray-600"
-                    }`}
-                  />
-                  <span className="text-gray-400">Age</span>
-                  <span className="text-white">
-                    {tokenData?.deploymentTimestamp
-                      ? formatTokenAge(tokenData.deploymentTimestamp)
-                      : "Unknown"}
-                  </span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <User className={`w-3 h-3 ${tokenData?.deployer ? "text-orange-400" : "text-gray-600"}`} />
-                  <span className="text-gray-400">Deployer</span>
-                  {tokenData?.deployer ? (
-                    <button
-                      onClick={() =>
-                        navigate(`/profile/${tokenData.deployer.address}`)
-                      }
-                      className="flex items-center space-x-2 text-orange-400 hover:text-orange-300 transition-colors"
-                    >
-                      {tokenData.deployer.pfp && (
-                        <img
-                          src={tokenData.deployer.pfp}
-                          alt={`${
-                            tokenData.deployer.username ||
-                            tokenData.deployer.address
-                          } profile`}
-                          className="w-4 h-4 rounded object-cover"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.style.display = "none";
-                          }}
-                        />
-                      )}
-                      <span className="truncate max-w-32">
-                        {tokenData.deployer.username ||
-                          abbreviateAddress(tokenData.deployer.address)}
-                      </span>
-                    </button>
-                  ) : (
-                    <span className="text-gray-600">Unknown</span>
-                  )}
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Globe className="w-3 h-3 text-orange-400" />
-                  <span className="text-gray-400">Website</span>
-                  {tokenData?.websiteUrl ? (
-                    <a
-                      href={tokenData.websiteUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-orange-400 hover:text-orange-300 transition-colors flex items-center space-x-1"
-                    >
-                      <span className="truncate max-w-32">
-                        {tokenData.websiteUrl}
-                      </span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  ) : (
-                    <span className="text-gray-600">Not available</span>
-                  )}
-                </div>
-                <div className="flex items-center space-x-2">
-                  <svg
-                    className="w-3 h-3 text-orange-400"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                  </svg>
-                  <span className="text-gray-400">X</span>
-                  {tokenData?.twitterUrl ? (
-                    <a
-                      href={tokenData.twitterUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-orange-400 hover:text-orange-300 transition-colors flex items-center space-x-1"
-                    >
-                      <span className="truncate max-w-32">
-                        {tokenData.twitterUrl}
-                      </span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  ) : (
-                    <span className="text-gray-600">Not available</span>
-                  )}
-                </div>
-                <div className="flex items-center space-x-2">
-                  <svg
-                    className="w-3 h-3 text-orange-400"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M23.1117 4.49449C23.4296 2.94472 21.9074 1.65683 20.4317 2.227L2.3425 9.21601C0.694517 9.85273 0.621087 12.1572 2.22518 12.8975L6.1645 14.7157L8.03849 21.2746C8.13583 21.6153 8.40618 21.8791 8.74917 21.968C9.09216 22.0568 9.45658 21.9576 9.70712 21.707L12.5938 18.8203L16.6375 21.8531C17.8113 22.7334 19.5019 22.0922 19.7967 20.6549L23.1117 4.49449ZM3.0633 11.0816L21.1525 4.0926L17.8375 20.2531L13.1 16.6999C12.7019 16.4013 12.1448 16.4409 11.7929 16.7928L10.5565 18.0292L10.928 15.9861L18.2071 8.70703C18.5614 8.35278 18.5988 7.79106 18.2947 7.39293C17.9906 6.99479 17.4389 6.88312 17.0039 7.13168L6.95124 12.876L3.0633 11.0816ZM8.17695 14.4791L8.78333 16.6015L9.01614 15.321C9.05253 15.1209 9.14908 14.9366 9.29291 14.7928L11.5128 12.573L8.17695 14.4791Z"
+              <div className="bg-gray-900 border border-gray-700 p-2">
+                <div className="text-orange-500 mb-2">COMPANY INFO</div>
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center space-x-2">
+                    <Clock
+                      className={`w-3 h-3 ${
+                        tokenData?.deploymentTimestamp
+                          ? "text-orange-500"
+                          : "text-gray-600"
+                      }`}
                     />
-                  </svg>
-                  <span className="text-gray-400">Telegram</span>
-                  {tokenData?.telegramUrl ? (
-                    <a
-                      href={tokenData.telegramUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-orange-400 hover:text-orange-300 transition-colors flex items-center space-x-1"
+                    <span className="text-gray-400">Age</span>
+                    <span className="text-white">
+                      {tokenData?.deploymentTimestamp
+                        ? formatTokenAge(tokenData.deploymentTimestamp)
+                        : "Unknown"}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <User
+                      className={`w-3 h-3 ${
+                        tokenData?.deployer
+                          ? "text-orange-500"
+                          : "text-gray-600"
+                      }`}
+                    />
+                    <span className="text-gray-400">Deployer</span>
+                    {tokenData?.deployer ? (
+                      <button
+                        onClick={() =>
+                          navigate(`/profile/${tokenData.deployer.address}`)
+                        }
+                        className="flex items-center space-x-2 text-orange-500 hover:text-orange-400 transition-colors"
+                      >
+                        {tokenData.deployer.pfp && (
+                          <img
+                            src={tokenData.deployer.pfp}
+                            alt={`${
+                              tokenData.deployer.username ||
+                              tokenData.deployer.address
+                            } profile`}
+                            className="w-4 h-4 rounded object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = "none";
+                            }}
+                          />
+                        )}
+                        <span className="truncate max-w-32">
+                          {tokenData.deployer.username ||
+                            abbreviateAddress(tokenData.deployer.address)}
+                        </span>
+                      </button>
+                    ) : (
+                      <span className="text-gray-600">Unknown</span>
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Globe className="w-3 h-3 text-orange-500" />
+                    <span className="text-gray-400">Website</span>
+                    {tokenData?.websiteUrl ? (
+                      <a
+                        href={tokenData.websiteUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-orange-500 hover:text-orange-400 transition-colors flex items-center space-x-1"
+                      >
+                        <span className="truncate max-w-32">
+                          {tokenData.websiteUrl}
+                        </span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    ) : (
+                      <span className="text-gray-600">Not available</span>
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <svg
+                      className="w-3 h-3 text-orange-500"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
                     >
-                      <span className="truncate max-w-32">
-                        {tokenData.telegramUrl}
-                      </span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  ) : (
-                    <span className="text-gray-600">Not available</span>
-                  )}
-                </div>
-              </div>
-              {/* Bottom Description */}
-              {tokenData?.description && (
-                <div className="border-t border-orange-500/30 pt-2 mt-2">
-                  <div className="text-orange-400 mb-1">COMPANY DESCRIPTION</div>
-                  <div className="text-gray-300 text-xs leading-relaxed">
-                    {tokenData.description}
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                    </svg>
+                    <span className="text-gray-400">X</span>
+                    {tokenData?.twitterUrl ? (
+                      <a
+                        href={tokenData.twitterUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-orange-500 hover:text-orange-400 transition-colors flex items-center space-x-1"
+                      >
+                        <span className="truncate max-w-32">
+                          {tokenData.twitterUrl}
+                        </span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    ) : (
+                      <span className="text-gray-600">Not available</span>
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <svg
+                      className="w-3 h-3 text-orange-500"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                        d="M23.1117 4.49449C23.4296 2.94472 21.9074 1.65683 20.4317 2.227L2.3425 9.21601C0.694517 9.85273 0.621087 12.1572 2.22518 12.8975L6.1645 14.7157L8.03849 21.2746C8.13583 21.6153 8.40618 21.8791 8.74917 21.968C9.09216 22.0568 9.45658 21.9576 9.70712 21.707L12.5938 18.8203L16.6375 21.8531C17.8113 22.7334 19.5019 22.0922 19.7967 20.6549L23.1117 4.49449ZM3.0633 11.0816L21.1525 4.0926L17.8375 20.2531L13.1 16.6999C12.7019 16.4013 12.1448 16.4409 11.7929 16.7928L10.5565 18.0292L10.928 15.9861L18.2071 8.70703C18.5614 8.35278 18.5988 7.79106 18.2947 7.39293C17.9906 6.99479 17.4389 6.88312 17.0039 7.13168L6.95124 12.876L3.0633 11.0816ZM8.17695 14.4791L8.78333 16.6015L9.01614 15.321C9.05253 15.1209 9.14908 14.9366 9.29291 14.7928L11.5128 12.573L8.17695 14.4791Z"
+                      />
+                    </svg>
+                    <span className="text-gray-400">Telegram</span>
+                    {tokenData?.telegramUrl ? (
+                      <a
+                        href={tokenData.telegramUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-orange-500 hover:text-orange-400 transition-colors flex items-center space-x-1"
+                      >
+                        <span className="truncate max-w-32">
+                          {tokenData.telegramUrl}
+                        </span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    ) : (
+                      <span className="text-gray-600">Not available</span>
+                    )}
                   </div>
                 </div>
-              )}
-            </div>
+                {/* Bottom Description */}
+                {tokenData?.description && (
+                  <div className="border-t border-orange-500/30 pt-2 mt-2">
+                    <div className="text-orange-500 mb-1">
+                      COMPANY DESCRIPTION
+                    </div>
+                    <div className="text-gray-300 text-xs leading-relaxed">
+                      {tokenData.description}
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </div>
 
@@ -1475,17 +1565,20 @@ const TokenPage = () => {
               />
             )}
 
-
             {/* Trades / Holders / Comments */}
-            <div className={`${isMobile ? "bg-black" : "bg-gray-900 border border-gray-700"} p-2`}>
+            <div
+              className={`${
+                isMobile ? "bg-black" : "bg-gray-900 border border-gray-700"
+              } p-2`}
+            >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-4">
                   <button
                     onClick={() => setActiveTab("trades")}
                     className={`text-xs font-bold transition-colors ${
                       activeTab === "trades"
-                        ? "text-orange-400"
-                        : "text-gray-400 hover:text-orange-300"
+                        ? "text-orange-500"
+                        : "text-gray-400 hover:text-orange-400"
                     }`}
                   >
                     TRADES
@@ -1494,8 +1587,8 @@ const TokenPage = () => {
                     onClick={() => setActiveTab("holders")}
                     className={`text-xs font-bold transition-colors ${
                       activeTab === "holders"
-                        ? "text-orange-400"
-                        : "text-gray-400 hover:text-orange-300"
+                        ? "text-orange-500"
+                        : "text-gray-400 hover:text-orange-400"
                     }`}
                   >
                     HOLDERS{holdersCount > 0 ? `(${holdersCount})` : ""}
@@ -1504,8 +1597,8 @@ const TokenPage = () => {
                     onClick={() => setActiveTab("comments")}
                     className={`text-xs font-bold transition-colors ${
                       activeTab === "comments"
-                        ? "text-orange-400"
-                        : "text-gray-400 hover:text-orange-300"
+                        ? "text-orange-500"
+                        : "text-gray-400 hover:text-orange-400"
                     }`}
                   >
                     COMMENTS({commentsCount})
@@ -1514,8 +1607,8 @@ const TokenPage = () => {
                     onClick={() => setActiveTab("info")}
                     className={`text-xs font-bold transition-colors ${
                       activeTab === "info"
-                        ? "text-orange-400"
-                        : "text-gray-400 hover:text-orange-300"
+                        ? "text-orange-500"
+                        : "text-gray-400 hover:text-orange-400"
                     }`}
                   >
                     INFO
@@ -1524,7 +1617,7 @@ const TokenPage = () => {
                 {activeTab === "trades" && filteredTrader && (
                   <button
                     onClick={() => setFilteredTrader(null)}
-                    className="text-xs text-orange-400 hover:text-orange-300 transition-colors"
+                    className="text-xs text-orange-500 hover:text-orange-400 transition-colors"
                   >
                     Clear Filter
                   </button>
@@ -1543,13 +1636,21 @@ const TokenPage = () => {
                     className="overflow-y-auto max-h-96 custom-scrollbar"
                   >
                     <table className="w-full text-xs min-w-[400px]">
-                      <thead className={`${isMobile ? "bg-black" : "bg-gray-900"} sticky top-0 z-10`}>
-                        <tr className={`text-gray-400 ${isMobile ? "" : "border-b border-gray-700"}`}>
+                      <thead
+                        className={`${
+                          isMobile ? "bg-black" : "bg-gray-900"
+                        } sticky top-0 z-10`}
+                      >
+                        <tr
+                          className={`text-gray-400 ${
+                            isMobile ? "" : "border-b border-gray-700"
+                          }`}
+                        >
                           <th className="text-left p-1">
                             <div className="flex items-center space-x-1">
                               <span>TRADER</span>
                               {filteredTrader && (
-                                <Filter className="w-3 h-3 text-orange-400 fill-current" />
+                                <Filter className="w-3 h-3 text-orange-500 fill-current" />
                               )}
                             </div>
                           </th>
@@ -1570,8 +1671,16 @@ const TokenPage = () => {
               ) : activeTab === "holders" ? (
                 <div className="overflow-x-auto max-h-96 custom-scrollbar">
                   <table className="w-full text-xs min-w-[400px]">
-                    <thead className={`${isMobile ? "bg-black" : "bg-gray-900"} sticky top-0 z-10`}>
-                      <tr className={`text-gray-400 ${isMobile ? "" : "border-b border-gray-700"}`}>
+                    <thead
+                      className={`${
+                        isMobile ? "bg-black" : "bg-gray-900"
+                      } sticky top-0 z-10`}
+                    >
+                      <tr
+                        className={`text-gray-400 ${
+                          isMobile ? "" : "border-b border-gray-700"
+                        }`}
+                      >
                         <th className="text-left p-1">HOLDER</th>
                         <th className="text-right p-1">BALANCE</th>
                         <th className="text-right p-1">PERCENTAGE</th>
@@ -1586,7 +1695,7 @@ const TokenPage = () => {
                             className="p-4 text-center text-gray-400"
                           >
                             <div className="flex items-center justify-center space-x-2">
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-400"></div>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500"></div>
                               <span>Loading holders...</span>
                             </div>
                           </td>
@@ -1595,7 +1704,11 @@ const TokenPage = () => {
                         <>
                           {/* Burnt tokens section */}
                           {burntData && (
-                            <tr className={`${isMobile ? "" : "border-b border-gray-800"} bg-red-900/20`}>
+                            <tr
+                              className={`${
+                                isMobile ? "" : "border-b border-gray-800"
+                              } bg-red-900/20`}
+                            >
                               <td className="p-1 text-red-400">
                                 <div className="flex items-center space-x-2">
                                   <span className="text-lg">🔥</span>
@@ -1628,7 +1741,11 @@ const TokenPage = () => {
 
                           {/* Uniswap pair section */}
                           {uniswapData && (
-                            <tr className={`${isMobile ? "" : "border-b border-gray-800"} bg-blue-900/20`}>
+                            <tr
+                              className={`${
+                                isMobile ? "" : "border-b border-gray-800"
+                              } bg-blue-900/20`}
+                            >
                               <td className="p-1 text-blue-400">
                                 <div className="flex items-center space-x-2">
                                   <span className="text-lg">🏦</span>
@@ -1661,7 +1778,11 @@ const TokenPage = () => {
 
                           {/* Bonding curve section - only for non-graduated tokens */}
                           {bondingCurveData && (
-                            <tr className={`${isMobile ? "" : "border-b border-gray-800"} bg-purple-900/20`}>
+                            <tr
+                              className={`${
+                                isMobile ? "" : "border-b border-gray-800"
+                              } bg-purple-900/20`}
+                            >
                               <td className="p-1 text-purple-400">
                                 <div className="flex items-center space-x-2">
                                   <span className="text-lg">🔮</span>
@@ -1706,7 +1827,11 @@ const TokenPage = () => {
                             holdersData.map((holder, idx) => (
                               <tr
                                 key={idx}
-                                className={isMobile ? "" : "border-b border-gray-800 last:border-0"}
+                                className={
+                                  isMobile
+                                    ? ""
+                                    : "border-b border-gray-800 last:border-0"
+                                }
                               >
                                 <td className="p-1 text-white">
                                   <div className="flex items-center space-x-2">
@@ -1725,7 +1850,7 @@ const TokenPage = () => {
                                           `/profile/${holder.holderAddress}`
                                         )
                                       }
-                                      className="hover:text-orange-400 underline text-left font-mono"
+                                      className="hover:text-orange-500 underline text-left font-mono"
                                     >
                                       {holder.username ||
                                         abbreviateAddress(holder.holderAddress)}
@@ -1745,7 +1870,7 @@ const TokenPage = () => {
                                     }`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="hover:text-orange-400"
+                                    className="hover:text-orange-500"
                                     title="View on Etherscan"
                                   >
                                     <ArrowUpRight className="w-4 h-4 inline" />
@@ -1772,26 +1897,45 @@ const TokenPage = () => {
                   <div className="space-y-3 text-xs p-2">
                     {/* Age */}
                     <div className="flex items-center space-x-2">
-                      <Clock className={`w-3 h-3 ${tokenData?.deploymentTimestamp ? "text-orange-400" : "text-gray-600"}`} />
+                      <Clock
+                        className={`w-3 h-3 ${
+                          tokenData?.deploymentTimestamp
+                            ? "text-orange-500"
+                            : "text-gray-600"
+                        }`}
+                      />
                       <span className="text-gray-400">Age</span>
                       <span className="text-white">
-                        {tokenData?.deploymentTimestamp ? formatTokenAge(tokenData.deploymentTimestamp) : "Unknown"}
+                        {tokenData?.deploymentTimestamp
+                          ? formatTokenAge(tokenData.deploymentTimestamp)
+                          : "Unknown"}
                       </span>
                     </div>
 
                     {/* Deployer */}
                     <div className="flex items-center space-x-2">
-                      <User className={`w-3 h-3 ${tokenData?.deployer ? "text-orange-400" : "text-gray-600"}`} />
+                      <User
+                        className={`w-3 h-3 ${
+                          tokenData?.deployer
+                            ? "text-orange-500"
+                            : "text-gray-600"
+                        }`}
+                      />
                       <span className="text-gray-400">Deployer</span>
                       {tokenData?.deployer ? (
                         <button
-                          onClick={() => navigate(`/profile/${tokenData.deployer.address}`)}
-                          className="flex items-center space-x-2 text-orange-400 hover:text-orange-300 transition-colors"
+                          onClick={() =>
+                            navigate(`/profile/${tokenData.deployer.address}`)
+                          }
+                          className="flex items-center space-x-2 text-orange-500 hover:text-orange-400 transition-colors"
                         >
                           {tokenData.deployer.pfp && (
                             <img
                               src={tokenData.deployer.pfp}
-                              alt={`${tokenData.deployer.username || tokenData.deployer.address} profile`}
+                              alt={`${
+                                tokenData.deployer.username ||
+                                tokenData.deployer.address
+                              } profile`}
                               className="w-4 h-4 rounded object-cover"
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
@@ -1800,7 +1944,8 @@ const TokenPage = () => {
                             />
                           )}
                           <span className="truncate max-w-32">
-                            {tokenData.deployer.username || abbreviateAddress(tokenData.deployer.address)}
+                            {tokenData.deployer.username ||
+                              abbreviateAddress(tokenData.deployer.address)}
                           </span>
                         </button>
                       ) : (
@@ -1810,16 +1955,18 @@ const TokenPage = () => {
 
                     {/* Website */}
                     <div className="flex items-center space-x-2">
-                      <Globe className="w-3 h-3 text-orange-400" />
+                      <Globe className="w-3 h-3 text-orange-500" />
                       <span className="text-gray-400">Website</span>
                       {tokenData?.websiteUrl ? (
                         <a
                           href={tokenData.websiteUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-orange-400 hover:text-orange-300 transition-colors flex items-center space-x-1"
+                          className="text-orange-500 hover:text-orange-400 transition-colors flex items-center space-x-1"
                         >
-                          <span className="truncate max-w-32">{tokenData.websiteUrl}</span>
+                          <span className="truncate max-w-32">
+                            {tokenData.websiteUrl}
+                          </span>
                           <ExternalLink className="w-3 h-3" />
                         </a>
                       ) : (
@@ -1829,7 +1976,11 @@ const TokenPage = () => {
 
                     {/* X */}
                     <div className="flex items-center space-x-2">
-                      <svg className="w-3 h-3 text-orange-400" viewBox="0 0 24 24" fill="currentColor">
+                      <svg
+                        className="w-3 h-3 text-orange-500"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
                         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                       </svg>
                       <span className="text-gray-400">X</span>
@@ -1838,9 +1989,11 @@ const TokenPage = () => {
                           href={tokenData.twitterUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-orange-400 hover:text-orange-300 transition-colors flex items-center space-x-1"
+                          className="text-orange-500 hover:text-orange-400 transition-colors flex items-center space-x-1"
                         >
-                          <span className="truncate max-w-32">{tokenData.twitterUrl}</span>
+                          <span className="truncate max-w-32">
+                            {tokenData.twitterUrl}
+                          </span>
                           <ExternalLink className="w-3 h-3" />
                         </a>
                       ) : (
@@ -1850,8 +2003,16 @@ const TokenPage = () => {
 
                     {/* Telegram */}
                     <div className="flex items-center space-x-2">
-                      <svg className="w-3 h-3 text-orange-400" viewBox="0 0 24 24" fill="currentColor">
-                        <path fillRule="evenodd" clipRule="evenodd" d="M23.1117 4.49449C23.4296 2.94472 21.9074 1.65683 20.4317 2.227L2.3425 9.21601C0.694517 9.85273 0.621087 12.1572 2.22518 12.8975L6.1645 14.7157L8.03849 21.2746C8.13583 21.6153 8.40618 21.8791 8.74917 21.968C9.09216 22.0568 9.45658 21.9576 9.70712 21.707L12.5938 18.8203L16.6375 21.8531C17.8113 22.7334 19.5019 22.0922 19.7967 20.6549L23.1117 4.49449ZM3.0633 11.0816L21.1525 4.0926L17.8375 20.2531L13.1 16.6999C12.7019 16.4013 12.1448 16.4409 11.7929 16.7928L10.5565 18.0292L10.928 15.9861L18.2071 8.70703C18.5614 8.35278 18.5988 7.79106 18.2947 7.39293C17.9906 6.99479 17.4389 6.88312 17.0039 7.13168L6.95124 12.876L3.0633 11.0816ZM8.17695 14.4791L8.78333 16.6015L9.01614 15.321C9.05253 15.1209 9.14908 14.9366 9.29291 14.7928L11.5128 12.573L8.17695 14.4791Z" />
+                      <svg
+                        className="w-3 h-3 text-orange-500"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          clipRule="evenodd"
+                          d="M23.1117 4.49449C23.4296 2.94472 21.9074 1.65683 20.4317 2.227L2.3425 9.21601C0.694517 9.85273 0.621087 12.1572 2.22518 12.8975L6.1645 14.7157L8.03849 21.2746C8.13583 21.6153 8.40618 21.8791 8.74917 21.968C9.09216 22.0568 9.45658 21.9576 9.70712 21.707L12.5938 18.8203L16.6375 21.8531C17.8113 22.7334 19.5019 22.0922 19.7967 20.6549L23.1117 4.49449ZM3.0633 11.0816L21.1525 4.0926L17.8375 20.2531L13.1 16.6999C12.7019 16.4013 12.1448 16.4409 11.7929 16.7928L10.5565 18.0292L10.928 15.9861L18.2071 8.70703C18.5614 8.35278 18.5988 7.79106 18.2947 7.39293C17.9906 6.99479 17.4389 6.88312 17.0039 7.13168L6.95124 12.876L3.0633 11.0816ZM8.17695 14.4791L8.78333 16.6015L9.01614 15.321C9.05253 15.1209 9.14908 14.9366 9.29291 14.7928L11.5128 12.573L8.17695 14.4791Z"
+                        />
                       </svg>
                       <span className="text-gray-400">Telegram</span>
                       {tokenData?.telegramUrl ? (
@@ -1859,9 +2020,11 @@ const TokenPage = () => {
                           href={tokenData.telegramUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-orange-400 hover:text-orange-300 transition-colors flex items-center space-x-1"
+                          className="text-orange-500 hover:text-orange-400 transition-colors flex items-center space-x-1"
                         >
-                          <span className="truncate max-w-32">{tokenData.telegramUrl}</span>
+                          <span className="truncate max-w-32">
+                            {tokenData.telegramUrl}
+                          </span>
                           <ExternalLink className="w-3 h-3" />
                         </a>
                       ) : (
@@ -1872,15 +2035,23 @@ const TokenPage = () => {
                     {/* Uniswap Pair - if graduated */}
                     {tokenData?.uniswapPair && (
                       <div className="flex items-center space-x-2">
-                        <img src="/Uniswap_Logo.svg.png" alt="Uniswap" className="w-5 h-5" />
+                        <img
+                          src="/Uniswap_Logo.svg.png"
+                          alt="Uniswap"
+                          className="w-5 h-5"
+                        />
                         <span className="text-gray-400">Uniswap Pair</span>
                         <a
-                          href={`${getExplorer(chainId)}/address/${tokenData.uniswapPair}`}
+                          href={`${getExplorer(chainId)}/address/${
+                            tokenData.uniswapPair
+                          }`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-pink-400 hover:text-pink-300 transition-colors flex items-center space-x-1"
                         >
-                          <span className="truncate max-w-32">{abbreviateAddress(tokenData.uniswapPair)}</span>
+                          <span className="truncate max-w-32">
+                            {abbreviateAddress(tokenData.uniswapPair)}
+                          </span>
                           <ExternalLink className="w-3 h-3" />
                         </a>
                       </div>
@@ -1888,8 +2059,12 @@ const TokenPage = () => {
 
                     {/* Description */}
                     {tokenData?.description && (
-                      <div className={`pt-3 ${isMobile ? "" : "border-t border-gray-700"}`}>
-                        <div className="text-orange-400 mb-2">DESCRIPTION</div>
+                      <div
+                        className={`pt-3 ${
+                          isMobile ? "" : "border-t border-gray-700"
+                        }`}
+                      >
+                        <div className="text-orange-500 mb-2">DESCRIPTION</div>
                         <div className="text-gray-300 leading-relaxed">
                           {tokenData.description}
                         </div>
@@ -1908,7 +2083,7 @@ const TokenPage = () => {
         <Dialog open={isLogoModalOpen} onOpenChange={setIsLogoModalOpen}>
           <DialogContent className="max-w-sm mx-auto bg-black border-gray-700">
             <DialogHeader>
-              <DialogTitle className="text-center text-orange-400 text-lg">
+              <DialogTitle className="text-center text-orange-500 text-lg">
                 {tokenData?.name || tokenData?.symbol}
               </DialogTitle>
             </DialogHeader>
@@ -1927,7 +2102,7 @@ const TokenPage = () => {
             </div>
             <div className="text-center text-gray-300 text-sm">
               <p className="mb-2">
-                <span className="text-orange-400 font-bold">
+                <span className="text-orange-500 font-bold">
                   {tokenData?.symbol}
                 </span>
                 {tokenData?.name && (
@@ -1958,13 +2133,15 @@ const TokenPage = () => {
           {/* Slide-up Modal */}
           <div
             className={`fixed left-0 right-0 bottom-[88px] bg-black border-t border-gray-700 rounded-t-lg z-50 transition-transform duration-300 ease-out max-h-[calc(100vh-200px)] ${
-              isTradingModalOpen ? 'translate-y-0' : 'translate-y-[calc(100%+88px)]'
+              isTradingModalOpen
+                ? "translate-y-0"
+                : "translate-y-[calc(100%+88px)]"
             }`}
           >
             <div className="h-full flex flex-col">
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-700">
-                <h2 className="text-orange-400 text-lg font-bold">
+                <h2 className="text-orange-500 text-lg font-bold">
                   Trade {tokenData?.symbol}
                 </h2>
                 <button
@@ -1998,7 +2175,7 @@ const TokenPage = () => {
           <div className="flex space-x-2">
             <button
               onClick={() => {
-                setTradeMode('buy');
+                setTradeMode("buy");
                 setIsTradingModalOpen(true);
               }}
               className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-4 transition-all duration-200 rounded"
@@ -2007,7 +2184,7 @@ const TokenPage = () => {
             </button>
             <button
               onClick={() => {
-                setTradeMode('sell');
+                setTradeMode("sell");
                 setIsTradingModalOpen(true);
               }}
               className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-4 transition-all duration-200 rounded"

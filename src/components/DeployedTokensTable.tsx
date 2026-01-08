@@ -151,7 +151,7 @@ const DeployedTokensTable: React.FC<DeployedTokensTableProps> = ({
   if (tokens.length === 0) {
     return (
       <div className="bg-gray-900 border border-gray-700 p-1">
-        <div className="text-orange-400 text-xs mb-1">DEPLOYED TOKENS</div>
+        <div className="text-orange-500 text-xs mb-1">DEPLOYED TOKENS</div>
         <div className="text-center py-4 text-gray-400 text-xs">
           No tokens deployed yet
         </div>
@@ -161,7 +161,7 @@ const DeployedTokensTable: React.FC<DeployedTokensTableProps> = ({
 
   return (
     <div className="bg-gray-900 border border-gray-700 p-1">
-      <div className="text-orange-400 text-xs mb-1">DEPLOYED TOKENS</div>
+      <div className="text-orange-500 text-xs mb-1">DEPLOYED TOKENS</div>
       <div className="overflow-x-auto">
         <table className="w-full text-xs min-w-[500px]">
           <thead className="bg-gray-800 sticky top-0">

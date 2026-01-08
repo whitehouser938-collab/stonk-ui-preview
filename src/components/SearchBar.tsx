@@ -190,7 +190,7 @@ const SearchBar = () => {
                         {/* Token Info */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center space-x-2">
-                            <span className="text-orange-400 font-bold text-xs">
+                            <span className="text-orange-500 font-bold text-xs">
                               {token.symbol}
                             </span>
                             <span className="text-gray-300 text-xs truncate">

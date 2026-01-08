@@ -191,7 +191,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
       {/* Loading State */}
       {loading && (
         <div className="text-center py-8 text-gray-500">
-          <div className="animate-spin w-8 h-8 border-2 border-orange-400 border-t-transparent rounded-full mx-auto mb-3"></div>
+          <div className="animate-spin w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full mx-auto mb-3"></div>
           <p className="text-sm">Loading comments...</p>
         </div>
       )}
@@ -232,7 +232,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
         {isConnected && currentUserId ? (
           <button
             onClick={() => setShowCommentModal(true)}
-            className="flex items-center space-x-1 px-3 py-1 bg-orange-600 text-white text-xs rounded hover:bg-orange-700 transition-colors"
+            className="flex items-center space-x-1 px-3 py-1 bg-orange-500 text-white text-xs rounded hover:bg-orange-600 transition-colors"
           >
             <Plus className="w-4 h-4" />
             <span>Add Comment</span>

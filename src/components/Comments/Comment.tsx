@@ -100,7 +100,7 @@ export const Comment: React.FC<CommentProps> = ({
             <UserAvatar user={comment.user} size="md" className="" />
             <Link
               to={`/profile/${comment.user.walletAddress}`}
-              className="text-orange-400 hover:text-white font-mono text-xs transition-colors cursor-pointer"
+              className="text-orange-500 hover:text-white font-mono text-xs transition-colors cursor-pointer"
               onClick={(e) => e.stopPropagation()}
             >
               {getDisplayName(comment.user)}
@@ -123,7 +123,7 @@ export const Comment: React.FC<CommentProps> = ({
               <div className="flex items-center space-x-1">
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="text-gray-400 hover:text-orange-400 transition-colors"
+                  className="text-gray-400 hover:text-orange-500 transition-colors"
                   title="Edit comment"
                 >
                   <Edit className="w-4 h-4" />
@@ -162,7 +162,7 @@ export const Comment: React.FC<CommentProps> = ({
                 disabled={
                   !editContent.trim() || editContent === comment.content
                 }
-                className="px-3 py-1 bg-orange-600 text-white text-xs rounded hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1 bg-orange-500 text-white text-xs rounded hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Save
               </button>
@@ -201,7 +201,7 @@ export const Comment: React.FC<CommentProps> = ({
           <div className="mb-3">
             <button
               onClick={() => setShowReplyForm(!showReplyForm)}
-              className="text-gray-400 hover:text-orange-400 transition-colors text-xs"
+              className="text-gray-400 hover:text-orange-500 transition-colors text-xs"
             >
               Reply
             </button>
@@ -232,7 +232,7 @@ export const Comment: React.FC<CommentProps> = ({
               <button
                 onClick={handleReply}
                 disabled={!replyContent.trim()}
-                className="px-3 py-1 bg-orange-600 text-white text-xs rounded hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1 bg-orange-500 text-white text-xs rounded hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Reply
               </button>
@@ -264,7 +264,7 @@ export const Comment: React.FC<CommentProps> = ({
           {comment.replies.length > 1 && !showAllReplies && (
             <button
               onClick={() => setShowAllReplies(true)}
-              className="text-xs text-orange-400 hover:text-orange-300 transition-colors ml-6"
+              className="text-xs text-orange-500 hover:text-orange-400 transition-colors ml-6"
             >
               Show all {comment.replies.length} replies
             </button>

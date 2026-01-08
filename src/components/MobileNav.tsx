@@ -60,7 +60,7 @@ export function MobileNav({
               className={cn(
                 "flex items-center space-x-3 px-4 py-3 rounded-lg text-base transition-all duration-200",
                 isActive
-                  ? "bg-orange-600/20 text-orange-400"
+                  ? "bg-orange-500/20 text-orange-500"
                   : "text-gray-400 hover:text-gray-200"
               )}
             >

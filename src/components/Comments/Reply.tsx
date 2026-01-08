@@ -89,7 +89,7 @@ export const Reply: React.FC<ReplyProps> = ({
           <div className="flex items-center space-x-1">
             <button
               onClick={() => setIsEditing(true)}
-              className="text-gray-400 hover:text-orange-400 transition-colors"
+              className="text-gray-400 hover:text-orange-500 transition-colors"
               title="Edit reply"
             >
               <Edit className="w-4 h-4" />
@@ -125,7 +125,7 @@ export const Reply: React.FC<ReplyProps> = ({
             <button
               onClick={handleEdit}
               disabled={!editContent.trim() || editContent === reply.content}
-              className="px-3 py-1 bg-orange-600 text-white text-xs rounded hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-1 bg-orange-500 text-white text-xs rounded hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Save
             </button>

@@ -46,7 +46,7 @@ const BondingCurveProgress: React.FC<BondingCurveProgressProps> = ({
               index < filledBlocks
                 ? isGraduated
                   ? "bg-green-600"
-                  : "bg-orange-600"
+                  : "bg-orange-500"
                 : "bg-gray-700"
             }`}
           ></div>
@@ -63,7 +63,7 @@ const BondingCurveProgress: React.FC<BondingCurveProgressProps> = ({
             </span>
             <button
               onClick={() => navigator.clipboard.writeText(uniswapPair)}
-              className="text-orange-400 hover:text-orange-300 text-xs font-medium"
+              className="text-orange-500 hover:text-orange-400 text-xs font-medium"
             >
               Copy
             </button>

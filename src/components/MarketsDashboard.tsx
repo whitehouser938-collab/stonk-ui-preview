@@ -148,11 +148,11 @@ const MobileCollapsibleSection: React.FC<{
           onClick={() => setIsOpen(!isOpen)}
           className="w-full flex justify-between items-center bg-gray-900 p-2 mb-1"
         >
-          <div className="text-orange-400 text-xs">{title}</div>
+          <div className="text-orange-500 text-xs">{title}</div>
           {isOpen ? (
-            <ChevronUp className="w-4 h-4 text-orange-400" />
+            <ChevronUp className="w-4 h-4 text-orange-500" />
           ) : (
-            <ChevronDown className="w-4 h-4 text-orange-400" />
+            <ChevronDown className="w-4 h-4 text-orange-500" />
           )}
         </button>
         {isOpen && <div>{children}</div>}
@@ -488,7 +488,9 @@ export function MarketsDashboard() {
                     <div className="p-3">
                       <div className="flex items-center gap-1.5 mb-1">
                         <span className="text-white font-bold text-sm truncate">
-                          {token.tokenName}
+                          {token.tokenName && token.tokenName.length > 12
+                            ? `${token.tokenName.slice(0, 12)}...`
+                            : token.tokenName}
                         </span>
                         {token.graduated ? (
                           <span className="bg-green-600 text-white px-1 py-0.5 rounded text-[9px] flex-shrink-0">
@@ -501,7 +503,7 @@ export function MarketsDashboard() {
                         )}
                       </div>
                       <div className="text-gray-400 text-[11px] mb-2">
-                        <span className="text-orange-400">market cap: </span>
+                        <span className="text-orange-500">market cap: </span>
                         <span className="text-white font-bold">
                           ${formatNumber(token.currentPrice * 1_000_000_000)}
                         </span>
@@ -526,7 +528,7 @@ export function MarketsDashboard() {
               onClick={() => handleViewModeChange("card")}
               className={`p-2 rounded transition-colors ${
                 viewMode === "card"
-                  ? "bg-orange-600 text-white"
+                  ? "bg-orange-500 text-white"
                   : "bg-gray-900 text-gray-400"
               }`}
             >
@@ -536,7 +538,7 @@ export function MarketsDashboard() {
               onClick={() => handleViewModeChange("list")}
               className={`p-2 rounded transition-colors ${
                 viewMode === "list"
-                  ? "bg-orange-600 text-white"
+                  ? "bg-orange-500 text-white"
                   : "bg-gray-900 text-gray-400"
               }`}
             >
@@ -612,7 +614,7 @@ export function MarketsDashboard() {
                       </span>
                     </div>
                     <div className="text-gray-400 text-xs mb-1">
-                      <span className="text-orange-400">MC: </span>
+                      <span className="text-orange-500">MC: </span>
                       <span className="text-white font-semibold">
                         ${formatNumber(token.currentPrice * 1_000_000_000)}
                       </span>
@@ -720,7 +722,9 @@ export function MarketsDashboard() {
                         </div>
                         {/* Row 2: Token Name */}
                         <div className="text-gray-400 text-[11px] truncate">
-                          {token.tokenName}
+                          {token.tokenName && token.tokenName.length > 12
+                            ? `${token.tokenName.slice(0, 12)}...`
+                            : token.tokenName}
                         </div>
                       </div>
                     </div>
@@ -745,19 +749,19 @@ export function MarketsDashboard() {
                       </div>
                       {/* Bottom: Stats in boxes */}
                       <div className="flex items-center gap-1 text-[10px]">
-                        <span className="bg-gray-800 px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[60px] text-center">
+                        <span className="px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[60px] text-center">
                           <span className="text-white">LIQ </span>
                           <span className="text-white">
                             ${formatNumber(token.totalVolume * 0.3)}
                           </span>
                         </span>
-                        <span className="bg-gray-800 px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[60px] text-center">
+                        <span className="px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[60px] text-center">
                           <span className="text-white">VOL </span>
                           <span className="text-white">
                             ${formatNumber(token.totalVolume)}
                           </span>
                         </span>
-                        <span className="bg-gray-800 px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[68px] text-center">
+                        <span className="px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[68px] text-center">
                           <span className="text-white">MCAP </span>
                           <span className="text-white">
                             ${formatNumber(token.currentPrice * 1_000_000_000)}
@@ -779,7 +783,7 @@ export function MarketsDashboard() {
               onClick={() => setActiveFilter("age")}
               className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
                 activeFilter === "age"
-                  ? "bg-orange-600 text-white"
+                  ? "bg-orange-500 text-white"
                   : "bg-gray-900 text-gray-400"
               }`}
             >
@@ -789,7 +793,7 @@ export function MarketsDashboard() {
               onClick={() => setActiveFilter("last_comment")}
               className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
                 activeFilter === "last_comment"
-                  ? "bg-orange-600 text-white"
+                  ? "bg-orange-500 text-white"
                   : "bg-gray-900 text-gray-400"
               }`}
             >
@@ -799,7 +803,7 @@ export function MarketsDashboard() {
               onClick={() => setActiveFilter("last_trade")}
               className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
                 activeFilter === "last_trade"
-                  ? "bg-orange-600 text-white"
+                  ? "bg-orange-500 text-white"
                   : "bg-gray-900 text-gray-400"
               }`}
             >
@@ -809,7 +813,7 @@ export function MarketsDashboard() {
               onClick={() => setActiveFilter("new")}
               className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
                 activeFilter === "new"
-                  ? "bg-orange-600 text-white"
+                  ? "bg-orange-500 text-white"
                   : "bg-gray-900 text-gray-400"
               }`}
             >
@@ -819,7 +823,7 @@ export function MarketsDashboard() {
               onClick={() => setActiveFilter("graduated")}
               className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
                 activeFilter === "graduated"
-                  ? "bg-orange-600 text-white"
+                  ? "bg-orange-500 text-white"
                   : "bg-gray-900 text-gray-400"
               }`}
             >
@@ -829,7 +833,7 @@ export function MarketsDashboard() {
               onClick={() => setActiveFilter("market_cap")}
               className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
                 activeFilter === "market_cap"
-                  ? "bg-orange-600 text-white"
+                  ? "bg-orange-500 text-white"
                   : "bg-gray-900 text-gray-400"
               }`}
             >
@@ -839,7 +843,7 @@ export function MarketsDashboard() {
               onClick={() => setActiveFilter("liquidity")}
               className={`flex-shrink-0 font-bold py-4 px-4 transition-all duration-200 rounded ${
                 activeFilter === "liquidity"
-                  ? "bg-orange-600 text-white"
+                  ? "bg-orange-500 text-white"
                   : "bg-gray-900 text-gray-400"
               }`}
             >
@@ -857,7 +861,7 @@ export function MarketsDashboard() {
           <div className="lg:col-span-3 space-y-1 order-last lg:order-first">
             <MobileCollapsibleSection title="TERMINAL">
               <div className="bg-gray-900 p-4 h-full flex flex-col items-center justify-center">
-                <div className="text-orange-400 text-lg font-bold mb-2 lg:block hidden">
+                <div className="text-orange-500 text-lg font-bold mb-2 lg:block hidden">
                   TERMINAL
                 </div>
                 <div className="text-gray-500 text-xs text-center">
@@ -869,7 +873,7 @@ export function MarketsDashboard() {
 
           {/* Center Column - Main Trading Data */}
           <div className="lg:col-span-6 bg-gray-900 order-first lg:order-none">
-            <div className="text-orange-400 text-xs p-1">
+            <div className="text-orange-500 text-xs p-1">
               ACTIVE TRADING PAIRS
             </div>
             <div className="overflow-x-auto h-full">
@@ -1039,7 +1043,7 @@ export function MarketsDashboard() {
             <MobileCollapsibleSection title="VOLUME LEADERS">
               <div className="bg-gray-900 p-1">
                 <div className="flex justify-between items-center mb-2">
-                  <div className="text-orange-400 text-xs hidden lg:block">
+                  <div className="text-orange-500 text-xs hidden lg:block">
                     VOLUME LEADERS
                   </div>
                   <div className="flex gap-1 w-full lg:w-auto">
@@ -1049,7 +1053,7 @@ export function MarketsDashboard() {
                         onClick={() => setVolumePeriod(period)}
                         className={`px-2 py-0.5 text-xs rounded transition-colors ${
                           volumePeriod === period
-                            ? "bg-orange-400 text-black font-bold"
+                            ? "bg-orange-500 text-black font-bold"
                             : "bg-gray-800 text-gray-400 hover:bg-gray-700"
                         }`}
                       >
@@ -1108,7 +1112,7 @@ export function MarketsDashboard() {
             {/* Graduated Tokens */}
             <MobileCollapsibleSection title="GRADUATED TOKENS">
               <div className="bg-gray-900 p-1">
-                <div className="text-orange-400 text-xs mb-1 hidden lg:block">
+                <div className="text-orange-500 text-xs mb-1 hidden lg:block">
                   GRADUATED TOKENS
                 </div>
                 <div className="overflow-y-auto max-h-48">
@@ -1199,7 +1203,7 @@ export function MarketsDashboard() {
             {/* Bonding Curve Progress */}
             <MobileCollapsibleSection title="BONDING CURVE PROGRESS">
               <div className="bg-gray-900 p-1">
-                <div className="text-orange-400 text-xs mb-1 hidden lg:block">
+                <div className="text-orange-500 text-xs mb-1 hidden lg:block">
                   BONDING CURVE PROGRESS
                 </div>
                 <div className="overflow-y-auto max-h-48">

@@ -749,7 +749,7 @@ const TradingForm = (props: TradingFormProps) => {
         w-full p-3 text-sm font-bold transition-all duration-200 rounded
         ${
           isBuy
-            ? "bg-orange-600 text-black"
+            ? "bg-orange-500 text-black"
             : "bg-transparent border border-gray-700 text-gray-400 hover:bg-gray-800"
         }
       `}
@@ -768,7 +768,7 @@ const TradingForm = (props: TradingFormProps) => {
         w-full p-3  text-sm font-bold transition-all duration-200 rounded
         ${
           !isBuy
-            ? "bg-orange-600 text-black"
+            ? "bg-orange-500 text-black"
             : "bg-transparent border border-gray-700 text-gray-400 hover:bg-gray-800"
         }
       `}
@@ -793,7 +793,7 @@ const TradingForm = (props: TradingFormProps) => {
               onClick={() => setPaymentMethod("ETH")}
               className={`px-4 py-2 text-sm font-medium transition-all duration-200 rounded ${
                 paymentMethod === "ETH"
-                  ? "bg-orange-600 text-black"
+                  ? "bg-orange-500 text-black"
                   : "bg-gray-800 hover:bg-gray-700 text-gray-300"
               }`}
             >
@@ -804,7 +804,7 @@ const TradingForm = (props: TradingFormProps) => {
               onClick={() => setPaymentMethod("WETH")}
               className={`px-4 py-2 text-sm font-medium transition-all duration-200 rounded ${
                 paymentMethod === "WETH"
-                  ? "bg-orange-600 text-black"
+                  ? "bg-orange-500 text-black"
                   : "bg-gray-800 hover:bg-gray-700 text-gray-300"
               }`}
             >
@@ -852,7 +852,7 @@ const TradingForm = (props: TradingFormProps) => {
                 }}
                 className={`px-3 py-2 text-xs font-medium transition-all duration-200 rounded ${
                   slippagePercent === preset && !customSlippage
-                    ? "bg-orange-600 text-black"
+                    ? "bg-orange-500 text-black"
                     : "bg-gray-800 hover:bg-gray-700 text-gray-300"
                 }`}
               >
@@ -871,7 +871,7 @@ const TradingForm = (props: TradingFormProps) => {
                     setSlippagePercent(Number(value));
                   }
                 }}
-                className="w-16 px-2 py-1 bg-gray-800 border border-gray-700 text-xs text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-orange-400 rounded"
+                className="w-16 px-2 py-1 bg-gray-800 border border-gray-700 text-xs text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-orange-500 rounded"
                 min="0"
                 max="50"
                 step="0.1"
@@ -882,7 +882,7 @@ const TradingForm = (props: TradingFormProps) => {
           {/* Current Slippage Display */}
           <div className="text-xs text-gray-400">
             Current slippage:{" "}
-            <span className="text-orange-400">{slippagePercent}%</span>
+            <span className="text-orange-500">{slippagePercent}%</span>
             {slippagePercent > 5 && (
               <span className="text-yellow-400 ml-2">
                 ⚠️ High slippage warning
@@ -917,12 +917,12 @@ const TradingForm = (props: TradingFormProps) => {
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
               {isCalculatingSellConversion ? (
                 <div className="flex items-center space-x-1">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-400"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500"></div>
                   <span className="text-xs text-gray-400">Calculating...</span>
                 </div>
               ) : expectedWethAmount && expectedWethAmount !== "0" ? (
                 <div className="text-right">
-                  <div className="text-xs text-orange-400 font-mono">
+                  <div className="text-xs text-orange-500 font-mono">
                     ≈ {abbreviateTokenAmount(expectedWethAmount, 18)} WETH
                   </div>
                 </div>

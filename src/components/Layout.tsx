@@ -96,12 +96,12 @@ export function Layout({ children }: LayoutProps) {
               isHeaderCollapsed ? 'w-8' : 'w-32'
             }`}>
               <div className="relative h-6 flex items-center">
-                <h1 className={`text-sm font-bold text-orange-400 font-mono tracking-tight whitespace-nowrap hover:text-orange-300 transition-all duration-1000 ease-in-out origin-left ${
+                <h1 className={`text-sm font-bold text-orange-500 font-mono tracking-tight whitespace-nowrap hover:text-orange-400 transition-all duration-1000 ease-in-out origin-left ${
                   isHeaderCollapsed ? 'scale-x-0 opacity-0' : 'scale-x-100 opacity-100'
                 }`}>
                   STONK EXCHANGE
                 </h1>
-                <h1 className={`text-sm font-bold text-orange-400 font-mono tracking-tight whitespace-nowrap hover:text-orange-300 absolute left-0 transition-all duration-1000 ease-in-out origin-left ${
+                <h1 className={`text-sm font-bold text-orange-500 font-mono tracking-tight whitespace-nowrap hover:text-orange-400 absolute left-0 transition-all duration-1000 ease-in-out origin-left ${
                   isHeaderCollapsed ? 'scale-x-100 opacity-100' : 'scale-x-0 opacity-0'
                 }`}>
                   SE
@@ -115,29 +115,29 @@ export function Layout({ children }: LayoutProps) {
             }`}>
               <div className="absolute whitespace-nowrap animate-scroll-left text-[11px] font-mono text-white">
                 <span className="inline-block mx-2">
-                  <span className="text-orange-400">NYC</span> {formatTimeMobile("America/New_York")}
+                  <span className="text-orange-500">NYC</span> {formatTimeMobile("America/New_York")}
                 </span>
                 <span className="inline-block mx-2">
-                  <span className="text-orange-400">LON</span> {formatTimeMobile("Europe/London")}
+                  <span className="text-orange-500">LON</span> {formatTimeMobile("Europe/London")}
                 </span>
                 <span className="inline-block mx-2">
-                  <span className="text-orange-400">TOK</span> {formatTimeMobile("Asia/Tokyo")}
+                  <span className="text-orange-500">TOK</span> {formatTimeMobile("Asia/Tokyo")}
                 </span>
                 <span className="inline-block mx-2">
-                  <span className="text-orange-400">SYD</span> {formatTimeMobile("Australia/Sydney")}
+                  <span className="text-orange-500">SYD</span> {formatTimeMobile("Australia/Sydney")}
                 </span>
                 {/* Duplicate for seamless loop */}
                 <span className="inline-block mx-2">
-                  <span className="text-orange-400">NYC</span> {formatTimeMobile("America/New_York")}
+                  <span className="text-orange-500">NYC</span> {formatTimeMobile("America/New_York")}
                 </span>
                 <span className="inline-block mx-2">
-                  <span className="text-orange-400">LON</span> {formatTimeMobile("Europe/London")}
+                  <span className="text-orange-500">LON</span> {formatTimeMobile("Europe/London")}
                 </span>
                 <span className="inline-block mx-2">
-                  <span className="text-orange-400">TOK</span> {formatTimeMobile("Asia/Tokyo")}
+                  <span className="text-orange-500">TOK</span> {formatTimeMobile("Asia/Tokyo")}
                 </span>
                 <span className="inline-block mx-2">
-                  <span className="text-orange-400">SYD</span> {formatTimeMobile("Australia/Sydney")}
+                  <span className="text-orange-500">SYD</span> {formatTimeMobile("Australia/Sydney")}
                 </span>
               </div>
             </div>
@@ -146,7 +146,7 @@ export function Layout({ children }: LayoutProps) {
           {/* Desktop Layout */}
           <div className="hidden md:flex items-center space-x-8">
             <Link to="/">
-              <h1 className="text-2xl font-bold text-orange-400 font-mono tracking-tight whitespace-nowrap hover:text-orange-300 transition-colors cursor-pointer">
+              <h1 className="text-2xl font-bold text-orange-500 font-mono tracking-tight whitespace-nowrap hover:text-orange-400 transition-colors cursor-pointer">
                 STONK EXCHANGE
               </h1>
             </Link>
@@ -160,7 +160,7 @@ export function Layout({ children }: LayoutProps) {
                     className={cn(
                       "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm transition-all duration-200",
                       isActive
-                        ? "bg-orange-600/20 text-orange-400 border border-orange-500/30"
+                        ? "bg-orange-500/20 text-orange-500 border border-orange-500/30"
                         : "text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"
                     )}
                   >
@@ -177,7 +177,7 @@ export function Layout({ children }: LayoutProps) {
           {/* Mobile Search Icon - Right Side */}
           <button
             onClick={() => setIsSearchModalOpen(true)}
-            className="md:hidden p-2 rounded-md hover:bg-gray-800 text-orange-400 flex-shrink-0"
+            className="md:hidden p-2 rounded-md hover:bg-gray-800 text-orange-500 flex-shrink-0"
           >
             <Search className="w-5 h-5" />
           </button>

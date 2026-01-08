@@ -675,7 +675,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-orange-400">Profile</h1>
+          <h1 className="text-3xl font-bold text-orange-500">Profile</h1>
         </div>
         <WalletConnectionPrompt
           title="Sign In"
@@ -691,7 +691,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-orange-400">Profile</h1>
+          <h1 className="text-3xl font-bold text-orange-500">Profile</h1>
         </div>
         <div className="flex items-center justify-center py-12">
           <div className="text-gray-400">Loading...</div>
@@ -705,7 +705,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-orange-400">Profile</h1>
+          <h1 className="text-3xl font-bold text-orange-500">Profile</h1>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2 space-y-6">
@@ -737,7 +737,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-orange-400">
+        <h1 className="text-3xl font-bold text-orange-500">
           {isOwnProfile
             ? ""
             : `${
@@ -888,7 +888,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                           });
                         }
                       }}
-                      className="hover:text-orange-400 transition-colors"
+                      className="hover:text-orange-500 transition-colors"
                     >
                       <Copy className="w-4 h-4" />
                     </Button>
@@ -907,9 +907,9 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                       onClick={openEditModal}
                       variant="outline"
                       size="sm"
-                      className="text-orange-400"
+                      className="text-orange-500"
                     >
-                      <Edit3 className="w-4 h-4 mr-2 text-orange-400" />
+                      <Edit3 className="w-4 h-4 mr-2 text-orange-500" />
                       Edit Profile
                     </Button>
                     <Button
@@ -929,25 +929,25 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
               {/* Stats (desktop) */}
               <div className="hidden md:flex space-x-8">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-400">
+                  <div className="text-2xl font-bold text-orange-500">
                     {profileStats.deployer.tokensDeployed}
                   </div>
                   <div className="text-sm text-gray-400">Tokens Deployed</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-400">
+                  <div className="text-2xl font-bold text-orange-500">
                     {profileStats.deployer.graduatedTokens}
                   </div>
                   <div className="text-sm text-gray-400">Graduated</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-400">
+                  <div className="text-2xl font-bold text-orange-500">
                     {profileStats.social.likesReceived}
                   </div>
                   <div className="text-sm text-gray-400">Likes Received</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-400">
+                  <div className="text-2xl font-bold text-orange-500">
                     {profileStats.social.commentsMade}
                   </div>
                   <div className="text-sm text-gray-400">Comments</div>
@@ -958,25 +958,25 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
             {/* Stats (mobile) */}
             <div className="mt-4 grid grid-cols-2 gap-4 md:hidden">
               <div className="text-center">
-                <div className="text-xl font-bold text-orange-400">
+                <div className="text-xl font-bold text-orange-500">
                   {profileStats.deployer.tokensDeployed}
                 </div>
                 <div className="text-xs text-gray-400">Tokens</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-orange-400">
+                <div className="text-xl font-bold text-orange-500">
                   {profileStats.deployer.graduatedTokens}
                 </div>
                 <div className="text-xs text-gray-400">Graduated</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-orange-400">
+                <div className="text-xl font-bold text-orange-500">
                   {profileStats.social.likesReceived}
                 </div>
                 <div className="text-xs text-gray-400">Likes</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-orange-400">
+                <div className="text-xl font-bold text-orange-500">
                   {profileStats.social.commentsMade}
                 </div>
                 <div className="text-xs text-gray-400">Comments</div>
@@ -990,7 +990,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                   onClick={openEditModal}
                   variant="outline"
                   size="sm"
-                  className="flex-1 text-orange-400"
+                  className="flex-1 text-orange-500"
                 >
                   <Edit3 className="w-4 h-4 mr-2" /> Edit
                 </Button>
@@ -1051,7 +1051,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                             <span className="text-gray-400">On</span>
                             <Link
                               to={`/token/SEP/${c.token.address}`}
-                              className="px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/30 hover:bg-orange-600/10 flex items-center gap-1"
+                              className="px-2 py-0.5 rounded bg-orange-500/10 text-orange-500 border border-orange-500/30 hover:bg-orange-600/10 flex items-center gap-1"
                             >
                               {c.token.logoUrl ? (
                                 <img
@@ -1060,7 +1060,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                                   className="w-4 h-4 rounded-sm"
                                 />
                               ) : (
-                                <Coins className="w-3.5 h-3.5 text-orange-400" />
+                                <Coins className="w-3.5 h-3.5 text-orange-500" />
                               )}
                               <span>{c.token.symbol}</span>
                             </Link>
@@ -1109,7 +1109,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                                   <div className="flex items-center justify-between mb-1">
                                     <Link
                                       to={`/profile/${r.user.walletAddress}`}
-                                      className="text-xs text-orange-400 hover:text-white font-mono"
+                                      className="text-xs text-orange-500 hover:text-white font-mono"
                                     >
                                       {r.user.username ||
                                         formatAddress(r.user.walletAddress)}
@@ -1145,7 +1145,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                             {!expandedComments.has(c.id) && (
                               <button
                                 onClick={() => toggleExpandReplies(c.id)}
-                                className="text-xs text-orange-400 hover:text-orange-300 transition-colors ml-4 mt-1"
+                                className="text-xs text-orange-500 hover:text-orange-300 transition-colors ml-4 mt-1"
                               >
                                 Show {c.replyCount}
                                 {c.replyCount === 1 ? " reply" : " replies"}
@@ -1195,7 +1195,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                             <span className="text-gray-400 text-xs">On</span>
                             <Link
                               to={`/token/SEP/${r.token.address}`}
-                              className="px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/30 hover:bg-orange-600/10 flex items-center gap-1 text-xs"
+                              className="px-2 py-0.5 rounded bg-orange-500/10 text-orange-500 border border-orange-500/30 hover:bg-orange-600/10 flex items-center gap-1 text-xs"
                             >
                               {r.token.logoUrl ? (
                                 <img
@@ -1204,7 +1204,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                                   className="w-4 h-4 rounded-sm"
                                 />
                               ) : (
-                                <Coins className="w-3.5 h-3.5 text-orange-400" />
+                                <Coins className="w-3.5 h-3.5 text-orange-500" />
                               )}
                               <span>{r.token.symbol}</span>
                             </Link>
@@ -1222,7 +1222,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                               <div className="flex items-center gap-2 text-xs text-gray-400">
                                 <Link
                                   to={`/profile/${r.parentCommentUser.walletAddress}`}
-                                  className="text-orange-400 hover:text-white font-mono"
+                                  className="text-orange-500 hover:text-white font-mono"
                                 >
                                   {r.parentCommentUser.username ||
                                     formatAddress(
@@ -1258,7 +1258,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between text-xs text-gray-400">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-orange-400 font-mono">
+                                  <span className="text-orange-500 font-mono">
                                     {user?.username ||
                                       formatAddress(targetAddress || "")}
                                   </span>

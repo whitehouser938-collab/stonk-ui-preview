@@ -143,14 +143,14 @@ export function TopPerformers() {
       <div className="bg-gray-900 border-b border-orange-500/30 p-2 flex flex-wrap justify-between items-center gap-2">
         <div className="flex items-center space-x-2 sm:space-x-4">
           {/* Desktop View */}
-          <span className="text-orange-400 font-bold whitespace-nowrap hidden md:inline">CRYPTO PERFORMANCE MONITOR</span>
-          <span className="text-orange-400 hidden md:inline whitespace-nowrap">TOP PERFORMERS</span>
-          <span className="text-orange-400 hidden md:inline whitespace-nowrap">REAL-TIME</span>
+          <span className="text-orange-500 font-bold whitespace-nowrap hidden md:inline">CRYPTO PERFORMANCE MONITOR</span>
+          <span className="text-orange-500 hidden md:inline whitespace-nowrap">TOP PERFORMERS</span>
+          <span className="text-orange-500 hidden md:inline whitespace-nowrap">REAL-TIME</span>
 
           {/* Mobile Dropdown View */}
           <div className="md:hidden">
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center space-x-1 text-orange-400 font-bold whitespace-nowrap">
+              <DropdownMenuTrigger className="flex items-center space-x-1 text-orange-500 font-bold whitespace-nowrap">
                 <span>{selectedView}</span>
                 <ChevronDown className="w-4 h-4" />
               </DropdownMenuTrigger>
@@ -163,7 +163,7 @@ export function TopPerformers() {
           </div>
         </div>
         <div className="flex items-center space-x-2 sm:space-x-4">
-          <span className="text-orange-400 whitespace-nowrap">EST: {new Date().toLocaleTimeString('en-US', { timeZone: 'America/New_York' })}</span>
+          <span className="text-orange-500 whitespace-nowrap">EST: {new Date().toLocaleTimeString('en-US', { timeZone: 'America/New_York' })}</span>
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             <span className="text-green-400">LIVE</span>
@@ -176,10 +176,10 @@ export function TopPerformers() {
         <div className="bg-gray-900 border border-gray-700 p-3">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <h2 className="text-base sm:text-xl font-bold text-orange-400 font-mono">LEADERBOARD</h2>
+              <h2 className="text-base sm:text-xl font-bold text-orange-500 font-mono">LEADERBOARD</h2>
               <div className="flex items-center space-x-2 text-xs">
-                <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
-                <span className="text-orange-400 font-mono">LIVE</span>
+                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                <span className="text-orange-500 font-mono">LIVE</span>
               </div>
             </div>
             
@@ -276,7 +276,7 @@ export function TopPerformers() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Vol:</span>
-                  <span className="text-orange-400">{formatNumber(performer.volume)}</span>
+                  <span className="text-orange-500">{formatNumber(performer.volume)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">MCap:</span>
@@ -292,24 +292,24 @@ export function TopPerformers() {
           <Table className="w-full text-xs font-mono min-w-[1200px]">
             <TableHeader>
               <TableRow className="border-b border-gray-700 bg-gray-900">
-                <TableHead className="text-orange-400 p-1 text-xs">RNK</TableHead>
-                <TableHead className="text-orange-400 p-1 text-xs">SYMBOL</TableHead>
-                <TableHead className="text-orange-400 p-1 text-xs">NAME</TableHead>
-                <TableHead className="text-orange-400 p-1 text-xs text-right">PRICE</TableHead>
-                <TableHead className="text-orange-400 p-1 text-xs text-right">1M</TableHead>
-                <TableHead className="text-orange-400 p-1 text-xs text-right">5M</TableHead>
-                <TableHead className="text-orange-400 p-1 text-xs text-right">15M</TableHead>
-                <TableHead className="text-orange-400 p-1 text-xs text-right">1H</TableHead>
-                <TableHead className="text-orange-400 p-1 text-xs text-right">4H</TableHead>
-                <TableHead className="text-orange-400 p-1 text-xs text-right">24H</TableHead>
-                <TableHead className="text-orange-400 p-1 text-xs text-right">7D</TableHead>
-                <TableHead className="text-orange-400 p-1 text-xs text-right">30D</TableHead>
-                <TableHead className="text-orange-400 p-1 text-xs text-right">VOLUME</TableHead>
-                <TableHead className="text-orange-400 p-1 text-xs text-right">VOL%</TableHead>
-                <TableHead className="text-orange-400 p-1 text-xs text-right">MCAP</TableHead>
-                <TableHead className="text-orange-400 p-1 text-xs text-right">HIGH</TableHead>
-                <TableHead className="text-orange-400 p-1 text-xs text-right">LOW</TableHead>
-                <TableHead className="text-orange-400 p-1 text-xs text-right">SUPPLY</TableHead>
+                <TableHead className="text-orange-500 p-1 text-xs">RNK</TableHead>
+                <TableHead className="text-orange-500 p-1 text-xs">SYMBOL</TableHead>
+                <TableHead className="text-orange-500 p-1 text-xs">NAME</TableHead>
+                <TableHead className="text-orange-500 p-1 text-xs text-right">PRICE</TableHead>
+                <TableHead className="text-orange-500 p-1 text-xs text-right">1M</TableHead>
+                <TableHead className="text-orange-500 p-1 text-xs text-right">5M</TableHead>
+                <TableHead className="text-orange-500 p-1 text-xs text-right">15M</TableHead>
+                <TableHead className="text-orange-500 p-1 text-xs text-right">1H</TableHead>
+                <TableHead className="text-orange-500 p-1 text-xs text-right">4H</TableHead>
+                <TableHead className="text-orange-500 p-1 text-xs text-right">24H</TableHead>
+                <TableHead className="text-orange-500 p-1 text-xs text-right">7D</TableHead>
+                <TableHead className="text-orange-500 p-1 text-xs text-right">30D</TableHead>
+                <TableHead className="text-orange-500 p-1 text-xs text-right">VOLUME</TableHead>
+                <TableHead className="text-orange-500 p-1 text-xs text-right">VOL%</TableHead>
+                <TableHead className="text-orange-500 p-1 text-xs text-right">MCAP</TableHead>
+                <TableHead className="text-orange-500 p-1 text-xs text-right">HIGH</TableHead>
+                <TableHead className="text-orange-500 p-1 text-xs text-right">LOW</TableHead>
+                <TableHead className="text-orange-500 p-1 text-xs text-right">SUPPLY</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -381,7 +381,7 @@ export function TopPerformers() {
                   )}>
                     {formatChange(performer.change30d)}%
                   </TableCell>
-                  <TableCell className="p-1 text-right text-orange-400 text-xs">
+                  <TableCell className="p-1 text-right text-orange-500 text-xs">
                     {formatNumber(performer.volume)}
                   </TableCell>
                   <TableCell className={cn(
@@ -412,13 +412,13 @@ export function TopPerformers() {
         <div className="bg-gray-900 p-2 sm:p-3 text-xs font-mono border border-gray-700">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-6 text-xs sm:text-sm">
-              <span className="text-gray-400">TOTAL TRACKED: <span className="text-orange-400">1,247</span></span>
+              <span className="text-gray-400">TOTAL TRACKED: <span className="text-orange-500">1,247</span></span>
               <span className="text-gray-400">AVG GAIN: <span className="text-green-400">+34.2%</span></span>
               <span className="text-gray-400">AVG LOSS: <span className="text-red-400">-18.7%</span></span>
             </div>
             <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-6 text-xs sm:text-sm">
               <span className="text-gray-400">TOTAL VOL: <span className="text-yellow-400">$127.4B</span></span>
-              <span className="text-gray-400">LAST UPDATE: <span className="text-orange-400">{new Date().toLocaleTimeString()}</span></span>
+              <span className="text-gray-400">LAST UPDATE: <span className="text-orange-500">{new Date().toLocaleTimeString()}</span></span>
             </div>
           </div>
         </div>
