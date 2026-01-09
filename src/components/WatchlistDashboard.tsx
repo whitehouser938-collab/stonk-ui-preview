@@ -262,8 +262,8 @@ export function WatchlistDashboard() {
                             {token.chain}
                           </span>
                           {token.graduated && (
-                            <span className="bg-green-600 text-black px-1 py-0.5 rounded text-xs font-mono">
-                              GRAD
+                            <span className="text-green-400 text-xs font-mono">
+                              bond
                             </span>
                           )}
                           {!token.graduated && (

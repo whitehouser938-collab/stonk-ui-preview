@@ -200,7 +200,7 @@ const SearchBar = () => {
                               <div className="flex items-center space-x-1">
                                 <TrendingUp className="w-3 h-3 text-green-400" />
                             <span className="text-green-400 text-xs font-bold font-mono">
-                              GRAD
+                              bond
                             </span>
                               </div>
                             )}

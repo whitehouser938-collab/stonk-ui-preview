@@ -917,8 +917,8 @@ export function MarketsDashboard() {
                         {/* Status Column */}
                         <td className="p-2 text-center">
                           {token.graduated ? (
-                            <span className="bg-green-600 text-black px-1.5 py-0.5 rounded text-xs font-sans font-bold inline-block">
-                              BOND
+                            <span className="text-green-400 text-xs font-sans font-bold">
+                              bond
                             </span>
                           ) : (
                             <div className="w-16 h-2 bg-gray-800 rounded-full overflow-hidden mx-auto">
