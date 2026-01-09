@@ -138,7 +138,7 @@ export function TopPerformers() {
   });
 
   return (
-    <div className="text-gray-100 text-xs font-mono">
+    <div className="text-gray-100 text-xs">
       {/* Top Time Bar */}
       <div className="bg-bg-card border-b border-orange-500/30 p-2 flex flex-wrap justify-between items-center gap-2">
         <div className="flex items-center space-x-2 sm:space-x-4">
@@ -176,10 +176,10 @@ export function TopPerformers() {
         <div className="bg-bg-card border border-gray-700 p-3">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <h2 className="text-base sm:text-xl font-bold text-orange-500 font-mono">LEADERBOARD</h2>
+              <h2 className="text-base sm:text-xl font-bold text-orange-500">LEADERBOARD</h2>
               <div className="flex items-center space-x-2 text-xs">
                 <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-                <span className="text-orange-500 font-mono">LIVE</span>
+                <span className="text-orange-500">LIVE</span>
               </div>
             </div>
             
@@ -240,8 +240,8 @@ export function TopPerformers() {
                   <span className="text-yellow-400 font-bold text-sm font-mono">#{index + 1}</span>
                   <span className="text-xs">{performer.icon}</span>
                   <div>
-                    <div className="text-white font-bold text-sm font-mono">{performer.symbol}</div>
-                    <div className="text-gray-400 text-xs truncate font-mono">{performer.name}</div>
+                    <div className="text-white font-bold text-sm">{performer.symbol}</div>
+                    <div className="text-gray-400 text-xs truncate">{performer.name}</div>
                   </div>
                 </div>
                 <div className="text-right">
@@ -255,11 +255,11 @@ export function TopPerformers() {
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+              <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="flex justify-between">
                   <span className="text-gray-400">24H:</span>
                   <span className={cn(
-                    "font-bold",
+                    "font-bold font-mono",
                     performer.change24h >= 0 ? "text-green-400" : "text-red-400"
                   )}>
                     {formatChange(performer.change24h)}%
@@ -268,7 +268,7 @@ export function TopPerformers() {
                 <div className="flex justify-between">
                   <span className="text-gray-400">7D:</span>
                   <span className={cn(
-                    "font-bold",
+                    "font-bold font-mono",
                     performer.change7d >= 0 ? "text-green-400" : "text-red-400"
                   )}>
                     {formatChange(performer.change7d)}%
@@ -276,11 +276,11 @@ export function TopPerformers() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Vol:</span>
-                  <span className="text-orange-500">{formatNumber(performer.volume)}</span>
+                  <span className="text-orange-500 font-mono">{formatNumber(performer.volume)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">MCap:</span>
-                  <span className="text-white">{formatNumber(performer.marketCap)}</span>
+                  <span className="text-white font-mono">{formatNumber(performer.marketCap)}</span>
                 </div>
               </div>
             </Card>
@@ -289,7 +289,7 @@ export function TopPerformers() {
 
         {/* Desktop Table View */}
         <div className="hidden md:block bg-bg-card border border-gray-700 overflow-auto">
-          <Table className="w-full text-xs font-mono min-w-[1200px]">
+          <Table className="w-full text-xs min-w-[1200px]">
             <TableHeader>
               <TableRow className="border-b border-gray-700 bg-bg-card">
                 <TableHead className="text-orange-500 p-1 text-xs">RNK</TableHead>
@@ -318,7 +318,7 @@ export function TopPerformers() {
                   key={performer.symbol} 
                   className="border-b border-gray-800 hover:bg-bg-card-hover/30 transition-colors"
                 >
-                  <TableCell className="p-1 text-yellow-400 font-bold">
+                  <TableCell className="p-1 text-yellow-400 font-bold font-mono">
                     {index + 1}
                   </TableCell>
                   <TableCell className="p-1">
@@ -330,76 +330,76 @@ export function TopPerformers() {
                   <TableCell className="p-1 text-gray-400 text-xs max-w-[80px] truncate">
                     {performer.name}
                   </TableCell>
-                  <TableCell className="p-1 text-right text-white font-bold">
+                  <TableCell className="p-1 text-right text-white font-bold font-mono">
                     ${formatPrice(performer.price)}
                   </TableCell>
                   <TableCell className={cn(
-                    "p-1 text-right font-bold text-xs",
+                    "p-1 text-right font-bold text-xs font-mono",
                     performer.change1m >= 0 ? "text-green-400" : "text-red-400"
                   )}>
                     {formatChange(performer.change1m)}%
                   </TableCell>
                   <TableCell className={cn(
-                    "p-1 text-right font-bold text-xs",
+                    "p-1 text-right font-bold text-xs font-mono",
                     performer.change5m >= 0 ? "text-green-400" : "text-red-400"
                   )}>
                     {formatChange(performer.change5m)}%
                   </TableCell>
                   <TableCell className={cn(
-                    "p-1 text-right font-bold text-xs",
+                    "p-1 text-right font-bold text-xs font-mono",
                     performer.change15m >= 0 ? "text-green-400" : "text-red-400"
                   )}>
                     {formatChange(performer.change15m)}%
                   </TableCell>
                   <TableCell className={cn(
-                    "p-1 text-right font-bold text-xs",
+                    "p-1 text-right font-bold text-xs font-mono",
                     performer.change1h >= 0 ? "text-green-400" : "text-red-400"
                   )}>
                     {formatChange(performer.change1h)}%
                   </TableCell>
                   <TableCell className={cn(
-                    "p-1 text-right font-bold text-xs",
+                    "p-1 text-right font-bold text-xs font-mono",
                     performer.change4h >= 0 ? "text-green-400" : "text-red-400"
                   )}>
                     {formatChange(performer.change4h)}%
                   </TableCell>
                   <TableCell className={cn(
-                    "p-1 text-right font-bold",
+                    "p-1 text-right font-bold font-mono",
                     performer.change24h >= 0 ? "text-green-400" : "text-red-400"
                   )}>
                     {formatChange(performer.change24h)}%
                   </TableCell>
                   <TableCell className={cn(
-                    "p-1 text-right font-bold",
+                    "p-1 text-right font-bold font-mono",
                     performer.change7d >= 0 ? "text-green-400" : "text-red-400"
                   )}>
                     {formatChange(performer.change7d)}%
                   </TableCell>
                   <TableCell className={cn(
-                    "p-1 text-right font-bold text-xs",
+                    "p-1 text-right font-bold text-xs font-mono",
                     performer.change30d >= 0 ? "text-green-400" : "text-red-400"
                   )}>
                     {formatChange(performer.change30d)}%
                   </TableCell>
-                  <TableCell className="p-1 text-right text-orange-500 text-xs">
+                  <TableCell className="p-1 text-right text-orange-500 text-xs font-mono">
                     {formatNumber(performer.volume)}
                   </TableCell>
                   <TableCell className={cn(
-                    "p-1 text-right text-xs",
+                    "p-1 text-right text-xs font-mono",
                     performer.volumeChange >= 0 ? "text-green-400" : "text-red-400"
                   )}>
                     {formatChange(performer.volumeChange)}%
                   </TableCell>
-                  <TableCell className="p-1 text-right text-white text-xs">
+                  <TableCell className="p-1 text-right text-white text-xs font-mono">
                     {formatNumber(performer.marketCap)}
                   </TableCell>
-                  <TableCell className="p-1 text-right text-gray-400 text-xs">
+                  <TableCell className="p-1 text-right text-gray-400 text-xs font-mono">
                     ${formatPrice(performer.highDay)}
                   </TableCell>
-                  <TableCell className="p-1 text-right text-gray-400 text-xs">
+                  <TableCell className="p-1 text-right text-gray-400 text-xs font-mono">
                     ${formatPrice(performer.lowDay)}
                   </TableCell>
-                  <TableCell className="p-1 text-right text-gray-400 text-xs">
+                  <TableCell className="p-1 text-right text-gray-400 text-xs font-mono">
                     {formatNumber(performer.circulatingSupply)}
                   </TableCell>
                 </TableRow>
@@ -409,16 +409,16 @@ export function TopPerformers() {
         </div>
 
         {/* Bottom Stats Bar */}
-        <div className="bg-bg-card p-2 sm:p-3 text-xs font-mono border border-gray-700">
+        <div className="bg-bg-card p-2 sm:p-3 text-xs border border-gray-700">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-6 text-xs sm:text-sm">
-              <span className="text-gray-400">TOTAL TRACKED: <span className="text-orange-500">1,247</span></span>
-              <span className="text-gray-400">AVG GAIN: <span className="text-green-400">+34.2%</span></span>
-              <span className="text-gray-400">AVG LOSS: <span className="text-red-400">-18.7%</span></span>
+              <span className="text-gray-400">TOTAL TRACKED: <span className="text-orange-500 font-mono">1,247</span></span>
+              <span className="text-gray-400">AVG GAIN: <span className="text-green-400 font-mono">+34.2%</span></span>
+              <span className="text-gray-400">AVG LOSS: <span className="text-red-400 font-mono">-18.7%</span></span>
             </div>
             <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-6 text-xs sm:text-sm">
-              <span className="text-gray-400">TOTAL VOL: <span className="text-yellow-400">$127.4B</span></span>
-              <span className="text-gray-400">LAST UPDATE: <span className="text-orange-500">{new Date().toLocaleTimeString()}</span></span>
+              <span className="text-gray-400">TOTAL VOL: <span className="text-yellow-400 font-mono">$127.4B</span></span>
+              <span className="text-gray-400">LAST UPDATE: <span className="text-orange-500 font-mono">{new Date().toLocaleTimeString()}</span></span>
             </div>
           </div>
         </div>

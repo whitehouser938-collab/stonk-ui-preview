@@ -423,13 +423,13 @@ export function MarketsDashboard() {
   };
 
   return (
-    <div className="text-gray-100 text-xs font-mono">
+    <div className="text-gray-100 text-xs">
       {/* MOBILE VIEW */}
       <div className="lg:hidden">
         {/* Trending Section - Horizontal Scroll */}
         <div>
           <div className="flex items-center justify-between p-3">
-            <h2 className="text-white font-bold text-sm font-mono">
+            <h2 className="text-white font-bold text-sm">
               Now trending <span className="rocket-blink">🚀</span>
             </h2>
           </div>
@@ -503,7 +503,7 @@ export function MarketsDashboard() {
                   {/* Token Info */}
                   <div className="p-3">
                     <div className="mb-1">
-                      <span className="text-white font-bold text-sm truncate font-mono">
+                      <span className="text-white font-bold text-sm truncate">
                         {token.tokenName && token.tokenName.length > 12
                           ? `${token.tokenName.slice(0, 12)}...`
                           : token.tokenName}
@@ -719,13 +719,13 @@ export function MarketsDashboard() {
                   <div className="flex-1 min-w-0 flex flex-col justify-center">
                     {/* Full Name */}
                     <div className="mb-1">
-                      <span className="text-white font-bold text-sm truncate font-mono">
+                      <span className="text-white font-bold text-sm truncate">
                         {token.tokenName}
                       </span>
                     </div>
 
                     {/* Symbol */}
-                    <div className="text-gray-400 text-[10px] mb-2 font-mono">
+                    <div className="text-gray-400 text-[10px] mb-2">
                       {token.tokenSymbol}
                     </div>
 
@@ -857,7 +857,7 @@ export function MarketsDashboard() {
                       <div className="flex flex-col flex-1">
                         {/* Row 1: Symbol */}
                         <div className="mb-0.5">
-                          <span className="text-white font-bold text-sm max-w-[120px] overflow-hidden text-ellipsis whitespace-nowrap font-mono">
+                          <span className="text-white font-bold text-sm max-w-[120px] overflow-hidden text-ellipsis whitespace-nowrap">
                             {token.tokenSymbol}
                           </span>
                         </div>

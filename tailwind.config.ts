@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import { theme } from "./src/styles/theme";
 
 export default {
 	darkMode: ["class"],
@@ -18,6 +19,12 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				// Read from theme.ts - Inter is default (sans), mono only for numbers/times/filters
+				// Parse the font string: "Inter, ui-sans-serif, ..." -> ['Inter', 'ui-sans-serif', ...]
+				sans: theme.fonts.sans.split(',').map(f => f.trim().replace(/^["']|["']$/g, '')),
+				mono: theme.fonts.mono.split(',').map(f => f.trim().replace(/^["']|["']$/g, '')),
+			},
 			colors: {
 				// Theme colors - centralized from theme.ts
 				'bg-main': '#121216', // Softer black for main content

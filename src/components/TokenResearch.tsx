@@ -147,7 +147,7 @@ export function TokenResearch() {
   const chartAvg = (chartMax + chartMin) / 2;
 
   return (
-    <div className="text-gray-100 text-xs font-mono">
+    <div className="text-gray-100 text-xs">
       {/* Main Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 p-1">
         {/* Left Column - Stock Overview */}
