@@ -59,10 +59,10 @@ export function Layout({ children }: LayoutProps) {
       // After collapse, set up interval to re-expand every 10 seconds
       expandIntervalRef.current = setInterval(() => {
         setIsHeaderCollapsed(false);
-        // Collapse again after 2 seconds
+        // Collapse again after 5 seconds (keep expanded for 5 full seconds)
         setTimeout(() => {
           setIsHeaderCollapsed(true);
-        }, 2000);
+        }, 5000);
       }, 10000);
     }, 2000);
 
@@ -98,7 +98,7 @@ export function Layout({ children }: LayoutProps) {
     <div className="min-h-screen lg:min-h-screen mobile-viewport-fix bg-bg-main text-gray-100">
       {/* Header */}
       <header className="bg-bg-header/95 backdrop-blur-sm z-40">
-        <div className="flex items-center justify-between px-3 sm:px-6 py-2 sm:py-4">
+        <div className="flex items-center justify-between px-2 sm:px-4 py-2 sm:py-4">
           {/* Mobile Layout */}
           <div className="md:hidden flex items-center space-x-2 flex-1 min-w-0">
             {/* Hamburger menu removed - navigation now at bottom */}
