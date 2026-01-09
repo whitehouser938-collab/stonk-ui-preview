@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAtom } from "jotai";
 import {
   BarChart,
@@ -41,6 +41,7 @@ export function Layout({ children }: LayoutProps) {
   const { isConnected } = useAppKitAccount({ namespace: "eip155" });
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
+  const expandIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
   // Check if we're on a token page
   const isTokenPage = location.pathname.match(/^\/token\/[^/]+\/[^/]+$/);
@@ -49,12 +50,28 @@ export function Layout({ children }: LayoutProps) {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
-  // Collapse header text after 2 seconds on mobile
+  // Collapse header text after 2 seconds on mobile, then re-expand every 10 seconds
   useEffect(() => {
+    // Initial collapse after 2 seconds
     const collapseTimer = setTimeout(() => {
       setIsHeaderCollapsed(true);
+      
+      // After collapse, set up interval to re-expand every 10 seconds
+      expandIntervalRef.current = setInterval(() => {
+        setIsHeaderCollapsed(false);
+        // Collapse again after 2 seconds
+        setTimeout(() => {
+          setIsHeaderCollapsed(true);
+        }, 2000);
+      }, 10000);
     }, 2000);
-    return () => clearTimeout(collapseTimer);
+
+    return () => {
+      clearTimeout(collapseTimer);
+      if (expandIntervalRef.current) {
+        clearInterval(expandIntervalRef.current);
+      }
+    };
   }, []);
 
   const formatTimeMobile = (timezone: string) => {
