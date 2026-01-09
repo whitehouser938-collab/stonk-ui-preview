@@ -195,11 +195,31 @@ export function MarketsDashboard() {
   const [volumePeriod, setVolumePeriod] = useState<"5m" | "1h" | "6h" | "24h">(
     "24h"
   );
-  const [activeFilter, setActiveFilter] = useState<FilterType>("market_cap");
   const [searchParams, setSearchParams] = useSearchParams();
   const viewMode = (searchParams.get("view") === "table" ? "list" : "card") as
     | "card"
     | "list";
+  
+  // Initialize filter from URL or default to "market_cap"
+  const getFilterFromUrl = (): FilterType => {
+    const filterParam = searchParams.get("filter");
+    const validFilters: FilterType[] = [
+      "age",
+      "last_comment",
+      "last_trade",
+      "new",
+      "graduated",
+      "market_cap",
+      "liquidity",
+    ];
+    if (filterParam && validFilters.includes(filterParam as FilterType)) {
+      return filterParam as FilterType;
+    }
+    return "market_cap";
+  };
+  
+  // Derive activeFilter from URL params
+  const activeFilter = getFilterFromUrl();
   const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
   const [isStickyRowActive, setIsStickyRowActive] = useState(false);
   const stickyRowRef = useRef<HTMLDivElement>(null);
@@ -211,12 +231,21 @@ export function MarketsDashboard() {
   const { address, isConnected } = useAppKitAccount({ namespace: "eip155" });
   const { isInWatchlist, toggleWatchlist } = useWatchlist(address);
 
+  const handleFilterChange = (filter: FilterType) => {
+    // Preserve existing search params (like view) and update filter
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set("filter", filter);
+    setSearchParams(newParams, { replace: true });
+  };
+
   const handleViewModeChange = (mode: "card" | "list") => {
+    const newParams = new URLSearchParams(searchParams);
     if (mode === "list") {
-      setSearchParams({ view: "table" });
+      newParams.set("view", "table");
     } else {
-      setSearchParams({});
+      newParams.delete("view");
     }
+    setSearchParams(newParams, { replace: true });
   };
 
 
@@ -609,7 +638,7 @@ export function MarketsDashboard() {
               }}
             >
                 <button
-                  onClick={() => setActiveFilter("age")}
+                  onClick={() => handleFilterChange("age")}
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "age"
                       ? "bg-orange-500 text-black"
@@ -619,7 +648,7 @@ export function MarketsDashboard() {
                   AGE
                 </button>
                 <button
-                  onClick={() => setActiveFilter("last_comment")}
+                  onClick={() => handleFilterChange("last_comment")}
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "last_comment"
                       ? "bg-orange-500 text-black"
@@ -629,7 +658,7 @@ export function MarketsDashboard() {
                   LAST COMMENT
                 </button>
                 <button
-                  onClick={() => setActiveFilter("last_trade")}
+                  onClick={() => handleFilterChange("last_trade")}
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "last_trade"
                       ? "bg-orange-500 text-black"
@@ -639,7 +668,7 @@ export function MarketsDashboard() {
                   LAST TRADE
                 </button>
                 <button
-                  onClick={() => setActiveFilter("new")}
+                  onClick={() => handleFilterChange("new")}
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "new"
                       ? "bg-orange-500 text-black"
@@ -649,7 +678,7 @@ export function MarketsDashboard() {
                   NEW
                 </button>
                 <button
-                  onClick={() => setActiveFilter("graduated")}
+                  onClick={() => handleFilterChange("graduated")}
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "graduated"
                       ? "bg-orange-500 text-black"
@@ -659,7 +688,7 @@ export function MarketsDashboard() {
                   GRADUATED
                 </button>
                 <button
-                  onClick={() => setActiveFilter("market_cap")}
+                  onClick={() => handleFilterChange("market_cap")}
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "market_cap"
                       ? "bg-orange-500 text-black"
@@ -669,7 +698,7 @@ export function MarketsDashboard() {
                   MARKET CAP
                 </button>
                 <button
-                  onClick={() => setActiveFilter("liquidity")}
+                  onClick={() => handleFilterChange("liquidity")}
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "liquidity"
                       ? "bg-orange-500 text-black"
