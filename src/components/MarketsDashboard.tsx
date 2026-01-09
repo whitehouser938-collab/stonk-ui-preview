@@ -336,27 +336,20 @@ export function MarketsDashboard() {
           updatedMarketsOverview.map((market) => [market.tokenAddress, market])
         );
 
-        const existingTokensMap = new Map(
-          prev.map((token) => [token.tokenAddress, token])
-        );
-
-        // Merge existing with updates
-        updatedMarketsMap.forEach((updatedMarket, tokenAddress) => {
-          const existing = existingTokensMap.get(tokenAddress);
-          if (existing) {
-            existingTokensMap.set(tokenAddress, {
-              ...existing,
+        // Only update existing tokens - do not add new tokens from websocket updates
+        // New tokens should only appear when fetching the appropriate page
+        return prev.map((token) => {
+          const updatedMarket = updatedMarketsMap.get(token.tokenAddress);
+          if (updatedMarket) {
+            // Update existing token with fresh data from websocket
+            return {
+              ...token,
               ...updatedMarket,
-            });
-          } else {
-            existingTokensMap.set(tokenAddress, updatedMarket);
+            };
           }
+          // Return token unchanged if no update available
+          return token;
         });
-
-        // Convert back to array and sort by totalVolume descending
-        return Array.from(existingTokensMap.values()).sort(
-          (a, b) => b.totalVolume - a.totalVolume
-        );
       });
     },
     []
