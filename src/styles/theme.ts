@@ -54,6 +54,15 @@ export const theme = {
   },
   
   fonts: {
+    // SOURCE OF TRUTH: These fonts are used throughout the application
+    // - sans (Inter): Default font for ALL text (configured in index.css as --font-sans)
+    // - mono: ONLY for numbers, times in scrolling banner, and filter buttons (use font-mono class)
+    // 
+    // These values are synced with:
+    // - index.css CSS variables (--font-sans, --font-mono)
+    // - tailwind.config.ts fontFamily configuration
+    // 
+    // To change fonts: Update here, then sync to index.css and tailwind.config.ts
     mono: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
     sans: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
   },

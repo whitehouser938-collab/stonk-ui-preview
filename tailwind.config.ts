@@ -20,10 +20,12 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				// Read from theme.ts - Inter is default (sans), mono only for numbers/times/filters
-				// Parse the font string: "Inter, ui-sans-serif, ..." -> ['Inter', 'ui-sans-serif', ...]
-				sans: theme.fonts.sans.split(',').map(f => f.trim().replace(/^["']|["']$/g, '')),
-				mono: theme.fonts.mono.split(',').map(f => f.trim().replace(/^["']|["']$/g, '')),
+				// Fonts read from CSS variables (--font-sans, --font-mono) defined in index.css
+				// SOURCE OF TRUTH: src/styles/theme.ts
+				// Inter (sans) is default - applies to EVERYTHING automatically
+				// Mono only for numbers, times in scrolling banner, and filter buttons (use font-mono class)
+				sans: ['var(--font-sans)'],
+				mono: ['var(--font-mono)'],
 			},
 			colors: {
 				// Theme colors - centralized from theme.ts
@@ -32,6 +34,7 @@ export default {
 				'bg-footer': '#000000', // Pure black for footer
 				'bg-card': '#1a1a1e', // Card background
 				'bg-card-hover': '#1f1f23', // Card hover state
+				'white-soft': '#f6f6f6', // rgb(246, 246, 246) - softer white for token names, times, and numbers
 				
 				// Existing shadcn/ui colors
 				border: 'hsl(var(--border))',

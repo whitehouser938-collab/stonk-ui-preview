@@ -503,7 +503,7 @@ export function MarketsDashboard() {
                   {/* Token Info */}
                   <div className="p-3">
                     <div className="mb-1">
-                      <span className="text-white font-bold text-sm truncate">
+                      <span className="text-white-soft font-bold text-sm truncate">
                         {token.tokenName && token.tokenName.length > 12
                           ? `${token.tokenName.slice(0, 12)}...`
                           : token.tokenName}
@@ -530,7 +530,7 @@ export function MarketsDashboard() {
                             : "Unknown")}
                       </a>
                       <span className="text-gray-400 text-[10px]">•</span>
-                      <span className="text-gray-400 text-[10px]">
+                      <span className="text-white-soft text-[10px]">
                         {formatTokenAge(
                           token.deploymentTimestamp || "",
                           currentTime
@@ -545,7 +545,7 @@ export function MarketsDashboard() {
                     )}
                     <div className="text-gray-400 text-[11px] mb-2">
                       <span className="text-orange-500">market cap: </span>
-                      <span className="text-white font-bold font-mono">
+                      <span className="text-white-soft font-bold font-mono">
                         ${formatNumber(token.currentPrice * 1_000_000_000)}
                       </span>
                     </div>
@@ -719,7 +719,7 @@ export function MarketsDashboard() {
                   <div className="flex-1 min-w-0 flex flex-col justify-center">
                     {/* Full Name */}
                     <div className="mb-1">
-                      <span className="text-white font-bold text-sm truncate">
+                      <span className="text-white-soft font-bold text-sm truncate">
                         {token.tokenName}
                       </span>
                     </div>
@@ -750,7 +750,7 @@ export function MarketsDashboard() {
                             : "Unknown")}
                       </a>
                       <span className="text-gray-400 text-[10px]">•</span>
-                      <span className="text-gray-400 text-[10px]">
+                      <span className="text-white-soft text-[10px]">
                         {formatTokenAge(
                           token.deploymentTimestamp || "",
                           currentTime
@@ -791,7 +791,7 @@ export function MarketsDashboard() {
                     {token.graduated && (
                       <div className="text-gray-400 text-xs font-mono">
                         <span className="text-orange-500">MC: </span>
-                        <span className="text-white font-semibold">
+                        <span className="text-white-soft font-semibold">
                           ${formatNumber(token.currentPrice * 1_000_000_000)}
                         </span>
                       </div>
@@ -874,7 +874,7 @@ export function MarketsDashboard() {
                     <div className="flex flex-col items-end gap-0.5 ml-2 flex-shrink-0">
                       {/* Top: Price, 1H, 24H */}
                       <div className="flex items-center gap-2">
-                        <div className="text-white font-mono text-xs">
+                        <div className="text-white-soft font-mono text-xs">
                           {formatPrice(token.currentPrice)}
                         </div>
                         <span
@@ -892,19 +892,19 @@ export function MarketsDashboard() {
                       <div className="flex items-center gap-1 text-[10px]">
                         <span className="px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[60px] text-center">
                           <span className="text-white">LIQ </span>
-                          <span className="text-white">
+                          <span className="text-white-soft">
                             ${formatNumber(token.totalVolume * 0.3)}
                           </span>
                         </span>
                         <span className="px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[60px] text-center">
                           <span className="text-white">VOL </span>
-                          <span className="text-white">
+                          <span className="text-white-soft">
                             ${formatNumber(token.totalVolume)}
                           </span>
                         </span>
                         <span className="px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[68px] text-center">
                           <span className="text-white">MCAP </span>
-                          <span className="text-white">
+                          <span className="text-white-soft">
                             ${formatNumber(token.currentPrice * 1_000_000_000)}
                           </span>
                         </span>
@@ -1085,13 +1085,13 @@ export function MarketsDashboard() {
                             )}
                           </div>
                         </td>
-                        <td className="p-1 text-gray-400 text-xs max-w-[150px] truncate">
+                        <td className="p-1 text-white-soft text-xs max-w-[150px] truncate">
                           {token.tokenName}
                         </td>
-                        <td className="p-1 text-right text-white font-mono">
+                        <td className="p-1 text-right text-white-soft font-mono">
                           {`$${Number(token.currentPrice).toFixed(6)}`}
                         </td>
-                        <td className="p-1 text-right text-gray-400 hidden md:table-cell">
+                        <td className="p-1 text-right text-white-soft hidden md:table-cell">
                           {formatNumber(token.currentPrice * 1_000_000_000)}
                         </td>
                         <td
@@ -1122,10 +1122,10 @@ export function MarketsDashboard() {
                         >
                           {formatPriceChange(token.priceChange5m).text}
                         </td>
-                        <td className="p-1 text-right text-gray-400 hidden md:table-cell">
+                        <td className="p-1 text-right text-white-soft hidden md:table-cell">
                           {formatNumber(token.totalVolume)}
                         </td>
-                        <td className="p-1 text-right text-gray-400 hidden md:table-cell">
+                        <td className="p-1 text-right text-white-soft hidden md:table-cell">
                           {formatTokenAge(
                             token.deploymentTimestamp || "",
                             currentTime
@@ -1274,10 +1274,10 @@ export function MarketsDashboard() {
                                 </span>
                               </div>
                             </td>
-                            <td className="p-1 text-right text-gray-400">
+                            <td className="p-1 text-right text-white-soft">
                               {formatNumber(token.currentPrice * 1_000_000_000)}
                             </td>
-                            <td className="p-1 text-right text-gray-400">
+                            <td className="p-1 text-right text-white-soft">
                               {formatShortSince(
                                 token.graduationTimestamp,
                                 currentTime
@@ -1369,10 +1369,10 @@ export function MarketsDashboard() {
                             <td className="p-1 text-right text-green-400">
                               {token.progress?.toFixed(1) ?? "0.0"}%
                             </td>
-                            <td className="p-1 text-right text-gray-400">
+                            <td className="p-1 text-right text-white-soft">
                               {formatNumber(token.totalVolume)}
                             </td>
-                            <td className="p-1 text-right text-gray-400">
+                            <td className="p-1 text-right text-white-soft">
                               {formatNumber(token.currentPrice * 1_000_000_000)}
                             </td>
                           </tr>
