@@ -22,7 +22,7 @@ export default {
 			fontFamily: {
 				// Fonts read from CSS variables (--font-sans, --font-mono) defined in index.css
 				// SOURCE OF TRUTH: src/styles/theme.ts
-				// Inter (sans) is default - applies to EVERYTHING automatically
+				// sans is default - applies to EVERYTHING automatically
 				// Mono only for numbers, times in scrolling banner, and filter buttons (use font-mono class)
 				sans: ['var(--font-sans)'],
 				mono: ['var(--font-mono)'],

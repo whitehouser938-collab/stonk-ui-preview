@@ -429,7 +429,7 @@ export function MarketsDashboard() {
         {/* Trending Section - Horizontal Scroll */}
         <div>
           <div className="flex items-center justify-between p-3">
-            <h2 className="text-white font-bold text-sm">
+            <h2 className="text-white font-bold text-base font-sans">
               Now trending <span className="rocket-blink">🚀</span>
             </h2>
           </div>
@@ -477,7 +477,7 @@ export function MarketsDashboard() {
                       </div>
                     )}
                     {/* Volume and Price Change overlay */}
-                    <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-[10px] flex items-center gap-2">
+                    <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-xs font-sans flex items-center gap-2">
                       <div>
                         <span className="text-gray-400">vol: </span>
                         <span className="text-white font-bold">
@@ -503,7 +503,7 @@ export function MarketsDashboard() {
                   {/* Token Info */}
                   <div className="p-3">
                     <div className="mb-1">
-                      <span className="text-white-soft font-bold text-sm truncate">
+                      <span className="text-white-soft font-bold text-sm font-sans truncate">
                         {token.tokenName && token.tokenName.length > 12
                           ? `${token.tokenName.slice(0, 12)}...`
                           : token.tokenName}
@@ -522,15 +522,15 @@ export function MarketsDashboard() {
                       <a
                         href={`/profile/${token.deployerAddress || ""}`}
                         onClick={(e) => e.stopPropagation()}
-                        className="text-gray-400 text-[10px] truncate font-mono underline hover:text-white"
+                        className="text-gray-400 text-xs font-sans truncate underline hover:text-white"
                       >
                         {token.username ||
                           (token.deployerAddress
                             ? formatAddress(token.deployerAddress)
                             : "Unknown")}
                       </a>
-                      <span className="text-gray-400 text-[10px]">•</span>
-                      <span className="text-white-soft text-[10px]">
+                      <span className="text-gray-400 text-xs">•</span>
+                      <span className="text-white-soft text-xs font-sans">
                         {formatTokenAge(
                           token.deploymentTimestamp || "",
                           currentTime
@@ -539,13 +539,13 @@ export function MarketsDashboard() {
                     </div>
                     {/* Description */}
                     {token.description && (
-                      <div className="text-gray-400 text-[10px] mb-2 line-clamp-2">
+                      <div className="text-gray-400 text-xs font-sans mb-2 line-clamp-2">
                         {token.description}
                       </div>
                     )}
-                    <div className="text-gray-400 text-[11px] mb-2">
+                    <div className="text-gray-400 text-xs font-sans mb-2">
                       <span className="text-orange-500">market cap: </span>
-                      <span className="text-white-soft font-bold font-mono">
+                      <span className="text-white-soft font-bold">
                         ${formatNumber(token.currentPrice * 1_000_000_000)}
                       </span>
                     </div>
@@ -719,13 +719,13 @@ export function MarketsDashboard() {
                   <div className="flex-1 min-w-0 flex flex-col justify-center">
                     {/* Full Name */}
                     <div className="mb-1">
-                      <span className="text-white-soft font-bold text-sm truncate">
+                      <span className="text-white-soft font-bold text-sm font-sans truncate">
                         {token.tokenName}
                       </span>
                     </div>
 
                     {/* Symbol */}
-                    <div className="text-gray-400 text-[10px] mb-2">
+                    <div className="text-gray-400 text-sm font-sans mb-2">
                       {token.tokenSymbol}
                     </div>
 
@@ -742,15 +742,15 @@ export function MarketsDashboard() {
                       <a
                         href={`/profile/${token.deployerAddress || ""}`}
                         onClick={(e) => e.stopPropagation()}
-                        className="text-gray-400 text-[10px] truncate font-mono underline hover:text-white"
+                        className="text-gray-400 text-xs font-sans truncate underline hover:text-white"
                       >
                         {token.username ||
                           (token.deployerAddress
                             ? formatAddress(token.deployerAddress)
                             : "Unknown")}
                       </a>
-                      <span className="text-gray-400 text-[10px]">•</span>
-                      <span className="text-white-soft text-[10px]">
+                      <span className="text-gray-400 text-xs">•</span>
+                      <span className="text-white-soft text-xs font-sans">
                         {formatTokenAge(
                           token.deploymentTimestamp || "",
                           currentTime
@@ -762,10 +762,10 @@ export function MarketsDashboard() {
                     {!token.graduated && (
                       <div className="w-full mb-2">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-gray-400 text-[10px]">
+                          <span className="text-gray-400 text-xs font-sans">
                             Progress
                           </span>
-                          <span className="text-white text-[10px] font-semibold">
+                          <span className="text-white text-xs font-semibold font-sans">
                             TODO%
                           </span>
                         </div>
@@ -782,14 +782,14 @@ export function MarketsDashboard() {
 
                     {/* Description */}
                     {token.description && (
-                      <div className="text-gray-400 text-[10px] mb-2 line-clamp-2">
+                      <div className="text-gray-400 text-xs font-sans mb-2 line-clamp-2">
                         {token.description}
                       </div>
                     )}
 
                     {/* Market Cap - Only for Graduated Tokens */}
                     {token.graduated && (
-                      <div className="text-gray-400 text-xs font-mono">
+                      <div className="text-gray-400 text-xs font-sans">
                         <span className="text-orange-500">MC: </span>
                         <span className="text-white-soft font-semibold">
                           ${formatNumber(token.currentPrice * 1_000_000_000)}
@@ -857,12 +857,12 @@ export function MarketsDashboard() {
                       <div className="flex flex-col flex-1">
                         {/* Row 1: Symbol */}
                         <div className="mb-0.5">
-                          <span className="text-white font-bold text-sm max-w-[120px] overflow-hidden text-ellipsis whitespace-nowrap">
+                          <span className="text-white font-bold text-sm font-sans max-w-[120px] overflow-hidden text-ellipsis whitespace-nowrap">
                             {token.tokenSymbol}
                           </span>
                         </div>
                         {/* Row 2: Token Name */}
-                        <div className="text-gray-400 text-[11px] truncate">
+                        <div className="text-gray-400 text-sm font-sans truncate">
                           {token.tokenName && token.tokenName.length > 12
                             ? `${token.tokenName.slice(0, 12)}...`
                             : token.tokenName}
@@ -874,22 +874,22 @@ export function MarketsDashboard() {
                     <div className="flex flex-col items-end gap-0.5 ml-2 flex-shrink-0">
                       {/* Top: Price, 1H, 24H */}
                       <div className="flex items-center gap-2">
-                        <div className="text-white-soft font-mono text-xs">
+                        <div className="text-white-soft text-xs font-sans">
                           {formatPrice(token.currentPrice)}
                         </div>
                         <span
-                          className={`${priceChange1h.color} text-[11px] font-semibold font-mono`}
+                          className={`${priceChange1h.color} text-xs font-semibold font-sans`}
                         >
                           1H {priceChange1h.text}
                         </span>
                         <span
-                          className={`${priceChange24h.color} text-[11px] font-semibold font-mono`}
+                          className={`${priceChange24h.color} text-xs font-semibold font-sans`}
                         >
                           24H {priceChange24h.text}
                         </span>
                       </div>
                       {/* Bottom: Stats in boxes */}
-                      <div className="flex items-center gap-1 text-[10px]">
+                      <div className="flex items-center gap-1 text-xs font-sans">
                         <span className="px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[60px] text-center">
                           <span className="text-white">LIQ </span>
                           <span className="text-white-soft">
@@ -981,7 +981,7 @@ export function MarketsDashboard() {
             <div className="overflow-x-auto h-full">
               <table className="w-full text-xs min-w-[640px]">
                 <thead className="bg-gray-800 sticky top-0">
-                  <tr className="text-gray-400">
+                  <tr className="text-gray-400 text-xs font-sans">
                     <th className="text-center p-1 w-8"></th>
                     <th className="text-left p-1">Symbol</th>
                     <th className="text-left p-1 hidden md:table-cell">Name</th>
@@ -1067,10 +1067,10 @@ export function MarketsDashboard() {
                                 token.logoUrl ? "hidden" : ""
                               }`}
                             />
-                            <span className="text-white font-bold flex-shrink-0">
+                            <span className="text-white font-bold text-sm font-sans flex-shrink-0">
                               {token.tokenSymbol}
                             </span>
-                            <span className="text-gray-400 text-xs flex-shrink-0">
+                            <span className="text-gray-400 text-xs font-sans flex-shrink-0">
                               {token.chain}
                             </span>
                             {token.graduated && (
@@ -1085,47 +1085,47 @@ export function MarketsDashboard() {
                             )}
                           </div>
                         </td>
-                        <td className="p-1 text-white-soft text-xs max-w-[150px] truncate">
+                        <td className="p-1 text-white-soft text-sm font-sans max-w-[150px] truncate">
                           {token.tokenName}
                         </td>
-                        <td className="p-1 text-right text-white-soft font-mono">
+                        <td className="p-1 text-right text-white-soft text-xs font-sans">
                           {`$${Number(token.currentPrice).toFixed(6)}`}
                         </td>
-                        <td className="p-1 text-right text-white-soft hidden md:table-cell">
+                        <td className="p-1 text-right text-white-soft text-xs font-sans hidden md:table-cell">
                           {formatNumber(token.currentPrice * 1_000_000_000)}
                         </td>
                         <td
-                          className={`p-1 text-right ${
+                          className={`p-1 text-right text-xs font-sans ${
                             formatPriceChange(token.priceChange24h).color
                           }`}
                         >
                           {formatPriceChange(token.priceChange24h).text}
                         </td>
                         <td
-                          className={`p-1 text-right ${
+                          className={`p-1 text-right text-xs font-sans ${
                             formatPriceChange(token.priceChange6h).color
                           }`}
                         >
                           {formatPriceChange(token.priceChange6h).text}
                         </td>
                         <td
-                          className={`p-1 text-right ${
+                          className={`p-1 text-right text-xs font-sans ${
                             formatPriceChange(token.priceChange1h).color
                           }`}
                         >
                           {formatPriceChange(token.priceChange1h).text}
                         </td>
                         <td
-                          className={`p-1 text-right ${
+                          className={`p-1 text-right text-xs font-sans ${
                             formatPriceChange(token.priceChange5m).color
                           }`}
                         >
                           {formatPriceChange(token.priceChange5m).text}
                         </td>
-                        <td className="p-1 text-right text-white-soft hidden md:table-cell">
+                        <td className="p-1 text-right text-white-soft text-xs font-sans hidden md:table-cell">
                           {formatNumber(token.totalVolume)}
                         </td>
-                        <td className="p-1 text-right text-white-soft hidden md:table-cell">
+                        <td className="p-1 text-right text-white-soft text-xs font-sans hidden md:table-cell">
                           {formatTokenAge(
                             token.deploymentTimestamp || "",
                             currentTime
@@ -1189,16 +1189,16 @@ export function MarketsDashboard() {
                           token.logoUrl ? "hidden" : ""
                         }`}
                       />
-                      <span className="text-white font-bold">
+                      <span className="text-white font-bold text-sm font-sans">
                         {token.tokenSymbol}
                       </span>
-                      <span className="text-gray-400 text-xs">
+                      <span className="text-gray-400 text-xs font-sans">
                         {token.tokenName.length > 15
                           ? `${token.tokenName.substring(0, 15)}...`
                           : token.tokenName}
                       </span>
                     </div>
-                    <span className="text-gray-400">
+                    <span className="text-gray-400 text-xs font-sans">
                       {formatNumber(volume)}
                     </span>
                   </div>
@@ -1220,7 +1220,7 @@ export function MarketsDashboard() {
                 <div className="overflow-y-auto max-h-48">
                   <table className="w-full text-xs">
                     <thead className="bg-gray-800 sticky top-0">
-                      <tr className="text-gray-400">
+                      <tr className="text-gray-400 text-xs font-sans">
                         <th className="text-left p-1">Token</th>
                         <th className="text-right p-1">MCAP</th>
                         <th className="text-right p-1">GRAD TIME</th>
@@ -1264,20 +1264,20 @@ export function MarketsDashboard() {
                                     token.logoUrl ? "hidden" : ""
                                   }`}
                                 />
-                                <span className="text-white font-bold">
+                                <span className="text-white font-bold text-sm font-sans">
                                   {token.tokenSymbol}
                                 </span>
-                                <span className="text-gray-400 text-xs">
+                                <span className="text-gray-400 text-xs font-sans">
                                   {token.tokenName.length > 15
                                     ? `${token.tokenName.substring(0, 15)}...`
                                     : token.tokenName}
                                 </span>
                               </div>
                             </td>
-                            <td className="p-1 text-right text-white-soft">
+                            <td className="p-1 text-right text-white-soft text-xs font-sans">
                               {formatNumber(token.currentPrice * 1_000_000_000)}
                             </td>
-                            <td className="p-1 text-right text-white-soft">
+                            <td className="p-1 text-right text-white-soft text-xs font-sans">
                               {formatShortSince(
                                 token.graduationTimestamp,
                                 currentTime
@@ -1311,7 +1311,7 @@ export function MarketsDashboard() {
                 <div className="overflow-y-auto max-h-48">
                   <table className="w-full text-xs">
                     <thead className="bg-gray-800 sticky top-0">
-                      <tr className="text-gray-400">
+                      <tr className="text-gray-400 text-xs font-sans">
                         <th className="text-left p-1">Token</th>
                         <th className="text-right p-1">PROGRESS</th>
                         <th className="text-right p-1">VOL</th>
@@ -1356,23 +1356,23 @@ export function MarketsDashboard() {
                                     token.logoUrl ? "hidden" : ""
                                   }`}
                                 />
-                                <span className="text-white font-bold">
+                                <span className="text-white font-bold text-sm font-sans">
                                   {token.tokenSymbol}
                                 </span>
-                                <span className="text-gray-400 text-xs">
+                                <span className="text-gray-400 text-xs font-sans">
                                   {token.tokenName.length > 15
                                     ? `${token.tokenName.substring(0, 15)}...`
                                     : token.tokenName}
                                 </span>
                               </div>
                             </td>
-                            <td className="p-1 text-right text-green-400">
+                            <td className="p-1 text-right text-green-400 text-xs font-sans">
                               {token.progress?.toFixed(1) ?? "0.0"}%
                             </td>
-                            <td className="p-1 text-right text-white-soft">
+                            <td className="p-1 text-right text-white-soft text-xs font-sans">
                               {formatNumber(token.totalVolume)}
                             </td>
-                            <td className="p-1 text-right text-white-soft">
+                            <td className="p-1 text-right text-white-soft text-xs font-sans">
                               {formatNumber(token.currentPrice * 1_000_000_000)}
                             </td>
                           </tr>
