@@ -179,8 +179,7 @@ type FilterType =
   | "last_trade"
   | "new"
   | "graduated"
-  | "market_cap"
-  | "liquidity";
+  | "market_cap";
 
 export function MarketsDashboard() {
   const { chainId } = useParams<{
@@ -210,7 +209,6 @@ export function MarketsDashboard() {
       "new",
       "graduated",
       "market_cap",
-      "liquidity",
     ];
     if (filterParam && validFilters.includes(filterParam as FilterType)) {
       return filterParam as FilterType;
@@ -286,7 +284,7 @@ export function MarketsDashboard() {
         setIsLoading(true);
 
         // Map activeFilter to API sortBy parameter
-        let sortBy: 'new' | 'age' | 'marketcap' | 'liquidity' | 'last_trade' | 'last_comment' = 'new';
+        let sortBy: 'new' | 'age' | 'marketcap' | 'last_trade' | 'last_comment' = 'new';
         let graduated: 'true' | 'false' | 'all' = 'all';
 
         switch (activeFilter) {
@@ -308,9 +306,6 @@ export function MarketsDashboard() {
             break;
           case 'market_cap':
             sortBy = 'marketcap';
-            break;
-          case 'liquidity':
-            sortBy = 'liquidity';
             break;
           default:
             sortBy = 'new';
@@ -696,16 +691,6 @@ export function MarketsDashboard() {
                   }`}
                 >
                   MARKET CAP
-                </button>
-                <button
-                  onClick={() => handleFilterChange("liquidity")}
-                  className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
-                    activeFilter === "liquidity"
-                      ? "bg-orange-500 text-black"
-                      : "text-gray-400"
-                  }`}
-                >
-                  LIQUIDITY
                 </button>
             </div>
         </div>
