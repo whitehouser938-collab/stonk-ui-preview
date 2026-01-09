@@ -633,14 +633,14 @@ export function MarketsDashboard() {
               }}
             >
                 <button
-                  onClick={() => handleFilterChange("age")}
+                  onClick={() => handleFilterChange("new")}
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
-                    activeFilter === "age"
+                    activeFilter === "new"
                       ? "bg-orange-500 text-black"
                       : "text-gray-400"
                   }`}
                 >
-                  AGE
+                  NEW
                 </button>
                 <button
                   onClick={() => handleFilterChange("last_comment")}
@@ -663,14 +663,14 @@ export function MarketsDashboard() {
                   LAST TRADE
                 </button>
                 <button
-                  onClick={() => handleFilterChange("new")}
+                  onClick={() => handleFilterChange("age")}
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
-                    activeFilter === "new"
+                    activeFilter === "age"
                       ? "bg-orange-500 text-black"
                       : "text-gray-400"
                   }`}
                 >
-                  NEW
+                  AGE
                 </button>
                 <button
                   onClick={() => handleFilterChange("graduated")}
@@ -804,7 +804,7 @@ export function MarketsDashboard() {
                     {/* Market Cap - Only for Graduated Tokens */}
                     {token.graduated && (
                       <div className="text-gray-400 text-xs font-sans">
-                        <span className="text-orange-500">MC: </span>
+                        <span className="text-gray-400">MC: </span>
                         <span className="text-white-soft font-semibold">
                           ${formatNumber(token.currentPrice * 1_000_000_000)}
                         </span>
