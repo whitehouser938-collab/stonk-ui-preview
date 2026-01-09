@@ -801,119 +801,157 @@ export function MarketsDashboard() {
               ))}
             </div>
           ) : (
-            /* List View */
-            filteredTokens.map((token) => {
-              const priceChange1h = formatPriceChange(token.priceChange1h);
-              const priceChange24h = formatPriceChange(token.priceChange24h);
+            /* List View - Table */
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs min-w-[640px]">
+                <thead className="bg-gray-800 sticky top-0">
+                  <tr className="text-gray-400 text-xs font-sans">
+                    <th className="text-left p-2">STONK</th>
+                    <th className="text-center p-2">STATUS</th>
+                    <th className="text-right p-2">MCAP</th>
+                    <th className="text-right p-2">VOLUME</th>
+                    <th className="text-right p-2">TXNS</th>
+                    <th className="text-right p-2">AGE</th>
+                    <th className="text-right p-2">5M</th>
+                    <th className="text-right p-2">1H</th>
+                    <th className="text-right p-2">24H</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredTokens.map((token) => {
+                    const priceChange5m = formatPriceChange(token.priceChange5m);
+                    const priceChange1h = formatPriceChange(token.priceChange1h);
+                    const priceChange24h = formatPriceChange(token.priceChange24h);
 
-              return (
-                <div
-                  key={token.tokenAddress}
-                  className="bg-bg-card rounded-lg p-2.5 cursor-pointer hover:bg-bg-card-hover transition-colors"
-                  onClick={() => handleTokenClick(token)}
-                  style={{ touchAction: "manipulation" }}
-                >
-                  {/* Single row with logo and all content */}
-                  <div className="flex items-center justify-between">
-                    {/* Left Side */}
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      {/* Star - centered with logo */}
-                      <button
-                        onClick={(e) =>
-                          handleToggleWatchlist(
-                            e,
-                            token.tokenAddress,
-                            token.chain
-                          )
-                        }
-                        className="flex-shrink-0"
+                    return (
+                      <tr
+                        key={token.tokenAddress}
+                        className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors cursor-pointer"
+                        onClick={() => handleTokenClick(token)}
+                        style={{ touchAction: "manipulation" }}
                       >
-                        <Star
-                          className={`w-4 h-4 ${
-                            isInWatchlist(token.tokenAddress, token.chain)
-                              ? "fill-gray-500 text-gray-500"
-                              : "text-gray-500"
-                          }`}
-                        />
-                      </button>
+                        {/* Stonk Column - with logo, name/symbol stacked */}
+                        <td className="p-2">
+                          <div className="flex items-center gap-2">
+                            {/* Star */}
+                            <button
+                              onClick={(e) =>
+                                handleToggleWatchlist(
+                                  e,
+                                  token.tokenAddress,
+                                  token.chain
+                                )
+                              }
+                              className="flex-shrink-0"
+                            >
+                              <Star
+                                className={`w-4 h-4 ${
+                                  isInWatchlist(token.tokenAddress, token.chain)
+                                    ? "fill-gray-500 text-gray-500"
+                                    : "text-gray-500"
+                                }`}
+                              />
+                            </button>
 
-                      {/* Logo */}
-                      <div className="flex-shrink-0">
-                        {token.logoUrl ? (
-                          <img
-                            src={token.logoUrl}
-                            alt={token.tokenSymbol}
-                            className="w-9 h-9 rounded object-cover"
-                            onError={(e) => {
-                              e.currentTarget.style.display = "none";
-                            }}
-                          />
-                        ) : (
-                          <Circle className="w-9 h-9 text-blue-400" />
-                        )}
-                      </div>
+                            {/* Logo/PFP */}
+                            <div className="flex-shrink-0">
+                              {token.logoUrl ? (
+                                <img
+                                  src={token.logoUrl}
+                                  alt={token.tokenSymbol}
+                                  className="w-8 h-8 rounded object-cover"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = "none";
+                                  }}
+                                />
+                              ) : (
+                                <Circle className="w-8 h-8 text-blue-400" />
+                              )}
+                            </div>
 
-                      {/* Token Info - both rows in one block */}
-                      <div className="flex flex-col flex-1">
-                        {/* Row 1: Symbol */}
-                        <div className="mb-0.5">
-                          <span className="text-white font-bold text-sm font-sans max-w-[120px] overflow-hidden text-ellipsis whitespace-nowrap">
-                            {token.tokenSymbol}
-                          </span>
-                        </div>
-                        {/* Row 2: Token Name */}
-                        <div className="text-gray-400 text-sm font-sans truncate">
-                          {token.tokenName && token.tokenName.length > 12
-                            ? `${token.tokenName.slice(0, 12)}...`
-                            : token.tokenName}
-                        </div>
-                      </div>
-                    </div>
+                            {/* Name and Symbol stacked */}
+                            <div className="flex flex-col flex-1 min-w-0">
+                              <div className="mb-0.5">
+                                <span className="text-white font-bold text-sm font-sans max-w-[100px] overflow-hidden text-ellipsis whitespace-nowrap block">
+                                  {token.tokenSymbol}
+                                </span>
+                              </div>
+                              <div className="text-gray-400 text-xs font-sans truncate">
+                                {token.tokenName && token.tokenName.length > 15
+                                  ? `${token.tokenName.slice(0, 15)}...`
+                                  : token.tokenName}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
 
-                    {/* Right Side - Price, Stats stacked */}
-                    <div className="flex flex-col items-end gap-0.5 ml-2 flex-shrink-0">
-                      {/* Top: Price, 1H, 24H */}
-                      <div className="flex items-center gap-2">
-                        <div className="text-white-soft text-xs font-sans">
-                          {formatPrice(token.currentPrice)}
-                        </div>
-                        <span
-                          className={`${priceChange1h.color} text-xs font-semibold font-sans`}
+                        {/* Status Column */}
+                        <td className="p-2 text-center">
+                          {token.graduated ? (
+                            <span className="bg-green-600 text-black px-1.5 py-0.5 rounded text-xs font-sans font-bold inline-block">
+                              BOND
+                            </span>
+                          ) : (
+                            <div className="w-16 h-2 bg-gray-800 rounded-full overflow-hidden mx-auto">
+                              <div
+                                className="progress-bar-glow h-2 rounded-full transition-all duration-300"
+                                style={{
+                                  width: `${token.progress?.toFixed(1) ?? 0}%`,
+                                }}
+                              />
+                            </div>
+                          )}
+                        </td>
+
+                        {/* MCAP */}
+                        <td className="p-2 text-right text-white-soft text-xs font-sans">
+                          ${formatNumber(token.currentPrice * 1_000_000_000)}
+                        </td>
+
+                        {/* VOLUME */}
+                        <td className="p-2 text-right text-white-soft text-xs font-sans">
+                          ${formatNumber(token.totalVolume)}
+                        </td>
+
+                        {/* TRANSACTIONS */}
+                        <td className="p-2 text-right text-white-soft text-xs font-sans">
+                          TODO
+                        </td>
+
+                        {/* AGE */}
+                        <td className="p-2 text-right text-white-soft text-xs font-sans">
+                          {formatTokenAge(
+                            token.deploymentTimestamp || "",
+                            currentTime
+                          )}
+                        </td>
+
+                        {/* 5M */}
+                        <td
+                          className={`p-2 text-right text-xs font-sans ${priceChange5m.color}`}
                         >
-                          1H {priceChange1h.text}
-                        </span>
-                        <span
-                          className={`${priceChange24h.color} text-xs font-semibold font-sans`}
+                          {priceChange5m.text}
+                        </td>
+
+                        {/* 1H */}
+                        <td
+                          className={`p-2 text-right text-xs font-sans ${priceChange1h.color}`}
                         >
-                          24H {priceChange24h.text}
-                        </span>
-                      </div>
-                      {/* Bottom: Stats in boxes */}
-                      <div className="flex items-center gap-1 text-xs font-sans">
-                        <span className="px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[60px] text-center">
-                          <span className="text-white">LIQ </span>
-                          <span className="text-white-soft">
-                            ${formatNumber(token.totalVolume * 0.3)}
-                          </span>
-                        </span>
-                        <span className="px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[60px] text-center">
-                          <span className="text-white">VOL </span>
-                          <span className="text-white-soft">
-                            ${formatNumber(token.totalVolume)}
-                          </span>
-                        </span>
-                        <span className="px-1.5 py-0.5 rounded whitespace-nowrap inline-block w-[68px] text-center">
-                          <span className="text-white">MCAP </span>
-                          <span className="text-white-soft">
-                            ${formatNumber(token.currentPrice * 1_000_000_000)}
-                          </span>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })
+                          {priceChange1h.text}
+                        </td>
+
+                        {/* 24H */}
+                        <td
+                          className={`p-2 text-right text-xs font-sans ${priceChange24h.color}`}
+                        >
+                          {priceChange24h.text}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
 
         {/* Pagination Controls - Mobile */}
