@@ -118,10 +118,14 @@
   /* Default font: sans (from theme.ts via CSS variable) - applies to everything */
   html {
     font-family: var(--font-sans);
+    background-color: #121216; /* bg-main - dark theme background */
+    overscroll-behavior: none; /* Prevent white space on overscroll */
   }
 
   body {
     @apply bg-background text-foreground;
+    background-color: #121216; /* bg-main - dark theme background */
+    overscroll-behavior: none; /* Prevent white space on overscroll */
     /* sans is inherited from html via --font-sans */
   }
 
