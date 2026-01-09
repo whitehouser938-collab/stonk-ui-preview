@@ -218,18 +218,29 @@ export const getTokenOHLCVBars = async (
   }
 };
 
+export interface GetAllTokensParams {
+  chain?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: 'new' | 'age' | 'marketcap' | 'liquidity' | 'last_trade' | 'last_comment';
+  sortOrder?: 'asc' | 'desc';
+  graduated?: 'true' | 'false' | 'all';
+}
+
 export const getAllTokens = async (
-  chain?: string,
-  page: number = 1,
-  limit: number = 20
+  params: GetAllTokensParams
 ): Promise<{ tokens: any[]; pagination: any }> => {
   try {
-    const params = new URLSearchParams();
-    if (chain) params.append("chain", chain);
-    params.append("page", page.toString());
-    params.append("limit", limit.toString());
+    const searchParams = new URLSearchParams();
 
-    const url = `${API_BASE_URL}/token/all?${params.toString()}`;
+    if (params.chain) searchParams.append("chain", params.chain);
+    if (params.page) searchParams.append("page", params.page.toString());
+    if (params.limit) searchParams.append("limit", params.limit.toString());
+    if (params.sortBy) searchParams.append("sortBy", params.sortBy);
+    if (params.sortOrder) searchParams.append("sortOrder", params.sortOrder);
+    if (params.graduated) searchParams.append("graduated", params.graduated);
+
+    const url = `${API_BASE_URL}/token/all?${searchParams.toString()}`;
 
     const response = await fetch(url);
     if (!response.ok) {
@@ -246,6 +257,32 @@ export const getAllTokens = async (
   } catch (error) {
     console.error("Error fetching all tokens:", error);
     return { tokens: [], pagination: null };
+  }
+};
+
+export const getTrendingTokens = async (
+  chain?: string,
+  limit: number = 10
+): Promise<any[]> => {
+  try {
+    const params = new URLSearchParams();
+    if (chain) params.append("chain", chain);
+    params.append("limit", limit.toString());
+
+    const url = `${API_BASE_URL}/token/trending?${params.toString()}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error("Failed to fetch trending tokens");
+    }
+    const data = await response.json();
+    if (!data || !data.success || !data.data.tokens) {
+      return [];
+    }
+    return data.data.tokens;
+  } catch (error) {
+    console.error("Error fetching trending tokens:", error);
+    return [];
   }
 };
 

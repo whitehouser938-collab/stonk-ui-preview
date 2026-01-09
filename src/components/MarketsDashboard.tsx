@@ -12,7 +12,7 @@ import {
   ArrowUp,
   ArrowDown,
 } from "lucide-react";
-import { getAllTokens } from "@/api/token";
+import { getAllTokens, getTrendingTokens } from "@/api/token";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Chain, TokenMarketOverview } from "@/types";
 import { useMarketsUpdates } from "@/hooks/useMarketsUpdate";
@@ -188,13 +188,14 @@ export function MarketsDashboard() {
   }>();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [tokens, setTokens] = useState<TokenMarketOverview[]>([]);
+  const [trendingTokens, setTrendingTokens] = useState<TokenMarketOverview[]>([]);
   const [bondingCurveVolumeData, setBondingCurveVolumeData] = useState<any[]>(
     []
   );
   const [volumePeriod, setVolumePeriod] = useState<"5m" | "1h" | "6h" | "24h">(
     "24h"
   );
-  const [activeFilter, setActiveFilter] = useState<FilterType>("new");
+  const [activeFilter, setActiveFilter] = useState<FilterType>("market_cap");
   const [searchParams, setSearchParams] = useSearchParams();
   const viewMode = (searchParams.get("view") === "table" ? "list" : "card") as
     | "card"
@@ -254,8 +255,48 @@ export function MarketsDashboard() {
     const fetchTokens = async () => {
       try {
         setIsLoading(true);
+
+        // Map activeFilter to API sortBy parameter
+        let sortBy: 'new' | 'age' | 'marketcap' | 'liquidity' | 'last_trade' | 'last_comment' = 'new';
+        let graduated: 'true' | 'false' | 'all' = 'all';
+
+        switch (activeFilter) {
+          case 'age':
+            sortBy = 'age';
+            break;
+          case 'last_comment':
+            sortBy = 'last_comment';
+            break;
+          case 'last_trade':
+            sortBy = 'last_trade';
+            break;
+          case 'new':
+            sortBy = 'new';
+            break;
+          case 'graduated':
+            graduated = 'true';
+            sortBy = 'new'; // Sort graduated tokens by newest first
+            break;
+          case 'market_cap':
+            sortBy = 'marketcap';
+            break;
+          case 'liquidity':
+            sortBy = 'liquidity';
+            break;
+          default:
+            sortBy = 'new';
+        }
+
         const { tokens: tokenData, pagination: paginationData } =
-          await getAllTokens(chainId, currentPage, 20);
+          await getAllTokens({
+            chain: chainId,
+            page: currentPage,
+            limit: 20,
+            sortBy,
+            sortOrder: 'desc',
+            graduated,
+          });
+
         setTokens(tokenData);
         setPagination(paginationData);
       } catch (error) {
@@ -268,7 +309,25 @@ export function MarketsDashboard() {
     };
 
     fetchTokens();
-  }, [chainId, currentPage]);
+  }, [chainId, currentPage, activeFilter]);
+
+  // Fetch trending tokens separately (cached on backend, consistent across pages)
+  useEffect(() => {
+    const fetchTrending = async () => {
+      try {
+        const trending = await getTrendingTokens(chainId, 10);
+        setTrendingTokens(trending);
+      } catch (error) {
+        console.error("Error fetching trending tokens:", error);
+      }
+    };
+
+    fetchTrending();
+
+    // Refresh trending every 5 minutes (matches backend cache TTL)
+    const interval = setInterval(fetchTrending, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [chainId]);
 
   const handleMarketsUpdate = useCallback(
     (updatedMarketsOverview: TokenMarketOverview[]) => {
@@ -335,70 +394,9 @@ export function MarketsDashboard() {
       : 0;
   };
 
-  // Get filtered tokens based on active filter
-  const getFilteredTokens = () => {
-    let filtered = [...tokens];
-
-    switch (activeFilter) {
-      case "age":
-        // Sort by deployment timestamp (oldest first)
-        filtered.sort((a, b) => {
-          const timeA = new Date(a.deploymentTimestamp || 0).getTime();
-          const timeB = new Date(b.deploymentTimestamp || 0).getTime();
-          return timeA - timeB;
-        });
-        break;
-      case "last_comment":
-        // TODO: Sort by last comment time when this data is available
-        // For now, sort by deployment time
-        filtered.sort((a, b) => {
-          const timeA = new Date(a.deploymentTimestamp || 0).getTime();
-          const timeB = new Date(b.deploymentTimestamp || 0).getTime();
-          return timeB - timeA;
-        });
-        break;
-      case "last_trade":
-        // TODO: Sort by last trade time when this data is available
-        // For now, sort by volume as proxy for recent activity
-        filtered.sort((a, b) => b.totalVolume - a.totalVolume);
-        break;
-      case "new":
-        // Sort by deployment timestamp (newest first)
-        filtered.sort((a, b) => {
-          const timeA = new Date(a.deploymentTimestamp || 0).getTime();
-          const timeB = new Date(b.deploymentTimestamp || 0).getTime();
-          return timeB - timeA;
-        });
-        break;
-      case "graduated":
-        // Show graduated tokens first, then sort by graduation time
-        filtered = filtered.filter((token) => token.graduated);
-        filtered.sort((a, b) => {
-          const timeA = new Date(a.graduationTimestamp || 0).getTime();
-          const timeB = new Date(b.graduationTimestamp || 0).getTime();
-          return timeB - timeA;
-        });
-        break;
-      case "market_cap":
-        // Sort by market cap (price * supply)
-        filtered.sort((a, b) => {
-          const mcapA = a.currentPrice * 1_000_000_000;
-          const mcapB = b.currentPrice * 1_000_000_000;
-          return mcapB - mcapA;
-        });
-        break;
-      case "liquidity":
-        // Sort by liquidity (approximated as 30% of volume)
-        filtered.sort((a, b) => {
-          const liqA = a.totalVolume * 0.3;
-          const liqB = b.totalVolume * 0.3;
-          return liqB - liqA;
-        });
-        break;
-    }
-
-    return filtered;
-  };
+  // NOTE: Filtering now handled by backend API
+  // Tokens are already sorted and filtered based on activeFilter
+  // No need for client-side filtering anymore
 
   // Get volume leaders for selected time period (no backend request, use existing data)
   const getVolumeLeaders = () => {
@@ -423,19 +421,12 @@ export function MarketsDashboard() {
       .slice(0, 6);
   };
 
-  const filteredTokens = getFilteredTokens();
+  // Tokens are already filtered and sorted by the API based on activeFilter
+  const filteredTokens = tokens;
 
-  // Get top trending tokens based on market cap
-  const getTrendingTokens = () => {
-    return tokens
-      .slice()
-      .sort((a, b) => {
-        // Sort by market cap (price * supply)
-        const marketCapA = a.currentPrice * 1_000_000_000;
-        const marketCapB = b.currentPrice * 1_000_000_000;
-        return marketCapB - marketCapA;
-      })
-      .slice(0, 10); // Top 10 trending
+  // Get trending tokens (fetched separately, consistent across pages)
+  const getTrendingTokensDisplay = () => {
+    return trendingTokens;
   };
 
   return (
@@ -470,7 +461,7 @@ export function MarketsDashboard() {
               }
             `}</style>
             <div className="flex gap-3 trending-scroll">
-              {getTrendingTokens().map((token) => (
+              {getTrendingTokensDisplay().map((token) => (
                 <div
                   key={token.tokenAddress}
                   onClick={() => handleTokenClick(token)}

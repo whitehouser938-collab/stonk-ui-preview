@@ -34,6 +34,8 @@ interface TokenVolumeSummary extends VolumeData {
   tokenAddress: string;
   markets: Set<string>;
   chain: string;
+  lastRefreshTimestamp?: number;
+  latestTradeTimestamp?: number;
 }
 
 export interface TokenMarketOverview extends TokenVolumeSummary {
@@ -42,6 +44,7 @@ export interface TokenMarketOverview extends TokenVolumeSummary {
   deploymentTimestamp: string;
   logoUrl: string | null;
   uniswapPairAddress: string | null;
+  lastCommentTimestamp?: number | null;
   liquidityWeth?: string;
   progress?: number;
   description?: string | null;
