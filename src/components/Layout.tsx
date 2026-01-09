@@ -98,7 +98,7 @@ export function Layout({ children }: LayoutProps) {
     <div className="min-h-screen lg:min-h-screen mobile-viewport-fix bg-bg-main text-gray-100">
       {/* Header */}
       <header className="bg-bg-header/95 backdrop-blur-sm z-40">
-        <div className="flex items-center justify-between px-2 sm:px-4 py-2 sm:py-4">
+        <div className="flex items-center justify-between pl-2 pr-1 sm:pl-4 sm:pr-2 py-2 sm:py-4">
           {/* Mobile Layout */}
           <div className="md:hidden flex items-center space-x-2 flex-1 min-w-0">
             {/* Hamburger menu removed - navigation now at bottom */}
