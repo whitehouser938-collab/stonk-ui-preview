@@ -613,7 +613,7 @@ export function MarketsDashboard() {
                 onClick={() => setIsFiltersExpanded(!isFiltersExpanded)}
                 className={`flex-shrink-0 p-2 rounded transition-all duration-300 font-mono ${
                   isFiltersExpanded
-                    ? "bg-orange-500 text-black"
+                    ? "bg-orange-400 text-black"
                     : "text-gray-400"
                 }`}
               >
@@ -636,7 +636,7 @@ export function MarketsDashboard() {
                   onClick={() => handleFilterChange("new")}
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "new"
-                      ? "bg-orange-500 text-black"
+                      ? "bg-orange-400 text-black"
                       : "text-gray-400"
                   }`}
                 >
@@ -646,7 +646,7 @@ export function MarketsDashboard() {
                   onClick={() => handleFilterChange("last_comment")}
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "last_comment"
-                      ? "bg-orange-500 text-black"
+                      ? "bg-orange-400 text-black"
                       : "text-gray-400"
                   }`}
                 >
@@ -656,7 +656,7 @@ export function MarketsDashboard() {
                   onClick={() => handleFilterChange("last_trade")}
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "last_trade"
-                      ? "bg-orange-500 text-black"
+                      ? "bg-orange-400 text-black"
                       : "text-gray-400"
                   }`}
                 >
@@ -666,7 +666,7 @@ export function MarketsDashboard() {
                   onClick={() => handleFilterChange("age")}
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "age"
-                      ? "bg-orange-500 text-black"
+                      ? "bg-orange-400 text-black"
                       : "text-gray-400"
                   }`}
                 >
@@ -676,7 +676,7 @@ export function MarketsDashboard() {
                   onClick={() => handleFilterChange("graduated")}
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "graduated"
-                      ? "bg-orange-500 text-black"
+                      ? "bg-orange-400 text-black"
                       : "text-gray-400"
                   }`}
                 >
@@ -686,7 +686,7 @@ export function MarketsDashboard() {
                   onClick={() => handleFilterChange("market_cap")}
                   className={`flex-shrink-0 p-2 rounded transition-colors font-mono ${
                     activeFilter === "market_cap"
-                      ? "bg-orange-500 text-black"
+                      ? "bg-orange-400 text-black"
                       : "text-gray-400"
                   }`}
                 >

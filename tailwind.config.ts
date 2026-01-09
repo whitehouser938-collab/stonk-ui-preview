@@ -36,6 +36,13 @@ export default {
 				'bg-card-hover': '#1f1f23', // Card hover state
 				'white-soft': '#f6f6f6', // rgb(246, 246, 246) - softer white for token names, times, and numbers
 				
+				// Orange colors from theme.ts
+				orange: {
+					400: theme.colors.orange[400], // #fb923c - lighter orange for filter buttons
+					500: theme.colors.orange[500], // #f97316 - primary orange for list/card toggles
+					600: theme.colors.orange[600], // #ea580c - darker orange
+				},
+				
 				// Existing shadcn/ui colors
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
