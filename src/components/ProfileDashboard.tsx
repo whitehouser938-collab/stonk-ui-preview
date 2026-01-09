@@ -675,7 +675,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-orange-500 font-mono">Profile</h1>
+          <h1 className="text-3xl font-bold text-orange-400 font-mono">Profile</h1>
         </div>
         <WalletConnectionPrompt
           title="Sign In"
@@ -691,7 +691,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-orange-500 font-mono">Profile</h1>
+          <h1 className="text-3xl font-bold text-orange-400 font-mono">Profile</h1>
         </div>
         <div className="flex items-center justify-center py-12">
           <div className="text-gray-400 font-mono">Loading...</div>
@@ -705,7 +705,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-orange-500 font-mono">Profile</h1>
+          <h1 className="text-3xl font-bold text-orange-400 font-mono">Profile</h1>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2 space-y-6">
@@ -737,7 +737,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-orange-500 font-mono">
+        <h1 className="text-3xl font-bold text-orange-400 font-mono">
           {isOwnProfile
             ? ""
             : `${
@@ -790,7 +790,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                     onChange={(e) =>
                       handleModalFileChange(e.target.files?.[0] || null)
                     }
-                    className="w-full p-2 bg-black border text-white text-xs font-mono file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-orange-600 file:text-black hover:file:bg-orange-700 border-gray-600"
+                    className="w-full p-2 bg-black border text-white text-xs font-mono file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-orange-500 file:text-black hover:file:bg-orange-700 border-gray-600"
                   />
                   {fileError && (
                     <div className="text-red-400 text-xs font-mono">{fileError}</div>
@@ -888,7 +888,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                           });
                         }
                       }}
-                      className="hover:text-orange-500 transition-colors"
+                      className="hover:text-orange-400 transition-colors"
                     >
                       <Copy className="w-4 h-4" />
                     </Button>
@@ -907,9 +907,9 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                       onClick={openEditModal}
                       variant="outline"
                       size="sm"
-                      className="text-orange-500"
+                      className="text-orange-400"
                     >
-                      <Edit3 className="w-4 h-4 mr-2 text-orange-500" />
+                      <Edit3 className="w-4 h-4 mr-2 text-orange-400" />
                       <span className="font-mono">Edit Profile</span>
                     </Button>
                     <Button
@@ -929,25 +929,25 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
               {/* Stats (desktop) */}
               <div className="hidden md:flex space-x-8">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-500 font-mono">
+                  <div className="text-2xl font-bold text-orange-400 font-mono">
                     {profileStats.deployer.tokensDeployed}
                   </div>
                   <div className="text-sm text-gray-400 font-mono">Tokens Deployed</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-500 font-mono">
+                  <div className="text-2xl font-bold text-orange-400 font-mono">
                     {profileStats.deployer.graduatedTokens}
                   </div>
                   <div className="text-sm text-gray-400 font-mono">Graduated</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-500 font-mono">
+                  <div className="text-2xl font-bold text-orange-400 font-mono">
                     {profileStats.social.likesReceived}
                   </div>
                   <div className="text-sm text-gray-400 font-mono">Likes Received</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-500 font-mono">
+                  <div className="text-2xl font-bold text-orange-400 font-mono">
                     {profileStats.social.commentsMade}
                   </div>
                   <div className="text-sm text-gray-400 font-mono">Comments</div>
@@ -958,25 +958,25 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
             {/* Stats (mobile) */}
             <div className="mt-4 grid grid-cols-2 gap-4 md:hidden">
               <div className="text-center">
-                <div className="text-xl font-bold text-orange-500 font-mono">
+                <div className="text-xl font-bold text-orange-400 font-mono">
                   {profileStats.deployer.tokensDeployed}
                 </div>
                 <div className="text-xs text-gray-400 font-mono">Tokens</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-orange-500 font-mono">
+                <div className="text-xl font-bold text-orange-400 font-mono">
                   {profileStats.deployer.graduatedTokens}
                 </div>
                 <div className="text-xs text-gray-400 font-mono">Graduated</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-orange-500 font-mono">
+                <div className="text-xl font-bold text-orange-400 font-mono">
                   {profileStats.social.likesReceived}
                 </div>
                 <div className="text-xs text-gray-400 font-mono">Likes</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-orange-500 font-mono">
+                <div className="text-xl font-bold text-orange-400 font-mono">
                   {profileStats.social.commentsMade}
                 </div>
                 <div className="text-xs text-gray-400 font-mono">Comments</div>
@@ -990,7 +990,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                   onClick={openEditModal}
                   variant="outline"
                   size="sm"
-                  className="flex-1 text-orange-500"
+                  className="flex-1 text-orange-400"
                 >
                   <Edit3 className="w-4 h-4 mr-2" /> <span className="font-mono">Edit</span>
                 </Button>
@@ -1051,7 +1051,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                             <span className="text-gray-400">On</span>
                             <Link
                               to={`/token/SEP/${c.token.address}`}
-                              className="px-2 py-0.5 rounded bg-orange-500/10 text-orange-500 border border-orange-500/30 hover:bg-orange-600/10 flex items-center gap-1"
+                              className="px-2 py-0.5 rounded bg-orange-400/10 text-orange-400 border border-orange-400/30 hover:bg-orange-500/10 flex items-center gap-1"
                             >
                               {c.token.logoUrl ? (
                                 <img
@@ -1060,7 +1060,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                                   className="w-4 h-4 rounded-sm"
                                 />
                               ) : (
-                                <Coins className="w-3.5 h-3.5 text-orange-500" />
+                                <Coins className="w-3.5 h-3.5 text-orange-400" />
                               )}
                               <span className="font-mono">{c.token.symbol}</span>
                             </Link>
@@ -1109,7 +1109,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                                   <div className="flex items-center justify-between mb-1">
                                     <Link
                                       to={`/profile/${r.user.walletAddress}`}
-                                      className="text-xs text-orange-500 hover:text-white font-mono"
+                                      className="text-xs text-orange-400 hover:text-white font-mono"
                                     >
                                       {r.user.username ||
                                         formatAddress(r.user.walletAddress)}
@@ -1145,7 +1145,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                             {!expandedComments.has(c.id) && (
                               <button
                                 onClick={() => toggleExpandReplies(c.id)}
-                                className="text-xs text-orange-500 hover:text-orange-300 transition-colors ml-4 mt-1 font-mono"
+                                className="text-xs text-orange-400 hover:text-orange-300 transition-colors ml-4 mt-1 font-mono"
                               >
                                 Show {c.replyCount}
                                 {c.replyCount === 1 ? " reply" : " replies"}
@@ -1195,7 +1195,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                             <span className="text-gray-400 text-xs font-mono">On</span>
                             <Link
                               to={`/token/SEP/${r.token.address}`}
-                              className="px-2 py-0.5 rounded bg-orange-500/10 text-orange-500 border border-orange-500/30 hover:bg-orange-600/10 flex items-center gap-1 text-xs font-mono"
+                              className="px-2 py-0.5 rounded bg-orange-400/10 text-orange-400 border border-orange-400/30 hover:bg-orange-500/10 flex items-center gap-1 text-xs font-mono"
                             >
                               {r.token.logoUrl ? (
                                 <img
@@ -1204,7 +1204,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                                   className="w-4 h-4 rounded-sm"
                                 />
                               ) : (
-                                <Coins className="w-3.5 h-3.5 text-orange-500" />
+                                <Coins className="w-3.5 h-3.5 text-orange-400" />
                               )}
                               <span>{r.token.symbol}</span>
                             </Link>
@@ -1222,7 +1222,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                               <div className="flex items-center gap-2 text-xs text-gray-400 font-mono">
                                 <Link
                                   to={`/profile/${r.parentCommentUser.walletAddress}`}
-                                  className="text-orange-500 hover:text-white font-mono"
+                                  className="text-orange-400 hover:text-white font-mono"
                                 >
                                   {r.parentCommentUser.username ||
                                     formatAddress(
@@ -1245,7 +1245,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                         </div>
 
                         {/* My reply (highlighted) */}
-                        <div className="bg-gradient-to-r from-orange-500/15 to-transparent border-t border-orange-500/40 p-4 ml-6 pl-4 border-l-2 border-orange-500">
+                        <div className="bg-gradient-to-r from-orange-400/15 to-transparent border-t border-orange-400/40 p-4 ml-6 pl-4 border-l-2 border-orange-400">
                           <div className="flex items-start gap-3">
                             <Avatar className="w-8 h-8">
                               <AvatarImage
@@ -1258,7 +1258,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between text-xs text-gray-400 font-mono">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-orange-500 font-mono">
+                                  <span className="text-orange-400 font-mono">
                                     {user?.username ||
                                       formatAddress(targetAddress || "")}
                                   </span>

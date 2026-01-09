@@ -89,12 +89,12 @@ export function Layout({ children }: LayoutProps) {
               isHeaderCollapsed ? 'w-8' : 'w-32'
             }`}>
               <div className="relative h-6 flex items-center">
-                <h1 className={`text-sm font-bold text-orange-500 font-mono tracking-tight whitespace-nowrap hover:text-orange-400 transition-all duration-1000 ease-in-out origin-left ${
+                <h1 className={`text-sm font-bold text-orange-400 font-mono tracking-tight whitespace-nowrap hover:text-orange-400 transition-all duration-1000 ease-in-out origin-left ${
                   isHeaderCollapsed ? 'scale-x-0 opacity-0' : 'scale-x-100 opacity-100'
                 }`}>
                   STONK EXCHANGE
                 </h1>
-                <h1 className={`text-sm font-bold text-orange-500 font-mono tracking-tight whitespace-nowrap hover:text-orange-400 absolute left-0 transition-all duration-1000 ease-in-out origin-left ${
+                <h1 className={`text-sm font-bold text-orange-400 font-mono tracking-tight whitespace-nowrap hover:text-orange-400 absolute left-0 transition-all duration-1000 ease-in-out origin-left ${
                   isHeaderCollapsed ? 'scale-x-100 opacity-100' : 'scale-x-0 opacity-0'
                 }`}>
                   SE
@@ -140,7 +140,7 @@ export function Layout({ children }: LayoutProps) {
                   className="absolute right-0 top-0 h-6 w-6 flex items-center justify-center z-10 bg-bg-header/80 hover:bg-bg-header transition-colors rounded"
                   aria-label="Search"
                 >
-                  <Search className="w-4 h-4 text-orange-500 hover:text-orange-400 transition-colors" />
+                  <Search className="w-4 h-4 text-orange-400 hover:text-orange-400 transition-colors" />
                 </button>
               )}
             </div>
@@ -149,7 +149,7 @@ export function Layout({ children }: LayoutProps) {
           {/* Desktop Layout */}
           <div className="hidden md:flex items-center space-x-8">
             <Link to="/">
-              <h1 className="text-2xl font-bold text-orange-500 font-mono tracking-tight whitespace-nowrap hover:text-orange-400 transition-colors cursor-pointer">
+              <h1 className="text-2xl font-bold text-orange-400 font-mono tracking-tight whitespace-nowrap hover:text-orange-400 transition-colors cursor-pointer">
                 STONK EXCHANGE
               </h1>
             </Link>
@@ -163,7 +163,7 @@ export function Layout({ children }: LayoutProps) {
                     className={cn(
                       "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm transition-all duration-200",
                       isActive
-                        ? "bg-orange-500/20 text-orange-500 border border-orange-500/30"
+                        ? "bg-orange-400/20 text-orange-400 border border-orange-400/30"
                         : "text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"
                     )}
                   >
@@ -217,7 +217,7 @@ export function Layout({ children }: LayoutProps) {
             to="/"
             className={`flex items-center justify-center flex-1 py-1.5 px-1 rounded transition-all duration-200 ${
               location.pathname === "/" || location.pathname.match(/^\/[A-Z]+$/)
-                ? "text-orange-500"
+                ? "text-orange-400"
                 : "text-gray-400"
             }`}
           >
@@ -227,7 +227,7 @@ export function Layout({ children }: LayoutProps) {
             to="/research"
             className={`flex items-center justify-center flex-1 py-1.5 px-1 rounded transition-all duration-200 ${
               location.pathname === "/research"
-                ? "text-orange-500"
+                ? "text-orange-400"
                 : "text-gray-400"
             }`}
           >
@@ -237,7 +237,7 @@ export function Layout({ children }: LayoutProps) {
             to="/launchpad"
             className={`flex items-center justify-center flex-1 py-1.5 px-1 rounded transition-all duration-200 ${
               location.pathname === "/launchpad"
-                ? "text-orange-500"
+                ? "text-orange-400"
                 : "text-gray-400"
             }`}
           >
@@ -253,7 +253,7 @@ export function Layout({ children }: LayoutProps) {
             to="/profile"
             className={`flex items-center justify-center flex-1 py-1.5 px-1 rounded transition-all duration-200 ${
               location.pathname === "/profile" || location.pathname.startsWith("/profile/")
-                ? "text-orange-500"
+                ? "text-orange-400"
                 : "text-gray-400"
             }`}
           >

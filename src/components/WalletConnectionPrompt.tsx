@@ -35,7 +35,7 @@ export function WalletConnectionPrompt({
           onClick={() => open()}
           variant="outline"
           size="sm"
-          className="border-orange-500/30 bg-orange-500/10 text-orange-500 hover:text-orange-300 hover:bg-orange-600/10 hover:border-orange-400/50"
+          className="border-orange-400/30 bg-orange-400/10 text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 hover:border-orange-500/50"
         >
           {actionText}
         </Button>
@@ -49,7 +49,7 @@ export function WalletConnectionPrompt({
         className={`bg-gray-900 border border-gray-700 rounded-lg p-4 ${className}`}
       >
         <div className="flex items-center space-x-3">
-          <Wallet className="w-6 h-6 text-orange-500" />
+          <Wallet className="w-6 h-6 text-orange-400" />
           <div className="flex-1">
             <h3 className="text-sm font-medium text-gray-200">{title}</h3>
             <p className="text-xs text-gray-400">{description}</p>
@@ -58,7 +58,7 @@ export function WalletConnectionPrompt({
             onClick={() => open()}
             variant="outline"
             size="sm"
-            className="border-orange-500/30 bg-orange-500/10 text-orange-500 hover:text-orange-300 hover:bg-orange-600/10 hover:border-orange-400/50"
+            className="border-orange-400/30 bg-orange-400/10 text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 hover:border-orange-500/50"
           >
             {actionText}
           </Button>
@@ -70,8 +70,8 @@ export function WalletConnectionPrompt({
   return (
     <Card className={`bg-gray-900 border-gray-700 ${className}`}>
       <CardHeader className="text-center">
-        <div className="mx-auto w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center mb-4">
-          <Wallet className="w-8 h-8 text-orange-500" />
+        <div className="mx-auto w-16 h-16 bg-orange-400/10 rounded-full flex items-center justify-center mb-4">
+          <Wallet className="w-8 h-8 text-orange-400" />
         </div>
         <CardTitle className="text-xl text-gray-200">{title}</CardTitle>
         <CardDescription className="text-gray-400">
@@ -83,7 +83,7 @@ export function WalletConnectionPrompt({
           onClick={() => open()}
           variant="outline"
           size="lg"
-          className="border-orange-500/30 bg-orange-500/10 text-orange-500 hover:text-orange-300 hover:bg-orange-600/10 hover:border-orange-400/50 transition-all duration-200"
+          className="border-orange-400/30 bg-orange-400/10 text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 hover:border-orange-500/50 transition-all duration-200"
         >
           <Wallet className="w-4 h-4 mr-2" />
           {actionText}

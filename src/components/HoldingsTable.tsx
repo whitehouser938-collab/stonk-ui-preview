@@ -157,7 +157,7 @@ const HoldingsTable: React.FC<HoldingsTableProps> = ({ holdings }) => {
   if (filteredHoldings.length === 0) {
     return (
       <div className="bg-gray-900 border border-gray-700 p-1">
-        <div className="text-orange-500 text-xs mb-1">HOLDINGS</div>
+        <div className="text-orange-400 text-xs mb-1">HOLDINGS</div>
         <div className="text-center py-4 text-gray-400 text-xs">
           No holdings yet
         </div>
@@ -167,7 +167,7 @@ const HoldingsTable: React.FC<HoldingsTableProps> = ({ holdings }) => {
 
   return (
     <div className="bg-gray-900 border border-gray-700 p-1">
-      <div className="text-orange-500 text-xs mb-1">HOLDINGS</div>
+      <div className="text-orange-400 text-xs mb-1">HOLDINGS</div>
       <div className="overflow-x-auto">
         <table className="w-full text-xs min-w-[800px]">
           <thead className="bg-gray-800 sticky top-0">

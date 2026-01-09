@@ -47,7 +47,7 @@ export function ProfileDisplay() {
       <Button
         onClick={() => open()}
         variant="outline"
-        className="flex items-center space-x-2 border-orange-500/30 bg-orange-500/10 text-orange-500 hover:text-orange-300 hover:bg-orange-600/10 hover:border-orange-400/50 transition-all duration-200"
+        className="flex items-center space-x-2 border-orange-400/30 bg-orange-400/10 text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 hover:border-orange-500/50 transition-all duration-200"
       >
         <Wallet className="w-4 h-4" />
         <span className="font-medium font-mono">Sign In</span>
@@ -86,7 +86,7 @@ export function ProfileDisplay() {
       </Avatar>
       <div className="flex flex-col items-start">
         <div className="flex items-center space-x-1">
-          <span className="text-sm font-medium text-gray-200 group-hover:text-orange-500 transition-colors font-mono">
+          <span className="text-sm font-medium text-gray-200 group-hover:text-orange-400 transition-colors font-mono">
             {user?.username || formatAddress(address || "")}
           </span>
           {!user?.username && (
@@ -110,7 +110,7 @@ export function ProfileDisplay() {
                   });
                 }
               }}
-              className="text-gray-500 hover:text-orange-500 transition-colors"
+              className="text-gray-500 hover:text-orange-400 transition-colors"
               title="Copy wallet address"
             >
               <Copy className="w-3 h-3" />
@@ -142,7 +142,7 @@ export function ProfileDisplay() {
                   });
                 }
               }}
-              className="text-gray-500 hover:text-orange-500 transition-colors"
+              className="text-gray-500 hover:text-orange-400 transition-colors"
               title="Copy wallet address"
             >
               <Copy className="w-3 h-3" />

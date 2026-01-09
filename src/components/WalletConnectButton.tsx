@@ -46,7 +46,7 @@ export const WalletConnectButton: React.FC = () => {
                 });
               }
             }}
-            className="text-gray-400 hover:text-orange-500 transition-colors"
+            className="text-gray-400 hover:text-orange-400 transition-colors"
             title="Copy wallet address"
           >
             <Copy className="w-3 h-3" />

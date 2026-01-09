@@ -157,7 +157,7 @@ const OrderBook: React.FC<OrderBookProps> = ({
           <h3 className="text-white font-bold text-sm">Order Book & Trades</h3>
         </div>
         <div className="p-4 text-center text-gray-400">
-          <div className="animate-spin w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+          <div className="animate-spin w-6 h-6 border-2 border-orange-400 border-t-transparent rounded-full mx-auto mb-2"></div>
           Loading trade data...
         </div>
       </div>
@@ -173,7 +173,7 @@ const OrderBook: React.FC<OrderBookProps> = ({
             onClick={() => setActiveTab("trades")}
             className={`px-4 py-3 text-xs font-bold border-b-2 transition-colors ${
               activeTab === "trades"
-                ? "border-orange-500 text-orange-500"
+                ? "border-orange-400 text-orange-400"
                 : "border-transparent text-gray-400 hover:text-white"
             }`}
           >
@@ -184,7 +184,7 @@ const OrderBook: React.FC<OrderBookProps> = ({
             onClick={() => setActiveTab("orderbook")}
             className={`px-4 py-3 text-xs font-bold border-b-2 transition-colors ${
               activeTab === "orderbook"
-                ? "border-orange-500 text-orange-500"
+                ? "border-orange-400 text-orange-400"
                 : "border-transparent text-gray-400 hover:text-white"
             }`}
           >
@@ -289,7 +289,7 @@ const OrderBook: React.FC<OrderBookProps> = ({
             {/* Current Price Separator */}
             <div className="p-3 bg-gray-800 border-y border-gray-600">
               <div className="text-center">
-                <span className="text-orange-500 font-bold text-sm">
+                <span className="text-orange-400 font-bold text-sm">
                   Current Price: {formatPrice(currentPrice || 0.00234)}
                 </span>
               </div>

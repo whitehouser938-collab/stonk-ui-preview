@@ -152,7 +152,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
         <div className="bg-gray-900 border border-gray-700 rounded-lg w-full max-w-2xl shadow-2xl">
           {/* Search Input Header */}
           <div className="flex items-center gap-3 p-4 border-b border-gray-700">
-            <Search className="text-orange-500 w-5 h-5 flex-shrink-0" />
+            <Search className="text-orange-400 w-5 h-5 flex-shrink-0" />
             <input
               ref={inputRef}
               placeholder="Search ticker or name..."
@@ -194,7 +194,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
                           className="w-10 h-10 rounded flex-shrink-0"
                         />
                       ) : (
-                        <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded text-white text-sm font-bold flex items-center justify-center flex-shrink-0">
+                        <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-red-600 rounded text-white text-sm font-bold flex items-center justify-center flex-shrink-0">
                           {token.symbol.slice(0, 2)}
                         </div>
                       )}
@@ -202,7 +202,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
                       {/* Token Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-orange-500 font-bold text-sm font-mono">
+                          <span className="text-orange-400 font-bold text-sm font-mono">
                             {token.symbol}
                           </span>
                           <span className="text-gray-300 text-sm truncate font-mono">

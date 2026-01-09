@@ -38,11 +38,14 @@ export const theme = {
       950: '#030712',
     },
     
-    // Accent colors
+    // Accent colors - SINGLE SOURCE OF TRUTH for all orange colors
+    // Change these values to update orange throughout the entire application
     orange: {
-      400: '#fb923c',
-      500: '#f97316', // Primary orange
-      600: '#ea580c',
+      300: '#fcd34d', // Lightest orange (for hover states)
+      400: '#fb923c', // Lighter orange
+      500: '#fb923c', // Primary orange (same as 400 - main orange used throughout)
+      600: '#ea580c', // Darker orange for hover states
+      700: '#c2410c', // Darkest orange (for hover states)
     },
     
     // Border colors

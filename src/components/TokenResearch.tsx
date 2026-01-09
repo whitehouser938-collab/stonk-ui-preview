@@ -156,11 +156,11 @@ export function TokenResearch() {
           <div className="bg-bg-card border border-gray-700 p-2">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2">
               <div className="flex items-center space-x-3 mb-2 sm:mb-0">
-                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded text-white font-bold text-sm flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-600 rounded text-white font-bold text-sm flex items-center justify-center flex-shrink-0">
                   {stockData.symbol}
                 </div>
                 <div>
-                  <div className="text-orange-500 font-bold text-base sm:text-lg">
+                  <div className="text-orange-400 font-bold text-base sm:text-lg">
                     {stockData.name}
                   </div>
                   <div className="text-gray-400">
@@ -186,7 +186,7 @@ export function TokenResearch() {
 
           {/* Price Chart */}
           <div className="bg-bg-card border border-gray-700 p-2">
-            <div className="text-orange-500 mb-2">INTRADAY CHART</div>
+            <div className="text-orange-400 mb-2">INTRADAY CHART</div>
             <div className="bg-bg-card border border-gray-800 p-2 h-48 flex">
               <div className="flex flex-col justify-between h-full text-xs text-gray-500 pr-2 border-r border-gray-700 text-right">
                 <span>${chartMax.toFixed(2)}</span>
@@ -208,7 +208,7 @@ export function TokenResearch() {
                         className="flex-1 min-w-[2.5rem] flex flex-col justify-end items-center"
                       >
                         <div
-                          className="bg-orange-500 w-full rounded-t"
+                          className="bg-orange-400 w-full rounded-t"
                           style={{ height: `${height}px` }}
                           title={`$${point.price.toFixed(2)}`}
                         ></div>
@@ -225,7 +225,7 @@ export function TokenResearch() {
 
           {/* Financial Metrics */}
           <div className="bg-bg-card border border-gray-700 p-2">
-            <div className="text-orange-500 mb-2">FINANCIAL METRICS</div>
+            <div className="text-orange-400 mb-2">FINANCIAL METRICS</div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 text-xs">
               <div className="bg-bg-card border border-gray-800 p-2">
                 <div className="text-gray-400">REVENUE (TTM)</div>
@@ -280,7 +280,7 @@ export function TokenResearch() {
 
           {/* Analyst Ratings */}
           <div className="bg-bg-card border border-gray-700 p-2">
-            <div className="text-orange-500 mb-2">ANALYST RATINGS</div>
+            <div className="text-orange-400 mb-2">ANALYST RATINGS</div>
             <div className="overflow-x-auto bg-bg-card border border-gray-800 p-1">
               <table className="w-full text-xs min-w-[400px]">
                 <thead>
@@ -326,7 +326,7 @@ export function TokenResearch() {
         <div className="col-span-12 lg:col-span-4 space-y-1">
           {/* Market Data */}
           <div className="bg-bg-card border border-gray-700 p-2">
-            <div className="text-orange-500 mb-2">MARKET DATA</div>
+            <div className="text-orange-400 mb-2">MARKET DATA</div>
             <div className="space-y-2 text-xs">
               <div className="flex justify-between items-start gap-2">
                 <span className="text-gray-400">Market Cap</span>
@@ -375,7 +375,7 @@ export function TokenResearch() {
 
           {/* Company Info */}
           <div className="bg-bg-card border border-gray-700 p-2">
-            <div className="text-orange-500 mb-2">COMPANY INFO</div>
+            <div className="text-orange-400 mb-2">COMPANY INFO</div>
             <div className="space-y-2 text-xs">
               <div className="flex items-center space-x-2">
                 <Globe className="w-3 h-3 text-gray-400" />
@@ -397,7 +397,7 @@ export function TokenResearch() {
 
           {/* Recent News */}
           <div className="bg-bg-card border border-gray-700 p-2">
-            <div className="text-orange-500 mb-2">RECENT NEWS</div>
+            <div className="text-orange-400 mb-2">RECENT NEWS</div>
             <div className="space-y-2">
               {newsData.map((news, index) => (
                 <div
@@ -405,7 +405,7 @@ export function TokenResearch() {
                   className="bg-black border border-gray-800 p-1"
                 >
                   <div className="flex flex-col sm:flex-row items-start justify-between mb-1 gap-1">
-                    <div className="text-white text-xs font-medium hover:text-orange-500 cursor-pointer">
+                    <div className="text-white text-xs font-medium hover:text-orange-400 cursor-pointer">
                       {news.title}
                     </div>
                     <span className="text-xs text-gray-400 whitespace-nowrap">
@@ -415,7 +415,7 @@ export function TokenResearch() {
                   <div className="text-gray-300 text-xs mb-1">
                     {news.summary}
                   </div>
-                  <div className="text-xs text-orange-500">{news.source}</div>
+                  <div className="text-xs text-orange-400">{news.source}</div>
                 </div>
               ))}
             </div>
@@ -423,7 +423,7 @@ export function TokenResearch() {
 
           {/* Technical Indicators */}
           <div className="bg-bg-card border border-gray-700 p-2">
-            <div className="text-orange-500 mb-2">TECHNICAL INDICATORS</div>
+            <div className="text-orange-400 mb-2">TECHNICAL INDICATORS</div>
             <div className="space-y-1 text-xs">
               <div className="flex justify-between">
                 <span className="text-gray-400">RSI (14)</span>
@@ -456,7 +456,7 @@ export function TokenResearch() {
 
       {/* Bottom Description */}
       <div className="bg-gray-900 border-t border-orange-500/30 p-2">
-        <div className="text-orange-500 mb-1">COMPANY DESCRIPTION</div>
+        <div className="text-orange-400 mb-1">COMPANY DESCRIPTION</div>
         <div className="text-gray-300 text-xs leading-relaxed">
           {stockData.description}
         </div>

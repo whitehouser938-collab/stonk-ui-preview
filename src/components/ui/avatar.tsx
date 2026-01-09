@@ -86,7 +86,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
           fallbackDiv.className = cn(
             className,
             sizeClasses[size],
-            "rounded-full flex items-center justify-center font-bold text-white bg-gradient-to-br from-orange-500 to-orange-600"
+            "rounded-full flex items-center justify-center font-bold text-white bg-gradient-to-br from-orange-400 to-orange-500"
           );
           fallbackDiv.textContent = fallback;
           target.parentNode?.replaceChild(fallbackDiv, target);

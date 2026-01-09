@@ -164,20 +164,20 @@ export function ICOLaunchpad() {
       <div className="bg-gray-900 border-b border-orange-500/30 p-2 flex flex-wrap justify-between items-center gap-2">
         <div className="flex items-center space-x-2 sm:space-x-4">
           {/* Desktop View */}
-          <span className="text-orange-500 font-bold whitespace-nowrap hidden md:inline">
+          <span className="text-orange-400 font-bold whitespace-nowrap hidden md:inline">
             ICO LAUNCHPAD
           </span>
-          <span className="text-orange-500 hidden md:inline whitespace-nowrap">
+          <span className="text-orange-400 hidden md:inline whitespace-nowrap">
             EQUITY MARKETS
           </span>
-          <span className="text-orange-500 hidden md:inline whitespace-nowrap">
+          <span className="text-orange-400 hidden md:inline whitespace-nowrap">
             NYSE/NASDAQ
           </span>
 
           {/* Mobile Dropdown View */}
           <div className="md:hidden">
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center space-x-1 text-orange-500 font-bold whitespace-nowrap">
+              <DropdownMenuTrigger className="flex items-center space-x-1 text-orange-400 font-bold whitespace-nowrap">
                 <span>{selectedView}</span>
                 <ChevronDown className="w-4 h-4" />
               </DropdownMenuTrigger>
@@ -205,7 +205,7 @@ export function ICOLaunchpad() {
           </div>
         </div>
         <div className="flex items-center space-x-2 sm:space-x-4">
-          <span className="text-orange-500 whitespace-nowrap">
+          <span className="text-orange-400 whitespace-nowrap">
             EST:{" "}
             {currentTime.toLocaleTimeString("en-US", {
               timeZone: "America/New_York",
@@ -229,7 +229,7 @@ export function ICOLaunchpad() {
                   <div
                     className={`w-6 h-6 rounded text-xs flex items-center justify-center font-bold border ${
                       step <= currentStep
-                        ? "bg-orange-500 border-orange-500 text-black"
+                        ? "bg-orange-400 border-orange-500 text-black"
                         : "border-gray-600 text-gray-400"
                     }`}
                   >
@@ -238,13 +238,13 @@ export function ICOLaunchpad() {
                   {step < totalSteps && (
                     <div
                       className={`w-4 sm:w-8 h-0.5 mx-1 ${
-                        step < currentStep ? "bg-orange-500" : "bg-gray-600"
+                        step < currentStep ? "bg-orange-400" : "bg-gray-600"
                       }`}
                     />
                   )}
                 </div>
               ))}
-              <span className="ml-2 sm:ml-4 text-orange-500 text-xs sm:text-sm">
+              <span className="ml-2 sm:ml-4 text-orange-400 text-xs sm:text-sm">
                 STEP {currentStep}:{" "}
                 {currentStep === 1
                   ? "COMPANY INFO"
@@ -259,7 +259,7 @@ export function ICOLaunchpad() {
           <div className="bg-gray-900 border border-gray-700 p-3">
             {currentStep === 1 && (
               <div className="space-y-3">
-                <div className="text-orange-500 mb-3 text-sm sm:text-base">
+                <div className="text-orange-400 mb-3 text-sm sm:text-base">
                   STONK INFORMATION
                 </div>
 
@@ -387,7 +387,7 @@ export function ICOLaunchpad() {
 
             {currentStep === 2 && (
               <div className="space-y-3">
-                <div className="text-orange-500 mb-3 text-sm sm:text-base">
+                <div className="text-orange-400 mb-3 text-sm sm:text-base">
                   OFFERING DETAILS
                 </div>
 
@@ -455,8 +455,8 @@ export function ICOLaunchpad() {
                   />
                 </div>
 
-                <div className="bg-orange-500/20 border border-orange-500 p-3">
-                  <div className="text-orange-500 font-bold mb-2 text-sm sm:text-base">
+                <div className="bg-orange-400/20 border border-orange-500 p-3">
+                  <div className="text-orange-400 font-bold mb-2 text-sm sm:text-base">
                     💰 ESTIMATED PROCEEDS
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
@@ -483,7 +483,7 @@ export function ICOLaunchpad() {
 
             {currentStep === 3 && (
               <div className="space-y-3">
-                <div className="text-orange-500 mb-3 text-sm sm:text-base">
+                <div className="text-orange-400 mb-3 text-sm sm:text-base">
                   COMPLIANCE & REVIEW
                 </div>
 
@@ -549,8 +549,8 @@ export function ICOLaunchpad() {
                   </div>
                 </div>
 
-                <div className="bg-orange-500/20 border border-orange-500 p-3">
-                  <div className="text-orange-500 font-bold mb-2 text-sm sm:text-base">
+                <div className="bg-orange-400/20 border border-orange-500 p-3">
+                  <div className="text-orange-400 font-bold mb-2 text-sm sm:text-base">
                     📊 IPO SUMMARY
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
@@ -608,7 +608,7 @@ export function ICOLaunchpad() {
               {currentStep < totalSteps ? (
                 <button
                   onClick={nextStep}
-                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-black text-xs sm:text-sm font-bold order-1 sm:order-2"
+                  className="px-4 py-2 bg-orange-400 hover:bg-orange-500 text-black text-xs sm:text-sm font-bold order-1 sm:order-2"
                 >
                   NEXT STEP
                 </button>
@@ -625,7 +625,7 @@ export function ICOLaunchpad() {
         <div className="col-span-1 lg:col-span-4 space-y-1">
           {/* Market Stats */}
           <div className="bg-gray-900 border border-gray-700 p-2">
-            <div className="text-orange-500 mb-2 text-sm sm:text-base">
+            <div className="text-orange-400 mb-2 text-sm sm:text-base">
               IPO MARKET STATS (YTD)
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
@@ -658,7 +658,7 @@ export function ICOLaunchpad() {
 
           {/* Recent IPOs */}
           <div className="bg-gray-900 border border-gray-700 p-2">
-            <div className="text-orange-500 mb-2 text-sm sm:text-base">
+            <div className="text-orange-400 mb-2 text-sm sm:text-base">
               RECENT IPO PERFORMANCE
             </div>
             <div className="space-y-1">
@@ -669,7 +669,7 @@ export function ICOLaunchpad() {
                 >
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1">
                     <div className="flex items-center space-x-2">
-                      <span className="text-orange-500 font-bold">
+                      <span className="text-orange-400 font-bold">
                         {ipo.symbol}
                       </span>
                       <span className="text-gray-400 truncate">{ipo.name}</span>
@@ -699,7 +699,7 @@ export function ICOLaunchpad() {
 
           {/* Upcoming IPOs */}
           <div className="bg-gray-900 border border-gray-700 p-2">
-            <div className="text-orange-500 mb-2 text-sm sm:text-base">
+            <div className="text-orange-400 mb-2 text-sm sm:text-base">
               UPCOMING IPOs
             </div>
             <div className="space-y-1">
@@ -709,7 +709,7 @@ export function ICOLaunchpad() {
                   className="bg-black border border-gray-800 p-2 text-xs sm:text-sm"
                 >
                   <div className="flex justify-between items-start">
-                    <span className="text-orange-500 font-bold">
+                    <span className="text-orange-400 font-bold">
                       {ipo.symbol}
                     </span>
                     <span className="text-gray-400 text-xs">{ipo.date}</span>
@@ -728,7 +728,7 @@ export function ICOLaunchpad() {
 
           {/* Launch Costs */}
           <div className="bg-gray-900 border border-gray-700 p-2">
-            <div className="text-orange-500 mb-2 flex items-center text-sm sm:text-base">
+            <div className="text-orange-400 mb-2 flex items-center text-sm sm:text-base">
               <DollarSign className="w-3 h-3 mr-1" />
               IPO COSTS
             </div>
@@ -756,7 +756,7 @@ export function ICOLaunchpad() {
               <div className="border-t border-gray-700 pt-2">
                 <div className="flex justify-between font-bold">
                   <span className="text-gray-200">Est. Total Cost</span>
-                  <span className="text-orange-500">$38M+</span>
+                  <span className="text-orange-400">$38M+</span>
                 </div>
               </div>
             </div>
@@ -764,21 +764,21 @@ export function ICOLaunchpad() {
 
           {/* Support */}
           <div className="bg-gray-900 border border-gray-700 p-2">
-            <div className="text-orange-500 mb-2 flex items-center text-sm sm:text-base">
+            <div className="text-orange-400 mb-2 flex items-center text-sm sm:text-base">
               <Users className="w-3 h-3 mr-1" />
               IPO SUPPORT
             </div>
             <div className="space-y-1 text-xs sm:text-sm">
-              <div className="text-orange-500 cursor-pointer hover:underline">
+              <div className="text-orange-400 cursor-pointer hover:underline">
                 📋 SEC Filing Guide
               </div>
-              <div className="text-orange-500 cursor-pointer hover:underline">
+              <div className="text-orange-400 cursor-pointer hover:underline">
                 🏦 Underwriter Network
               </div>
-              <div className="text-orange-500 cursor-pointer hover:underline">
+              <div className="text-orange-400 cursor-pointer hover:underline">
                 ⚖️ Legal Partner
               </div>
-              <div className="text-orange-500 cursor-pointer hover:underline">
+              <div className="text-orange-400 cursor-pointer hover:underline">
                 📞 Expert Consultation
               </div>
             </div>

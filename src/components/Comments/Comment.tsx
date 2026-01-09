@@ -100,7 +100,7 @@ export const Comment: React.FC<CommentProps> = ({
             <UserAvatar user={comment.user} size="md" className="" />
             <Link
               to={`/profile/${comment.user.walletAddress}`}
-              className="text-orange-500 hover:text-white font-mono text-xs transition-colors cursor-pointer"
+              className="text-orange-400 hover:text-white font-mono text-xs transition-colors cursor-pointer"
               onClick={(e) => e.stopPropagation()}
             >
               {getDisplayName(comment.user)}
@@ -123,7 +123,7 @@ export const Comment: React.FC<CommentProps> = ({
               <div className="flex items-center space-x-1">
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="text-gray-400 hover:text-orange-500 transition-colors"
+                  className="text-gray-400 hover:text-orange-400 transition-colors"
                   title="Edit comment"
                 >
                   <Edit className="w-4 h-4" />
@@ -146,7 +146,7 @@ export const Comment: React.FC<CommentProps> = ({
             <textarea
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
-              className={`w-full ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none font-mono`}
+              className={`w-full ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-400 resize-none font-mono`}
               rows={3}
               maxLength={1000}
             />
@@ -162,7 +162,7 @@ export const Comment: React.FC<CommentProps> = ({
                 disabled={
                   !editContent.trim() || editContent === comment.content
                 }
-                className="px-3 py-1 bg-orange-500 text-black text-xs rounded hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-mono"
+                className="px-3 py-1 bg-orange-400 text-black text-xs rounded hover:bg-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-mono"
               >
                 Save
               </button>
@@ -215,7 +215,7 @@ export const Comment: React.FC<CommentProps> = ({
               value={replyContent}
               onChange={(e) => setReplyContent(e.target.value)}
               placeholder="Write a reply..."
-              className={`w-full ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none font-mono`}
+              className={`w-full ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-400 resize-none font-mono`}
               rows={3}
               maxLength={1000}
             />
@@ -232,7 +232,7 @@ export const Comment: React.FC<CommentProps> = ({
               <button
                 onClick={handleReply}
                 disabled={!replyContent.trim()}
-                className="px-3 py-1 bg-orange-500 text-black text-xs rounded hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-mono"
+                className="px-3 py-1 bg-orange-400 text-black text-xs rounded hover:bg-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-mono"
               >
                 Reply
               </button>
@@ -264,7 +264,7 @@ export const Comment: React.FC<CommentProps> = ({
           {comment.replies.length > 1 && !showAllReplies && (
             <button
               onClick={() => setShowAllReplies(true)}
-              className="text-xs text-orange-500 hover:text-orange-400 transition-colors ml-6 font-mono"
+              className="text-xs text-orange-400 hover:text-orange-500 transition-colors ml-6 font-mono"
             >
               Show all {comment.replies.length} replies
             </button>

@@ -687,7 +687,7 @@ const TokenPage = () => {
               )}
               <button
                 onClick={() => navigate(`/profile/${trade.maker}`)}
-                className="hover:text-orange-500 underline text-left"
+                className="hover:text-orange-400 underline text-left"
               >
                 {trade.makerUsername || abbreviateAddress(trade.maker)}
               </button>
@@ -702,7 +702,7 @@ const TokenPage = () => {
               ) : (
                 <button
                   onClick={() => setFilteredTrader(trade.maker)}
-                  className="text-gray-400 hover:text-orange-500 transition-colors"
+                  className="text-gray-400 hover:text-orange-400 transition-colors"
                   title="Filter by this trader"
                 >
                   <Filter className="w-3 h-3" />
@@ -735,7 +735,7 @@ const TokenPage = () => {
               href={`${getExplorer(chainId)}/tx/${trade.transactionHash}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-orange-500"
+              className="hover:text-orange-400"
               title="View on Etherscan"
             >
               <ArrowUpRight className="w-4 h-4 inline" />
@@ -755,8 +755,8 @@ const TokenPage = () => {
         <div className="min-h-screen flex items-center justify-center p-4">
           <div className="bg-gray-900 border border-gray-700 p-8 max-w-md w-full text-center">
             <div className="mb-6">
-              <AlertTriangle className="w-16 h-16 text-orange-500 mx-auto mb-4" />
-              <h1 className="text-2xl font-bold text-orange-500 mb-2">
+              <AlertTriangle className="w-16 h-16 text-orange-400 mx-auto mb-4" />
+              <h1 className="text-2xl font-bold text-orange-400 mb-2">
                 Token Not Found
               </h1>
               <p className="text-gray-400 text-sm leading-relaxed">
@@ -769,7 +769,7 @@ const TokenPage = () => {
             <div className="space-y-3">
               <button
                 onClick={() => navigate("/")}
-                className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-orange-500 hover:bg-orange-600 text-black font-bold text-sm transition-all duration-200"
+                className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-orange-400 hover:bg-orange-500 text-black font-bold text-sm transition-all duration-200"
               >
                 <Home className="w-4 h-4" />
                 <span>Back to Homepage</span>
@@ -823,7 +823,7 @@ const TokenPage = () => {
 
                     {/* Address with Copy */}
                     <div
-                      className="flex items-center space-x-1 text-gray-400 text-xs cursor-pointer hover:text-orange-500 transition-colors"
+                      className="flex items-center space-x-1 text-gray-400 text-xs cursor-pointer hover:text-orange-400 transition-colors"
                       onClick={async () => {
                         if (tokenData?.tokenAddress) {
                           await navigator.clipboard.writeText(
@@ -874,7 +874,7 @@ const TokenPage = () => {
                         />
                       ) : (
                         <div
-                          className="w-28 h-28 bg-gradient-to-br from-orange-500 to-red-600 text-white font-bold text-3xl flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+                          className="w-28 h-28 bg-gradient-to-br from-orange-400 to-red-600 text-white font-bold text-3xl flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
                           onClick={() => setIsLogoModalOpen(true)}
                         >
                           {tokenData?.symbol?.slice(0, 3)}
@@ -957,7 +957,7 @@ const TokenPage = () => {
                               href={tokenData.websiteUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-orange-500 hover:text-orange-400 transition-colors bg-gray-800 rounded p-1.5"
+                              className="text-orange-400 hover:text-orange-400 transition-colors bg-gray-800 rounded p-1.5"
                               title="Website"
                             >
                               <Globe className="w-4 h-4" />
@@ -968,7 +968,7 @@ const TokenPage = () => {
                               href={tokenData.twitterUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-orange-500 hover:text-orange-400 transition-colors bg-gray-800 rounded p-1.5"
+                              className="text-orange-400 hover:text-orange-400 transition-colors bg-gray-800 rounded p-1.5"
                               title="X"
                             >
                               <svg
@@ -985,7 +985,7 @@ const TokenPage = () => {
                               href={tokenData.telegramUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-orange-500 hover:text-orange-400 transition-colors bg-gray-800 rounded p-1.5"
+                              className="text-orange-400 hover:text-orange-400 transition-colors bg-gray-800 rounded p-1.5"
                               title="Telegram"
                             >
                               <svg
@@ -1058,7 +1058,7 @@ const TokenPage = () => {
                       <button className="px-1.5 py-0.5 text-[10px] bg-gray-800 text-gray-400 rounded">
                         1h
                       </button>
-                      <button className="px-1.5 py-0.5 text-[10px] bg-orange-500 text-black rounded font-mono">
+                      <button className="px-1.5 py-0.5 text-[10px] bg-orange-400 text-black rounded font-mono">
                         24h
                       </button>
                     </div>
@@ -1076,7 +1076,7 @@ const TokenPage = () => {
                         className="w-16 h-16 object-cover"
                       />
                     ) : (
-                      <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 text-white font-bold text-lg flex items-center justify-center flex-shrink-0">
+                      <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-red-600 text-white font-bold text-lg flex items-center justify-center flex-shrink-0">
                         {tokenData?.symbol}
                       </div>
                     )}
@@ -1084,14 +1084,14 @@ const TokenPage = () => {
                     <div className="flex-1 min-w-0">
                       {/* Desktop: Keep horizontal */}
                       <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-3">
-                        <div className="text-orange-500 font-bold text-2xl sm:text-3xl truncate">
+                        <div className="text-orange-400 font-bold text-2xl sm:text-3xl truncate">
                           {tokenData?.symbol}
                         </div>
                         <div className="text-gray-300 text-sm sm:text-base truncate">
                           {tokenData?.name}
                         </div>
                         <span
-                          className="text-gray-400 text-xs cursor-pointer hover:text-orange-500 transition-colors truncate flex-shrink-0"
+                          className="text-gray-400 text-xs cursor-pointer hover:text-orange-400 transition-colors truncate flex-shrink-0"
                           onClick={async () => {
                             if (tokenData?.tokenAddress) {
                               await navigator.clipboard.writeText(
@@ -1119,7 +1119,7 @@ const TokenPage = () => {
                       {/* Age and Deployer Row */}
                       <div className="flex items-center space-x-4 mt-2 overflow-hidden">
                         <div className="flex items-center space-x-2">
-                          <Clock className="w-3 h-3 text-orange-500" />
+                          <Clock className="w-3 h-3 text-orange-400" />
                           <span className="text-white text-sm">
                             {tokenData?.deploymentTimestamp
                               ? formatTokenAge(tokenData.deploymentTimestamp)
@@ -1131,7 +1131,7 @@ const TokenPage = () => {
                             onClick={() =>
                               navigate(`/profile/${tokenData.deployer.address}`)
                             }
-                            className="flex items-center space-x-2 text-orange-500 hover:text-orange-400 transition-colors"
+                            className="flex items-center space-x-2 text-orange-400 hover:text-orange-400 transition-colors"
                           >
                             {tokenData.deployer.pfp && (
                               <img
@@ -1162,7 +1162,7 @@ const TokenPage = () => {
                             href={tokenData.websiteUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-orange-500 hover:text-orange-400 transition-colors"
+                            className="text-orange-400 hover:text-orange-400 transition-colors"
                             title="Website"
                           >
                             <Globe className="w-4 h-4" />
@@ -1173,7 +1173,7 @@ const TokenPage = () => {
                             href={tokenData.twitterUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-orange-500 hover:text-orange-400 transition-colors"
+                            className="text-orange-400 hover:text-orange-400 transition-colors"
                             title="X"
                           >
                             <svg
@@ -1190,7 +1190,7 @@ const TokenPage = () => {
                             href={tokenData.telegramUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-orange-500 hover:text-orange-400 transition-colors"
+                            className="text-orange-400 hover:text-orange-400 transition-colors"
                             title="Telegram"
                           >
                             <svg
@@ -1269,7 +1269,7 @@ const TokenPage = () => {
                                 className={`w-5 h-5 ${
                                   isInWatchlist(tokenData.tokenAddress, chainId)
                                     ? "fill-yellow-400 text-yellow-400"
-                                    : "text-orange-500 hover:text-orange-400"
+                                    : "text-orange-400 hover:text-orange-400"
                                 }`}
                               />
                             </button>
@@ -1309,7 +1309,7 @@ const TokenPage = () => {
               } p-2`}
             >
               {!isMobile && (
-                <div className="text-orange-500 mb-2">INTRADAY CHART</div>
+                <div className="text-orange-400 mb-2">INTRADAY CHART</div>
               )}
               <TradingViewChart
                 tokenSymbol={tokenData.symbol}
@@ -1339,7 +1339,7 @@ const TokenPage = () => {
                         className="flex-1 min-w-[2.5rem] flex flex-col justify-end items-center"
                       >
                         <div
-                          className="bg-orange-500 w-full rounded-t"
+                          className="bg-orange-400 w-full rounded-t"
                           style={{ height: `${height}px` }}
                           title={`$${point.price.toFixed(2)}`}
                         ></div>
@@ -1357,7 +1357,7 @@ const TokenPage = () => {
             {/* Financial Metrics - Hidden on Mobile */}
             {!isMobile && (
               <div className="bg-gray-900 border border-gray-700 p-2">
-                <div className="text-orange-500 mb-2">FINANCIAL METRICS</div>
+                <div className="text-orange-400 mb-2">FINANCIAL METRICS</div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 text-xs">
                   <div className="bg-black border border-black p-2">
                     <div className="text-gray-400">MARKET CAP</div>
@@ -1409,13 +1409,13 @@ const TokenPage = () => {
             {/* Company Info - Hidden on Mobile (shown in INFO tab instead) */}
             {!isMobile && (
               <div className="bg-gray-900 border border-gray-700 p-2">
-                <div className="text-orange-500 mb-2">COMPANY INFO</div>
+                <div className="text-orange-400 mb-2">COMPANY INFO</div>
                 <div className="space-y-2 text-xs">
                   <div className="flex items-center space-x-2">
                     <Clock
                       className={`w-3 h-3 ${
                         tokenData?.deploymentTimestamp
-                          ? "text-orange-500"
+                          ? "text-orange-400"
                           : "text-gray-600"
                       }`}
                     />
@@ -1430,7 +1430,7 @@ const TokenPage = () => {
                     <User
                       className={`w-3 h-3 ${
                         tokenData?.deployer
-                          ? "text-orange-500"
+                          ? "text-orange-400"
                           : "text-gray-600"
                       }`}
                     />
@@ -1440,7 +1440,7 @@ const TokenPage = () => {
                         onClick={() =>
                           navigate(`/profile/${tokenData.deployer.address}`)
                         }
-                        className="flex items-center space-x-2 text-orange-500 hover:text-orange-400 transition-colors"
+                        className="flex items-center space-x-2 text-orange-400 hover:text-orange-400 transition-colors"
                       >
                         {tokenData.deployer.pfp && (
                           <img
@@ -1466,14 +1466,14 @@ const TokenPage = () => {
                     )}
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Globe className="w-3 h-3 text-orange-500" />
+                    <Globe className="w-3 h-3 text-orange-400" />
                     <span className="text-gray-400">Website</span>
                     {tokenData?.websiteUrl ? (
                       <a
                         href={tokenData.websiteUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-orange-500 hover:text-orange-400 transition-colors flex items-center space-x-1"
+                        className="text-orange-400 hover:text-orange-400 transition-colors flex items-center space-x-1"
                       >
                         <span className="truncate max-w-32">
                           {tokenData.websiteUrl}
@@ -1486,7 +1486,7 @@ const TokenPage = () => {
                   </div>
                   <div className="flex items-center space-x-2">
                     <svg
-                      className="w-3 h-3 text-orange-500"
+                      className="w-3 h-3 text-orange-400"
                       viewBox="0 0 24 24"
                       fill="currentColor"
                     >
@@ -1498,7 +1498,7 @@ const TokenPage = () => {
                         href={tokenData.twitterUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-orange-500 hover:text-orange-400 transition-colors flex items-center space-x-1"
+                        className="text-orange-400 hover:text-orange-400 transition-colors flex items-center space-x-1"
                       >
                         <span className="truncate max-w-32">
                           {tokenData.twitterUrl}
@@ -1511,7 +1511,7 @@ const TokenPage = () => {
                   </div>
                   <div className="flex items-center space-x-2">
                     <svg
-                      className="w-3 h-3 text-orange-500"
+                      className="w-3 h-3 text-orange-400"
                       viewBox="0 0 24 24"
                       fill="currentColor"
                     >
@@ -1527,7 +1527,7 @@ const TokenPage = () => {
                         href={tokenData.telegramUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-orange-500 hover:text-orange-400 transition-colors flex items-center space-x-1"
+                        className="text-orange-400 hover:text-orange-400 transition-colors flex items-center space-x-1"
                       >
                         <span className="truncate max-w-32">
                           {tokenData.telegramUrl}
@@ -1542,7 +1542,7 @@ const TokenPage = () => {
                 {/* Bottom Description */}
                 {tokenData?.description && (
                   <div className="border-t border-orange-500/30 pt-2 mt-2">
-                    <div className="text-orange-500 mb-1">
+                    <div className="text-orange-400 mb-1">
                       COMPANY DESCRIPTION
                     </div>
                     <div className="text-gray-300 text-xs leading-relaxed">
@@ -1580,7 +1580,7 @@ const TokenPage = () => {
                     onClick={() => setActiveTab("trades")}
                     className={`text-xs font-bold transition-colors ${
                       activeTab === "trades"
-                        ? "text-orange-500"
+                        ? "text-orange-400"
                         : "text-gray-400 hover:text-orange-400"
                     }`}
                   >
@@ -1590,7 +1590,7 @@ const TokenPage = () => {
                     onClick={() => setActiveTab("holders")}
                     className={`text-xs font-bold transition-colors ${
                       activeTab === "holders"
-                        ? "text-orange-500"
+                        ? "text-orange-400"
                         : "text-gray-400 hover:text-orange-400"
                     }`}
                   >
@@ -1600,7 +1600,7 @@ const TokenPage = () => {
                     onClick={() => setActiveTab("comments")}
                     className={`text-xs font-bold transition-colors ${
                       activeTab === "comments"
-                        ? "text-orange-500"
+                        ? "text-orange-400"
                         : "text-gray-400 hover:text-orange-400"
                     }`}
                   >
@@ -1610,7 +1610,7 @@ const TokenPage = () => {
                     onClick={() => setActiveTab("info")}
                     className={`text-xs font-bold transition-colors ${
                       activeTab === "info"
-                        ? "text-orange-500"
+                        ? "text-orange-400"
                         : "text-gray-400 hover:text-orange-400"
                     }`}
                   >
@@ -1620,7 +1620,7 @@ const TokenPage = () => {
                 {activeTab === "trades" && filteredTrader && (
                   <button
                     onClick={() => setFilteredTrader(null)}
-                    className="text-xs text-orange-500 hover:text-orange-400 transition-colors"
+                    className="text-xs text-orange-400 hover:text-orange-400 transition-colors"
                   >
                     Clear Filter
                   </button>
@@ -1653,7 +1653,7 @@ const TokenPage = () => {
                             <div className="flex items-center space-x-1">
                               <span>TRADER</span>
                               {filteredTrader && (
-                                <Filter className="w-3 h-3 text-orange-500 fill-current" />
+                                <Filter className="w-3 h-3 text-orange-400 fill-current" />
                               )}
                             </div>
                           </th>
@@ -1853,7 +1853,7 @@ const TokenPage = () => {
                                           `/profile/${holder.holderAddress}`
                                         )
                                       }
-                                      className="hover:text-orange-500 underline text-left font-mono"
+                                      className="hover:text-orange-400 underline text-left font-mono"
                                     >
                                       {holder.username ||
                                         abbreviateAddress(holder.holderAddress)}
@@ -1873,7 +1873,7 @@ const TokenPage = () => {
                                     }`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="hover:text-orange-500"
+                                    className="hover:text-orange-400"
                                     title="View on Etherscan"
                                   >
                                     <ArrowUpRight className="w-4 h-4 inline" />
@@ -1903,7 +1903,7 @@ const TokenPage = () => {
                       <Clock
                         className={`w-3 h-3 ${
                           tokenData?.deploymentTimestamp
-                            ? "text-orange-500"
+                            ? "text-orange-400"
                             : "text-gray-600"
                         }`}
                       />
@@ -1920,7 +1920,7 @@ const TokenPage = () => {
                       <User
                         className={`w-3 h-3 ${
                           tokenData?.deployer
-                            ? "text-orange-500"
+                            ? "text-orange-400"
                             : "text-gray-600"
                         }`}
                       />
@@ -1930,7 +1930,7 @@ const TokenPage = () => {
                           onClick={() =>
                             navigate(`/profile/${tokenData.deployer.address}`)
                           }
-                          className="flex items-center space-x-2 text-orange-500 hover:text-orange-400 transition-colors"
+                          className="flex items-center space-x-2 text-orange-400 hover:text-orange-400 transition-colors"
                         >
                           {tokenData.deployer.pfp && (
                             <img
@@ -1958,14 +1958,14 @@ const TokenPage = () => {
 
                     {/* Website */}
                     <div className="flex items-center space-x-2">
-                      <Globe className="w-3 h-3 text-orange-500" />
+                      <Globe className="w-3 h-3 text-orange-400" />
                       <span className="text-gray-400">Website</span>
                       {tokenData?.websiteUrl ? (
                         <a
                           href={tokenData.websiteUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-orange-500 hover:text-orange-400 transition-colors flex items-center space-x-1"
+                          className="text-orange-400 hover:text-orange-400 transition-colors flex items-center space-x-1"
                         >
                           <span className="truncate max-w-32">
                             {tokenData.websiteUrl}
@@ -1980,7 +1980,7 @@ const TokenPage = () => {
                     {/* X */}
                     <div className="flex items-center space-x-2">
                       <svg
-                        className="w-3 h-3 text-orange-500"
+                        className="w-3 h-3 text-orange-400"
                         viewBox="0 0 24 24"
                         fill="currentColor"
                       >
@@ -1992,7 +1992,7 @@ const TokenPage = () => {
                           href={tokenData.twitterUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-orange-500 hover:text-orange-400 transition-colors flex items-center space-x-1"
+                          className="text-orange-400 hover:text-orange-400 transition-colors flex items-center space-x-1"
                         >
                           <span className="truncate max-w-32">
                             {tokenData.twitterUrl}
@@ -2007,7 +2007,7 @@ const TokenPage = () => {
                     {/* Telegram */}
                     <div className="flex items-center space-x-2">
                       <svg
-                        className="w-3 h-3 text-orange-500"
+                        className="w-3 h-3 text-orange-400"
                         viewBox="0 0 24 24"
                         fill="currentColor"
                       >
@@ -2023,7 +2023,7 @@ const TokenPage = () => {
                           href={tokenData.telegramUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-orange-500 hover:text-orange-400 transition-colors flex items-center space-x-1"
+                          className="text-orange-400 hover:text-orange-400 transition-colors flex items-center space-x-1"
                         >
                           <span className="truncate max-w-32">
                             {tokenData.telegramUrl}
@@ -2067,7 +2067,7 @@ const TokenPage = () => {
                           isMobile ? "" : "border-t border-gray-700"
                         }`}
                       >
-                        <div className="text-orange-500 mb-2">DESCRIPTION</div>
+                        <div className="text-orange-400 mb-2">DESCRIPTION</div>
                         <div className="text-gray-300 leading-relaxed">
                           {tokenData.description}
                         </div>
@@ -2086,7 +2086,7 @@ const TokenPage = () => {
         <Dialog open={isLogoModalOpen} onOpenChange={setIsLogoModalOpen}>
           <DialogContent className="max-w-sm mx-auto bg-black border-gray-700">
             <DialogHeader>
-              <DialogTitle className="text-center text-orange-500 text-lg">
+              <DialogTitle className="text-center text-orange-400 text-lg">
                 {tokenData?.name || tokenData?.symbol}
               </DialogTitle>
             </DialogHeader>
@@ -2098,14 +2098,14 @@ const TokenPage = () => {
                   className="w-48 h-48 object-cover shadow-2xl"
                 />
               ) : (
-                <div className="w-48 h-48 bg-gradient-to-br from-orange-500 to-red-600 text-white font-bold text-4xl flex items-center justify-center shadow-2xl">
+                <div className="w-48 h-48 bg-gradient-to-br from-orange-400 to-red-600 text-white font-bold text-4xl flex items-center justify-center shadow-2xl">
                   {tokenData?.symbol}
                 </div>
               )}
             </div>
             <div className="text-center text-gray-300 text-sm">
               <p className="mb-2">
-                <span className="text-orange-500 font-bold">
+                <span className="text-orange-400 font-bold">
                   {tokenData?.symbol}
                 </span>
                 {tokenData?.name && (
@@ -2144,7 +2144,7 @@ const TokenPage = () => {
             <div className="h-full flex flex-col">
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-700">
-                <h2 className="text-orange-500 text-lg font-bold">
+                <h2 className="text-orange-400 text-lg font-bold">
                   Trade {tokenData?.symbol}
                 </h2>
                 <button

@@ -14,7 +14,7 @@ export function ConnectWallet() {
     <Button
       onClick={() => open()}
       variant="outline"
-      className="flex items-center space-x-2 border-orange-500/30 bg-orange-500/10 text-orange-500 hover:text-orange-300 hover:bg-orange-600/10 hover:border-orange-400/50 transition-all duration-200"
+      className="flex items-center space-x-2 border-orange-400/30 bg-orange-400/10 text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 hover:border-orange-500/50 transition-all duration-200"
     >
       <Wallet className="w-4 h-4" />
       <span className="font-medium">{buttonText}</span>

@@ -97,7 +97,7 @@ export function WatchlistDashboard() {
     return (
       <div className="h-screen overflow-auto text-gray-100 text-xs font-mono flex items-center justify-center">
         <div className="text-center p-8 bg-bg-card border border-gray-700 rounded max-w-md">
-          <AlertCircle className="w-12 h-12 text-orange-500 mx-auto mb-4" />
+          <AlertCircle className="w-12 h-12 text-orange-400 mx-auto mb-4" />
           <h2 className="text-lg text-white mb-2 font-mono">Connect Your Wallet</h2>
           <p className="text-gray-400 font-mono">
             Please connect your wallet to view your watchlist
@@ -111,7 +111,7 @@ export function WatchlistDashboard() {
     <div className="h-screen overflow-auto text-gray-100 text-xs font-mono">
       <div className="p-4">
         <div className="bg-bg-card border border-gray-700">
-          <div className="text-orange-500 text-sm p-2 border-b border-gray-700 flex items-center justify-between">
+          <div className="text-orange-400 text-sm p-2 border-b border-gray-700 flex items-center justify-between">
             <span className="font-mono">MY WATCHLIST</span>
             <span className="text-gray-400 font-mono">
               {watchlist.length} {watchlist.length === 1 ? "token" : "tokens"}

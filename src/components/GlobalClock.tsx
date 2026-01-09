@@ -21,29 +21,29 @@ const GlobalClock = () => {
   return (
     <div className="px-2 text-xs font-mono">
       {/* Top Time Bar */}
-      <div className="border-b border-orange-500/30 p-1 flex justify-between items-center">
+      <div className="border-b border-orange-400/30 p-1 flex justify-between items-center">
         {/* Desktop view - original style */}
         <div className="hidden sm:flex space-x-6">
           <span className="text-white">
-            <span className="text-orange-500">NYC:</span>{" "}
+            <span className="text-orange-400">NYC:</span>{" "}
             {currentTime.toLocaleTimeString("US", {
               timeZone: "America/New_York",
             })}
           </span>
           <span className="text-white">
-            <span className="text-orange-500">LON:</span>{" "}
+            <span className="text-orange-400">LON:</span>{" "}
             {currentTime.toLocaleTimeString("GB", {
               timeZone: "Europe/London",
             })}
           </span>
           <span className="text-white">
-            <span className="text-orange-500">TOK:</span>{" "}
+            <span className="text-orange-400">TOK:</span>{" "}
             {currentTime.toLocaleTimeString("JP", {
               timeZone: "Asia/Tokyo",
             })}
           </span>
           <span className="text-white">
-            <span className="text-orange-500">SYD:</span>{" "}
+            <span className="text-orange-400">SYD:</span>{" "}
             {currentTime.toLocaleTimeString("AU", {
               timeZone: "Australia/Sydney",
             })}
@@ -53,19 +53,19 @@ const GlobalClock = () => {
         {/* Mobile view - compact format */}
         <div className="flex sm:hidden flex-wrap gap-x-3 gap-y-1">
           <span className="text-white whitespace-nowrap">
-            <span className="text-orange-500">NYC</span>{" "}
+            <span className="text-orange-400">NYC</span>{" "}
             {formatTimeMobile("America/New_York")}
           </span>
           <span className="text-white whitespace-nowrap">
-            <span className="text-orange-500">LON</span>{" "}
+            <span className="text-orange-400">LON</span>{" "}
             {formatTimeMobile("Europe/London")}
           </span>
           <span className="text-white whitespace-nowrap">
-            <span className="text-orange-500">TOK</span>{" "}
+            <span className="text-orange-400">TOK</span>{" "}
             {formatTimeMobile("Asia/Tokyo")}
           </span>
           <span className="text-white whitespace-nowrap">
-            <span className="text-orange-500">SYD</span>{" "}
+            <span className="text-orange-400">SYD</span>{" "}
             {formatTimeMobile("Australia/Sydney")}
           </span>
         </div>

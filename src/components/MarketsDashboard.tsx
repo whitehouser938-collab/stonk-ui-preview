@@ -158,11 +158,11 @@ const MobileCollapsibleSection: React.FC<{
           onClick={() => setIsOpen(!isOpen)}
           className="w-full flex justify-between items-center bg-bg-card p-2 mb-1"
         >
-          <div className="text-orange-500 text-xs">{title}</div>
+          <div className="text-orange-400 text-xs">{title}</div>
           {isOpen ? (
-            <ChevronUp className="w-4 h-4 text-orange-500" />
+            <ChevronUp className="w-4 h-4 text-orange-400" />
           ) : (
-            <ChevronDown className="w-4 h-4 text-orange-500" />
+            <ChevronDown className="w-4 h-4 text-orange-400" />
           )}
         </button>
         {isOpen && <div>{children}</div>}
@@ -568,7 +568,7 @@ export function MarketsDashboard() {
                       </div>
                     )}
                     <div className="text-gray-400 text-xs font-sans mb-2">
-                      <span className="text-orange-500">market cap: </span>
+                      <span className="text-orange-400">market cap: </span>
                       <span className="text-white-soft font-bold">
                         ${formatNumber(token.currentPrice * 1_000_000_000)}
                       </span>
@@ -1015,7 +1015,7 @@ export function MarketsDashboard() {
           <div className="lg:col-span-3 space-y-1 order-last lg:order-first">
             <MobileCollapsibleSection title="TERMINAL">
               <div className="bg-bg-card p-4 h-full flex flex-col items-center justify-center">
-                <div className="text-orange-500 text-lg font-bold mb-2 lg:block hidden">
+                <div className="text-orange-400 text-lg font-bold mb-2 lg:block hidden">
                   TERMINAL
                 </div>
                 <div className="text-gray-500 text-xs text-center">
@@ -1027,7 +1027,7 @@ export function MarketsDashboard() {
 
           {/* Center Column - Main Trading Data */}
           <div className="lg:col-span-6 bg-bg-card order-first lg:order-none">
-            <div className="text-orange-500 text-xs p-1">
+            <div className="text-orange-400 text-xs p-1">
               ACTIVE TRADING PAIRS
             </div>
             <div className="overflow-x-auto h-full">
@@ -1197,7 +1197,7 @@ export function MarketsDashboard() {
             <MobileCollapsibleSection title="VOLUME LEADERS">
               <div className="bg-bg-card p-1">
                 <div className="flex justify-between items-center mb-2">
-                  <div className="text-orange-500 text-xs hidden lg:block">
+                  <div className="text-orange-400 text-xs hidden lg:block">
                     VOLUME LEADERS
                   </div>
                   <div className="flex gap-1 w-full lg:w-auto">
@@ -1207,7 +1207,7 @@ export function MarketsDashboard() {
                         onClick={() => setVolumePeriod(period)}
                         className={`px-2 py-0.5 text-xs rounded transition-colors ${
                           volumePeriod === period
-                            ? "bg-orange-500 text-black font-bold"
+                            ? "bg-orange-400 text-black font-bold"
                             : "bg-gray-800 text-gray-400 hover:bg-gray-700"
                         }`}
                       >
@@ -1266,7 +1266,7 @@ export function MarketsDashboard() {
             {/* Graduated Tokens */}
             <MobileCollapsibleSection title="GRADUATED TOKENS">
               <div className="bg-bg-card p-1">
-                <div className="text-orange-500 text-xs mb-1 hidden lg:block">
+                <div className="text-orange-400 text-xs mb-1 hidden lg:block">
                   GRADUATED TOKENS
                 </div>
                 <div className="overflow-y-auto max-h-48">
@@ -1357,7 +1357,7 @@ export function MarketsDashboard() {
             {/* Bonding Curve Progress */}
             <MobileCollapsibleSection title="BONDING CURVE PROGRESS">
               <div className="bg-bg-card p-1">
-                <div className="text-orange-500 text-xs mb-1 hidden lg:block">
+                <div className="text-orange-400 text-xs mb-1 hidden lg:block">
                   BONDING CURVE PROGRESS
                 </div>
                 <div className="overflow-y-auto max-h-48">

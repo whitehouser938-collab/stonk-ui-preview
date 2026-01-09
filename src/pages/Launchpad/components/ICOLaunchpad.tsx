@@ -463,7 +463,7 @@ export function ICOLaunchpad() {
             <form onSubmit={handleSubmit}>
               {/* Information */}
               <div className="space-y-3">
-                <div className="text-orange-500 mb-3 text-sm sm:text-base">
+                <div className="text-orange-400 mb-3 text-sm sm:text-base">
                   STONK INFORMATION
                 </div>
 
@@ -548,7 +548,7 @@ export function ICOLaunchpad() {
                         const file = e.target.files?.[0];
                         handleFileChange(file || null);
                       }}
-                      className={`w-full p-2 bg-bg-card text-white text-xs sm:text-sm font-mono file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-orange-500 file:text-black hover:file:bg-orange-600 ${
+                      className={`w-full p-2 bg-bg-card text-white text-xs sm:text-sm font-mono file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-orange-500 file:text-black hover:file:bg-orange-500 ${
                         validationErrors.logoFile
                           ? "border border-red-500"
                           : "border-none sm:border sm:border-gray-600"
@@ -686,7 +686,7 @@ export function ICOLaunchpad() {
                         name="paymentMethod"
                         checked={formData.useETH === true}
                         onChange={() => handleInputChange("useETH", "true")}
-                        className="form-radio text-orange-500"
+                        className="form-radio text-orange-400"
                       />
                       <span className="text-white text-sm">Use ETH</span>
                     </label>
@@ -696,7 +696,7 @@ export function ICOLaunchpad() {
                         name="paymentMethod"
                         checked={formData.useETH === false}
                         onChange={() => handleInputChange("useETH", "false")}
-                        className="form-radio text-orange-500"
+                        className="form-radio text-orange-400"
                       />
                       <span className="text-white text-sm">Use WETH</span>
                     </label>
