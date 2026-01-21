@@ -2182,7 +2182,7 @@ const TokenPage = () => {
           )}
           {/* Slide-up Modal - 40% height, not full screen */}
           <div
-            className={`fixed left-0 right-0 bottom-[calc(48px+env(safe-area-inset-bottom))] bg-bg-main border-t border-gray-700 rounded-t-lg z-50 transition-transform duration-300 ease-out h-[40vh] ${
+            className={`fixed left-0 right-0 bottom-[calc(48px+env(safe-area-inset-bottom))] bg-bg-main rounded-t-lg z-50 transition-transform duration-300 ease-out h-[40vh] ${
               isTradingModalOpen
                 ? "translate-y-0"
                 : "translate-y-full"
