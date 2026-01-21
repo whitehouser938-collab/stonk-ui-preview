@@ -192,6 +192,7 @@ function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000
         datafeed: Datafeed,
         debug: false,
         library_path: "/charting_library/",
+        toolbar_bg: "#121216",
       }
 
       const widget: IChartingLibraryWidget  = new window.TradingView.widget(widgetOptions);
@@ -210,13 +211,13 @@ function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000
           const mode = modeRef.current;
           const asset = assetRef.current;
           if (mode === "price") {
-            priceEl.style.color = "#fff";
+            priceEl.style.color = "#fb923c";
             priceEl.style.fontWeight = "600";
 
             mcapEl.style.color = "#888";
             mcapEl.style.fontWeight = "400";
           } else {
-            mcapEl.style.color = "#fff";
+            mcapEl.style.color = "#fb923c";
             mcapEl.style.fontWeight = "600";
 
             priceEl.style.color = "#888";
@@ -240,7 +241,7 @@ function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000
             <span 
               class="tv-opt-price"
               data-val="price"
-              style="color:#fff;font-weight:600;"
+              style="color:#fb923c;font-weight:600;"
             >
               Price
             </span>
@@ -267,13 +268,13 @@ function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000
           const asset = assetRef.current;
 
           if (asset === "USD") {
-            usdEl.style.color = "#fff";
+            usdEl.style.color = "#fb923c";
             usdEl.style.fontWeight = "600";
 
             wethEl.style.color = "#888";
             wethEl.style.fontWeight = "400";
           } else {
-            wethEl.style.color = "#fff";
+            wethEl.style.color = "#fb923c";
             wethEl.style.fontWeight = "600";
 
             usdEl.style.color = "#888";
@@ -296,7 +297,7 @@ function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000
             <span 
               class="tv-opt-asset-usd"
               data-val="price"
-              style="color:#fff;font-weight:600;"
+              style="color:#fb923c;font-weight:600;"
             >
               USD
             </span>
@@ -314,6 +315,31 @@ function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000
 
       widget.onChartReady(() => {
         setIsLoading(false);
+
+        // Apply custom styling to match page theme
+        widget.applyOverrides({
+          // Background colors - match #121216
+          "paneProperties.backgroundType": "solid",
+          "paneProperties.background": "#121216",
+          "paneProperties.backgroundGradientStartColor": "#121216",
+          "paneProperties.backgroundGradientEndColor": "#121216",
+          
+          // Grid colors - subtle to match dark theme
+          "paneProperties.vertGridProperties.color": "rgba(255, 255, 255, 0.05)",
+          "paneProperties.horzGridProperties.color": "rgba(255, 255, 255, 0.05)",
+          
+          // Scale/axis colors
+          "scalesProperties.textColor": "#9ca3af",
+          "scalesProperties.lineColor": "rgba(255, 255, 255, 0.1)",
+          "scalesProperties.crosshairLabelBgColorDark": "#121216",
+          "scalesProperties.axisHighlightColor": "#fb923c",
+          
+          // Crosshair
+          "paneProperties.crossHairProperties.color": "rgba(251, 146, 60, 0.5)",
+          
+          // Separator
+          "paneProperties.separatorColor": "rgba(255, 255, 255, 0.1)",
+        });
 
         initializingRef.current = false;
       });
