@@ -1077,38 +1077,22 @@ const TokenPage = () => {
                     </div>
                   )}
 
-                  {/* Price Change with Time Selector */}
-                  <div className="flex items-center justify-between">
-                    <div
-                      className={`text-sm font-sans ${
-                        tokenData.price.priceChange24h >= 0
-                          ? "text-green-400"
-                          : "text-red-400"
-                      }`}
-                    >
-                      {tokenData.price.priceChange24h >= 0 ? "+" : ""}$
-                      {(
-                        (tokenData.price.currentPrice *
-                          tokenData.price.priceChange24h) /
-                        100
-                      ).toFixed(2)}{" "}
-                      ({tokenData.price.priceChange24h >= 0 ? "+" : ""}
-                      {tokenData.price.priceChange24h.toFixed(2)}%) Past 24h
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <button className="px-1.5 py-0.5 text-[10px] bg-gray-800 text-gray-400 rounded">
-                        1m
-                      </button>
-                      <button className="px-1.5 py-0.5 text-[10px] bg-gray-800 text-gray-400 rounded">
-                        5m
-                      </button>
-                      <button className="px-1.5 py-0.5 text-[10px] bg-gray-800 text-gray-400 rounded">
-                        1h
-                      </button>
-                      <button className="px-1.5 py-0.5 text-[10px] bg-orange-400 text-black rounded font-sans">
-                        24h
-                      </button>
-                    </div>
+                  {/* Price Change */}
+                  <div
+                    className={`text-sm font-sans ${
+                      tokenData.price.priceChange24h >= 0
+                        ? "text-green-400"
+                        : "text-red-400"
+                    }`}
+                  >
+                    {tokenData.price.priceChange24h >= 0 ? "+" : ""}$
+                    {(
+                      (tokenData.price.currentPrice *
+                        tokenData.price.priceChange24h) /
+                      100
+                    ).toFixed(2)}{" "}
+                    ({tokenData.price.priceChange24h >= 0 ? "+" : ""}
+                    {tokenData.price.priceChange24h.toFixed(2)}%) Past 24h
                   </div>
                 </div>
               ) : (
