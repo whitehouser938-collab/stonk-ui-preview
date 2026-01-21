@@ -193,6 +193,7 @@ function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000
         debug: false,
         library_path: "/charting_library/",
         toolbar_bg: "#121216",
+        custom_css_url: "/tradingview-custom.css",
       }
 
       const widget: IChartingLibraryWidget  = new window.TradingView.widget(widgetOptions);
@@ -340,6 +341,64 @@ function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000
           // Separator
           "paneProperties.separatorColor": "rgba(255, 255, 255, 0.1)",
         });
+
+        // Style the header/toolbar directly via iframe
+        setTimeout(() => {
+          try {
+            const iframe = widget._iFrame as HTMLIFrameElement;
+            if (iframe && iframe.contentDocument) {
+              const style = iframe.contentDocument.createElement('style');
+              style.textContent = `
+                /* Header and toolbar background */
+                .tv-header,
+                [class*="header"],
+                [class*="Header"],
+                [class*="toolbar"],
+                [class*="Toolbar"],
+                div[class*="header"],
+                div[class*="Header"] {
+                  background-color: #121216 !important;
+                  background: #121216 !important;
+                }
+                
+                /* Time frame buttons container */
+                [class*="timeframe"],
+                [class*="Timeframe"],
+                [class*="button-group"],
+                [class*="ButtonGroup"] {
+                  background-color: transparent !important;
+                }
+                
+                /* Chart type buttons container */
+                [class*="chart-type"],
+                [class*="ChartType"],
+                [class*="chartStyle"],
+                [class*="ChartStyle"] {
+                  background-color: transparent !important;
+                }
+                
+                /* All buttons in header */
+                [class*="button"],
+                [class*="Button"],
+                button {
+                  background-color: transparent !important;
+                }
+                
+                /* Active/selected buttons */
+                [class*="active"],
+                [class*="Active"],
+                [class*="selected"],
+                [class*="Selected"] {
+                  color: #fb923c !important;
+                }
+              `;
+              iframe.contentDocument.head.appendChild(style);
+            }
+          } catch (e) {
+            // Cross-origin restrictions might prevent this, CSS file will handle it
+            console.log('Could not inject styles directly, using CSS file');
+          }
+        }, 500);
 
         initializingRef.current = false;
       });

@@ -1,0 +1,70 @@
+/* Custom CSS for TradingView chart header/toolbar styling */
+/* Target the header bar with time frames and chart type buttons */
+
+/* Main header/toolbar background - use very broad selectors */
+div[class*="header"],
+div[class*="Header"],
+div[class*="toolbar"],
+div[class*="Toolbar"],
+.tv-header,
+.headerContainer,
+.header-container,
+[data-name="header"],
+[data-name="toolbar"] {
+  background-color: #121216 !important;
+  background: #121216 !important;
+}
+
+/* Target any element with header/toolbar in class name */
+[class*="header"],
+[class*="Header"],
+[class*="toolbar"],
+[class*="Toolbar"] {
+  background-color: #121216 !important;
+  background: #121216 !important;
+}
+
+/* Time frame buttons area */
+[class*="timeframe"],
+[class*="Timeframe"],
+[class*="time-frame"],
+[class*="TimeFrame"] {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Chart type buttons area */
+[class*="chart-type"],
+[class*="ChartType"],
+[class*="chartStyle"],
+[class*="ChartStyle"],
+[class*="chart-style"],
+[class*="ChartStyle"] {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* All buttons in header */
+button[class*="button"],
+button[class*="Button"],
+[class*="button"][class*="header"],
+[class*="Button"][class*="Header"] {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Active/selected state for buttons */
+[class*="active"],
+[class*="Active"],
+[class*="selected"],
+[class*="Selected"],
+[aria-selected="true"] {
+  color: #fb923c !important;
+  background-color: rgba(251, 146, 60, 0.1) !important;
+}
+
+/* Hover state */
+button:hover,
+[class*="button"]:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
