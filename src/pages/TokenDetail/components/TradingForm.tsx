@@ -742,7 +742,7 @@ const TradingForm = (props: TradingFormProps) => {
         className="h-full flex flex-col bg-bg-main"
       >
         {/* Top Bar: Buy/Sell Toggles + Close Button */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-700">
+        <div className="flex items-center justify-between p-3 border-b border-gray-700">
           <div className="flex space-x-2 flex-1">
             <button
               type="button"
@@ -750,7 +750,7 @@ const TradingForm = (props: TradingFormProps) => {
                 setIsBuy(true);
                 setAmount("");
               }}
-              className={`flex-1 py-3 px-4 text-sm font-bold transition-all duration-200 rounded ${
+              className={`flex-1 py-2 px-3 text-xs font-bold transition-all duration-200 rounded ${
                 isBuy
                   ? "bg-orange-400 text-black"
                   : "bg-gray-800 text-gray-400"
@@ -764,7 +764,7 @@ const TradingForm = (props: TradingFormProps) => {
                 setIsBuy(false);
                 setAmount("");
               }}
-              className={`flex-1 py-3 px-4 text-sm font-bold transition-all duration-200 rounded ${
+              className={`flex-1 py-2 px-3 text-xs font-bold transition-all duration-200 rounded ${
                 !isBuy
                   ? "bg-orange-400 text-black"
                   : "bg-gray-800 text-gray-400"
@@ -777,15 +777,15 @@ const TradingForm = (props: TradingFormProps) => {
             <button
               type="button"
               onClick={props.onClose}
-              className="ml-4 text-gray-400 hover:text-white transition-colors"
+              className="ml-3 text-gray-400 hover:text-white transition-colors"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5" />
             </button>
           )}
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-3 space-y-3">
           {/* Payment Method Selector (only for buy mode) */}
           {isBuy && (
             <div>
@@ -795,7 +795,7 @@ const TradingForm = (props: TradingFormProps) => {
                   <button
                     type="button"
                     onClick={() => setPaymentMethod("ETH")}
-                    className={`px-3 py-1.5 text-xs font-medium transition-all duration-200 rounded ${
+                    className={`px-2 py-1 text-xs font-medium transition-all duration-200 rounded ${
                       paymentMethod === "ETH"
                         ? "bg-orange-400 text-black"
                         : "bg-gray-800 text-gray-400"
@@ -806,7 +806,7 @@ const TradingForm = (props: TradingFormProps) => {
                   <button
                     type="button"
                     onClick={() => setPaymentMethod("WETH")}
-                    className={`px-3 py-1.5 text-xs font-medium transition-all duration-200 rounded ${
+                    className={`px-2 py-1 text-xs font-medium transition-all duration-200 rounded ${
                       paymentMethod === "WETH"
                         ? "bg-orange-400 text-black"
                         : "bg-gray-800 text-gray-400"
@@ -850,7 +850,7 @@ const TradingForm = (props: TradingFormProps) => {
                 type="number"
                 min="0"
                 step="any"
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white text-lg font-sans focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-base font-sans focus:outline-none focus:ring-2 focus:ring-orange-400"
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
@@ -878,11 +878,11 @@ const TradingForm = (props: TradingFormProps) => {
           {/* Quick Options */}
           <div>
             {isBuy ? (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 <button
                   type="button"
                   onClick={() => setAmount("")}
-                  className="px-3 py-2 text-xs font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg"
+                  className="px-2 py-1.5 text-xs font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg"
                 >
                   Reset
                 </button>
@@ -893,7 +893,7 @@ const TradingForm = (props: TradingFormProps) => {
                     onClick={() => {
                       setAmount(value.toString());
                     }}
-                    className="px-3 py-2 text-xs font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg"
+                    className="px-2 py-1.5 text-xs font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg"
                   >
                     {value} {paymentMethod}
                   </button>
@@ -907,13 +907,13 @@ const TradingForm = (props: TradingFormProps) => {
                       setAmount(ethers.formatEther(evilWETHBalance));
                     }
                   }}
-                  className="px-3 py-2 text-xs font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg"
+                  className="px-2 py-1.5 text-xs font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg"
                 >
                   Max
                 </button>
               </div>
             ) : (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 {[10, 25, 50, 75, 100].map((percentage) => (
                   <button
                     key={percentage}
@@ -928,7 +928,7 @@ const TradingForm = (props: TradingFormProps) => {
                         .replace(/\.?0+$/, "");
                       setAmount(sellAmountString || "0");
                     }}
-                    className="px-3 py-2 text-xs font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg"
+                    className="px-2 py-1.5 text-xs font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg"
                   >
                     {percentage}%
                   </button>
@@ -947,7 +947,7 @@ const TradingForm = (props: TradingFormProps) => {
               type="button"
               disabled={isApproving || !isWalletConnected || !amount}
               onClick={handleApprove}
-              className="w-full py-3 text-sm font-bold transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+              className="w-full py-2 text-xs font-bold transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
             >
               {isApproving ? "Approving..." : "Approve WETH"}
             </button>
@@ -967,7 +967,7 @@ const TradingForm = (props: TradingFormProps) => {
               type="button"
               disabled={isApproving || !isWalletConnected || !amount}
               onClick={handleTokenApprove}
-              className="w-full py-3 text-sm font-bold transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+              className="w-full py-2 text-xs font-bold transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
             >
               {isApproving ? "Approving..." : `Approve ${props.symbol}`}
             </button>
@@ -975,11 +975,11 @@ const TradingForm = (props: TradingFormProps) => {
         </div>
 
         {/* Main Submit Button at Bottom */}
-        <div className="p-4 border-t border-gray-700">
+        <div className="p-3 border-t border-gray-700">
           <button
             type="submit"
             disabled={isLoading || pendingTxHash !== null}
-            className={`w-full py-4 text-base font-bold transition-all duration-200 rounded-lg ${
+            className={`w-full py-2.5 text-sm font-bold transition-all duration-200 rounded-lg ${
               isBuy
                 ? "bg-orange-400 hover:bg-orange-500 text-black"
                 : "bg-orange-400 hover:bg-orange-500 text-black"
