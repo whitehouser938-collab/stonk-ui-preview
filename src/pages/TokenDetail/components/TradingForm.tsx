@@ -25,6 +25,7 @@ interface TradingFormProps {
   onTradeConfirmed?: (
     callback: (txHash: string, tradeType: "BUY" | "SELL") => void
   ) => void;
+  formRef?: React.RefObject<HTMLFormElement>;
 }
 
 export interface TokenTradeData {
@@ -732,6 +733,7 @@ const TradingForm = (props: TradingFormProps) => {
 
   return (
     <form
+      ref={props.formRef}
       onSubmit={handleSubmit}
       className={`p-2 ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-700 space-y-6 text-gray-400`}
     >
@@ -1014,8 +1016,8 @@ const TradingForm = (props: TradingFormProps) => {
         </div>
       )}
 
-      {/* Submit Button */}
-      {/* Approve button for buy mode (WETH) if allowance is insufficient */}
+      {/* Submit Button - Hidden when lockMode is true (mobile modal uses external submit button) */}
+      {/* Approve buttons are always shown when needed, even in mobile modal */}
       {isBuy &&
       paymentMethod === "WETH" &&
       amount &&
@@ -1052,25 +1054,28 @@ const TradingForm = (props: TradingFormProps) => {
           {isApproving ? "Approving..." : `Approve ${props.symbol}`}
         </button>
       ) : (
-        <button
-          type="submit"
-          disabled={isLoading || pendingTxHash !== null}
-          className={`w-full p-3 text-sm font-bold transition-all duration-200 rounded ${
-            isBuy
-              ? "bg-green-600 hover:bg-green-700 text-black"
-              : "bg-red-600 hover:bg-red-700 text-white"
-          }`}
-        >
-          {pendingTxHash
-            ? "Waiting for Confirmation..."
-            : isLoading
-            ? isBuy
-              ? "Submitting Buy..."
-              : "Submitting Sell..."
-            : isBuy
-            ? "Submit Buy Order"
-            : "Submit Sell Order"}
-        </button>
+        /* Submit button - only show when not in lockMode (mobile modal) */
+        !props.lockMode && (
+          <button
+            type="submit"
+            disabled={isLoading || pendingTxHash !== null}
+            className={`w-full p-3 text-sm font-bold transition-all duration-200 rounded ${
+              isBuy
+                ? "bg-green-600 hover:bg-green-700 text-black"
+                : "bg-red-600 hover:bg-red-700 text-white"
+            }`}
+          >
+            {pendingTxHash
+              ? "Waiting for Confirmation..."
+              : isLoading
+              ? isBuy
+                ? "Submitting Buy..."
+                : "Submitting Sell..."
+              : isBuy
+              ? "Submit Buy Order"
+              : "Submit Sell Order"}
+          </button>
+        )
       )}
     </form>
   );

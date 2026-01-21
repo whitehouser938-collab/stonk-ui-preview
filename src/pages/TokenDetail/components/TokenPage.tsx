@@ -220,6 +220,9 @@ const TokenPage = () => {
     ((txHash: string, tradeType: "BUY" | "SELL") => void) | null
   >(null);
 
+  // Ref to access the trading form for submitting
+  const tradingFormRef = useRef<HTMLFormElement>(null);
+
   const handleTradeUpdate = useCallback((newTrades: TradeData[]) => {
     console.log(
       `[TokenPage] Received trade update at ${Date.now()}:`,
@@ -2135,10 +2138,10 @@ const TokenPage = () => {
           )}
           {/* Slide-up Modal */}
           <div
-            className={`fixed left-0 right-0 bottom-[88px] bg-bg-main border-t border-gray-700 rounded-t-lg z-50 transition-transform duration-300 ease-out max-h-[calc(100vh-200px)] ${
+            className={`fixed left-0 right-0 bottom-[calc(116px+env(safe-area-inset-bottom))] bg-bg-main border-t border-gray-700 rounded-t-lg z-50 transition-transform duration-300 ease-out max-h-[calc(100vh-116px-env(safe-area-inset-bottom))] ${
               isTradingModalOpen
                 ? "translate-y-0"
-                : "translate-y-[calc(100%+88px)]"
+                : "translate-y-[calc(100%+116px+env(safe-area-inset-bottom))]"
             }`}
           >
             <div className="h-full flex flex-col">
@@ -2155,13 +2158,14 @@ const TokenPage = () => {
                 </button>
               </div>
               {/* Content - Scrollable */}
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto pb-24">
                 <TradingForm
                   chain={tokenData?.chain}
                   symbol={tokenData?.symbol}
                   tokenAddress={tokenData?.tokenAddress}
                   initialMode={tradeMode}
                   lockMode={true}
+                  formRef={tradingFormRef}
                   onTradeConfirmed={(callback) => {
                     tradeConfirmCallbackRef.current = callback;
                   }}
@@ -2175,26 +2179,45 @@ const TokenPage = () => {
       {/* Fixed Buy/Sell Buttons - Mobile Only - Always at Bottom */}
       {isMobile && !isSearchModalOpen && (
         <div className="fixed left-0 right-0 bottom-[calc(48px+env(safe-area-inset-bottom))] bg-bg-main p-4 z-[60]">
-          <div className="flex space-x-2">
+          {isTradingModalOpen ? (
+            /* Single Submit Button when modal is open */
             <button
               onClick={() => {
-                setTradeMode("buy");
-                setIsTradingModalOpen(true);
+                if (tradingFormRef.current) {
+                  tradingFormRef.current.requestSubmit();
+                }
               }}
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-4 transition-all duration-200 rounded"
+              className={`w-full text-white font-bold py-4 px-4 transition-all duration-200 rounded ${
+                tradeMode === "buy"
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-red-600 hover:bg-red-700"
+              }`}
             >
-              BUY
+              {tradeMode === "buy" ? "SUBMIT BUY" : "SUBMIT SELL"}
             </button>
-            <button
-              onClick={() => {
-                setTradeMode("sell");
-                setIsTradingModalOpen(true);
-              }}
-              className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-4 transition-all duration-200 rounded"
-            >
-              SELL
-            </button>
-          </div>
+          ) : (
+            /* Two buttons when modal is closed */
+            <div className="flex space-x-2">
+              <button
+                onClick={() => {
+                  setTradeMode("buy");
+                  setIsTradingModalOpen(true);
+                }}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-4 transition-all duration-200 rounded"
+              >
+                BUY
+              </button>
+              <button
+                onClick={() => {
+                  setTradeMode("sell");
+                  setIsTradingModalOpen(true);
+                }}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-4 transition-all duration-200 rounded"
+              >
+                SELL
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
