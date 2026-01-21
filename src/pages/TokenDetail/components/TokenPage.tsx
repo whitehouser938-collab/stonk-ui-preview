@@ -2174,7 +2174,7 @@ const TokenPage = () => {
 
       {/* Fixed Buy/Sell Buttons - Mobile Only - Always at Bottom */}
       {isMobile && !isSearchModalOpen && (
-        <div className="fixed left-0 right-0 bottom-0 bg-bg-main border-t border-gray-700 p-4 z-50">
+        <div className="fixed left-0 right-0 bottom-[calc(48px+env(safe-area-inset-bottom))] bg-bg-main p-4 z-[60]">
           <div className="flex space-x-2">
             <button
               onClick={() => {
