@@ -747,13 +747,13 @@ const TokenPage = () => {
   );
 
   return (
-    <div className="bg-black text-gray-100 text-xs font-mono">
+    <div className="bg-bg-main text-gray-100 text-xs font-mono">
       {isLoading && <LoadingScreen />}
 
       {/* Error/Not Found Screen */}
       {error && (
         <div className="min-h-screen flex items-center justify-center p-4">
-          <div className="bg-gray-900 border border-gray-700 p-8 max-w-md w-full text-center">
+          <div className="bg-bg-main border border-gray-700 p-8 max-w-md w-full text-center">
             <div className="mb-6">
               <AlertTriangle className="w-16 h-16 text-orange-400 mx-auto mb-4" />
               <h1 className="text-2xl font-bold text-orange-400 mb-2">
@@ -804,7 +804,7 @@ const TokenPage = () => {
             {/* Stock Header */}
             <div
               className={`${
-                isMobile ? "bg-black" : "bg-gray-900 border border-gray-700"
+                isMobile ? "bg-bg-main" : "bg-bg-main border border-gray-700"
               } p-2 overflow-hidden`}
             >
               {isMobile ? (
@@ -1305,7 +1305,7 @@ const TokenPage = () => {
             {/* Price Chart */}
             <div
               className={`${
-                isMobile ? "bg-black" : "bg-gray-900 border border-gray-700"
+                isMobile ? "bg-bg-main" : "bg-bg-main border border-gray-700"
               } p-2`}
             >
               {!isMobile && (
@@ -1356,10 +1356,10 @@ const TokenPage = () => {
 
             {/* Financial Metrics - Hidden on Mobile */}
             {!isMobile && (
-              <div className="bg-gray-900 border border-gray-700 p-2">
+              <div className="bg-bg-main border border-gray-700 p-2">
                 <div className="text-orange-400 mb-2">FINANCIAL METRICS</div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 text-xs">
-                  <div className="bg-black border border-black p-2">
+                  <div className="bg-bg-main border border-black p-2">
                     <div className="text-gray-400">MARKET CAP</div>
                     <div className="text-white font-mono text-sm">
                       {formatNumber(
@@ -1367,13 +1367,13 @@ const TokenPage = () => {
                       )}
                     </div>
                   </div>
-                  <div className="bg-black border border-black p-2">
+                  <div className="bg-bg-main border border-black p-2">
                     <div className="text-gray-400">LIQUIDITY</div>
                     <div className="text-white font-mono text-sm">
                       {getLiquidityWeth(tokenData)} WETH
                     </div>
                   </div>
-                  <div className="bg-black border border-black p-2">
+                  <div className="bg-bg-main border border-black p-2">
                     <div className="text-gray-400">FDV</div>
                     <div className="text-white font-mono text-sm">
                       {formatNumber(
@@ -1381,7 +1381,7 @@ const TokenPage = () => {
                       )}
                     </div>
                   </div>
-                  <div className="bg-black border border-black p-2">
+                  <div className="bg-bg-main border border-black p-2">
                     <div className="text-gray-400">PRICE (USD)</div>
                     <div className="text-white font-mono text-sm">
                       $
@@ -1390,13 +1390,13 @@ const TokenPage = () => {
                         : "N/A"}
                     </div>
                   </div>
-                  <div className="bg-black border border-black p-2">
+                  <div className="bg-bg-main border border-black p-2">
                     <div className="text-gray-400">HOLDERS</div>
                     <div className="text-white font-mono text-sm">
                       {holdersCount > 0 ? holdersCount : "Loading..."}
                     </div>
                   </div>
-                  <div className="bg-black border border-black p-2">
+                  <div className="bg-bg-main border border-black p-2">
                     <div className="text-gray-400">VOLUME</div>
                     <div className="text-white font-mono text-sm">
                       {formatNumber(tokenData.price.totalVolume)}
@@ -1408,7 +1408,7 @@ const TokenPage = () => {
 
             {/* Company Info - Hidden on Mobile (shown in INFO tab instead) */}
             {!isMobile && (
-              <div className="bg-gray-900 border border-gray-700 p-2">
+              <div className="bg-bg-main border border-gray-700 p-2">
                 <div className="text-orange-400 mb-2">COMPANY INFO</div>
                 <div className="space-y-2 text-xs">
                   <div className="flex items-center space-x-2">
@@ -1571,7 +1571,7 @@ const TokenPage = () => {
             {/* Trades / Holders / Comments */}
             <div
               className={`${
-                isMobile ? "bg-black" : "bg-gray-900 border border-gray-700"
+                isMobile ? "bg-bg-main" : "bg-bg-main border border-gray-700"
               } p-2`}
             >
               <div className="flex items-center justify-between mb-2">
@@ -1641,7 +1641,7 @@ const TokenPage = () => {
                     <table className="w-full text-xs min-w-[400px]">
                       <thead
                         className={`${
-                          isMobile ? "bg-black" : "bg-gray-900"
+                          isMobile ? "bg-bg-main" : "bg-bg-main"
                         } sticky top-0 z-10`}
                       >
                         <tr
@@ -1676,7 +1676,7 @@ const TokenPage = () => {
                   <table className="w-full text-xs min-w-[400px]">
                     <thead
                       className={`${
-                        isMobile ? "bg-black" : "bg-gray-900"
+                        isMobile ? "bg-bg-main" : "bg-bg-main"
                       } sticky top-0 z-10`}
                     >
                       <tr
@@ -2084,7 +2084,7 @@ const TokenPage = () => {
       {/* Token Logo Modal - Mobile Only */}
       {isMobile && (
         <Dialog open={isLogoModalOpen} onOpenChange={setIsLogoModalOpen}>
-          <DialogContent className="max-w-sm mx-auto bg-black border-gray-700">
+          <DialogContent className="max-w-sm mx-auto bg-bg-main border-gray-700">
             <DialogHeader>
               <DialogTitle className="text-center text-orange-400 text-lg">
                 {tokenData?.name || tokenData?.symbol}
@@ -2135,7 +2135,7 @@ const TokenPage = () => {
           )}
           {/* Slide-up Modal */}
           <div
-            className={`fixed left-0 right-0 bottom-[88px] bg-black border-t border-gray-700 rounded-t-lg z-50 transition-transform duration-300 ease-out max-h-[calc(100vh-200px)] ${
+            className={`fixed left-0 right-0 bottom-[88px] bg-bg-main border-t border-gray-700 rounded-t-lg z-50 transition-transform duration-300 ease-out max-h-[calc(100vh-200px)] ${
               isTradingModalOpen
                 ? "translate-y-0"
                 : "translate-y-[calc(100%+88px)]"
@@ -2174,7 +2174,7 @@ const TokenPage = () => {
 
       {/* Fixed Buy/Sell Buttons - Mobile Only - Always at Bottom */}
       {isMobile && !isSearchModalOpen && (
-        <div className="fixed left-0 right-0 bottom-0 bg-black border-t border-gray-700 p-4 z-50">
+        <div className="fixed left-0 right-0 bottom-0 bg-bg-main border-t border-gray-700 p-4 z-50">
           <div className="flex space-x-2">
             <button
               onClick={() => {
