@@ -78,8 +78,8 @@ button,
 }
 
 /* Parent elements of buttons should have #121216 background */
-button ~ *,
-[class*="button"] ~ * {
+button~*,
+[class*="button"]~* {
   background-color: #121216 !important;
 }
 
@@ -112,14 +112,43 @@ button[class*="Button"],
   background: transparent !important;
 }
 
-/* Active/selected state for buttons */
-[class*="active"],
-[class*="Active"],
-[class*="selected"],
-[class*="Selected"],
-[aria-selected="true"] {
-  color: #fb923c !important;
-  background-color: rgba(251, 146, 60, 0.1) !important;
+/* Active/selected state - ONLY for our custom buttons (Price/MCap, USD/WETH) */
+/* These are handled by JavaScript, so we don't need broad selectors here */
+.tv-opt-price,
+.tv-opt-mcap,
+.tv-opt-asset-usd,
+.tv-opt-asset-weth {
+  /* Color is set inline by JavaScript */
+}
+
+/* Bottom toolbar elements (date range, %, log, auto) should NOT be orange */
+/* Override any orange styling that might be applied */
+[class*="time"] [class*="active"],
+[class*="time"] [class*="Active"],
+[class*="time"] [class*="selected"],
+[class*="time"] [class*="Selected"],
+[class*="scale"] [class*="active"],
+[class*="scale"] [class*="Active"],
+[class*="scale"] [class*="selected"],
+[class*="scale"] [class*="Selected"],
+[class*="axis"] [class*="active"],
+[class*="axis"] [class*="Active"],
+[class*="axis"] [class*="selected"],
+[class*="axis"] [class*="Selected"],
+[class*="bottom"] [class*="active"],
+[class*="bottom"] [class*="Active"],
+[class*="bottom"] [class*="selected"],
+[class*="bottom"] [class*="Selected"],
+[class*="footer"] [class*="active"],
+[class*="footer"] [class*="Active"],
+[class*="footer"] [class*="selected"],
+[class*="footer"] [class*="Selected"],
+[class*="timeframe"] [class*="active"],
+[class*="timeframe"] [class*="Active"],
+[class*="timeframe"] [class*="selected"],
+[class*="timeframe"] [class*="Selected"] {
+  color: inherit !important;
+  background-color: transparent !important;
 }
 
 /* Hover state */
@@ -129,8 +158,8 @@ button:hover,
 }
 
 /* Force all top-level containers in header to have #121216 */
-body > div:first-child,
-iframe body > div:first-child,
+body>div:first-child,
+iframe body>div:first-child,
 iframe body header,
 iframe body [class*="header"]:first-of-type {
   background-color: #121216 !important;

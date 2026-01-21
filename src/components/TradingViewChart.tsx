@@ -449,12 +449,34 @@ function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000
                   background-color: transparent !important;
                 }
                 
-                /* Active/selected buttons */
-                [class*="active"],
-                [class*="Active"],
-                [class*="selected"],
-                [class*="Selected"] {
-                  color: #fb923c !important;
+                /* Bottom toolbar elements (date range, %, log, auto) should NOT be orange */
+                /* Override any orange styling that might be applied */
+                [class*="time"] [class*="active"],
+                [class*="time"] [class*="Active"],
+                [class*="time"] [class*="selected"],
+                [class*="time"] [class*="Selected"],
+                [class*="scale"] [class*="active"],
+                [class*="scale"] [class*="Active"],
+                [class*="scale"] [class*="selected"],
+                [class*="scale"] [class*="Selected"],
+                [class*="axis"] [class*="active"],
+                [class*="axis"] [class*="Active"],
+                [class*="axis"] [class*="selected"],
+                [class*="axis"] [class*="Selected"],
+                [class*="bottom"] [class*="active"],
+                [class*="bottom"] [class*="Active"],
+                [class*="bottom"] [class*="selected"],
+                [class*="bottom"] [class*="Selected"],
+                [class*="footer"] [class*="active"],
+                [class*="footer"] [class*="Active"],
+                [class*="footer"] [class*="selected"],
+                [class*="footer"] [class*="Selected"],
+                [class*="timeframe"] [class*="active"],
+                [class*="timeframe"] [class*="Active"],
+                [class*="timeframe"] [class*="selected"],
+                [class*="timeframe"] [class*="Selected"] {
+                  color: inherit !important;
+                  background-color: transparent !important;
                 }
               `;
               doc.head.appendChild(style);
