@@ -1283,7 +1283,7 @@ const TokenPage = () => {
               } p-2`}
             >
               {!isMobile && (
-                <div className="text-orange-400 mb-2">INTRADAY CHART</div>
+                <div className="mb-2">INTRADAY CHART</div>
               )}
               <TradingViewChart
                 tokenSymbol={tokenData.symbol}
