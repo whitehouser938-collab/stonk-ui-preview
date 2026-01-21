@@ -2180,17 +2180,17 @@ const TokenPage = () => {
               onClick={() => setIsTradingModalOpen(false)}
             />
           )}
-          {/* Slide-up Modal - 40% height, not full screen */}
+          {/* Slide-up Modal - Minimum 40vh, expands if needed, not scrollable */}
           <div
-            className={`fixed left-0 right-0 bottom-[calc(48px+env(safe-area-inset-bottom))] bg-bg-main rounded-t-lg z-50 transition-transform duration-300 ease-out h-[40vh] ${
+            className={`fixed left-0 right-0 bottom-[calc(48px+env(safe-area-inset-bottom))] bg-bg-main rounded-t-lg z-50 transition-transform duration-300 ease-out min-h-[40vh] max-h-[85vh] ${
               isTradingModalOpen
                 ? "translate-y-0"
                 : "translate-y-full"
             }`}
           >
             <div className="h-full flex flex-col">
-              {/* Content - Scrollable */}
-              <div className="flex-1 overflow-y-auto">
+              {/* Content - Not scrollable, expands to fit */}
+              <div className="flex-1 overflow-hidden">
                 <TradingForm
                   chain={tokenData?.chain}
                   symbol={tokenData?.symbol}

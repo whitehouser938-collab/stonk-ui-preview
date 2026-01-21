@@ -784,8 +784,8 @@ const TradingForm = (props: TradingFormProps) => {
           )}
         </div>
 
-        {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-3">
+        {/* Content - Not scrollable, expands to fit */}
+        <div className="flex-1 overflow-hidden p-3 space-y-3">
           {/* Payment Method Selector (only for buy mode) */}
           {isBuy && (
             <div>
@@ -878,11 +878,11 @@ const TradingForm = (props: TradingFormProps) => {
           {/* Quick Options */}
           <div>
             {isBuy ? (
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-nowrap gap-1 overflow-x-auto">
                 <button
                   type="button"
                   onClick={() => setAmount("")}
-                  className="px-2 py-1.5 text-xs font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg"
+                  className="px-1.5 py-1 text-[10px] font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded flex-shrink-0 whitespace-nowrap"
                 >
                   Reset
                 </button>
@@ -893,7 +893,7 @@ const TradingForm = (props: TradingFormProps) => {
                     onClick={() => {
                       setAmount(value.toString());
                     }}
-                    className="px-2 py-1.5 text-xs font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg"
+                    className="px-1.5 py-1 text-[10px] font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded flex-shrink-0 whitespace-nowrap"
                   >
                     {value} {paymentMethod}
                   </button>
@@ -907,13 +907,13 @@ const TradingForm = (props: TradingFormProps) => {
                       setAmount(ethers.formatEther(evilWETHBalance));
                     }
                   }}
-                  className="px-2 py-1.5 text-xs font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg"
+                  className="px-1.5 py-1 text-[10px] font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded flex-shrink-0 whitespace-nowrap"
                 >
                   Max
                 </button>
               </div>
             ) : (
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-nowrap gap-1 overflow-x-auto">
                 {[10, 25, 50, 75, 100].map((percentage) => (
                   <button
                     key={percentage}
@@ -928,7 +928,7 @@ const TradingForm = (props: TradingFormProps) => {
                         .replace(/\.?0+$/, "");
                       setAmount(sellAmountString || "0");
                     }}
-                    className="px-2 py-1.5 text-xs font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg"
+                    className="px-1.5 py-1 text-[10px] font-medium transition-all duration-200 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded flex-shrink-0 whitespace-nowrap"
                   >
                     {percentage}%
                   </button>
