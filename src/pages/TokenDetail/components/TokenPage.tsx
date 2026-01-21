@@ -676,7 +676,7 @@ const TokenPage = () => {
           key={idx}
           className={isMobile ? "" : "border-b border-gray-800 last:border-0"}
         >
-          <td className="p-1 text-white font-mono">
+          <td className="p-1 text-white font-sans">
             <div className="flex items-center space-x-2">
               {trade.makerPfp && (
                 <img
@@ -713,10 +713,10 @@ const TokenPage = () => {
               )}
             </div>
           </td>
-          <td className="p-1 text-right text-white font-mono">
+          <td className="p-1 text-right text-white font-sans">
             {abbreviateTokenAmount(trade.baseAmount)}
           </td>
-          <td className="p-1 text-right text-white font-mono">
+          <td className="p-1 text-right text-white font-sans">
             {abbreviateTokenAmount(trade.quoteAmount)}
           </td>
           <td className="p-1 text-center">
@@ -750,7 +750,7 @@ const TokenPage = () => {
   );
 
   return (
-    <div className="bg-bg-main text-gray-100 text-xs font-mono">
+    <div className="bg-bg-main text-gray-100 text-xs font-sans">
       {isLoading && <LoadingScreen />}
 
       {/* Error/Not Found Screen */}
@@ -1011,7 +1011,7 @@ const TokenPage = () => {
 
                   {/* Market Cap */}
                   <div className="flex items-baseline space-x-2">
-                    <div className="text-white font-mono text-3xl font-bold">
+                    <div className="text-white font-sans text-3xl font-bold">
                       $
                       {formatNumber(
                         tokenData.price.currentPrice * 1_000_000_000
@@ -1023,7 +1023,7 @@ const TokenPage = () => {
                   {/* Liquidity - Only show if graduated */}
                   {(tokenData?.isGraduated || tokenData?.uniswapPair) && (
                     <div className="flex items-baseline space-x-2">
-                      <div className="text-white font-mono text-xl">
+                      <div className="text-white font-sans text-xl">
                         $
                         {formatNumber(
                           parseFloat(getLiquidityWeth(tokenData)) * 2000
@@ -1036,7 +1036,7 @@ const TokenPage = () => {
                   {/* Price Change with Time Selector */}
                   <div className="flex items-center justify-between">
                     <div
-                      className={`text-sm font-mono ${
+                      className={`text-sm font-sans ${
                         tokenData.price.priceChange24h >= 0
                           ? "text-green-400"
                           : "text-red-400"
@@ -1061,7 +1061,7 @@ const TokenPage = () => {
                       <button className="px-1.5 py-0.5 text-[10px] bg-gray-800 text-gray-400 rounded">
                         1h
                       </button>
-                      <button className="px-1.5 py-0.5 text-[10px] bg-orange-400 text-black rounded font-mono">
+                      <button className="px-1.5 py-0.5 text-[10px] bg-orange-400 text-black rounded font-sans">
                         24h
                       </button>
                     </div>
@@ -1284,14 +1284,14 @@ const TokenPage = () => {
 
                   {/* Desktop: Price on the right */}
                   <div className="text-left sm:text-right min-w-0">
-                    <div className="text-xl sm:text-2xl font-mono text-white truncate">
+                    <div className="text-xl sm:text-2xl font-sans text-white truncate">
                       $
                       {tokenData.price.currentPrice
                         ? parseFloat(tokenData.price.currentPrice.toFixed(7))
                         : "N/A"}
                     </div>
                     <div
-                      className={`text-base sm:text-lg font-mono truncate ${
+                      className={`text-base sm:text-lg font-sans truncate ${
                         tokenData.price.priceChange24h >= 0
                           ? "text-green-400"
                           : "text-red-400"
@@ -1364,7 +1364,7 @@ const TokenPage = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 text-xs">
                   <div className="bg-bg-main border border-black p-2">
                     <div className="text-gray-400">MARKET CAP</div>
-                    <div className="text-white font-mono text-sm">
+                    <div className="text-white font-sans text-sm">
                       {formatNumber(
                         tokenData.price.currentPrice * 1_000_000_000
                       )}
@@ -1372,13 +1372,13 @@ const TokenPage = () => {
                   </div>
                   <div className="bg-bg-main border border-black p-2">
                     <div className="text-gray-400">LIQUIDITY</div>
-                    <div className="text-white font-mono text-sm">
+                    <div className="text-white font-sans text-sm">
                       {getLiquidityWeth(tokenData)} WETH
                     </div>
                   </div>
                   <div className="bg-bg-main border border-black p-2">
                     <div className="text-gray-400">FDV</div>
-                    <div className="text-white font-mono text-sm">
+                    <div className="text-white font-sans text-sm">
                       {formatNumber(
                         tokenData.price.currentPrice * 1_000_000_000
                       )}
@@ -1386,7 +1386,7 @@ const TokenPage = () => {
                   </div>
                   <div className="bg-bg-main border border-black p-2">
                     <div className="text-gray-400">PRICE (USD)</div>
-                    <div className="text-white font-mono text-sm">
+                    <div className="text-white font-sans text-sm">
                       $
                       {tokenData.price.currentPrice
                         ? parseFloat(tokenData.price.currentPrice.toFixed(7))
@@ -1395,13 +1395,13 @@ const TokenPage = () => {
                   </div>
                   <div className="bg-bg-main border border-black p-2">
                     <div className="text-gray-400">HOLDERS</div>
-                    <div className="text-white font-mono text-sm">
+                    <div className="text-white font-sans text-sm">
                       {holdersCount > 0 ? holdersCount : "Loading..."}
                     </div>
                   </div>
                   <div className="bg-bg-main border border-black p-2">
                     <div className="text-gray-400">VOLUME</div>
-                    <div className="text-white font-mono text-sm">
+                    <div className="text-white font-sans text-sm">
                       {formatNumber(tokenData.price.totalVolume)}
                     </div>
                   </div>
@@ -1718,12 +1718,12 @@ const TokenPage = () => {
                               <td className="p-1 text-red-400">
                                 <div className="flex items-center space-x-2">
                                   <span className="text-lg">🔥</span>
-                                  <span className="font-mono text-sm">
+                                  <span className="font-sans text-sm">
                                     0x0000...dEaD
                                   </span>
                                 </div>
                               </td>
-                              <td className="p-1 text-right text-red-400 font-mono">
+                              <td className="p-1 text-right text-red-400 font-sans">
                                 {formatBalance(burntData.balance)}
                               </td>
                               <td className="p-1 text-right text-red-400">
@@ -1755,12 +1755,12 @@ const TokenPage = () => {
                               <td className="p-1 text-blue-400">
                                 <div className="flex items-center space-x-2">
                                   <span className="text-lg">🏦</span>
-                                  <span className="font-mono text-sm">
+                                  <span className="font-sans text-sm">
                                     UNISWAP
                                   </span>
                                 </div>
                               </td>
-                              <td className="p-1 text-right text-blue-400 font-mono">
+                              <td className="p-1 text-right text-blue-400 font-sans">
                                 {formatBalance(uniswapData.balance)}
                               </td>
                               <td className="p-1 text-right text-blue-400">
@@ -1792,12 +1792,12 @@ const TokenPage = () => {
                               <td className="p-1 text-purple-400">
                                 <div className="flex items-center space-x-2">
                                   <span className="text-lg">🔮</span>
-                                  <span className="font-mono text-sm">
+                                  <span className="font-sans text-sm">
                                     BONDING CURVE
                                   </span>
                                 </div>
                               </td>
-                              <td className="p-1 text-right text-purple-400 font-mono">
+                              <td className="p-1 text-right text-purple-400 font-sans">
                                 {formatBalance(bondingCurveData.balance)}
                               </td>
                               <td className="p-1 text-right text-purple-400">
@@ -1856,14 +1856,14 @@ const TokenPage = () => {
                                           `/profile/${holder.holderAddress}`
                                         )
                                       }
-                                      className="hover:text-orange-400 underline text-left font-mono"
+                                      className="hover:text-orange-400 underline text-left font-sans"
                                     >
                                       {holder.username ||
                                         abbreviateAddress(holder.holderAddress)}
                                     </button>
                                   </div>
                                 </td>
-                                <td className="p-1 text-right text-white font-mono">
+                                <td className="p-1 text-right text-white font-sans">
                                   {formatBalance(holder.balance)}
                                 </td>
                                 <td className="p-1 text-right text-gray-400">
