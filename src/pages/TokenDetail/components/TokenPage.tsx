@@ -1281,7 +1281,7 @@ const TokenPage = () => {
                 <div className="overflow-x-auto scrollbar-hide -mx-2 px-2">
                   <div className="flex space-x-2 min-w-max">
                     {/* Vol 24h */}
-                    <div className="bg-gray-800 rounded-lg p-3 min-w-[100px] flex-shrink-0">
+                    <div className="bg-bg-card rounded-lg p-3 min-w-[100px] flex-shrink-0">
                       <div className="text-gray-400 text-xs mb-1">Vol 24h</div>
                       <div className="text-white font-sans text-sm">
                         ${formatNumber(tokenData.price.totalVolume || 0)}
@@ -1289,7 +1289,7 @@ const TokenPage = () => {
                     </div>
 
                     {/* Price */}
-                    <div className="bg-gray-800 rounded-lg p-3 min-w-[100px] flex-shrink-0">
+                    <div className="bg-bg-card rounded-lg p-3 min-w-[100px] flex-shrink-0">
                       <div className="text-gray-400 text-xs mb-1">Price</div>
                       <div className="text-white font-sans text-sm">
                         $
@@ -1300,7 +1300,7 @@ const TokenPage = () => {
                     </div>
 
                     {/* 5m */}
-                    <div className="bg-gray-800 rounded-lg p-3 min-w-[100px] flex-shrink-0">
+                    <div className="bg-bg-card rounded-lg p-3 min-w-[100px] flex-shrink-0">
                       <div className="text-gray-400 text-xs mb-1">5m</div>
                       <div
                         className={`font-sans text-sm ${
@@ -1315,7 +1315,7 @@ const TokenPage = () => {
                     </div>
 
                     {/* 1h */}
-                    <div className="bg-gray-800 rounded-lg p-3 min-w-[100px] flex-shrink-0">
+                    <div className="bg-bg-card rounded-lg p-3 min-w-[100px] flex-shrink-0">
                       <div className="text-gray-400 text-xs mb-1">1h</div>
                       <div
                         className={`font-sans text-sm ${
@@ -1330,7 +1330,7 @@ const TokenPage = () => {
                     </div>
 
                     {/* 24h */}
-                    <div className="bg-gray-800 rounded-lg p-3 min-w-[100px] flex-shrink-0">
+                    <div className="bg-bg-card rounded-lg p-3 min-w-[100px] flex-shrink-0">
                       <div className="text-gray-400 text-xs mb-1">24h</div>
                       <div
                         className={`font-sans text-sm ${
@@ -1364,7 +1364,7 @@ const TokenPage = () => {
                           }%`}
                     </div>
                   </div>
-                  <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+                  <div className="w-full bg-bg-card h-2 rounded-full overflow-hidden">
                     <div
                       className={`progress-bar-glow h-2 rounded-full transition-all duration-300 ${
                         tokenData?.isGraduated || tokenData?.uniswapPair
@@ -1405,7 +1405,7 @@ const TokenPage = () => {
                       href={tokenData.telegramUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center space-x-2 bg-gray-800 rounded-lg p-3 hover:bg-gray-700 transition-colors"
+                      className="flex items-center justify-center space-x-2 bg-bg-card rounded-lg p-3 hover:bg-bg-card-hover transition-colors"
                     >
                       <svg
                         className="w-5 h-5 text-white"
@@ -1432,7 +1432,7 @@ const TokenPage = () => {
                       href={tokenData.twitterUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center space-x-2 bg-gray-800 rounded-lg p-3 hover:bg-gray-700 transition-colors"
+                      className="flex items-center justify-center space-x-2 bg-bg-card rounded-lg p-3 hover:bg-bg-card-hover transition-colors"
                     >
                       <svg
                         className="w-5 h-5 text-white"
@@ -1457,7 +1457,7 @@ const TokenPage = () => {
                       href={tokenData.websiteUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center space-x-2 bg-gray-800 rounded-lg p-3 hover:bg-gray-700 transition-colors"
+                      className="flex items-center justify-center space-x-2 bg-bg-card rounded-lg p-3 hover:bg-bg-card-hover transition-colors"
                     >
                       <Globe className="w-5 h-5 text-white" />
                       <span className="text-white text-sm">
