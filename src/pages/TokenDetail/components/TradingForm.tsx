@@ -742,7 +742,7 @@ const TradingForm = (props: TradingFormProps) => {
         className="h-full flex flex-col bg-bg-main"
       >
         {/* Top Bar: Buy/Sell Toggles + Close Button */}
-        <div className="flex items-center justify-between p-3 border-b border-gray-700">
+        <div className="flex items-center justify-between p-2 border-b border-gray-700">
           <div className="flex space-x-2 flex-1">
             <button
               type="button"
@@ -784,49 +784,51 @@ const TradingForm = (props: TradingFormProps) => {
           )}
         </div>
 
-        {/* Content - Not scrollable, expands to fit */}
-        <div className="flex-1 overflow-hidden p-3 space-y-3">
-          {/* Payment Method Selector (only for buy mode) */}
-          {isBuy && (
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-gray-400">Payment Method</span>
-                <div className="flex space-x-2">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod("ETH")}
-                    className={`px-2 py-1 text-xs font-medium transition-all duration-200 rounded ${
-                      paymentMethod === "ETH"
-                        ? "bg-orange-400 text-black"
-                        : "bg-gray-800 text-gray-400"
-                    }`}
-                  >
-                    ETH
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod("WETH")}
-                    className={`px-2 py-1 text-xs font-medium transition-all duration-200 rounded ${
-                      paymentMethod === "WETH"
-                        ? "bg-orange-400 text-black"
-                        : "bg-gray-800 text-gray-400"
-                    }`}
-                  >
-                    WETH
-                  </button>
+        {/* Content - Not scrollable, fixed height to prevent resize on toggle */}
+        <div className="flex-1 overflow-hidden p-2 space-y-2">
+          {/* Payment Method Selector (only for buy mode) - Fixed height container */}
+          <div className="h-[48px]">
+            {isBuy && (
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-gray-400">Payment Method</span>
+                  <div className="flex space-x-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("ETH")}
+                      className={`px-2 py-1 text-xs font-medium transition-all duration-200 rounded ${
+                        paymentMethod === "ETH"
+                          ? "bg-orange-400 text-black"
+                          : "bg-gray-800 text-gray-400"
+                      }`}
+                    >
+                      ETH
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("WETH")}
+                      className={`px-2 py-1 text-xs font-medium transition-all duration-200 rounded ${
+                        paymentMethod === "WETH"
+                          ? "bg-orange-400 text-black"
+                          : "bg-gray-800 text-gray-400"
+                      }`}
+                    >
+                      WETH
+                    </button>
+                  </div>
+                </div>
+                <div className="text-xs text-gray-400">
+                  Balance:{" "}
+                  <span className="text-white font-sans">
+                    {paymentMethod === "ETH"
+                      ? parseFloat(ethers.formatEther(ethBalance)).toFixed(4)
+                      : abbreviateTokenAmount(evilWETHBalance, 18)}{" "}
+                    {paymentMethod}
+                  </span>
                 </div>
               </div>
-              <div className="text-xs text-gray-400">
-                Balance:{" "}
-                <span className="text-white font-sans">
-                  {paymentMethod === "ETH"
-                    ? parseFloat(ethers.formatEther(ethBalance)).toFixed(4)
-                    : abbreviateTokenAmount(evilWETHBalance, 18)}{" "}
-                  {paymentMethod}
-                </span>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Amount Input */}
           <div>
@@ -850,7 +852,7 @@ const TradingForm = (props: TradingFormProps) => {
                 type="number"
                 min="0"
                 step="any"
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-base font-sans focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-2.5 py-2 text-white text-sm font-sans focus:outline-none focus:ring-2 focus:ring-orange-400"
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
@@ -975,11 +977,11 @@ const TradingForm = (props: TradingFormProps) => {
         </div>
 
         {/* Main Submit Button at Bottom */}
-        <div className="p-3 border-t border-gray-700">
+        <div className="p-2 border-t border-gray-700">
           <button
             type="submit"
             disabled={isLoading || pendingTxHash !== null}
-            className={`w-full py-2.5 text-sm font-bold transition-all duration-200 rounded-lg ${
+            className={`w-full py-2 text-sm font-bold transition-all duration-200 rounded-lg ${
               isBuy
                 ? "bg-orange-400 hover:bg-orange-500 text-black"
                 : "bg-orange-400 hover:bg-orange-500 text-black"
