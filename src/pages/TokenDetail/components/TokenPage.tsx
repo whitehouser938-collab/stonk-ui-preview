@@ -993,63 +993,6 @@ const TokenPage = () => {
                           }}
                         />
                       </div>
-
-                      {/* Social Links - Below Progress Bar with Separate Grey Boxes */}
-                      {(tokenData?.websiteUrl ||
-                        tokenData?.twitterUrl ||
-                        tokenData?.telegramUrl) && (
-                        <div className="flex items-center justify-end space-x-2">
-                          {tokenData?.websiteUrl && (
-                            <a
-                              href={tokenData.websiteUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-orange-400 hover:text-orange-400 transition-colors bg-gray-800 rounded p-1.5"
-                              title="Website"
-                            >
-                              <Globe className="w-4 h-4" />
-                            </a>
-                          )}
-                          {tokenData?.twitterUrl && (
-                            <a
-                              href={tokenData.twitterUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-orange-400 hover:text-orange-400 transition-colors bg-gray-800 rounded p-1.5"
-                              title="X"
-                            >
-                              <svg
-                                className="w-4 h-4"
-                                viewBox="0 0 24 24"
-                                fill="currentColor"
-                              >
-                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                              </svg>
-                            </a>
-                          )}
-                          {tokenData?.telegramUrl && (
-                            <a
-                              href={tokenData.telegramUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-orange-400 hover:text-orange-400 transition-colors bg-gray-800 rounded p-1.5"
-                              title="Telegram"
-                            >
-                              <svg
-                                className="w-4 h-4"
-                                viewBox="0 0 24 24"
-                                fill="currentColor"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  clipRule="evenodd"
-                                  d="M23.1117 4.49449C23.4296 2.94472 21.9074 1.65683 20.4317 2.227L2.3425 9.21601C0.694517 9.85273 0.621087 12.1572 2.22518 12.8975L6.1645 14.7157L8.03849 21.2746C8.13583 21.6153 8.40618 21.8791 8.74917 21.968C9.09216 22.0568 9.45658 21.9576 9.70712 21.707L12.5938 18.8203L16.6375 21.8531C17.8113 22.7334 19.5019 22.0922 19.7967 20.6549L23.1117 4.49449ZM3.0633 11.0816L21.1525 4.0926L17.8375 20.2531L13.1 16.6999C12.7019 16.4013 12.1448 16.4409 11.7929 16.7928L10.5565 18.0292L10.928 15.9861L18.2071 8.70703C18.5614 8.35278 18.5988 7.79106 18.2947 7.39293C17.9906 6.99479 17.4389 6.88312 17.0039 7.13168L6.95124 12.876L3.0633 11.0816ZM8.17695 14.4791L8.78333 16.6015L9.01614 15.321C9.05253 15.1209 9.14908 14.9366 9.29291 14.7928L11.5128 12.573L8.17695 14.4791Z"
-                                />
-                              </svg>
-                            </a>
-                          )}
-                        </div>
-                      )}
                     </div>
                   </div>
 
