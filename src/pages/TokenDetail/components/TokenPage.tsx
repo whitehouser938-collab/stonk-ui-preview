@@ -908,8 +908,8 @@ const TokenPage = () => {
                     </div>
                   </div>
 
-                  {/* Logo and Progress Bar Row */}
-                  <div className="flex items-start justify-between gap-3">
+                  {/* Logo and Digital Clock Row */}
+                  <div className="flex items-center justify-between gap-3">
                     {/* Token Logo */}
                     <div className="flex-shrink-0">
                       {tokenData?.logoUrl ? (
@@ -929,69 +929,15 @@ const TokenPage = () => {
                       )}
                     </div>
 
-                    {/* Progress Bar */}
-                    <div className="flex-1 flex flex-col justify-center space-y-2">
-                      <div className="text-xs text-gray-400 text-right">
-                        {tokenData?.isGraduated || tokenData?.uniswapPair ? (
-                          <span className="text-green-400 font-bold">
-                            Graduated
-                          </span>
-                        ) : (
-                          `Progress ${(
-                            tokenData?.bondingCurve?.progress ??
-                            tokenData?.progress ??
-                            0
-                          ).toFixed(1)}%`
-                        )}
-                      </div>
-                      <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full ${
-                            tokenData?.isGraduated || tokenData?.uniswapPair
-                              ? "bg-green-500"
-                              : "bg-yellow-400"
-                          }`}
-                          style={{
-                            width: `${
-                              tokenData?.isGraduated || tokenData?.uniswapPair
-                                ? 100
-                                : Math.min(
-                                    100,
-                                    Math.max(
-                                      0,
-                                      tokenData?.bondingCurve?.progress ??
-                                        tokenData?.progress ??
-                                        0
-                                    )
-                                  )
-                            }%`,
-                          }}
-                        />
-                      </div>
-
-                      {/* NYSE Trading Hours Progress Bar */}
-                      <div className="text-xs text-gray-400 text-right mt-2">
-                        <span
-                          className={`${
-                            nyseTradingProgress.status === "open"
-                              ? "text-green-400"
-                              : "text-red-400"
-                          } font-bold`}
-                        >
-                          {nyseTradingProgress.label}
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full transition-all duration-1000 ${
-                            nyseTradingProgress.status === "open"
-                              ? "bg-gradient-to-r from-green-500 to-red-500"
-                              : "bg-red-500"
-                          }`}
-                          style={{
-                            width: `${nyseTradingProgress.progress}%`,
-                          }}
-                        />
+                    {/* Digital Clock */}
+                    <div className="flex-1 flex items-center justify-center">
+                      <div className="text-white font-mono text-2xl font-bold">
+                        {currentTime.toLocaleTimeString("en-US", {
+                          hour12: false,
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                        })}
                       </div>
                     </div>
                   </div>
@@ -1327,6 +1273,209 @@ const TokenPage = () => {
               </div>
             </div> */}
             </div>
+
+            {/* Mobile Content Under Chart */}
+            {isMobile && (
+              <div className="bg-bg-main space-y-3 p-2">
+                {/* Horizontally Scrolling Metric Bubbles */}
+                <div className="overflow-x-auto scrollbar-hide -mx-2 px-2">
+                  <div className="flex space-x-2 min-w-max">
+                    {/* Vol 24h */}
+                    <div className="bg-gray-800 rounded-lg p-3 min-w-[100px] flex-shrink-0">
+                      <div className="text-gray-400 text-xs mb-1">Vol 24h</div>
+                      <div className="text-white font-sans text-sm">
+                        ${formatNumber(tokenData.price.totalVolume || 0)}
+                      </div>
+                    </div>
+
+                    {/* Price */}
+                    <div className="bg-gray-800 rounded-lg p-3 min-w-[100px] flex-shrink-0">
+                      <div className="text-gray-400 text-xs mb-1">Price</div>
+                      <div className="text-white font-sans text-sm">
+                        $
+                        {tokenData.price.currentPrice
+                          ? parseFloat(tokenData.price.currentPrice.toFixed(7))
+                          : "0.00"}
+                      </div>
+                    </div>
+
+                    {/* 5m */}
+                    <div className="bg-gray-800 rounded-lg p-3 min-w-[100px] flex-shrink-0">
+                      <div className="text-gray-400 text-xs mb-1">5m</div>
+                      <div
+                        className={`font-sans text-sm ${
+                          (tokenData.price.priceChange5m || 0) >= 0
+                            ? "text-green-400"
+                            : "text-red-400"
+                        }`}
+                      >
+                        {(tokenData.price.priceChange5m || 0) >= 0 ? "+" : ""}
+                        {(tokenData.price.priceChange5m || 0).toFixed(2)}%
+                      </div>
+                    </div>
+
+                    {/* 1h */}
+                    <div className="bg-gray-800 rounded-lg p-3 min-w-[100px] flex-shrink-0">
+                      <div className="text-gray-400 text-xs mb-1">1h</div>
+                      <div
+                        className={`font-sans text-sm ${
+                          (tokenData.price.priceChange1h || 0) >= 0
+                            ? "text-green-400"
+                            : "text-red-400"
+                        }`}
+                      >
+                        {(tokenData.price.priceChange1h || 0) >= 0 ? "+" : ""}
+                        {(tokenData.price.priceChange1h || 0).toFixed(2)}%
+                      </div>
+                    </div>
+
+                    {/* 24h */}
+                    <div className="bg-gray-800 rounded-lg p-3 min-w-[100px] flex-shrink-0">
+                      <div className="text-gray-400 text-xs mb-1">24h</div>
+                      <div
+                        className={`font-sans text-sm ${
+                          (tokenData.price.priceChange24h || 0) >= 0
+                            ? "text-green-400"
+                            : "text-red-400"
+                        }`}
+                      >
+                        {(tokenData.price.priceChange24h || 0) >= 0 ? "+" : ""}
+                        {(tokenData.price.priceChange24h || 0).toFixed(2)}%
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bonding Curve Progress */}
+                <div className="bg-bg-main">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-white font-bold text-sm">
+                      Bonding Curve Progress
+                    </div>
+                    <div className="text-white text-sm">
+                      {tokenData?.isGraduated || tokenData?.uniswapPair
+                        ? "100.0%"
+                        : `${
+                            (
+                              tokenData?.bondingCurve?.progress ??
+                              tokenData?.progress ??
+                              0
+                            ).toFixed(1)
+                          }%`}
+                    </div>
+                  </div>
+                  <div className="w-full bg-gray-800 h-3 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${
+                        tokenData?.isGraduated || tokenData?.uniswapPair
+                          ? "bg-green-500"
+                          : "bg-yellow-400"
+                      }`}
+                      style={{
+                        width: `${
+                          tokenData?.isGraduated || tokenData?.uniswapPair
+                            ? 100
+                            : Math.min(
+                                100,
+                                Math.max(
+                                  0,
+                                  tokenData?.bondingCurve?.progress ??
+                                    tokenData?.progress ??
+                                    0
+                                )
+                              )
+                        }%`,
+                      }}
+                    />
+                  </div>
+                  {tokenData?.isGraduated || tokenData?.uniswapPair ? (
+                    <div className="text-gray-300 text-xs mt-2">
+                      Coin has graduated!
+                    </div>
+                  ) : null}
+                </div>
+
+                {/* Description */}
+                {tokenData?.description && (
+                  <div className="text-gray-300 text-sm leading-relaxed">
+                    {tokenData.description}
+                  </div>
+                )}
+
+                {/* Social Links in 3 Rows */}
+                <div className="space-y-2">
+                  {/* Row 1: Telegram */}
+                  {tokenData?.telegramUrl && (
+                    <a
+                      href={tokenData.telegramUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-2 bg-gray-800 rounded-lg p-3 hover:bg-gray-700 transition-colors"
+                    >
+                      <svg
+                        className="w-5 h-5 text-white"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          clipRule="evenodd"
+                          d="M23.1117 4.49449C23.4296 2.94472 21.9074 1.65683 20.4317 2.227L2.3425 9.21601C0.694517 9.85273 0.621087 12.1572 2.22518 12.8975L6.1645 14.7157L8.03849 21.2746C8.13583 21.6153 8.40618 21.8791 8.74917 21.968C9.09216 22.0568 9.45658 21.9576 9.70712 21.707L12.5938 18.8203L16.6375 21.8531C17.8113 22.7334 19.5019 22.0922 19.7967 20.6549L23.1117 4.49449ZM3.0633 11.0816L21.1525 4.0926L17.8375 20.2531L13.1 16.6999C12.7019 16.4013 12.1448 16.4409 11.7929 16.7928L10.5565 18.0292L10.928 15.9861L18.2071 8.70703C18.5614 8.35278 18.5988 7.79106 18.2947 7.39293C17.9906 6.99479 17.4389 6.88312 17.0039 7.13168L6.95124 12.876L3.0633 11.0816ZM8.17695 14.4791L8.78333 16.6015L9.01614 15.321C9.05253 15.1209 9.14908 14.9366 9.29291 14.7928L11.5128 12.573L8.17695 14.4791Z"
+                        />
+                      </svg>
+                      <span className="text-white text-sm">
+                        {tokenData.telegramUrl
+                          .replace(/^https?:\/\/(www\.)?(t\.me|telegram\.me)\//, "")
+                          .replace(/\/$/, "")}
+                      </span>
+                    </a>
+                  )}
+
+                  {/* Row 2: Twitter/X */}
+                  {tokenData?.twitterUrl && (
+                    <a
+                      href={tokenData.twitterUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-2 bg-gray-800 rounded-lg p-3 hover:bg-gray-700 transition-colors"
+                    >
+                      <svg
+                        className="w-5 h-5 text-white"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                      </svg>
+                      <span className="text-white text-sm">
+                        {tokenData.twitterUrl
+                          .replace(/^https?:\/\/(www\.)?(x\.com|twitter\.com)\//, "")
+                          .replace(/^@/, "")
+                          .replace(/\/$/, "")
+                          .split("/")[0]}
+                      </span>
+                    </a>
+                  )}
+
+                  {/* Row 3: Website */}
+                  {tokenData?.websiteUrl && (
+                    <a
+                      href={tokenData.websiteUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-2 bg-gray-800 rounded-lg p-3 hover:bg-gray-700 transition-colors"
+                    >
+                      <Globe className="w-5 h-5 text-white" />
+                      <span className="text-white text-sm">
+                        {tokenData.websiteUrl
+                          .replace(/^https?:\/\/(www\.)?/, "")
+                          .replace(/\/$/, "")
+                          .split("/")[0]}
+                      </span>
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Financial Metrics - Hidden on Mobile */}
             {!isMobile && (
