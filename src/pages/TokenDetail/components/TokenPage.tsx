@@ -55,6 +55,8 @@ import { CommentsSection } from "@/components/Comments";
 import { useTokenMarketUpdates } from "@/hooks/useTokenMarketUpdate";
 import { useWatchlist } from "@/hooks/useWatchlist";
 import { useAppKitAccount } from "@reown/appkit/react";
+import { useETHWalletSigner } from "@/hooks/signers/useWalletSigner";
+import { ethers } from "ethers";
 
 function formatNumber(num: number): string {
   if (num >= 1e9) return parseFloat((num / 1e9).toFixed(2)) + "B";
@@ -188,6 +190,10 @@ const TokenPage = () => {
   const { toast } = useToast();
   const { address, isConnected } = useAppKitAccount({ namespace: "eip155" });
   const { isInWatchlist, toggleWatchlist } = useWatchlist(address);
+  const { getETHSigner } = useETHWalletSigner();
+
+  // Token balance for mobile button logic
+  const [userTokenBalance, setUserTokenBalance] = useState<string>("0");
 
   const TRADE_PAGE_SIZE = 20;
   const [trades, setTrades] = useState<TradeData[]>([]);
@@ -223,6 +229,29 @@ const TokenPage = () => {
   // Ref to access the trading form for submitting
   const tradingFormRef = useRef<HTMLFormElement>(null);
 
+  // Fetch user token balance on page load (for mobile button logic)
+  const fetchUserTokenBalance = useCallback(async () => {
+    if (!isConnected || !address || !tokenAddress) {
+      setUserTokenBalance("0");
+      return;
+    }
+
+    try {
+      const signer = await getETHSigner();
+      const token = new ethers.Contract(
+        tokenAddress,
+        ["function balanceOf(address) view returns (uint256)"],
+        signer
+      );
+      const balance = await token.balanceOf(address);
+      setUserTokenBalance(balance.toString());
+    } catch (error) {
+      console.error("Error fetching user token balance:", error);
+      setUserTokenBalance("0");
+    }
+  }, [isConnected, address, tokenAddress, getETHSigner]);
+
+  // Refresh balance when trades are confirmed
   const handleTradeUpdate = useCallback((newTrades: TradeData[]) => {
     console.log(
       `[TokenPage] Received trade update at ${Date.now()}:`,
@@ -237,6 +266,16 @@ const TokenPage = () => {
           trade.tradeType
         );
       });
+    }
+
+    // Refresh user balance if user made a trade
+    if (isConnected && address) {
+      const userMadeTrade = newTrades.some(
+        (trade) => trade.maker.toLowerCase() === address.toLowerCase()
+      );
+      if (userMadeTrade) {
+        fetchUserTokenBalance();
+      }
     }
 
     setTrades((prevTrades) => {
@@ -258,7 +297,7 @@ const TokenPage = () => {
       // Keep only the most recent 1000 trades for performance
       return uniqueTrades.slice(0, 1000);
     });
-  }, []);
+  }, [isConnected, address, fetchUserTokenBalance]);
 
   // Subscribe to real-time trade updates
   useTradeUpdates(chainId, tokenAddress, handleTradeUpdate);
@@ -280,6 +319,11 @@ const TokenPage = () => {
   );
 
   useTokenMarketUpdates(chainId, tokenAddress, handleMarketUpdate);
+
+  // Fetch user token balance on page load
+  useEffect(() => {
+    fetchUserTokenBalance();
+  }, [fetchUserTokenBalance]);
 
   useEffect(() => {
     const fetchTokenData = async () => {
@@ -2165,29 +2209,45 @@ const TokenPage = () => {
         </>
       )}
 
-      {/* Fixed Buy/Sell Buttons - Mobile Only - Only show when modal is closed */}
+      {/* Fixed Trade Button - Mobile Only - Only show when modal is closed */}
       {isMobile && !isSearchModalOpen && !isTradingModalOpen && (
         <div className="fixed left-0 right-0 bottom-[calc(48px+env(safe-area-inset-bottom))] bg-bg-main p-4 z-[60]">
-          <div className="flex space-x-2">
+          {!isConnected ? (
+            /* Not signed in - Show "Log in to trade" */
+            <button
+              onClick={() => {
+                // Open wallet connection modal - this will be handled by AppKit
+                // For now, just open the trading modal which will show wallet prompt
+                setIsTradingModalOpen(true);
+              }}
+              className="w-full bg-orange-400 hover:bg-orange-500 text-black font-bold py-4 px-4 transition-all duration-200 rounded"
+            >
+              Log in to trade
+            </button>
+          ) : BigInt(userTokenBalance) === 0n ? (
+            /* Signed in but no token balance - Show "Buy" */
             <button
               onClick={() => {
                 setTradeMode("buy");
                 setIsTradingModalOpen(true);
               }}
-              className="flex-1 bg-orange-400 hover:bg-orange-500 text-black font-bold py-4 px-4 transition-all duration-200 rounded"
+              className="w-full bg-orange-400 hover:bg-orange-500 text-black font-bold py-4 px-4 transition-all duration-200 rounded"
             >
-              BUY
+              Buy
             </button>
+          ) : (
+            /* Signed in with token balance - Show "Trade" */
             <button
               onClick={() => {
+                // Default to sell mode if user has tokens
                 setTradeMode("sell");
                 setIsTradingModalOpen(true);
               }}
-              className="flex-1 bg-orange-400 hover:bg-orange-500 text-black font-bold py-4 px-4 transition-all duration-200 rounded"
+              className="w-full bg-orange-400 hover:bg-orange-500 text-black font-bold py-4 px-4 transition-all duration-200 rounded"
             >
-              SELL
+              Trade
             </button>
-          </div>
+          )}
         </div>
       )}
     </div>
