@@ -1,6 +1,12 @@
 /* Custom CSS for TradingView chart header/toolbar styling */
 /* Target the header bar with time frames and chart type buttons */
 
+/* Override TradingView CSS variables */
+:root {
+  --tv-color-pane-background: #121216 !important;
+  --themed-color-pane-bg: #121216 !important;
+}
+
 /* Main header/toolbar background - use very broad selectors */
 div[class*="header"],
 div[class*="Header"],
@@ -22,6 +28,59 @@ div[class*="Toolbar"],
 [class*="Toolbar"] {
   background-color: #121216 !important;
   background: #121216 !important;
+}
+
+/* Target elements that use the CSS variable for background */
+[style*="--tv-color-pane-background"],
+[style*="--themed-color-pane-bg"],
+[style*="background-color: var(--tv-color-pane-background"],
+[style*="background-color: var(--themed-color-pane-bg"] {
+  background-color: #121216 !important;
+  background: #121216 !important;
+}
+
+/* Target flex containers that hold buttons (based on the CSS you provided) */
+div[style*="display: flex"][style*="align-items: center"],
+div[style*="display:flex"][style*="align-items:center"] {
+  background-color: #121216 !important;
+  background: #121216 !important;
+}
+
+/* Target the top bar that contains custom buttons (Price/MCap, USD/WETH) */
+/* This is the main header bar container */
+div:has(button),
+div:has([class*="button"]),
+header,
+header div,
+[role="toolbar"],
+[role="banner"] {
+  background-color: #121216 !important;
+  background: #121216 !important;
+}
+
+/* Target separator elements (the | characters) */
+[class*="separator"],
+[class*="Separator"],
+[class*="divider"],
+[class*="Divider"],
+span[style*="color"][style*="#666"],
+span[style*="color:#666"] {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Parent containers of buttons */
+button,
+[class*="button"],
+[class*="Button"] {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Parent elements of buttons should have #121216 background */
+button ~ *,
+[class*="button"] ~ * {
+  background-color: #121216 !important;
 }
 
 /* Time frame buttons area */
@@ -67,4 +126,19 @@ button[class*="Button"],
 button:hover,
 [class*="button"]:hover {
   background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Force all top-level containers in header to have #121216 */
+body > div:first-child,
+iframe body > div:first-child,
+iframe body header,
+iframe body [class*="header"]:first-of-type {
+  background-color: #121216 !important;
+  background: #121216 !important;
+}
+
+/* Target any element with the specific background color variable */
+* {
+  --tv-color-pane-background: #121216 !important;
+  --themed-color-pane-bg: #121216 !important;
 }
