@@ -93,7 +93,7 @@ export const Comment: React.FC<CommentProps> = ({
 
   return (
     <div className={`${depth > 0 ? "ml-6 pl-4" : ""}`}>
-      <div className={`${isMobile ? "bg-black" : "bg-gray-800"} p-2`}>
+      <div className="p-2 bg-main">
         {/* Comment Header */}
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center space-x-2">
@@ -146,7 +146,7 @@ export const Comment: React.FC<CommentProps> = ({
             <textarea
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
-              className={`w-full ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-400 resize-none font-sans`}
+              className="w-full bg-card border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-400 resize-none font-sans"
               rows={3}
               maxLength={1000}
             />
@@ -215,7 +215,7 @@ export const Comment: React.FC<CommentProps> = ({
               value={replyContent}
               onChange={(e) => setReplyContent(e.target.value)}
               placeholder="Write a reply..."
-              className={`w-full ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-400 resize-none font-sans`}
+              className="w-full bg-card border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-400 resize-none font-sans"
               rows={3}
               maxLength={1000}
             />

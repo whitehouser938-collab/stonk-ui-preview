@@ -66,7 +66,7 @@ export const Reply: React.FC<ReplyProps> = ({
   };
 
   return (
-    <div className={`${isMobile ? "bg-black" : "bg-gray-800"} p-2 ml-6`}>
+    <div className="p-2 ml-6 bg-main">
       {/* Reply Header */}
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center space-x-2">
@@ -111,7 +111,7 @@ export const Reply: React.FC<ReplyProps> = ({
           <textarea
             value={editContent}
             onChange={(e) => setEditContent(e.target.value)}
-            className={`w-full ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none font-sans`}
+            className="w-full bg-card border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none font-sans"
             rows={3}
             maxLength={1000}
           />

@@ -207,7 +207,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
   }, [comments, sortOrder]);
 
   return (
-    <div className={`${isMobile ? "bg-black" : "bg-gray-900"} p-4`}>
+    <div className="p-4 bg-main">
       {/* Error Display */}
       {error && (
         <div className="mb-4 p-3 bg-red-900/20 border border-red-700 rounded text-red-400 text-sm">
@@ -231,7 +231,8 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
           <input
             type="text"
             placeholder="Add a comment..."
-            className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-gray-500 font-sans cursor-pointer"
+            style={{ backgroundColor: '#1A1A1E' }}
+            className="w-full bg-card border border-gray-600 rounded px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-gray-500 font-sans cursor-pointer"
             onClick={() => {
               if (isConnected && currentUserId) {
                 setShowCommentModal(true);
@@ -273,7 +274,8 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
         {/* Sort Button */}
         <button
           onClick={() => setSortOrder(sortOrder === "newest" ? "oldest" : "newest")}
-          className="flex items-center gap-1.5 bg-gray-800 border border-gray-600 rounded px-3 py-2 text-sm text-white hover:bg-gray-700 transition-colors font-sans"
+          style={{ backgroundColor: '#1A1A1E' }}
+          className="flex items-center gap-1.5 bg-card border border-gray-600 rounded px-3 py-2 text-sm text-white hover:bg-card-hover transition-colors font-sans"
         >
           <ArrowUpDown className="w-4 h-4" />
           <span>{sortOrder === "newest" ? "Newest" : "Oldest"}</span>

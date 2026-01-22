@@ -40,7 +40,8 @@ export const CommentModal: React.FC<CommentModalProps> = ({
       onClick={onClose}
     >
       <div 
-        className="bg-gray-900 border border-gray-700 rounded-lg w-full max-w-md mx-4"
+        style={{ backgroundColor: '#1A1A1E' }}
+        className="bg-card border border-gray-700 rounded-lg w-full max-w-md mx-4"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
@@ -62,14 +63,12 @@ export const CommentModal: React.FC<CommentModalProps> = ({
             value={content}
             onChange={(e) => setContent(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={placeholder}
-            className="w-full bg-gray-800 border border-white rounded p-3 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-gray-300 resize-none font-sans"
+            placeholder="comment"
+            style={{ backgroundColor: '#1A1A1E' }}
+            className="w-full bg-card border border-gray-400 rounded p-3 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-gray-300 resize-none font-sans"
             rows={6}
             autoFocus
           />
-          <div className="text-xs text-gray-500 mt-2 font-sans">
-            Press Ctrl+Enter to submit
-          </div>
         </div>
 
         {/* Modal Footer */}

@@ -1748,7 +1748,7 @@ const TokenPage = () => {
                             : "text-gray-400 hover:text-orange-400"
                         }`}
                       >
-                        COMMENTS({commentsCount})
+                        Comments({commentsCount})
                         {activeTab === "comments" && (
                           <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-400"></span>
                         )}
@@ -1761,7 +1761,7 @@ const TokenPage = () => {
                             : "text-gray-400 hover:text-orange-400"
                         }`}
                       >
-                        TRADES
+                        Trades
                         {activeTab === "trades" && (
                           <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-400"></span>
                         )}
@@ -1774,7 +1774,7 @@ const TokenPage = () => {
                             : "text-gray-400 hover:text-orange-400"
                         }`}
                       >
-                        HOLDERS{holdersCount > 0 ? `(${holdersCount})` : ""}
+                        Holders{holdersCount > 0 ? `(${holdersCount})` : ""}
                         {activeTab === "holders" && (
                           <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-400"></span>
                         )}
@@ -1787,7 +1787,7 @@ const TokenPage = () => {
                             : "text-gray-400 hover:text-orange-400"
                         }`}
                       >
-                        INFO
+                        Info
                         {activeTab === "info" && (
                           <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-400"></span>
                         )}
@@ -1803,7 +1803,7 @@ const TokenPage = () => {
                             : "text-gray-400 hover:text-orange-400"
                         }`}
                       >
-                        TRADES
+                        Trades
                         {activeTab === "trades" && (
                           <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-400"></span>
                         )}
@@ -1816,7 +1816,7 @@ const TokenPage = () => {
                             : "text-gray-400 hover:text-orange-400"
                         }`}
                       >
-                        HOLDERS{holdersCount > 0 ? `(${holdersCount})` : ""}
+                        Holders{holdersCount > 0 ? `(${holdersCount})` : ""}
                         {activeTab === "holders" && (
                           <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-400"></span>
                         )}
@@ -1829,7 +1829,7 @@ const TokenPage = () => {
                             : "text-gray-400 hover:text-orange-400"
                         }`}
                       >
-                        COMMENTS({commentsCount})
+                        Comments({commentsCount})
                         {activeTab === "comments" && (
                           <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-400"></span>
                         )}
@@ -1842,7 +1842,7 @@ const TokenPage = () => {
                             : "text-gray-400 hover:text-orange-400"
                         }`}
                       >
-                        INFO
+                        Info
                         {activeTab === "info" && (
                           <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-400"></span>
                         )}
