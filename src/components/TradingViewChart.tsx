@@ -134,7 +134,7 @@ function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000
   const scriptLoadedRef = useRef(false);
   const initializingRef = useRef(false);
   const [isLoading, setIsLoading] = useState(true);
-  const modeRef = useRef<"price" | "mcap">("price");
+  const modeRef = useRef<"price" | "mcap">("mcap");
   const assetRef = useRef<"USD" | "WETH">("USD");
 
 
@@ -160,7 +160,7 @@ function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000
         tokenSymbol: tokenSymbol,
         tokenSupply: tokenSupply,
         chain: chain,
-        mode: "price",
+        mode: "mcap",
         asset: "USD",
       })
 
@@ -179,6 +179,8 @@ function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000
           "header_symbol_search",
           "header_quick_search",
           "edit_buttons_in_legend",
+          "timeframes_toolbar",
+          "control_bar",
           ...(isMobile ? ["left_toolbar"] : []),
         ],
 
@@ -249,7 +251,7 @@ function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000
             <span 
               class="tv-opt-price"
               data-val="price"
-              style="font-weight:600;"
+              style="color:#888;"
             >
               Price
             </span>
@@ -257,7 +259,7 @@ function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000
             <span 
               class="tv-opt-mcap"
               data-val="mcap"
-              style="color:#888;"
+              style="font-weight:600;"
             >
               MCap
             </span>
