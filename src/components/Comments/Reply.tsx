@@ -66,23 +66,23 @@ export const Reply: React.FC<ReplyProps> = ({
   };
 
   return (
-    <div className={`${isMobile ? "bg-black" : "bg-gray-800"} border border-gray-700 rounded p-3 mb-2 ml-6`}>
+    <div className={`${isMobile ? "bg-black" : "bg-gray-800"} p-2 ml-6`}>
       {/* Reply Header */}
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-1">
         <div className="flex items-center space-x-2">
           <UserAvatar user={reply.user} size="sm" className="" />
           <Link
             to={`/profile/${reply.user.walletAddress}`}
-            className="text-blue-400 hover:text-white font-mono text-xs transition-colors cursor-pointer"
+            className="text-white hover:text-orange-400 font-sans text-sm transition-colors cursor-pointer"
             onClick={(e) => e.stopPropagation()}
           >
             {getDisplayName(reply.user)}
           </Link>
-          <span className="text-gray-500 text-xs font-mono">
+          <span className="text-gray-400 text-sm font-sans">
             {formatTimeAgo(reply.createdAt)}
           </span>
           {reply.updatedAt !== reply.createdAt && (
-            <span className="text-gray-600 text-xs font-mono">(edited)</span>
+            <span className="text-gray-600 text-sm font-sans">(edited)</span>
           )}
         </div>
         {isOwner && (
@@ -107,55 +107,55 @@ export const Reply: React.FC<ReplyProps> = ({
 
       {/* Reply Content */}
       {isEditing ? (
-        <div className="mb-3">
+        <div className="mb-1">
           <textarea
             value={editContent}
             onChange={(e) => setEditContent(e.target.value)}
-            className={`w-full ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none font-mono`}
+            className={`w-full ${isMobile ? "bg-black" : "bg-gray-900"} border border-gray-600 rounded p-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none font-sans`}
             rows={3}
             maxLength={1000}
           />
           <div className="flex justify-end space-x-2 mt-2">
             <button
               onClick={handleCancelEdit}
-              className="px-3 py-1 text-xs text-gray-400 hover:text-gray-300 transition-colors font-mono"
+              className="px-3 py-1 text-xs text-gray-400 hover:text-gray-300 transition-colors font-sans"
             >
               Cancel
             </button>
             <button
               onClick={handleEdit}
               disabled={!editContent.trim() || editContent === reply.content}
-              className="px-3 py-1 bg-orange-400 text-black text-xs rounded hover:bg-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-mono"
+              className="px-3 py-1 bg-orange-400 text-black text-xs rounded hover:bg-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-sans"
             >
               Save
             </button>
           </div>
         </div>
       ) : (
-        <div className="flex items-start space-x-2 mb-3">
-          {/* Like count on left */}
+        <div className="flex items-start justify-between mb-1">
+          {/* Content on left */}
+          <div className="text-white text-base flex-1 font-sans pr-4">{reply.content}</div>
+          {/* Like count on right */}
           {currentUserId && currentUserId !== "skip" ? (
             <button
               onClick={handleLike}
-              className={`flex items-center space-x-1 transition-colors flex-shrink-0 ${
+              className={`flex flex-col items-center transition-colors flex-shrink-0 ${
                 reply.isLiked
                   ? "text-red-400"
                   : "text-gray-400 hover:text-red-400"
               }`}
             >
               <Heart
-                className={`w-4 h-4 ${reply.isLiked ? "fill-current" : ""}`}
+                className={`w-5 h-5 ${reply.isLiked ? "fill-current" : ""}`}
               />
-              <span className="text-xs font-mono">{reply._count?.likes || 0}</span>
+              <span className="text-sm font-sans mt-1">{reply._count?.likes || 0}</span>
             </button>
           ) : (
-            <div className="flex items-center space-x-1 text-gray-500 flex-shrink-0">
-              <Heart className="w-4 h-4" />
-              <span className="text-xs font-mono">{reply._count?.likes || 0}</span>
+            <div className="flex flex-col items-center text-gray-400 flex-shrink-0 font-sans">
+              <Heart className="w-5 h-5" />
+              <span className="text-sm font-sans mt-1">{reply._count?.likes || 0}</span>
             </div>
           )}
-          {/* Content on right */}
-          <div className="text-gray-200 text-sm flex-1 font-mono">{reply.content}</div>
         </div>
       )}
     </div>

@@ -205,7 +205,13 @@ const TokenPage = () => {
   const [filteredTrader, setFilteredTrader] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
     "trades" | "holders" | "comments" | "info"
-  >("trades");
+  >(() => {
+    // Check if mobile on initial render
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      return "comments";
+    }
+    return "trades";
+  });
   const [holdersData, setHoldersData] = useState<TokenHolder[]>([]);
   const [holdersCount, setHoldersCount] = useState<number>(0);
   const [isLoadingHolders, setIsLoadingHolders] = useState(false);
@@ -558,6 +564,7 @@ const TokenPage = () => {
     }
   }, [tokenData, fetchCommentsCount]);
 
+
   // --- Infinite Scroll Handler ---
   const handleScroll = useCallback(async () => {
     const container = scrollContainerRef.current;
@@ -879,7 +886,7 @@ const TokenPage = () => {
       {!error && tokenData && (
         <div
           className={`grid grid-cols-1 lg:grid-cols-12 gap-1 p-1 ${
-            isMobile ? "pb-24" : ""
+            isMobile ? "pb-20" : ""
           }`}
         >
           {/* Left Column - Stock Overview */}
@@ -1729,48 +1736,119 @@ const TokenPage = () => {
                 isMobile ? "bg-bg-main" : "bg-bg-main border border-gray-700"
               } p-2`}
             >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-4">
-                  <button
-                    onClick={() => setActiveTab("trades")}
-                    className={`text-xs font-bold transition-colors ${
-                      activeTab === "trades"
-                        ? "text-orange-400"
-                        : "text-gray-400 hover:text-orange-400"
-                    }`}
-                  >
-                    TRADES
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("holders")}
-                    className={`text-xs font-bold transition-colors ${
-                      activeTab === "holders"
-                        ? "text-orange-400"
-                        : "text-gray-400 hover:text-orange-400"
-                    }`}
-                  >
-                    HOLDERS{holdersCount > 0 ? `(${holdersCount})` : ""}
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("comments")}
-                    className={`text-xs font-bold transition-colors ${
-                      activeTab === "comments"
-                        ? "text-orange-400"
-                        : "text-gray-400 hover:text-orange-400"
-                    }`}
-                  >
-                    COMMENTS({commentsCount})
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("info")}
-                    className={`text-xs font-bold transition-colors ${
-                      activeTab === "info"
-                        ? "text-orange-400"
-                        : "text-gray-400 hover:text-orange-400"
-                    }`}
-                  >
-                    INFO
-                  </button>
+              <div className={`flex items-center mb-2 ${isMobile ? "justify-center" : "justify-between"}`}>
+                <div className={`flex items-center space-x-4 ${isMobile ? "" : ""}`}>
+                  {isMobile ? (
+                    <>
+                      <button
+                        onClick={() => setActiveTab("comments")}
+                        className={`text-sm font-bold transition-colors relative pb-1 ${
+                          activeTab === "comments"
+                            ? "text-white"
+                            : "text-gray-400 hover:text-orange-400"
+                        }`}
+                      >
+                        COMMENTS({commentsCount})
+                        {activeTab === "comments" && (
+                          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-400"></span>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => setActiveTab("trades")}
+                        className={`text-sm font-bold transition-colors relative pb-1 ${
+                          activeTab === "trades"
+                            ? "text-white"
+                            : "text-gray-400 hover:text-orange-400"
+                        }`}
+                      >
+                        TRADES
+                        {activeTab === "trades" && (
+                          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-400"></span>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => setActiveTab("holders")}
+                        className={`text-sm font-bold transition-colors relative pb-1 ${
+                          activeTab === "holders"
+                            ? "text-white"
+                            : "text-gray-400 hover:text-orange-400"
+                        }`}
+                      >
+                        HOLDERS{holdersCount > 0 ? `(${holdersCount})` : ""}
+                        {activeTab === "holders" && (
+                          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-400"></span>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => setActiveTab("info")}
+                        className={`text-sm font-bold transition-colors relative pb-1 ${
+                          activeTab === "info"
+                            ? "text-white"
+                            : "text-gray-400 hover:text-orange-400"
+                        }`}
+                      >
+                        INFO
+                        {activeTab === "info" && (
+                          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-400"></span>
+                        )}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => setActiveTab("trades")}
+                        className={`text-sm font-bold transition-colors relative pb-1 ${
+                          activeTab === "trades"
+                            ? "text-white"
+                            : "text-gray-400 hover:text-orange-400"
+                        }`}
+                      >
+                        TRADES
+                        {activeTab === "trades" && (
+                          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-400"></span>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => setActiveTab("holders")}
+                        className={`text-sm font-bold transition-colors relative pb-1 ${
+                          activeTab === "holders"
+                            ? "text-white"
+                            : "text-gray-400 hover:text-orange-400"
+                        }`}
+                      >
+                        HOLDERS{holdersCount > 0 ? `(${holdersCount})` : ""}
+                        {activeTab === "holders" && (
+                          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-400"></span>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => setActiveTab("comments")}
+                        className={`text-sm font-bold transition-colors relative pb-1 ${
+                          activeTab === "comments"
+                            ? "text-white"
+                            : "text-gray-400 hover:text-orange-400"
+                        }`}
+                      >
+                        COMMENTS({commentsCount})
+                        {activeTab === "comments" && (
+                          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-400"></span>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => setActiveTab("info")}
+                        className={`text-sm font-bold transition-colors relative pb-1 ${
+                          activeTab === "info"
+                            ? "text-white"
+                            : "text-gray-400 hover:text-orange-400"
+                        }`}
+                      >
+                        INFO
+                        {activeTab === "info" && (
+                          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-400"></span>
+                        )}
+                      </button>
+                    </>
+                  )}
                 </div>
                 {activeTab === "trades" && filteredTrader && (
                   <button
