@@ -1280,7 +1280,8 @@ const TokenPage = () => {
                 tokenAddress={tokenAddress}
                 tokenSupply={tokenData.totalSupply}
                 chain={chainId}
-                height={isMobile ? 400 : 500}
+                height={isMobile ? 458 : 500}
+                isMobile={isMobile}
               />
               {/* <div className="bg-black border border-gray-800 p-2 h-48 flex">
               <div className="flex flex-col justify-between h-full text-xs text-gray-500 pr-2 border-r border-gray-700 text-right">

@@ -23,6 +23,7 @@ interface TradingViewChartProps {
   tokenSupply: number;
   chain: Chain;
   height?: number;
+  isMobile?: boolean;
 }
 const formatTinyPrice = (price: number) => {
     if (price <= 0 || !isFinite(price)) return price.toString();
@@ -127,7 +128,7 @@ const customFormatters = {
     }
 };
 
-function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000, chain, height }: TradingViewChartProps) {
+function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000, chain, height, isMobile = false }: TradingViewChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const tvWidgetRef = useRef<any>(null);
   const scriptLoadedRef = useRef(false);
@@ -178,6 +179,7 @@ function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000
           "header_symbol_search",
           "header_quick_search",
           "edit_buttons_in_legend",
+          ...(isMobile ? ["left_toolbar"] : []),
         ],
 
         custom_formatters: customFormatters,
