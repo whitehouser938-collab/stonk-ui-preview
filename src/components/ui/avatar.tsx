@@ -70,18 +70,24 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
     lg: "w-8 h-8 text-sm",
   };
 
-  if (profilePicture) {
-    return (
-      <img
-        src={profilePicture}
-        alt={alt}
-        className={cn(
-          className,
-          sizeClasses[size],
-          "rounded-full object-cover font-bold text-white"
-        )}
-        onError={(e) => {
-          const target = e.target as HTMLImageElement;
+  // Use default PFP if no profile picture is available
+  const defaultPfp = "/default-pfp.jpeg";
+  const imageSrc = profilePicture || defaultPfp;
+
+  return (
+    <img
+      src={imageSrc}
+      alt={alt}
+      className={cn(
+        className,
+        sizeClasses[size],
+        "rounded-full object-cover font-bold text-white"
+      )}
+      onError={(e) => {
+        // If default PFP also fails, show fallback with initials
+        const target = e.target as HTMLImageElement;
+        // Only show fallback if we tried the default and it failed
+        if (target.src.includes(defaultPfp) || !profilePicture) {
           const fallbackDiv = document.createElement("div");
           fallbackDiv.className = cn(
             className,
@@ -90,21 +96,12 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
           );
           fallbackDiv.textContent = fallback;
           target.parentNode?.replaceChild(fallbackDiv, target);
-        }}
-      />
-    );
-  }
-
-  return (
-    <div
-      className={cn(
-        className,
-        sizeClasses[size],
-        "rounded-full flex items-center justify-center font-bold text-white bg-gradient-to-br from-orange-500 to-orange-600"
-      )}
-    >
-      {fallback}
-    </div>
+        } else {
+          // If user's PFP fails, try default
+          target.src = defaultPfp;
+        }
+      }}
+    />
   );
 };
 

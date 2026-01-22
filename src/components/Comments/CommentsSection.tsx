@@ -9,6 +9,7 @@ import { useAppKitAccount } from "@reown/appkit/react";
 import { WalletConnectionPrompt } from "@/components/WalletConnectionPrompt";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { UserAvatar } from "@/components/ui/avatar";
+import { getUserByWalletAddress } from "@/api/user";
 
 interface CommentsSectionProps {
   tokenAddress: string;
@@ -26,9 +27,29 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
   const isMobile = useIsMobile();
   const [showCommentModal, setShowCommentModal] = useState(false);
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
+  const [fetchedUser, setFetchedUser] = useState<any>(null);
   const { toast } = useToast();
   const { user } = useUser();
   const { address, isConnected } = useAppKitAccount({ namespace: "eip155" });
+
+  // Fetch user data from API when connected
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (isConnected && address) {
+        try {
+          const userData = await getUserByWalletAddress(address);
+          setFetchedUser(userData);
+        } catch (error) {
+          // User might not exist yet, that's okay
+          setFetchedUser(null);
+        }
+      } else {
+        setFetchedUser(null);
+      }
+    };
+
+    fetchUserData();
+  }, [isConnected, address]);
 
   // Only allow commenting if wallet is connected
   const currentUserId = useMemo(() => {
@@ -181,15 +202,16 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
     }
   };
 
-  // Get current user for avatar
+  // Get current user for avatar - prefer fetched user data, fallback to context user
   const currentUserForAvatar = useMemo(() => {
     if (!isConnected || !address) return null;
+    const userData = fetchedUser || user;
     return {
       walletAddress: address,
-      username: user?.username,
-      pfp: user?.profileImage,
+      username: userData?.username,
+      pfp: userData?.profileImage || userData?.profilePicture || null,
     };
-  }, [isConnected, address, user]);
+  }, [isConnected, address, fetchedUser, user]);
 
   // Sort comments
   const sortedComments = useMemo(() => {
