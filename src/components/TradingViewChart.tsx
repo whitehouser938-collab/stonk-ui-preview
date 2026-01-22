@@ -173,7 +173,10 @@ function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000
         theme: "dark",
         locale: "en",
 
-        enabled_features: ["use_localstorage_for_settings"],
+        enabled_features: [
+          "use_localstorage_for_settings",
+          "hide_left_toolbar_by_default",
+        ],
         disabled_features: [
           "header_compare",
           "header_symbol_search",
@@ -181,7 +184,6 @@ function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000
           "edit_buttons_in_legend",
           "timeframes_toolbar",
           "control_bar",
-          ...(isMobile ? ["left_toolbar"] : []),
         ],
 
         custom_formatters: customFormatters,
@@ -330,6 +332,22 @@ function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000
 
       widget.onChartReady(() => {
         setIsLoading(false);
+
+        // Hide the left toolbar by default
+        setTimeout(() => {
+          try {
+            const chart = widget.activeChart();
+            if (chart) {
+              // Check if toolbar is visible, and if so, hide it
+              const isToolbarVisible = chart.getCheckableActionState("drawingToolbarAction");
+              if (isToolbarVisible) {
+                chart.executeActionById("drawingToolbarAction");
+              }
+            }
+          } catch (e) {
+            console.log("Could not hide toolbar programmatically", e);
+          }
+        }, 100);
 
         // Apply custom styling to match page theme
         widget.applyOverrides({
