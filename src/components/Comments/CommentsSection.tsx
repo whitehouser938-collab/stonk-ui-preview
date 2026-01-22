@@ -314,7 +314,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
 
       {/* Comments List */}
       {!loading ? (
-        <div className="max-h-96 overflow-y-auto custom-scrollbar">
+        <div className={isMobile ? "" : "max-h-96 overflow-y-auto custom-scrollbar"}>
           {sortedComments.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <MessageSquare className="w-12 h-12 mx-auto mb-3 text-gray-600" />

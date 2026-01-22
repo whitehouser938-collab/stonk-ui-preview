@@ -1270,7 +1270,7 @@ const TokenPage = () => {
             <div
               className={`${
                 isMobile ? "bg-bg-main" : "bg-bg-main border border-gray-700"
-              } p-2`}
+              } ${isMobile ? "p-0" : "p-2"}`}
             >
               {!isMobile && (
                 <div className="mb-2">INTRADAY CHART</div>
@@ -1280,7 +1280,7 @@ const TokenPage = () => {
                 tokenAddress={tokenAddress}
                 tokenSupply={tokenData.totalSupply}
                 chain={chainId}
-                height={300}
+                height={isMobile ? 400 : 500}
               />
               {/* <div className="bg-black border border-gray-800 p-2 h-48 flex">
               <div className="flex flex-col justify-between h-full text-xs text-gray-500 pr-2 border-r border-gray-700 text-right">
@@ -2121,7 +2121,7 @@ const TokenPage = () => {
                   </table>
                 </div>
               ) : activeTab === "comments" ? (
-                <div className="max-h-96 overflow-y-auto custom-scrollbar">
+                <div className={isMobile ? "" : "max-h-96 overflow-y-auto custom-scrollbar"}>
                   <CommentsSection
                     tokenAddress={tokenData?.tokenAddress || ""}
                     tokenSymbol={tokenData?.symbol || ""}
