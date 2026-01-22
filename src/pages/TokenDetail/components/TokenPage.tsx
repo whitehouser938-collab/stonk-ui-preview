@@ -31,6 +31,8 @@ import {
   X,
   Star,
   User,
+  ArrowLeft,
+  Share2,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -220,6 +222,8 @@ const TokenPage = () => {
   );
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [showPinnedNav, setShowPinnedNav] = useState(false);
 
   // Callback refs to notify TradingForm of confirmed trades
   const tradeConfirmCallbackRef = useRef<
@@ -626,6 +630,38 @@ const TokenPage = () => {
     };
   }, [handleScroll, scrollContainerRef.current]);
 
+  // Scroll detection for pinned navigation (mobile only)
+  useEffect(() => {
+    if (!isMobile || !headerRef.current || !tokenData) return;
+
+    const handleScrollForPinnedNav = () => {
+      const header = headerRef.current;
+      if (!header) return;
+
+      // Get scroll position from window or document
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+      
+      // Get header position relative to viewport
+      const headerRect = header.getBoundingClientRect();
+      const headerBottom = headerRect.bottom;
+      
+      // Show pinned nav when header has scrolled out of view (when header bottom is above viewport top)
+      setShowPinnedNav(headerBottom < 0);
+    };
+
+    // Use both window and document scroll events for better compatibility
+    window.addEventListener("scroll", handleScrollForPinnedNav, { passive: true });
+    document.addEventListener("scroll", handleScrollForPinnedNav, { passive: true });
+    
+    // Check on mount in case page is already scrolled
+    handleScrollForPinnedNav();
+
+    return () => {
+      window.removeEventListener("scroll", handleScrollForPinnedNav);
+      document.removeEventListener("scroll", handleScrollForPinnedNav);
+    };
+  }, [isMobile, tokenData]);
+
   // Removed legacy financial mock data & formatter; token page now shows
   // crypto-centric metrics with placeholders to be wired up later.
   const [searchTerm, setSearchTerm] = useState("");
@@ -850,6 +886,7 @@ const TokenPage = () => {
           <div className="col-span-12 lg:col-span-8 space-y-1">
             {/* Stock Header */}
             <div
+              ref={headerRef}
               className={`${
                 isMobile ? "bg-bg-main" : "bg-bg-main border border-gray-700"
               } p-2 overflow-hidden`}
@@ -2278,6 +2315,102 @@ const TokenPage = () => {
             </div>
           </div>
         </>
+      )}
+
+      {/* Pinned Navigation Bar - Mobile Only */}
+      {isMobile && showPinnedNav && tokenData && (
+        <div className="fixed top-0 left-0 right-0 bg-bg-main border-b border-gray-700 z-[70] px-3 py-2">
+          <div className="flex items-center justify-between gap-2">
+            {/* Left: Back Arrow */}
+            <button
+              onClick={() => navigate("/")}
+              className="flex-shrink-0 p-1.5 hover:bg-gray-800 rounded transition-colors"
+              aria-label="Back to main page"
+            >
+              <ArrowLeft className="w-5 h-5 text-white" />
+            </button>
+
+            {/* Center: Token Name, Symbol, and Market Cap */}
+            <div className="flex-1 min-w-0 flex flex-col items-center">
+              <div className="flex items-center gap-1.5">
+                <span className="text-white font-bold text-sm truncate">
+                  {tokenData.name && tokenData.name.length > 15
+                    ? tokenData.name.slice(0, 15) + "..."
+                    : tokenData.name}
+                </span>
+                <span className="text-gray-400 text-sm">
+                  ${tokenData.symbol}
+                </span>
+              </div>
+              <div className="text-gray-400 text-xs">
+                MC ${formatNumber(tokenData.price.currentPrice * 1_000_000_000)}
+              </div>
+            </div>
+
+            {/* Right: Star and Share */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={async () => {
+                  if (!isConnected) {
+                    toast({
+                      title: "Sign in required",
+                      description: "Please sign in to add tokens to your watchlist",
+                      variant: "default",
+                    });
+                    return;
+                  }
+                  try {
+                    await toggleWatchlist(tokenData.tokenAddress, chainId);
+                    toast({
+                      title: isInWatchlist(tokenData.tokenAddress, chainId)
+                        ? "Removed from watchlist"
+                        : "Added to watchlist",
+                      description: isInWatchlist(tokenData.tokenAddress, chainId)
+                        ? `${tokenData.symbol} has been removed from your watchlist`
+                        : `${tokenData.symbol} has been added to your watchlist`,
+                      variant: "default",
+                    });
+                  } catch (error) {
+                    console.error("Error toggling watchlist:", error);
+                    toast({
+                      title: "Error",
+                      description: "Failed to update watchlist",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                className="flex-shrink-0 p-1.5 hover:bg-gray-800 rounded transition-colors"
+                aria-label={
+                  isInWatchlist(tokenData.tokenAddress, chainId)
+                    ? "Remove from watchlist"
+                    : "Add to watchlist"
+                }
+              >
+                <Star
+                  className={`w-5 h-5 ${
+                    isInWatchlist(tokenData.tokenAddress, chainId)
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-white"
+                  }`}
+                />
+              </button>
+              <button
+                onClick={() => {
+                  // Placeholder for share functionality
+                  toast({
+                    title: "Share",
+                    description: "Share functionality coming soon",
+                    variant: "default",
+                  });
+                }}
+                className="flex-shrink-0 p-1.5 hover:bg-gray-800 rounded transition-colors"
+                aria-label="Share"
+              >
+                <Share2 className="w-5 h-5 text-white" />
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Fixed Trade Button - Mobile Only - Only show when modal is closed */}
