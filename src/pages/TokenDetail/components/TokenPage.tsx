@@ -1012,62 +1012,65 @@ const TokenPage = () => {
                     </div>
                   </div>
 
-                  {/* Market Cap / Liquidity - Clickable on mobile */}
-                  <div 
-                    className={`flex items-baseline space-x-2 mb-1 ${isMobile && (tokenData?.isGraduated || tokenData?.uniswapPair) ? 'cursor-pointer' : ''}`}
-                    onClick={() => {
-                      if (isMobile && (tokenData?.isGraduated || tokenData?.uniswapPair)) {
-                        // Clear any existing timeout
-                        if (liquidityTimeoutRef.current) {
-                          clearTimeout(liquidityTimeoutRef.current);
+                  {/* Market Cap / Liquidity and Price Change - Combined container */}
+                  <div className="flex flex-col gap-0">
+                    {/* Market Cap / Liquidity - Clickable on mobile */}
+                    <div 
+                      className={`flex items-baseline space-x-2 ${isMobile && (tokenData?.isGraduated || tokenData?.uniswapPair) ? 'cursor-pointer' : ''}`}
+                      onClick={() => {
+                        if (isMobile && (tokenData?.isGraduated || tokenData?.uniswapPair)) {
+                          // Clear any existing timeout
+                          if (liquidityTimeoutRef.current) {
+                            clearTimeout(liquidityTimeoutRef.current);
+                          }
+                          setShowLiquidity(true);
+                          liquidityTimeoutRef.current = setTimeout(() => {
+                            setShowLiquidity(false);
+                            liquidityTimeoutRef.current = null;
+                          }, 3000);
                         }
-                        setShowLiquidity(true);
-                        liquidityTimeoutRef.current = setTimeout(() => {
-                          setShowLiquidity(false);
-                          liquidityTimeoutRef.current = null;
-                        }, 3000);
-                      }
-                    }}
-                  >
-                    {showLiquidity ? (
-                      <>
-                        <div className="text-[#FAFAFA] font-sans text-3xl font-bold">
-                          $
-                          {formatNumber(
-                            parseFloat(getLiquidityWeth(tokenData)) * 2000
-                          )}
-                        </div>
-                        <div className="text-gray-400 text-xs">Liquidity</div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="text-[#FAFAFA] font-sans text-3xl font-bold">
-                          $
-                          {formatNumber(
-                            tokenData.price.currentPrice * 1_000_000_000
-                          )}
-                        </div>
-                        <div className="text-gray-400 text-xs">Market cap</div>
-                      </>
-                    )}
-                  </div>
+                      }}
+                    >
+                      {showLiquidity ? (
+                        <>
+                          <div className="text-[#FAFAFA] font-sans text-3xl font-bold">
+                            $
+                            {formatNumber(
+                              parseFloat(getLiquidityWeth(tokenData)) * 2000
+                            )}
+                          </div>
+                          <div className="text-gray-400 text-xs">Liquidity</div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="text-[#FAFAFA] font-sans text-3xl font-bold">
+                            $
+                            {formatNumber(
+                              tokenData.price.currentPrice * 1_000_000_000
+                            )}
+                          </div>
+                          <div className="text-gray-400 text-xs">Market cap</div>
+                        </>
+                      )}
+                    </div>
 
-                  {/* Price Change */}
-                  <div
-                    className={`text-sm font-sans mt-0 ${
-                      tokenData.price.priceChange24h >= 0
-                        ? "text-green-400"
-                        : "text-red-400"
-                    }`}
-                  >
-                    {tokenData.price.priceChange24h >= 0 ? "+" : ""}$
-                    {(
-                      (tokenData.price.currentPrice *
-                        tokenData.price.priceChange24h) /
-                      100
-                    ).toFixed(2)}{" "}
-                    ({tokenData.price.priceChange24h >= 0 ? "+" : ""}
-                    {tokenData.price.priceChange24h.toFixed(2)}%) Past 24h
+                    {/* Price Change */}
+                    <div
+                      className={`text-sm font-sans leading-none ${
+                        tokenData.price.priceChange24h >= 0
+                          ? "text-green-400"
+                          : "text-red-400"
+                      }`}
+                    >
+                      {tokenData.price.priceChange24h >= 0 ? "+" : ""}$
+                      {(
+                        (tokenData.price.currentPrice *
+                          tokenData.price.priceChange24h) /
+                        100
+                      ).toFixed(2)}{" "}
+                      ({tokenData.price.priceChange24h >= 0 ? "+" : ""}
+                      {tokenData.price.priceChange24h.toFixed(2)}%) Past 24h
+                    </div>
                   </div>
                 </div>
               ) : (
