@@ -2449,7 +2449,7 @@ const TokenPage = () => {
           )}
           {/* Slide-up Modal - Fixed height, not scrollable, doesn't resize on toggle */}
           <div
-            className={`fixed left-0 right-0 bottom-[calc(48px+env(safe-area-inset-bottom))] bg-bg-main rounded-t-lg z-50 transition-transform duration-300 ease-out h-[38vh] ${
+            className={`fixed ${isMobile ? 'left-1 right-1' : 'left-0 right-0'} bottom-[calc(48px+env(safe-area-inset-bottom))] bg-bg-main rounded-t-lg z-50 transition-transform duration-300 ease-out h-[38vh] ${
               isTradingModalOpen
                 ? "translate-y-0"
                 : "translate-y-full"
@@ -2478,7 +2478,7 @@ const TokenPage = () => {
 
       {/* Pinned Navigation Bar - Mobile Only */}
       {isMobile && showPinnedNav && tokenData && (
-        <div className="fixed top-0 left-0 right-0 bg-bg-main border-b border-gray-700 z-[70] px-3 py-2">
+        <div className="fixed top-0 left-1 right-1 bg-bg-main border-b border-gray-700 z-[70] py-2">
           <div className="flex items-center justify-between gap-2">
             {/* Left: Back Arrow */}
             <button
@@ -2574,7 +2574,7 @@ const TokenPage = () => {
 
       {/* Fixed Trade Button - Mobile Only - Only show when modal is closed */}
       {isMobile && !isSearchModalOpen && !isTradingModalOpen && (
-        <div className="fixed left-0 right-0 bottom-[calc(48px+env(safe-area-inset-bottom))] bg-bg-main p-4 z-[60]">
+        <div className="fixed left-3 right-3 bottom-[calc(48px+env(safe-area-inset-bottom))] z-[60] py-4">
           {!isConnected ? (
             /* Not signed in - Show "Log in to trade" */
             <button
