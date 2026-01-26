@@ -1012,6 +1012,9 @@ const TokenPage = () => {
                     </div>
                   </div>
 
+                  {/* Spacer div for future use */}
+                  <div className="h-12"></div>
+
                   {/* Market Cap / Liquidity and Price Change - Combined container */}
                   <div className="flex flex-col gap-0">
                     {/* Market Cap / Liquidity - Clickable on mobile */}
