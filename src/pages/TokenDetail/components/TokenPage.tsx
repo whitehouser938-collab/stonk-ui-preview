@@ -926,7 +926,29 @@ const TokenPage = () => {
             >
               {isMobile ? (
                 /* Mobile Layout - New Design */
-                <div className="space-y-2">
+                <div className="space-y-2 -mt-2">
+                  {/* Back Button and Timer Row */}
+                  <div className="flex items-center justify-between pt-0">
+                    {/* Back Button */}
+                    <button
+                      onClick={() => navigate(-1)}
+                      className="p-2 hover:bg-gray-800 rounded transition-colors"
+                      aria-label="Go back"
+                    >
+                      <ArrowLeft className="w-5 h-5 text-[#FAFAFA]" />
+                    </button>
+
+                    {/* Timer */}
+                    <div className="text-[#FAFAFA] font-mono text-base">
+                      {currentTime.toLocaleTimeString("en-US", {
+                        hour12: false,
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                      })}
+                    </div>
+                  </div>
+
                   {/* Logo and Token Info Row */}
                   <div className="flex items-start gap-3">
                     {/* Token Logo */}
@@ -1018,44 +1040,105 @@ const TokenPage = () => {
 
                   {/* Market Cap / Liquidity and Price Change - Combined container */}
                   <div className="flex flex-col gap-0">
-                    {/* Market Cap / Liquidity - Clickable on mobile */}
-                    <div 
-                      className={`flex items-baseline space-x-2 ${isMobile && (tokenData?.isGraduated || tokenData?.uniswapPair) ? 'cursor-pointer' : ''}`}
-                      onClick={() => {
-                        if (isMobile && (tokenData?.isGraduated || tokenData?.uniswapPair)) {
-                          // Clear any existing timeout
-                          if (liquidityTimeoutRef.current) {
-                            clearTimeout(liquidityTimeoutRef.current);
+                    {/* Market Cap / Liquidity Row with Star and Share */}
+                    <div className="flex items-baseline justify-between">
+                      <div 
+                        className={`flex items-baseline space-x-2 ${isMobile && (tokenData?.isGraduated || tokenData?.uniswapPair) ? 'cursor-pointer' : ''}`}
+                        onClick={() => {
+                          if (isMobile && (tokenData?.isGraduated || tokenData?.uniswapPair)) {
+                            // Clear any existing timeout
+                            if (liquidityTimeoutRef.current) {
+                              clearTimeout(liquidityTimeoutRef.current);
+                            }
+                            setShowLiquidity(true);
+                            liquidityTimeoutRef.current = setTimeout(() => {
+                              setShowLiquidity(false);
+                              liquidityTimeoutRef.current = null;
+                            }, 3000);
                           }
-                          setShowLiquidity(true);
-                          liquidityTimeoutRef.current = setTimeout(() => {
-                            setShowLiquidity(false);
-                            liquidityTimeoutRef.current = null;
-                          }, 3000);
-                        }
-                      }}
-                    >
-                      {showLiquidity ? (
-                        <>
-                          <div className="text-[#FAFAFA] font-sans text-3xl font-bold">
-                            $
-                            {formatNumber(
-                              parseFloat(getLiquidityWeth(tokenData)) * 2000
-                            )}
-                          </div>
-                          <div className="text-gray-400 text-xs">Liquidity</div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="text-[#FAFAFA] font-sans text-3xl font-bold">
-                            $
-                            {formatNumber(
-                              tokenData.price.currentPrice * 1_000_000_000
-                            )}
-                          </div>
-                          <div className="text-gray-400 text-xs">Market cap</div>
-                        </>
-                      )}
+                        }}
+                      >
+                        {showLiquidity ? (
+                          <>
+                            <div className="text-[#FAFAFA] font-sans text-3xl font-bold">
+                              $
+                              {formatNumber(
+                                parseFloat(getLiquidityWeth(tokenData)) * 2000
+                              )}
+                            </div>
+                            <div className="text-gray-400 text-xs">Liquidity</div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="text-[#FAFAFA] font-sans text-3xl font-bold">
+                              $
+                              {formatNumber(
+                                tokenData.price.currentPrice * 1_000_000_000
+                              )}
+                            </div>
+                            <div className="text-gray-400 text-xs">Market cap</div>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Star and Share Icons */}
+                      <div className="flex items-center gap-1">
+                        {/* Watchlist Star */}
+                        {isConnected && tokenData?.tokenAddress && (
+                          <button
+                            onClick={async () => {
+                              try {
+                                await toggleWatchlist(tokenData.tokenAddress, chainId);
+                                toast({
+                                  title: isInWatchlist(tokenData.tokenAddress, chainId)
+                                    ? "Removed from watchlist"
+                                    : "Added to watchlist",
+                                  description: isInWatchlist(tokenData.tokenAddress, chainId)
+                                    ? "Token removed from your watchlist"
+                                    : "Token added to your watchlist",
+                                  variant: "default",
+                                });
+                              } catch (error) {
+                                console.error("Error toggling watchlist:", error);
+                                toast({
+                                  title: "Error",
+                                  description: "Failed to update watchlist",
+                                  variant: "destructive",
+                                });
+                              }
+                            }}
+                            className="flex-shrink-0 p-1.5 hover:bg-gray-800 rounded transition-colors"
+                            aria-label={
+                              isInWatchlist(tokenData.tokenAddress, chainId)
+                                ? "Remove from watchlist"
+                                : "Add to watchlist"
+                            }
+                          >
+                            <Star
+                              className={`w-5 h-5 ${
+                                isInWatchlist(tokenData.tokenAddress, chainId)
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-[#FAFAFA] hover:text-orange-400"
+                              }`}
+                            />
+                          </button>
+                        )}
+
+                        {/* Share Icon */}
+                        <button
+                          onClick={() => {
+                            toast({
+                              title: "Share",
+                              description: "Share functionality coming soon",
+                              variant: "default",
+                            });
+                          }}
+                          className="flex-shrink-0 p-1.5 hover:bg-gray-800 rounded transition-colors"
+                          aria-label="Share"
+                        >
+                          <Share2 className="w-5 h-5 text-[#FAFAFA]" />
+                        </button>
+                      </div>
                     </div>
 
                     {/* Price Change */}
