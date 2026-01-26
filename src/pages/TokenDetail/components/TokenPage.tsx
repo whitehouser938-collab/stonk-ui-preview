@@ -926,9 +926,9 @@ const TokenPage = () => {
             >
               {isMobile ? (
                 /* Mobile Layout - New Design */
-                <div className="space-y-2 -mt-2">
+                <div className="space-y-2">
                   {/* Back Button and Timer Row */}
-                  <div className="flex items-center justify-between pt-0">
+                  <div className="flex items-center justify-between py-2">
                     {/* Back Button */}
                     <button
                       onClick={() => navigate(-1)}
