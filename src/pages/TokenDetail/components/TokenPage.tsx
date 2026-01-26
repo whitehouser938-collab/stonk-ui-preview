@@ -843,12 +843,12 @@ const TokenPage = () => {
               }
             })()}
           </td>
-          <td className="p-1 pl-4 text-left font-sans" style={{ 
+          <td className={`p-1 text-left font-sans ${isMobile ? "pl-1" : "pl-4"}`} style={{ 
             color: trade.tradeType === "BUY" ? '#22c55e' : '#ef4444' 
           }}>
             {abbreviateTokenAmount(trade.baseAmount)}
           </td>
-          <td className="p-1 pl-6 text-left font-sans" style={{ color: '#F8FAFC' }}>
+          <td className={`p-1 text-left font-sans ${isMobile ? "pl-1" : "pl-6"}`} style={{ color: '#F8FAFC' }}>
             {abbreviateTokenAmount(trade.quoteAmount)}
           </td>
           <td className="p-1 text-center">
@@ -2037,7 +2037,7 @@ const TokenPage = () => {
                     ref={scrollContainerRef}
                     className="overflow-y-auto max-h-96 custom-scrollbar"
                   >
-                    <table className="w-full text-xs min-w-[400px]">
+                    <table className={`w-full text-xs ${isMobile ? "" : "min-w-[400px]"}`}>
                       <thead
                         className={`${
                           isMobile ? "bg-bg-main" : "bg-bg-main"
@@ -2057,17 +2057,19 @@ const TokenPage = () => {
                             </div>
                           </th>
                           <th className={`text-center p-1 ${isMobile ? "font-normal" : ""}`}>Type</th>
-                          <th className={`text-left p-1 pl-4 ${isMobile ? "font-normal" : ""}`}>
+                          <th className={`text-left p-1 ${isMobile ? "font-normal pl-1" : "pl-4"}`}>
                             <div className="flex flex-col leading-tight">
                               <span>{(tokenData?.symbol || "Token")}</span>
                             </div>
                           </th>
-                          <th className={`text-left p-1 pl-6 ${isMobile ? "font-normal" : ""}`}>
+                          <th className={`text-left p-1 ${isMobile ? "font-normal pl-1" : "pl-6"}`}>
                             <div className="flex flex-col leading-tight">
                               <span>WETH</span>
                             </div>
                           </th>
-                          <th className={`text-center p-1 ${isMobile ? "font-normal" : ""}`}></th>
+                          <th className={`text-center p-1 ${isMobile ? "font-normal" : ""}`}>
+                            {isMobile && <ArrowUpRight className="w-4 h-4 text-gray-400" />}
+                          </th>
                         </tr>
                       </thead>
                       <tbody>{tradeRows}</tbody>
