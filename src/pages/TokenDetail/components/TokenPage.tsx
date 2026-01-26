@@ -453,18 +453,26 @@ const TokenPage = () => {
     const fetchTrades = async () => {
       if (!chainId || !tokenAddress) return;
       try {
+        // Reset pagination state
+        setHasMoreTrades(true);
+        setIsFetchingMoreTrades(false);
+        
         const initialTrades = await getTokenTrades(
           chainId,
           tokenAddress,
           TRADE_PAGE_SIZE
         );
-        if (initialTrades.length < TRADE_PAGE_SIZE) setHasMoreTrades(false);
-        if (initialTrades.length > 0)
+        if (initialTrades.length < TRADE_PAGE_SIZE) {
+          setHasMoreTrades(false);
+        }
+        if (initialTrades.length > 0) {
           setLastTrade(initialTrades[initialTrades.length - 1]);
+        }
         setTrades(initialTrades);
       } catch (error) {
         console.error("Error fetching trades:", error);
         setTrades([]);
+        setHasMoreTrades(false);
       }
     };
     fetchTrades();
@@ -572,7 +580,10 @@ const TokenPage = () => {
   const handleScroll = useCallback(async () => {
     const container = scrollContainerRef.current;
 
-    if (!container || !hasMoreTrades || isFetchingMoreTrades) return;
+    // Only handle scroll when trades tab is active
+    if (activeTab !== "trades") return;
+    
+    if (!container || !hasMoreTrades || isFetchingMoreTrades || !lastTrade) return;
 
     const isAtBottom =
       container.scrollHeight - container.scrollTop <=
@@ -593,42 +604,47 @@ const TokenPage = () => {
 
         console.log(`[Scroll] Fetched ${moreTrades.length} trades`);
 
-        // Check for duplicates before updating state
-        const uniqueNewTrades = moreTrades.filter(
-          (newTrade) =>
-            !trades.some(
-              (existingTrade) =>
-                existingTrade.transactionHash === newTrade.transactionHash &&
-                existingTrade.logIndex === newTrade.logIndex
-            )
-        );
-
-        console.log(
-          `[Scroll] ${uniqueNewTrades.length} unique new trades out of ${moreTrades.length}`
-        );
-
-        // Stop pagination if we got fewer trades than requested or no unique trades
-        if (
-          moreTrades.length < TRADE_PAGE_SIZE ||
-          uniqueNewTrades.length === 0
-        ) {
-          console.log(
-            `[Scroll] Stopping pagination (moreTrades: ${moreTrades.length}, unique: ${uniqueNewTrades.length})`
+        // Check for duplicates before updating state - use functional update to avoid stale closure
+        setTrades((prevTrades) => {
+          const uniqueNewTrades = moreTrades.filter(
+            (newTrade) =>
+              !prevTrades.some(
+                (existingTrade) =>
+                  existingTrade.transactionHash === newTrade.transactionHash &&
+                  existingTrade.logIndex === newTrade.logIndex
+              )
           );
-          setHasMoreTrades(false);
-        }
 
-        if (uniqueNewTrades.length > 0) {
-          setLastTrade(uniqueNewTrades[uniqueNewTrades.length - 1]);
-          setTrades((prev) => [...prev, ...uniqueNewTrades]);
-        }
+          console.log(
+            `[Scroll] ${uniqueNewTrades.length} unique new trades out of ${moreTrades.length}`
+          );
+
+          // Stop pagination if we got fewer trades than requested or no unique trades
+          if (
+            moreTrades.length < TRADE_PAGE_SIZE ||
+            uniqueNewTrades.length === 0
+          ) {
+            console.log(
+              `[Scroll] Stopping pagination (moreTrades: ${moreTrades.length}, unique: ${uniqueNewTrades.length})`
+            );
+            setHasMoreTrades(false);
+          }
+
+          if (uniqueNewTrades.length > 0) {
+            setLastTrade(uniqueNewTrades[uniqueNewTrades.length - 1]);
+            return [...prevTrades, ...uniqueNewTrades];
+          }
+
+          return prevTrades;
+        });
       } catch (error) {
         console.error("Error fetching more trades:", error);
+        setHasMoreTrades(false);
       } finally {
         setIsFetchingMoreTrades(false);
       }
     }
-  }, [chainId, tokenAddress, hasMoreTrades, isFetchingMoreTrades, lastTrade]);
+  }, [chainId, tokenAddress, hasMoreTrades, isFetchingMoreTrades, lastTrade, activeTab]);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -638,7 +654,7 @@ const TokenPage = () => {
     return () => {
       container.removeEventListener("scroll", handleScroll);
     };
-  }, [handleScroll, scrollContainerRef.current]);
+  }, [handleScroll]);
 
   // Scroll detection for pinned navigation (mobile only)
   useEffect(() => {
