@@ -813,39 +813,44 @@ const TokenPage = () => {
             </div>
           </td>
           <td className="p-1 text-center">
-            {isMobile ? (
-              <span
-                className={`text-xs ${
-                  trade.tradeType === "BUY"
-                    ? "text-green-400"
-                    : "text-red-400"
-                }`}
-              >
-                {trade.tradeType === "BUY" ? "Buy" : "Sell"}
-              </span>
-            ) : (
-              <span
-                className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                  trade.tradeType === "BUY"
-                    ? "bg-green-600/80 text-[#FAFAFA]"
-                    : "bg-red-600/80 text-[#FAFAFA]"
-                }`}
-              >
-                {trade.tradeType === "BUY" ? "Buy" : "Sell"}
-              </span>
-            )}
+            {(() => {
+              const timeStr = formatTimeAgo(trade.timestamp).replace(' ago', '');
+              const typeText = trade.tradeType === "BUY" ? "Buy" : "Sell";
+              if (isMobile) {
+                return (
+                  <span
+                    className={`text-xs ${
+                      trade.tradeType === "BUY"
+                        ? "text-green-400"
+                        : "text-red-400"
+                    }`}
+                  >
+                    {typeText} {timeStr}
+                  </span>
+                );
+              } else {
+                return (
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                      trade.tradeType === "BUY"
+                        ? "bg-green-600/80 text-[#FAFAFA]"
+                        : "bg-red-600/80 text-[#FAFAFA]"
+                    }`}
+                  >
+                    {typeText} {timeStr}
+                  </span>
+                );
+              }
+            })()}
           </td>
-          <td className="p-1 pl-4 text-left font-sans" style={{ color: '#F8FAFC' }}>
+          <td className="p-1 pl-4 text-left font-sans" style={{ 
+            color: trade.tradeType === "BUY" ? '#22c55e' : '#ef4444' 
+          }}>
             {abbreviateTokenAmount(trade.baseAmount)}
           </td>
           <td className="p-1 pl-6 text-left font-sans" style={{ color: '#F8FAFC' }}>
             {abbreviateTokenAmount(trade.quoteAmount)}
           </td>
-          {!isMobile && (
-            <td className="p-1 text-right text-gray-400">
-              {formatTimeAgo(trade.timestamp)}
-            </td>
-          )}
           <td className="p-1 text-center">
             <a
               href={`${getExplorer(chainId)}/tx/${trade.transactionHash}`}
@@ -2054,17 +2059,14 @@ const TokenPage = () => {
                           <th className={`text-center p-1 ${isMobile ? "font-normal" : ""}`}>Type</th>
                           <th className={`text-left p-1 pl-4 ${isMobile ? "font-normal" : ""}`}>
                             <div className="flex flex-col leading-tight">
-                              <span>Amount</span>
                               <span>{(tokenData?.symbol || "Token")}</span>
                             </div>
                           </th>
                           <th className={`text-left p-1 pl-6 ${isMobile ? "font-normal" : ""}`}>
                             <div className="flex flex-col leading-tight">
-                              <span>Amount</span>
                               <span>WETH</span>
                             </div>
                           </th>
-                          {!isMobile && <th className="text-right p-1">Time</th>}
                           <th className={`text-center p-1 ${isMobile ? "font-normal" : ""}`}></th>
                         </tr>
                       </thead>
