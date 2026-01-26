@@ -835,10 +835,10 @@ const TokenPage = () => {
               </span>
             )}
           </td>
-          <td className="p-1 text-right font-sans" style={{ color: '#F8FAFC' }}>
+          <td className="p-1 pl-4 text-left font-sans" style={{ color: '#F8FAFC' }}>
             {abbreviateTokenAmount(trade.baseAmount)}
           </td>
-          <td className="p-1 text-right font-sans" style={{ color: '#F8FAFC' }}>
+          <td className="p-1 pl-6 text-left font-sans" style={{ color: '#F8FAFC' }}>
             {abbreviateTokenAmount(trade.quoteAmount)}
           </td>
           {!isMobile && (
@@ -926,7 +926,7 @@ const TokenPage = () => {
             >
               {isMobile ? (
                 /* Mobile Layout - New Design */
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {/* Token Name, Symbol, and Address */}
                   <div className="flex items-center flex-wrap gap-x-2 gap-y-1">
                     <div className="text-[#FAFAFA] font-bold text-xl leading-tight">
@@ -1014,7 +1014,7 @@ const TokenPage = () => {
 
                   {/* Market Cap / Liquidity - Clickable on mobile */}
                   <div 
-                    className={`flex items-baseline space-x-2 ${isMobile && (tokenData?.isGraduated || tokenData?.uniswapPair) ? 'cursor-pointer' : ''}`}
+                    className={`flex items-baseline space-x-2 mb-1 ${isMobile && (tokenData?.isGraduated || tokenData?.uniswapPair) ? 'cursor-pointer' : ''}`}
                     onClick={() => {
                       if (isMobile && (tokenData?.isGraduated || tokenData?.uniswapPair)) {
                         // Clear any existing timeout
@@ -1054,7 +1054,7 @@ const TokenPage = () => {
 
                   {/* Price Change */}
                   <div
-                    className={`text-sm font-sans ${
+                    className={`text-sm font-sans mt-0 ${
                       tokenData.price.priceChange24h >= 0
                         ? "text-green-400"
                         : "text-red-400"
@@ -1955,26 +1955,26 @@ const TokenPage = () => {
                         >
                           <th className={`text-left p-1 ${isMobile ? "font-normal" : ""}`}>
                             <div className="flex items-center space-x-1">
-                              <span>TRADER</span>
+                              <span>Trader</span>
                               {filteredTrader && (
                                 <Filter className="w-3 h-3 text-orange-400 fill-current" />
                               )}
                             </div>
                           </th>
-                          <th className={`text-center p-1 ${isMobile ? "font-normal" : ""}`}>TYPE</th>
-                          <th className={`text-right p-1 ${isMobile ? "font-normal" : ""}`}>
+                          <th className={`text-center p-1 ${isMobile ? "font-normal" : ""}`}>Type</th>
+                          <th className={`text-left p-1 pl-4 ${isMobile ? "font-normal" : ""}`}>
                             <div className="flex flex-col leading-tight">
-                              <span>AMOUNT</span>
-                              <span>{(tokenData?.symbol || "TOKEN").toUpperCase()}</span>
+                              <span>Amount</span>
+                              <span>{(tokenData?.symbol || "Token")}</span>
                             </div>
                           </th>
-                          <th className={`text-right p-1 ${isMobile ? "font-normal" : ""}`}>
+                          <th className={`text-left p-1 pl-6 ${isMobile ? "font-normal" : ""}`}>
                             <div className="flex flex-col leading-tight">
-                              <span>AMOUNT</span>
+                              <span>Amount</span>
                               <span>WETH</span>
                             </div>
                           </th>
-                          {!isMobile && <th className="text-right p-1">TIME</th>}
+                          {!isMobile && <th className="text-right p-1">Time</th>}
                           <th className={`text-center p-1 ${isMobile ? "font-normal" : ""}`}></th>
                         </tr>
                       </thead>
