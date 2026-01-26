@@ -821,7 +821,7 @@ const TokenPage = () => {
                     : "text-red-400"
                 }`}
               >
-                {trade.tradeType}
+                {trade.tradeType === "BUY" ? "Buy" : "Sell"}
               </span>
             ) : (
               <span
@@ -831,7 +831,7 @@ const TokenPage = () => {
                     : "bg-red-600/80 text-[#FAFAFA]"
                 }`}
               >
-                {trade.tradeType}
+                {trade.tradeType === "BUY" ? "Buy" : "Sell"}
               </span>
             )}
           </td>
@@ -2661,7 +2661,7 @@ const TokenPage = () => {
 
       {/* Fixed Trade Button - Mobile Only - Only show when modal is closed */}
       {isMobile && !isSearchModalOpen && !isTradingModalOpen && (
-        <div className="fixed left-3 right-3 bottom-[calc(48px+env(safe-area-inset-bottom))] z-[60] py-4">
+        <div className="fixed left-0 right-0 bottom-[calc(48px+env(safe-area-inset-bottom))] z-[60] py-4 flex justify-center">
           {!isConnected ? (
             /* Not signed in - Show "Log in to trade" */
             <button
@@ -2681,7 +2681,7 @@ const TokenPage = () => {
                 setTradeMode("buy");
                 setIsTradingModalOpen(true);
               }}
-              className="w-full bg-orange-400 hover:bg-orange-500 text-black font-bold py-4 px-4 transition-all duration-200 rounded"
+              className="w-[90%] bg-orange-400 hover:bg-orange-500 text-black font-bold text-lg py-2 px-4 transition-all duration-200 rounded"
             >
               Buy
             </button>
