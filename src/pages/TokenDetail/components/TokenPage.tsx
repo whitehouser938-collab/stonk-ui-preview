@@ -2075,8 +2075,8 @@ const TokenPage = () => {
                   </div>
                 )
               ) : activeTab === "holders" ? (
-                <div className="overflow-x-auto max-h-96 custom-scrollbar">
-                  <table className="w-full text-xs min-w-[400px]">
+                <div className={`${isMobile ? "" : "overflow-x-auto"} max-h-96 custom-scrollbar`}>
+                  <table className={`w-full text-xs ${isMobile ? "" : "min-w-[400px]"}`}>
                     <thead
                       className={`${
                         isMobile ? "bg-bg-main" : "bg-bg-main"
@@ -2087,17 +2087,17 @@ const TokenPage = () => {
                           isMobile ? "" : "border-b border-gray-700"
                         }`}
                       >
-                        <th className={`text-left p-1 pr-2 ${isMobile ? "font-normal" : ""}`} style={{ width: 'auto', maxWidth: '200px' }}>Holder</th>
-                        <th className={`text-right p-1 pl-2 ${isMobile ? "font-normal" : ""}`}>Balance</th>
-                        <th className={`text-right p-1 ${isMobile ? "font-normal" : ""}`}>Percentage</th>
-                        <th className="text-center p-1"></th>
+                        <th className={`text-left p-1 ${isMobile ? "font-normal pr-1" : "pr-2"}`} style={isMobile ? {} : { width: 'auto', maxWidth: '200px' }}>Holder</th>
+                        {!isMobile && <th className={`text-right p-1 pl-2 ${isMobile ? "font-normal" : ""}`}>Balance</th>}
+                        <th className={`text-right p-1 ${isMobile ? "font-normal pl-1" : ""}`}>Percentage</th>
+                        {!isMobile && <th className="text-center p-1"></th>}
                       </tr>
                     </thead>
                     <tbody>
                       {isLoadingHolders ? (
                         <tr>
                           <td
-                            colSpan={4}
+                            colSpan={isMobile ? 2 : 4}
                             className="p-4 text-center text-gray-400"
                           >
                             <div className="flex items-center justify-center space-x-2">
@@ -2115,7 +2115,7 @@ const TokenPage = () => {
                                 isMobile ? "" : "border-b border-gray-800"
                               } bg-red-900/20`}
                             >
-                              <td className="p-1 pr-2 text-red-400">
+                              <td className={`p-1 ${isMobile ? "pr-1" : "pr-2"} text-red-400`}>
                                 <div className="flex items-center space-x-2">
                                   <span className="text-lg">🔥</span>
                                   <span className="font-sans text-xs">
@@ -2123,25 +2123,29 @@ const TokenPage = () => {
                                   </span>
                                 </div>
                               </td>
-                              <td className="p-1 pl-2 text-right text-red-400 font-sans">
-                                {formatBalance(burntData.balance)}
-                              </td>
-                              <td className="p-1 text-right text-red-400">
+                              {!isMobile && (
+                                <td className="p-1 pl-2 text-right text-red-400 font-sans">
+                                  {formatBalance(burntData.balance)}
+                                </td>
+                              )}
+                              <td className={`p-1 ${isMobile ? "pl-1" : ""} text-right text-red-400`}>
                                 {calculatePercentage(burntData.balance)}
                               </td>
-                              <td className="p-1 text-center">
-                                <a
-                                  href={`${getExplorer(
-                                    chainId
-                                  )}/address/0x000000000000000000000000000000000000dEaD`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="hover:text-red-300"
-                                  title="View on Etherscan"
-                                >
-                                  <ArrowUpRight className="w-4 h-4 inline" />
-                                </a>
-                              </td>
+                              {!isMobile && (
+                                <td className="p-1 text-center">
+                                  <a
+                                    href={`${getExplorer(
+                                      chainId
+                                    )}/address/0x000000000000000000000000000000000000dEaD`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:text-red-300"
+                                    title="View on Etherscan"
+                                  >
+                                    <ArrowUpRight className="w-4 h-4 inline" />
+                                  </a>
+                                </td>
+                              )}
                             </tr>
                           )}
 
@@ -2152,7 +2156,7 @@ const TokenPage = () => {
                                 isMobile ? "" : "border-b border-gray-800"
                               } bg-blue-900/20`}
                             >
-                              <td className="p-1 pr-2 text-blue-400">
+                              <td className={`p-1 ${isMobile ? "pr-1" : "pr-2"} text-blue-400`}>
                                 <div className="flex items-center space-x-2">
                                   <span className="text-lg">🏦</span>
                                   <span className="font-sans text-xs">
@@ -2160,25 +2164,29 @@ const TokenPage = () => {
                                   </span>
                                 </div>
                               </td>
-                              <td className="p-1 pl-2 text-right text-blue-400 font-sans">
-                                {formatBalance(uniswapData.balance)}
-                              </td>
-                              <td className="p-1 text-right text-blue-400">
+                              {!isMobile && (
+                                <td className="p-1 pl-2 text-right text-blue-400 font-sans">
+                                  {formatBalance(uniswapData.balance)}
+                                </td>
+                              )}
+                              <td className={`p-1 ${isMobile ? "pl-1" : ""} text-right text-blue-400`}>
                                 {calculatePercentage(uniswapData.balance)}
                               </td>
-                              <td className="p-1 text-center">
-                                <a
-                                  href={`${getExplorer(chainId)}/address/${
-                                    uniswapData.holderAddress
-                                  }`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="hover:text-blue-300"
-                                  title="View on Etherscan"
-                                >
-                                  <ArrowUpRight className="w-4 h-4 inline" />
-                                </a>
-                              </td>
+                              {!isMobile && (
+                                <td className="p-1 text-center">
+                                  <a
+                                    href={`${getExplorer(chainId)}/address/${
+                                      uniswapData.holderAddress
+                                    }`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:text-blue-300"
+                                    title="View on Etherscan"
+                                  >
+                                    <ArrowUpRight className="w-4 h-4 inline" />
+                                  </a>
+                                </td>
+                              )}
                             </tr>
                           )}
 
@@ -2189,7 +2197,7 @@ const TokenPage = () => {
                                 isMobile ? "" : "border-b border-gray-800"
                               } bg-purple-900/20`}
                             >
-                              <td className="p-1 pr-2 text-purple-400">
+                              <td className={`p-1 ${isMobile ? "pr-1" : "pr-2"} text-purple-400`}>
                                 <div className="flex items-center space-x-2">
                                   <span className="text-lg">🔮</span>
                                   <span className="font-sans text-sm">
@@ -2197,25 +2205,29 @@ const TokenPage = () => {
                                   </span>
                                 </div>
                               </td>
-                              <td className="p-1 pl-2 text-right text-purple-400 font-sans">
-                                {formatBalance(bondingCurveData.balance)}
-                              </td>
-                              <td className="p-1 text-right text-purple-400">
+                              {!isMobile && (
+                                <td className="p-1 pl-2 text-right text-purple-400 font-sans">
+                                  {formatBalance(bondingCurveData.balance)}
+                                </td>
+                              )}
+                              <td className={`p-1 ${isMobile ? "pl-1" : ""} text-right text-purple-400`}>
                                 {calculatePercentage(bondingCurveData.balance)}
                               </td>
-                              <td className="p-1 text-center">
-                                <a
-                                  href={`${getExplorer(chainId)}/address/${
-                                    bondingCurveData.holderAddress
-                                  }`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="hover:text-purple-300"
-                                  title="View on Etherscan"
-                                >
-                                  <ArrowUpRight className="w-4 h-4 inline" />
-                                </a>
-                              </td>
+                              {!isMobile && (
+                                <td className="p-1 text-center">
+                                  <a
+                                    href={`${getExplorer(chainId)}/address/${
+                                      bondingCurveData.holderAddress
+                                    }`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:text-purple-300"
+                                    title="View on Etherscan"
+                                  >
+                                    <ArrowUpRight className="w-4 h-4 inline" />
+                                  </a>
+                                </td>
+                              )}
                             </tr>
                           )}
 
@@ -2223,7 +2235,7 @@ const TokenPage = () => {
                           {holdersData.length === 0 && !burntData ? (
                             <tr>
                               <td
-                                colSpan={4}
+                                colSpan={isMobile ? 2 : 4}
                                 className="p-4 text-center text-gray-400"
                               >
                                 No holders found
@@ -2239,7 +2251,7 @@ const TokenPage = () => {
                                     : "border-b border-gray-800 last:border-0"
                                 }
                               >
-                                <td className="p-1 pr-2 text-[#FAFAFA]">
+                                <td className={`p-1 ${isMobile ? "pr-1" : "pr-2"} text-[#FAFAFA]`}>
                                   <div className="flex items-center space-x-2">
                                     <img
                                       src={holder.pfp || "/default-pfp.jpeg"}
@@ -2256,32 +2268,36 @@ const TokenPage = () => {
                                           `/profile/${holder.holderAddress}`
                                         )
                                       }
-                                      className="hover:text-orange-400 underline text-left font-sans"
+                                      className="hover:text-orange-400 text-left font-sans"
                                     >
                                       {holder.username ||
                                         abbreviateAddress(holder.holderAddress)}
                                     </button>
                                   </div>
                                 </td>
-                                <td className="p-1 pl-2 text-right text-[#FAFAFA] font-sans">
-                                  {formatBalance(holder.balance)}
-                                </td>
-                                <td className="p-1 text-right text-gray-400">
+                                {!isMobile && (
+                                  <td className="p-1 pl-2 text-right text-[#FAFAFA] font-sans">
+                                    {formatBalance(holder.balance)}
+                                  </td>
+                                )}
+                                <td className={`p-1 ${isMobile ? "pl-1" : ""} text-right text-gray-400`}>
                                   {calculatePercentage(holder.balance)}
                                 </td>
-                                <td className="p-1 text-center">
-                                  <a
-                                    href={`${getExplorer(chainId)}/address/${
-                                      holder.holderAddress
-                                    }`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="hover:text-orange-400"
-                                    title="View on Etherscan"
-                                  >
-                                    <ArrowUpRight className="w-4 h-4 inline" />
-                                  </a>
-                                </td>
+                                {!isMobile && (
+                                  <td className="p-1 text-center">
+                                    <a
+                                      href={`${getExplorer(chainId)}/address/${
+                                        holder.holderAddress
+                                      }`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="hover:text-orange-400"
+                                      title="View on Etherscan"
+                                    >
+                                      <ArrowUpRight className="w-4 h-4 inline" />
+                                    </a>
+                                  </td>
+                                )}
                               </tr>
                             ))
                           )}
