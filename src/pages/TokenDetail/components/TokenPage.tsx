@@ -2085,9 +2085,9 @@ const TokenPage = () => {
                           isMobile ? "" : "border-b border-gray-700"
                         }`}
                       >
-                        <th className="text-left p-1">HOLDER</th>
-                        <th className="text-right p-1">BALANCE</th>
-                        <th className="text-right p-1">PERCENTAGE</th>
+                        <th className={`text-left p-1 pr-2 ${isMobile ? "font-normal" : ""}`} style={{ width: 'auto', maxWidth: '200px' }}>Holder</th>
+                        <th className={`text-right p-1 pl-2 ${isMobile ? "font-normal" : ""}`}>Balance</th>
+                        <th className={`text-right p-1 ${isMobile ? "font-normal" : ""}`}>Percentage</th>
                         <th className="text-center p-1"></th>
                       </tr>
                     </thead>
@@ -2113,15 +2113,15 @@ const TokenPage = () => {
                                 isMobile ? "" : "border-b border-gray-800"
                               } bg-red-900/20`}
                             >
-                              <td className="p-1 text-red-400">
+                              <td className="p-1 pr-2 text-red-400">
                                 <div className="flex items-center space-x-2">
                                   <span className="text-lg">🔥</span>
-                                  <span className="font-sans text-sm">
+                                  <span className="font-sans text-xs">
                                     0x0000...dEaD
                                   </span>
                                 </div>
                               </td>
-                              <td className="p-1 text-right text-red-400 font-sans">
+                              <td className="p-1 pl-2 text-right text-red-400 font-sans">
                                 {formatBalance(burntData.balance)}
                               </td>
                               <td className="p-1 text-right text-red-400">
@@ -2150,15 +2150,15 @@ const TokenPage = () => {
                                 isMobile ? "" : "border-b border-gray-800"
                               } bg-blue-900/20`}
                             >
-                              <td className="p-1 text-blue-400">
+                              <td className="p-1 pr-2 text-blue-400">
                                 <div className="flex items-center space-x-2">
                                   <span className="text-lg">🏦</span>
-                                  <span className="font-sans text-sm">
+                                  <span className="font-sans text-xs">
                                     UNISWAP
                                   </span>
                                 </div>
                               </td>
-                              <td className="p-1 text-right text-blue-400 font-sans">
+                              <td className="p-1 pl-2 text-right text-blue-400 font-sans">
                                 {formatBalance(uniswapData.balance)}
                               </td>
                               <td className="p-1 text-right text-blue-400">
@@ -2187,7 +2187,7 @@ const TokenPage = () => {
                                 isMobile ? "" : "border-b border-gray-800"
                               } bg-purple-900/20`}
                             >
-                              <td className="p-1 text-purple-400">
+                              <td className="p-1 pr-2 text-purple-400">
                                 <div className="flex items-center space-x-2">
                                   <span className="text-lg">🔮</span>
                                   <span className="font-sans text-sm">
@@ -2195,7 +2195,7 @@ const TokenPage = () => {
                                   </span>
                                 </div>
                               </td>
-                              <td className="p-1 text-right text-purple-400 font-sans">
+                              <td className="p-1 pl-2 text-right text-purple-400 font-sans">
                                 {formatBalance(bondingCurveData.balance)}
                               </td>
                               <td className="p-1 text-right text-purple-400">
@@ -2237,7 +2237,7 @@ const TokenPage = () => {
                                     : "border-b border-gray-800 last:border-0"
                                 }
                               >
-                                <td className="p-1 text-[#FAFAFA]">
+                                <td className="p-1 pr-2 text-[#FAFAFA]">
                                   <div className="flex items-center space-x-2">
                                     <img
                                       src={holder.pfp || "/default-pfp.jpeg"}
@@ -2261,7 +2261,7 @@ const TokenPage = () => {
                                     </button>
                                   </div>
                                 </td>
-                                <td className="p-1 text-right text-[#FAFAFA] font-sans">
+                                <td className="p-1 pl-2 text-right text-[#FAFAFA] font-sans">
                                   {formatBalance(holder.balance)}
                                 </td>
                                 <td className="p-1 text-right text-gray-400">
