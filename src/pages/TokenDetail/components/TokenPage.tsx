@@ -2672,7 +2672,7 @@ const TokenPage = () => {
                 // For now, just open the trading modal which will show wallet prompt
                 setIsTradingModalOpen(true);
               }}
-              className="w-full bg-orange-400 hover:bg-orange-500 text-black font-bold py-4 px-4 transition-all duration-200 rounded"
+              className="w-[90%] bg-orange-400 hover:bg-orange-500 text-black font-bold py-4 px-4 transition-all duration-200 rounded"
             >
               Log in to trade
             </button>
@@ -2683,7 +2683,7 @@ const TokenPage = () => {
                 setTradeMode("buy");
                 setIsTradingModalOpen(true);
               }}
-              className="w-[90%] bg-orange-400 hover:bg-orange-500 text-black font-bold text-lg py-2 px-4 transition-all duration-200 rounded"
+              className="w-[90%] bg-orange-400 hover:bg-orange-500 text-black font-bold py-4 px-4 transition-all duration-200 rounded"
             >
               Buy
             </button>
@@ -2695,7 +2695,7 @@ const TokenPage = () => {
                 setTradeMode("sell");
                 setIsTradingModalOpen(true);
               }}
-              className="w-full bg-orange-400 hover:bg-orange-500 text-black font-bold py-4 px-4 transition-all duration-200 rounded"
+              className="w-[90%] bg-orange-400 hover:bg-orange-500 text-black font-bold py-4 px-4 transition-all duration-200 rounded"
             >
               Trade
             </button>
