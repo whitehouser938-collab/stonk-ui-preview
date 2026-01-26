@@ -225,7 +225,7 @@ export function Layout({ children }: LayoutProps) {
       <SearchModal isOpen={isSearchModalOpen} onClose={() => setIsSearchModalOpen(false)} />
 
       {/* Main Content */}
-      <main className="p-0 sm:p-6 pb-24 lg:pb-6">{children}</main>
+      <main className="p-1 sm:p-6 pb-24 lg:pb-6">{children}</main>
 
       {/* Bottom Navigation - Mobile Only */}
       <div className="fixed bottom-0 left-0 right-0 mt-16 bg-[#18191b] border-t border-t-[#f8fafc1a] pt-2 pb-[calc(8px+env(safe-area-inset-bottom))] z-50 lg:hidden">
