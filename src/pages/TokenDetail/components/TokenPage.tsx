@@ -2077,7 +2077,7 @@ const TokenPage = () => {
                   </div>
                 )
               ) : activeTab === "holders" ? (
-                <div className={`${isMobile ? "" : "overflow-x-auto"} max-h-96 custom-scrollbar`}>
+                <div className={`${isMobile ? "overflow-y-auto pb-24" : "overflow-x-auto"} max-h-96 custom-scrollbar`}>
                   <table className={`w-full text-xs ${isMobile ? "" : "min-w-[400px]"}`}>
                     <thead
                       className={`${
@@ -2244,7 +2244,7 @@ const TokenPage = () => {
                               </td>
                             </tr>
                           ) : (
-                            holdersData.map((holder, idx) => (
+                            holdersData.slice(0, 20).map((holder, idx) => (
                               <tr
                                 key={idx}
                                 className={
@@ -2307,6 +2307,7 @@ const TokenPage = () => {
                       )}
                     </tbody>
                   </table>
+                  {isMobile && <div className="h-24"></div>}
                 </div>
               ) : activeTab === "comments" ? (
                 <div className={isMobile ? "" : "max-h-96 overflow-y-auto custom-scrollbar"}>
