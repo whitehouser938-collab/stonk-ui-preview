@@ -927,71 +927,20 @@ const TokenPage = () => {
               {isMobile ? (
                 /* Mobile Layout - New Design */
                 <div className="space-y-2">
-                  {/* Token Name, Symbol, and Address */}
-                  <div className="flex items-center flex-wrap gap-x-2 gap-y-1">
-                    <div className="text-[#FAFAFA] font-bold text-xl leading-tight">
-                      {tokenData?.name && tokenData.name.length > 20
-                        ? tokenData.name.slice(0, 20) + "..."
-                        : tokenData?.name}{" "}
-                      <span className="text-gray-400">
-                        ({tokenData?.symbol})
-                      </span>
-                    </div>
-
-                    {/* Address with Copy */}
-                    <div
-                      className="flex items-center space-x-1 text-gray-400 text-xs cursor-pointer hover:text-orange-400 transition-colors"
-                      onClick={async () => {
-                        if (tokenData?.tokenAddress) {
-                          await navigator.clipboard.writeText(
-                            tokenData.tokenAddress
-                          );
-                          toast({
-                            title: "Address Copied",
-                            description: "Token address copied to clipboard",
-                            variant: "default",
-                          });
-                        }
-                      }}
-                    >
-                      <span>
-                        {tokenData?.tokenAddress
-                          ? `${tokenData.tokenAddress.slice(
-                              0,
-                              6
-                            )}...${tokenData.tokenAddress.slice(-4)}`
-                          : "N/A"}
-                      </span>
-                      <svg
-                        className="w-3 h-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-
-                  {/* Logo and Digital Clock Row */}
-                  <div className="flex items-center justify-between gap-3">
+                  {/* Logo and Token Info Row */}
+                  <div className="flex items-start gap-3">
                     {/* Token Logo */}
                     <div className="flex-shrink-0">
                       {tokenData?.logoUrl ? (
                         <img
                           src={tokenData.logoUrl}
                           alt={`${tokenData.name} logo`}
-                          className="w-28 h-28 object-cover cursor-pointer hover:opacity-80 transition-opacity"
+                          className="w-28 h-28 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity border border-orange-400"
                           onClick={() => setIsLogoModalOpen(true)}
                         />
                       ) : (
                         <div
-                          className="w-28 h-28 bg-gradient-to-br from-orange-400 to-red-600 text-[#FAFAFA] font-bold text-3xl flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+                          className="w-28 h-28 bg-gradient-to-br from-orange-400 to-red-600 text-[#FAFAFA] font-bold text-3xl flex items-center justify-center rounded-lg cursor-pointer hover:opacity-80 transition-opacity border border-orange-400"
                           onClick={() => setIsLogoModalOpen(true)}
                         >
                           {tokenData?.symbol?.slice(0, 3)}
@@ -999,15 +948,67 @@ const TokenPage = () => {
                       )}
                     </div>
 
-                    {/* Digital Clock */}
-                    <div className="flex-1 flex items-center justify-center">
-                      <div className="text-[#FAFAFA] font-mono text-2xl font-bold">
-                        {currentTime.toLocaleTimeString("en-US", {
-                          hour12: false,
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          second: "2-digit",
-                        })}
+                    {/* Token Name, Symbol, and Address */}
+                    <div className="flex-1 flex flex-col gap-1">
+                      {/* Token Name */}
+                      <div className="text-[#FAFAFA] font-bold text-xl leading-tight">
+                        {tokenData?.name && tokenData.name.length > 20
+                          ? tokenData.name.slice(0, 20) + "..."
+                          : tokenData?.name}
+                      </div>
+
+                      {/* Token Symbol */}
+                      <div className="text-[#FAFAFA] text-base leading-tight">
+                        {tokenData?.symbol}
+                      </div>
+
+                      {/* Contract Address with Age */}
+                      <div className="flex items-center gap-1.5 text-gray-400 text-xs">
+                        <div
+                          className="flex items-center space-x-1 cursor-pointer hover:text-orange-400 transition-colors"
+                          onClick={async () => {
+                            if (tokenData?.tokenAddress) {
+                              await navigator.clipboard.writeText(
+                                tokenData.tokenAddress
+                              );
+                              toast({
+                                title: "Address Copied",
+                                description: "Token address copied to clipboard",
+                                variant: "default",
+                              });
+                            }
+                          }}
+                        >
+                          <span>
+                            {tokenData?.tokenAddress
+                              ? `${tokenData.tokenAddress.slice(
+                                  0,
+                                  6
+                                )}...${tokenData.tokenAddress.slice(-4)}`
+                              : "N/A"}
+                          </span>
+                          <svg
+                            className="w-3 h-3"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                            />
+                          </svg>
+                        </div>
+                        {tokenData?.deploymentTimestamp && (
+                          <>
+                            <span className="text-gray-600">•</span>
+                            <span>
+                              {formatTokenAge(tokenData.deploymentTimestamp)}
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
