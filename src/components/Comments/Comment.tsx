@@ -100,7 +100,7 @@ export const Comment: React.FC<CommentProps> = ({
             <UserAvatar user={comment.user} size="md" className="" />
             <Link
               to={`/profile/${comment.user.walletAddress}`}
-              className="text-white hover:text-orange-400 font-sans text-sm transition-colors cursor-pointer"
+              className="text-label hover:text-orange-400 font-sans text-sm transition-colors cursor-pointer"
               onClick={(e) => e.stopPropagation()}
             >
               {getDisplayName(comment.user)}
@@ -171,7 +171,7 @@ export const Comment: React.FC<CommentProps> = ({
         ) : (
           <div className="flex items-start justify-between mb-1">
             {/* Content on left */}
-            <div className="text-white text-base flex-1 font-sans pr-4">{comment.content}</div>
+            <div className="text-content text-base flex-1 font-sans pr-4">{comment.content}</div>
             {/* Like count on right */}
             {currentUserId && currentUserId !== "skip" ? (
               <button

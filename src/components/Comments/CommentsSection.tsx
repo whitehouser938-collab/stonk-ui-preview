@@ -254,7 +254,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
             type="text"
             placeholder="Add a comment..."
             style={{ backgroundColor: '#1A1A1E' }}
-            className="w-full bg-card border border-gray-600 rounded px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-gray-500 font-sans cursor-pointer"
+            className="w-full bg-card border border-gray-600 rounded px-3 py-2 text-sm text-label placeholder-gray-400 focus:outline-none focus:border-gray-500 font-sans cursor-pointer"
             onClick={() => {
               if (isConnected && currentUserId) {
                 setShowCommentModal(true);
@@ -297,7 +297,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
         <button
           onClick={() => setSortOrder(sortOrder === "newest" ? "oldest" : "newest")}
           style={{ backgroundColor: '#1A1A1E' }}
-          className="flex items-center gap-1.5 bg-card border border-gray-600 rounded px-3 py-2 text-sm text-white hover:bg-card-hover transition-colors font-sans"
+          className="flex items-center gap-1.5 bg-card border border-gray-600 rounded px-3 py-2 text-sm text-label hover:bg-card-hover transition-colors font-sans"
         >
           <ArrowUpDown className="w-4 h-4" />
           <span>{sortOrder === "newest" ? "Newest" : "Oldest"}</span>

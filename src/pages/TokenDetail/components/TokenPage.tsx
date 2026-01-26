@@ -203,6 +203,8 @@ const TokenPage = () => {
   const [hasMoreTrades, setHasMoreTrades] = useState(true);
   const [isFetchingMoreTrades, setIsFetchingMoreTrades] = useState(false);
   const [filteredTrader, setFilteredTrader] = useState<string | null>(null);
+  const [isFilterBySizeEnabled, setIsFilterBySizeEnabled] = useState(false);
+  const [showLiquidity, setShowLiquidity] = useState(false);
   const [activeTab, setActiveTab] = useState<
     "trades" | "holders" | "comments" | "info"
   >(() => {
@@ -229,6 +231,7 @@ const TokenPage = () => {
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
+  const liquidityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [showPinnedNav, setShowPinnedNav] = useState(false);
 
   // Callback refs to notify TradingForm of confirmed trades
@@ -688,6 +691,15 @@ const TokenPage = () => {
     return () => clearInterval(timer);
   }, []);
 
+  // Cleanup liquidity timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (liquidityTimeoutRef.current) {
+        clearTimeout(liquidityTimeoutRef.current);
+      }
+    };
+  }, []);
+
   function abbreviateNumber(num: string | number): string {
     const n = typeof num === "string" ? parseFloat(num) : num;
     if (n >= 1e9) return (n / 1e9).toFixed(2) + "B";
@@ -763,7 +775,7 @@ const TokenPage = () => {
           key={idx}
           className={isMobile ? "" : "border-b border-gray-800 last:border-0"}
         >
-          <td className="p-1 text-white font-sans">
+          <td className="p-1 font-sans" style={{ color: '#FAFAFA' }}>
             <div className="flex items-center space-x-2">
               {trade.makerPfp && (
                 <img
@@ -800,26 +812,40 @@ const TokenPage = () => {
               )}
             </div>
           </td>
-          <td className="p-1 text-right text-white font-sans">
+          <td className="p-1 text-center">
+            {isMobile ? (
+              <span
+                className={`text-xs ${
+                  trade.tradeType === "BUY"
+                    ? "text-green-400"
+                    : "text-red-400"
+                }`}
+              >
+                {trade.tradeType}
+              </span>
+            ) : (
+              <span
+                className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                  trade.tradeType === "BUY"
+                    ? "bg-green-600/80 text-[#FAFAFA]"
+                    : "bg-red-600/80 text-[#FAFAFA]"
+                }`}
+              >
+                {trade.tradeType}
+              </span>
+            )}
+          </td>
+          <td className="p-1 text-right font-sans" style={{ color: '#F8FAFC' }}>
             {abbreviateTokenAmount(trade.baseAmount)}
           </td>
-          <td className="p-1 text-right text-white font-sans">
+          <td className="p-1 text-right font-sans" style={{ color: '#F8FAFC' }}>
             {abbreviateTokenAmount(trade.quoteAmount)}
           </td>
-          <td className="p-1 text-center">
-            <span
-              className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                trade.tradeType === "BUY"
-                  ? "bg-green-600/80 text-white"
-                  : "bg-red-600/80 text-white"
-              }`}
-            >
-              {trade.tradeType}
-            </span>
-          </td>
-          <td className="p-1 text-right text-gray-400">
-            {formatTimeAgo(trade.timestamp)}
-          </td>
+          {!isMobile && (
+            <td className="p-1 text-right text-gray-400">
+              {formatTimeAgo(trade.timestamp)}
+            </td>
+          )}
           <td className="p-1 text-center">
             <a
               href={`${getExplorer(chainId)}/tx/${trade.transactionHash}`}
@@ -903,7 +929,7 @@ const TokenPage = () => {
                 <div className="space-y-3">
                   {/* Token Name, Symbol, and Address */}
                   <div className="flex items-center flex-wrap gap-x-2 gap-y-1">
-                    <div className="text-white font-bold text-xl leading-tight">
+                    <div className="text-[#FAFAFA] font-bold text-xl leading-tight">
                       {tokenData?.name && tokenData.name.length > 20
                         ? tokenData.name.slice(0, 20) + "..."
                         : tokenData?.name}{" "}
@@ -965,7 +991,7 @@ const TokenPage = () => {
                         />
                       ) : (
                         <div
-                          className="w-28 h-28 bg-gradient-to-br from-orange-400 to-red-600 text-white font-bold text-3xl flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+                          className="w-28 h-28 bg-gradient-to-br from-orange-400 to-red-600 text-[#FAFAFA] font-bold text-3xl flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
                           onClick={() => setIsLogoModalOpen(true)}
                         >
                           {tokenData?.symbol?.slice(0, 3)}
@@ -975,7 +1001,7 @@ const TokenPage = () => {
 
                     {/* Digital Clock */}
                     <div className="flex-1 flex items-center justify-center">
-                      <div className="text-white font-mono text-2xl font-bold">
+                      <div className="text-[#FAFAFA] font-mono text-2xl font-bold">
                         {currentTime.toLocaleTimeString("en-US", {
                           hour12: false,
                           hour: "2-digit",
@@ -986,29 +1012,45 @@ const TokenPage = () => {
                     </div>
                   </div>
 
-                  {/* Market Cap */}
-                  <div className="flex items-baseline space-x-2">
-                    <div className="text-white font-sans text-3xl font-bold">
-                      $
-                      {formatNumber(
-                        tokenData.price.currentPrice * 1_000_000_000
-                      )}
-                    </div>
-                    <div className="text-gray-400 text-xs">Market cap</div>
+                  {/* Market Cap / Liquidity - Clickable on mobile */}
+                  <div 
+                    className={`flex items-baseline space-x-2 ${isMobile && (tokenData?.isGraduated || tokenData?.uniswapPair) ? 'cursor-pointer' : ''}`}
+                    onClick={() => {
+                      if (isMobile && (tokenData?.isGraduated || tokenData?.uniswapPair)) {
+                        // Clear any existing timeout
+                        if (liquidityTimeoutRef.current) {
+                          clearTimeout(liquidityTimeoutRef.current);
+                        }
+                        setShowLiquidity(true);
+                        liquidityTimeoutRef.current = setTimeout(() => {
+                          setShowLiquidity(false);
+                          liquidityTimeoutRef.current = null;
+                        }, 3000);
+                      }
+                    }}
+                  >
+                    {showLiquidity ? (
+                      <>
+                        <div className="text-[#FAFAFA] font-sans text-3xl font-bold">
+                          $
+                          {formatNumber(
+                            parseFloat(getLiquidityWeth(tokenData)) * 2000
+                          )}
+                        </div>
+                        <div className="text-gray-400 text-xs">Liquidity</div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-[#FAFAFA] font-sans text-3xl font-bold">
+                          $
+                          {formatNumber(
+                            tokenData.price.currentPrice * 1_000_000_000
+                          )}
+                        </div>
+                        <div className="text-gray-400 text-xs">Market cap</div>
+                      </>
+                    )}
                   </div>
-
-                  {/* Liquidity - Only show if graduated */}
-                  {(tokenData?.isGraduated || tokenData?.uniswapPair) && (
-                    <div className="flex items-baseline space-x-2">
-                      <div className="text-white font-sans text-xl">
-                        $
-                        {formatNumber(
-                          parseFloat(getLiquidityWeth(tokenData)) * 2000
-                        )}
-                      </div>
-                      <div className="text-gray-400 text-xs">Liquidity</div>
-                    </div>
-                  )}
 
                   {/* Price Change */}
                   <div
@@ -1040,7 +1082,7 @@ const TokenPage = () => {
                         className="w-16 h-16 object-cover"
                       />
                     ) : (
-                      <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-red-600 text-white font-bold text-lg flex items-center justify-center flex-shrink-0">
+                      <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-red-600 text-[#FAFAFA] font-bold text-lg flex items-center justify-center flex-shrink-0">
                         {tokenData?.symbol}
                       </div>
                     )}
@@ -1084,7 +1126,7 @@ const TokenPage = () => {
                       <div className="flex items-center space-x-4 mt-2 overflow-hidden">
                         <div className="flex items-center space-x-2">
                           <Clock className="w-3 h-3 text-orange-400" />
-                          <span className="text-white text-sm">
+                          <span className="text-[#FAFAFA] text-sm">
                             {tokenData?.deploymentTimestamp
                               ? formatTokenAge(tokenData.deploymentTimestamp)
                               : "Unknown"}
@@ -1245,7 +1287,7 @@ const TokenPage = () => {
 
                   {/* Desktop: Price on the right */}
                   <div className="text-left sm:text-right min-w-0">
-                    <div className="text-xl sm:text-2xl font-sans text-white truncate">
+                    <div className="text-xl sm:text-2xl font-sans text-[#FAFAFA] truncate">
                       $
                       {tokenData.price.currentPrice
                         ? parseFloat(tokenData.price.currentPrice.toFixed(7))
@@ -1326,17 +1368,17 @@ const TokenPage = () => {
                 <div className="overflow-x-auto scrollbar-hide -mx-2 px-2">
                   <div className="flex space-x-2 min-w-max">
                     {/* Vol 24h */}
-                    <div className="bg-bg-card rounded-lg p-3 min-w-[100px] flex-shrink-0">
+                    <div className="bg-bg-card rounded-lg p-3 min-w-[100px] flex-shrink-0 text-center">
                       <div className="text-gray-400 text-xs mb-1">Vol 24h</div>
-                      <div className="text-white font-sans text-sm">
+                      <div className="text-[#FAFAFA] font-sans text-sm">
                         ${formatNumber(tokenData.price.totalVolume || 0)}
                       </div>
                     </div>
 
                     {/* Price */}
-                    <div className="bg-bg-card rounded-lg p-3 min-w-[100px] flex-shrink-0">
+                    <div className="bg-bg-card rounded-lg p-3 min-w-[100px] flex-shrink-0 text-center">
                       <div className="text-gray-400 text-xs mb-1">Price</div>
-                      <div className="text-white font-sans text-sm">
+                      <div className="text-[#FAFAFA] font-sans text-sm">
                         $
                         {tokenData.price.currentPrice
                           ? parseFloat(tokenData.price.currentPrice.toFixed(7))
@@ -1345,7 +1387,7 @@ const TokenPage = () => {
                     </div>
 
                     {/* 5m */}
-                    <div className="bg-bg-card rounded-lg p-3 min-w-[100px] flex-shrink-0">
+                    <div className="bg-bg-card rounded-lg p-3 min-w-[100px] flex-shrink-0 text-center">
                       <div className="text-gray-400 text-xs mb-1">5m</div>
                       <div
                         className={`font-sans text-sm ${
@@ -1360,7 +1402,7 @@ const TokenPage = () => {
                     </div>
 
                     {/* 1h */}
-                    <div className="bg-bg-card rounded-lg p-3 min-w-[100px] flex-shrink-0">
+                    <div className="bg-bg-card rounded-lg p-3 min-w-[100px] flex-shrink-0 text-center">
                       <div className="text-gray-400 text-xs mb-1">1h</div>
                       <div
                         className={`font-sans text-sm ${
@@ -1375,7 +1417,7 @@ const TokenPage = () => {
                     </div>
 
                     {/* 24h */}
-                    <div className="bg-bg-card rounded-lg p-3 min-w-[100px] flex-shrink-0">
+                    <div className="bg-bg-card rounded-lg p-3 min-w-[100px] flex-shrink-0 text-center">
                       <div className="text-gray-400 text-xs mb-1">24h</div>
                       <div
                         className={`font-sans text-sm ${
@@ -1394,10 +1436,10 @@ const TokenPage = () => {
                 {/* Bonding Curve Progress */}
                 <div className="bg-bg-main">
                   <div className="flex items-center justify-between mb-2">
-                    <div className="text-white font-bold text-sm">
+                    <div className="text-[#FAFAFA] font-bold text-sm">
                       Bonding Curve Progress
                     </div>
-                    <div className="text-white text-sm">
+                    <div className="text-[#FAFAFA] text-sm">
                       {tokenData?.isGraduated || tokenData?.uniswapPair
                         ? "100.0%"
                         : `${
@@ -1453,7 +1495,7 @@ const TokenPage = () => {
                       className="flex items-center justify-center space-x-2 bg-bg-card rounded-lg p-3 hover:bg-bg-card-hover transition-colors"
                     >
                       <svg
-                        className="w-5 h-5 text-white"
+                        className="w-5 h-5 text-[#FAFAFA]"
                         viewBox="0 0 24 24"
                         fill="currentColor"
                       >
@@ -1463,7 +1505,7 @@ const TokenPage = () => {
                           d="M23.1117 4.49449C23.4296 2.94472 21.9074 1.65683 20.4317 2.227L2.3425 9.21601C0.694517 9.85273 0.621087 12.1572 2.22518 12.8975L6.1645 14.7157L8.03849 21.2746C8.13583 21.6153 8.40618 21.8791 8.74917 21.968C9.09216 22.0568 9.45658 21.9576 9.70712 21.707L12.5938 18.8203L16.6375 21.8531C17.8113 22.7334 19.5019 22.0922 19.7967 20.6549L23.1117 4.49449ZM3.0633 11.0816L21.1525 4.0926L17.8375 20.2531L13.1 16.6999C12.7019 16.4013 12.1448 16.4409 11.7929 16.7928L10.5565 18.0292L10.928 15.9861L18.2071 8.70703C18.5614 8.35278 18.5988 7.79106 18.2947 7.39293C17.9906 6.99479 17.4389 6.88312 17.0039 7.13168L6.95124 12.876L3.0633 11.0816ZM8.17695 14.4791L8.78333 16.6015L9.01614 15.321C9.05253 15.1209 9.14908 14.9366 9.29291 14.7928L11.5128 12.573L8.17695 14.4791Z"
                         />
                       </svg>
-                      <span className="text-white text-sm">
+                      <span className="text-[#FAFAFA] text-sm">
                         {tokenData.telegramUrl
                           .replace(/^https?:\/\/(www\.)?(t\.me|telegram\.me)\//, "")
                           .replace(/\/$/, "")}
@@ -1480,13 +1522,13 @@ const TokenPage = () => {
                       className="flex items-center justify-center space-x-2 bg-bg-card rounded-lg p-3 hover:bg-bg-card-hover transition-colors"
                     >
                       <svg
-                        className="w-5 h-5 text-white"
+                        className="w-5 h-5 text-[#FAFAFA]"
                         viewBox="0 0 24 24"
                         fill="currentColor"
                       >
                         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                       </svg>
-                      <span className="text-white text-sm">
+                      <span className="text-[#FAFAFA] text-sm">
                         {tokenData.twitterUrl
                           .replace(/^https?:\/\/(www\.)?(x\.com|twitter\.com)\//, "")
                           .replace(/^@/, "")
@@ -1504,8 +1546,8 @@ const TokenPage = () => {
                       rel="noopener noreferrer"
                       className="flex items-center justify-center space-x-2 bg-bg-card rounded-lg p-3 hover:bg-bg-card-hover transition-colors"
                     >
-                      <Globe className="w-5 h-5 text-white" />
-                      <span className="text-white text-sm">
+                      <Globe className="w-5 h-5 text-[#FAFAFA]" />
+                      <span className="text-[#FAFAFA] text-sm">
                         {tokenData.websiteUrl
                           .replace(/^https?:\/\/(www\.)?/, "")
                           .replace(/\/$/, "")
@@ -1524,7 +1566,7 @@ const TokenPage = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 text-xs">
                   <div className="bg-bg-main border border-black p-2">
                     <div className="text-gray-400">MARKET CAP</div>
-                    <div className="text-white font-sans text-sm">
+                    <div className="text-[#FAFAFA] font-sans text-sm">
                       {formatNumber(
                         tokenData.price.currentPrice * 1_000_000_000
                       )}
@@ -1532,13 +1574,13 @@ const TokenPage = () => {
                   </div>
                   <div className="bg-bg-main border border-black p-2">
                     <div className="text-gray-400">LIQUIDITY</div>
-                    <div className="text-white font-sans text-sm">
+                    <div className="text-[#FAFAFA] font-sans text-sm">
                       {getLiquidityWeth(tokenData)} WETH
                     </div>
                   </div>
                   <div className="bg-bg-main border border-black p-2">
                     <div className="text-gray-400">FDV</div>
-                    <div className="text-white font-sans text-sm">
+                    <div className="text-[#FAFAFA] font-sans text-sm">
                       {formatNumber(
                         tokenData.price.currentPrice * 1_000_000_000
                       )}
@@ -1546,7 +1588,7 @@ const TokenPage = () => {
                   </div>
                   <div className="bg-bg-main border border-black p-2">
                     <div className="text-gray-400">PRICE (USD)</div>
-                    <div className="text-white font-sans text-sm">
+                    <div className="text-[#FAFAFA] font-sans text-sm">
                       $
                       {tokenData.price.currentPrice
                         ? parseFloat(tokenData.price.currentPrice.toFixed(7))
@@ -1555,13 +1597,13 @@ const TokenPage = () => {
                   </div>
                   <div className="bg-bg-main border border-black p-2">
                     <div className="text-gray-400">HOLDERS</div>
-                    <div className="text-white font-sans text-sm">
+                    <div className="text-[#FAFAFA] font-sans text-sm">
                       {holdersCount > 0 ? holdersCount : "Loading..."}
                     </div>
                   </div>
                   <div className="bg-bg-main border border-black p-2">
                     <div className="text-gray-400">VOLUME</div>
-                    <div className="text-white font-sans text-sm">
+                    <div className="text-[#FAFAFA] font-sans text-sm">
                       {formatNumber(tokenData.price.totalVolume)}
                     </div>
                   </div>
@@ -1583,7 +1625,7 @@ const TokenPage = () => {
                       }`}
                     />
                     <span className="text-gray-400">Age</span>
-                    <span className="text-white">
+                    <span className="text-[#FAFAFA]">
                       {tokenData?.deploymentTimestamp
                         ? formatTokenAge(tokenData.deploymentTimestamp)
                         : "Unknown"}
@@ -1738,14 +1780,14 @@ const TokenPage = () => {
               } p-2`}
             >
               <div className={`flex items-center mb-2 ${isMobile ? "justify-center" : "justify-between"}`}>
-                <div className={`flex items-center space-x-4 ${isMobile ? "" : ""}`}>
+                <div className={`flex items-center ${isMobile ? "space-x-8" : "space-x-6"}`}>
                   {isMobile ? (
                     <>
                       <button
                         onClick={() => setActiveTab("comments")}
                         className={`text-sm font-bold transition-colors relative pb-1 ${
                           activeTab === "comments"
-                            ? "text-white"
+                            ? "text-[#FAFAFA]"
                             : "text-gray-400 hover:text-orange-400"
                         }`}
                       >
@@ -1758,7 +1800,7 @@ const TokenPage = () => {
                         onClick={() => setActiveTab("trades")}
                         className={`text-sm font-bold transition-colors relative pb-1 ${
                           activeTab === "trades"
-                            ? "text-white"
+                            ? "text-[#FAFAFA]"
                             : "text-gray-400 hover:text-orange-400"
                         }`}
                       >
@@ -1771,7 +1813,7 @@ const TokenPage = () => {
                         onClick={() => setActiveTab("holders")}
                         className={`text-sm font-bold transition-colors relative pb-1 ${
                           activeTab === "holders"
-                            ? "text-white"
+                            ? "text-[#FAFAFA]"
                             : "text-gray-400 hover:text-orange-400"
                         }`}
                       >
@@ -1784,7 +1826,7 @@ const TokenPage = () => {
                         onClick={() => setActiveTab("info")}
                         className={`text-sm font-bold transition-colors relative pb-1 ${
                           activeTab === "info"
-                            ? "text-white"
+                            ? "text-[#FAFAFA]"
                             : "text-gray-400 hover:text-orange-400"
                         }`}
                       >
@@ -1800,7 +1842,7 @@ const TokenPage = () => {
                         onClick={() => setActiveTab("trades")}
                         className={`text-sm font-bold transition-colors relative pb-1 ${
                           activeTab === "trades"
-                            ? "text-white"
+                            ? "text-[#FAFAFA]"
                             : "text-gray-400 hover:text-orange-400"
                         }`}
                       >
@@ -1813,7 +1855,7 @@ const TokenPage = () => {
                         onClick={() => setActiveTab("holders")}
                         className={`text-sm font-bold transition-colors relative pb-1 ${
                           activeTab === "holders"
-                            ? "text-white"
+                            ? "text-[#FAFAFA]"
                             : "text-gray-400 hover:text-orange-400"
                         }`}
                       >
@@ -1826,7 +1868,7 @@ const TokenPage = () => {
                         onClick={() => setActiveTab("comments")}
                         className={`text-sm font-bold transition-colors relative pb-1 ${
                           activeTab === "comments"
-                            ? "text-white"
+                            ? "text-[#FAFAFA]"
                             : "text-gray-400 hover:text-orange-400"
                         }`}
                       >
@@ -1839,7 +1881,7 @@ const TokenPage = () => {
                         onClick={() => setActiveTab("info")}
                         className={`text-sm font-bold transition-colors relative pb-1 ${
                           activeTab === "info"
-                            ? "text-white"
+                            ? "text-[#FAFAFA]"
                             : "text-gray-400 hover:text-orange-400"
                         }`}
                       >
@@ -1860,6 +1902,34 @@ const TokenPage = () => {
                   </button>
                 )}
               </div>
+              {activeTab === "trades" && isMobile && (
+                <div className="mb-3 flex items-center space-x-2">
+                  <span className="text-xs text-gray-400">filter by size</span>
+                  <button
+                    onClick={() => setIsFilterBySizeEnabled(!isFilterBySizeEnabled)}
+                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                      isFilterBySizeEnabled ? 'bg-green-500' : 'bg-gray-600'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        isFilterBySizeEnabled ? 'translate-x-5' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                  <input
+                    type="text"
+                    placeholder="0.05"
+                    className="w-16 rounded bg-gray-700 px-2 py-1 text-xs text-[#FAFAFA]"
+                    disabled={!isFilterBySizeEnabled}
+                  />
+                  {isFilterBySizeEnabled && (
+                    <span className="text-xs text-gray-400">
+                      (showing trades greater than 0.05 {tokenData?.symbol || 'TOKEN'})
+                    </span>
+                  )}
+                </div>
+              )}
               {activeTab === "trades" ? (
                 displayTrades.length === 0 ? (
                   <div className="text-gray-400 text-xs">
@@ -1883,7 +1953,7 @@ const TokenPage = () => {
                             isMobile ? "" : "border-b border-gray-700"
                           }`}
                         >
-                          <th className="text-left p-1">
+                          <th className={`text-left p-1 ${isMobile ? "font-normal" : ""}`}>
                             <div className="flex items-center space-x-1">
                               <span>TRADER</span>
                               {filteredTrader && (
@@ -1891,14 +1961,21 @@ const TokenPage = () => {
                               )}
                             </div>
                           </th>
-                          <th className="text-right p-1">
-                            {(tokenData?.symbol || "TOKEN").toUpperCase()}{" "}
-                            AMOUNT
+                          <th className={`text-center p-1 ${isMobile ? "font-normal" : ""}`}>TYPE</th>
+                          <th className={`text-right p-1 ${isMobile ? "font-normal" : ""}`}>
+                            <div className="flex flex-col leading-tight">
+                              <span>AMOUNT</span>
+                              <span>{(tokenData?.symbol || "TOKEN").toUpperCase()}</span>
+                            </div>
                           </th>
-                          <th className="text-right p-1">WETH AMOUNT</th>
-                          <th className="text-center p-1">TYPE</th>
-                          <th className="text-right p-1">TIME</th>
-                          <th className="text-center p-1"></th>
+                          <th className={`text-right p-1 ${isMobile ? "font-normal" : ""}`}>
+                            <div className="flex flex-col leading-tight">
+                              <span>AMOUNT</span>
+                              <span>WETH</span>
+                            </div>
+                          </th>
+                          {!isMobile && <th className="text-right p-1">TIME</th>}
+                          <th className={`text-center p-1 ${isMobile ? "font-normal" : ""}`}></th>
                         </tr>
                       </thead>
                       <tbody>{tradeRows}</tbody>
@@ -2070,7 +2147,7 @@ const TokenPage = () => {
                                     : "border-b border-gray-800 last:border-0"
                                 }
                               >
-                                <td className="p-1 text-white">
+                                <td className="p-1 text-[#FAFAFA]">
                                   <div className="flex items-center space-x-2">
                                     <img
                                       src={holder.pfp || "/default-pfp.jpeg"}
@@ -2094,7 +2171,7 @@ const TokenPage = () => {
                                     </button>
                                   </div>
                                 </td>
-                                <td className="p-1 text-right text-white font-sans">
+                                <td className="p-1 text-right text-[#FAFAFA] font-sans">
                                   {formatBalance(holder.balance)}
                                 </td>
                                 <td className="p-1 text-right text-gray-400">
@@ -2142,7 +2219,7 @@ const TokenPage = () => {
                         }`}
                       />
                       <span className="text-gray-400">Age</span>
-                      <span className="text-white">
+                      <span className="text-[#FAFAFA]">
                         {tokenData?.deploymentTimestamp
                           ? formatTokenAge(tokenData.deploymentTimestamp)
                           : "Unknown"}
@@ -2332,7 +2409,7 @@ const TokenPage = () => {
                   className="w-48 h-48 object-cover shadow-2xl"
                 />
               ) : (
-                <div className="w-48 h-48 bg-gradient-to-br from-orange-400 to-red-600 text-white font-bold text-4xl flex items-center justify-center shadow-2xl">
+                <div className="w-48 h-48 bg-gradient-to-br from-orange-400 to-red-600 text-[#FAFAFA] font-bold text-4xl flex items-center justify-center shadow-2xl">
                   {tokenData?.symbol}
                 </div>
               )}
@@ -2406,13 +2483,13 @@ const TokenPage = () => {
               className="flex-shrink-0 p-1.5 hover:bg-gray-800 rounded transition-colors"
               aria-label="Back to main page"
             >
-              <ArrowLeft className="w-5 h-5 text-white" />
+              <ArrowLeft className="w-5 h-5 text-[#FAFAFA]" />
             </button>
 
             {/* Center: Token Name, Symbol, and Market Cap */}
             <div className="flex-1 min-w-0 flex flex-col items-center">
               <div className="flex items-center gap-1.5">
-                <span className="text-white font-bold text-sm truncate">
+                <span className="text-[#FAFAFA] font-bold text-sm truncate">
                   {tokenData.name && tokenData.name.length > 15
                     ? tokenData.name.slice(0, 15) + "..."
                     : tokenData.name}
@@ -2469,7 +2546,7 @@ const TokenPage = () => {
                   className={`w-5 h-5 ${
                     isInWatchlist(tokenData.tokenAddress, chainId)
                       ? "fill-yellow-400 text-yellow-400"
-                      : "text-white"
+                      : "text-[#FAFAFA]"
                   }`}
                 />
               </button>
@@ -2485,7 +2562,7 @@ const TokenPage = () => {
                 className="flex-shrink-0 p-1.5 hover:bg-gray-800 rounded transition-colors"
                 aria-label="Share"
               >
-                <Share2 className="w-5 h-5 text-white" />
+                <Share2 className="w-5 h-5 text-[#FAFAFA]" />
               </button>
             </div>
           </div>

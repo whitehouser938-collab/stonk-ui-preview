@@ -35,6 +35,8 @@ export default {
 				'bg-card': '#1a1a1e', // Card background
 				'bg-card-hover': '#1f1f23', // Card hover state
 				'white-soft': '#f6f6f6', // rgb(246, 246, 246) - softer white for token names, times, and numbers
+				'text-label': '#FAFAFA', // For labels, usernames, buttons
+				'text-content': '#F8FAFC', // For content text (comments, replies)
 				
 				// Orange colors from theme.ts - SINGLE SOURCE OF TRUTH
 				// All orange colors throughout the app reference theme.ts

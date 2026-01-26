@@ -73,7 +73,7 @@ export const Reply: React.FC<ReplyProps> = ({
           <UserAvatar user={reply.user} size="sm" className="" />
           <Link
             to={`/profile/${reply.user.walletAddress}`}
-            className="text-white hover:text-orange-400 font-sans text-sm transition-colors cursor-pointer"
+            className="text-label hover:text-orange-400 font-sans text-sm transition-colors cursor-pointer"
             onClick={(e) => e.stopPropagation()}
           >
             {getDisplayName(reply.user)}
@@ -134,7 +134,7 @@ export const Reply: React.FC<ReplyProps> = ({
       ) : (
         <div className="flex items-start justify-between mb-1">
           {/* Content on left */}
-          <div className="text-white text-base flex-1 font-sans pr-4">{reply.content}</div>
+          <div className="text-content text-base flex-1 font-sans pr-4">{reply.content}</div>
           {/* Like count on right */}
           {currentUserId && currentUserId !== "skip" ? (
             <button

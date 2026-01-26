@@ -46,12 +46,12 @@ export const CommentModal: React.FC<CommentModalProps> = ({
       >
         {/* Modal Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
-          <h3 className="text-white font-sans text-lg font-bold">
+          <h3 className="text-label font-sans text-lg font-bold">
             {title}
           </h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-gray-400 hover:text-label transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -65,7 +65,7 @@ export const CommentModal: React.FC<CommentModalProps> = ({
             onKeyDown={handleKeyDown}
             placeholder="comment"
             style={{ backgroundColor: '#1A1A1E' }}
-            className="w-full bg-card border border-gray-400 rounded p-3 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-gray-300 resize-none font-sans"
+            className="w-full bg-card border border-gray-400 rounded p-3 text-sm text-content placeholder-gray-400 focus:outline-none focus:border-gray-300 resize-none font-sans"
             rows={6}
             autoFocus
           />
@@ -75,7 +75,7 @@ export const CommentModal: React.FC<CommentModalProps> = ({
         <div className="flex justify-center space-x-2 p-4 border-t border-gray-700">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm text-white bg-gray-700 hover:bg-gray-600 transition-colors font-sans rounded"
+            className="px-4 py-2 text-sm text-label bg-gray-700 hover:bg-gray-600 transition-colors font-sans rounded"
           >
             Cancel
           </button>
