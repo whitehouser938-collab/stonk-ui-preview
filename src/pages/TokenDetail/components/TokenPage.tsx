@@ -59,6 +59,7 @@ import { useWatchlist } from "@/hooks/useWatchlist";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useETHWalletSigner } from "@/hooks/signers/useWalletSigner";
 import { ethers } from "ethers";
+import { Search } from "lucide-react";
 
 function formatNumber(num: number): string {
   if (num >= 1e9) return parseFloat((num / 1e9).toFixed(2)) + "B";
@@ -186,7 +187,7 @@ const TokenPage = () => {
   const [isTradingModalOpen, setIsTradingModalOpen] = useState(false);
   const [tradeMode, setTradeMode] = useState<"buy" | "sell">("buy");
   const isMobile = useIsMobile();
-  const [isSearchModalOpen] = useAtom(isSearchModalOpenAtom);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useAtom(isSearchModalOpenAtom);
 
   const { isLoading, startLoading, stopLoading } = useLoading();
   const { toast } = useToast();
@@ -938,6 +939,20 @@ const TokenPage = () => {
         >
           {/* Left Column - Stock Overview */}
           <div className="col-span-12 lg:col-span-8 space-y-1">
+            {/* Search Bar - Mobile Only */}
+            {isMobile && (
+              <div className={`${
+                isMobile ? "bg-bg-main" : "bg-bg-main border border-gray-700"
+              } p-2 overflow-hidden`}>
+                <button
+                  onClick={() => setIsSearchModalOpen(true)}
+                  className="w-full flex items-center gap-3 px-4 py-3 bg-[#1F2023] rounded-lg text-left hover:bg-[#2C2C2C] transition-colors"
+                >
+                  <Search className="w-5 h-5 text-[#8F8F8F] flex-shrink-0" />
+                  <span className="text-[#8F8F8F] text-sm font-mono" style={{ fontSize: '14px' }}>Search...</span>
+                </button>
+              </div>
+            )}
             {/* Stock Header */}
             <div
               ref={headerRef}
@@ -953,7 +968,7 @@ const TokenPage = () => {
                     {/* Back Button */}
                     <button
                       onClick={() => navigate(-1)}
-                      className="p-2 hover:bg-gray-800 rounded transition-colors"
+                      className="p-2 bg-transparent hover:opacity-70 transition-opacity"
                       aria-label="Go back"
                     >
                       <ArrowLeft className="w-5 h-5 text-[#FAFAFA]" />

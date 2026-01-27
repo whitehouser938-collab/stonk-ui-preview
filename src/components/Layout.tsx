@@ -150,16 +150,6 @@ export function Layout({ children }: LayoutProps) {
                   <span className="text-orange-500">SYD</span> {formatTimeMobile("Australia/Sydney")}
                 </span>
               </div>
-              {/* Search icon - only on token pages */}
-              {isTokenPage && (
-                <button
-                  onClick={() => setIsSearchModalOpen(true)}
-                  className="absolute right-0 top-0 h-6 w-6 flex items-center justify-center z-10 bg-bg-header/80 hover:bg-bg-header transition-colors rounded"
-                  aria-label="Search"
-                >
-                  <Search className="w-4 h-4 text-orange-400 hover:text-orange-400 transition-colors" />
-                </button>
-              )}
             </div>
           </div>
 
