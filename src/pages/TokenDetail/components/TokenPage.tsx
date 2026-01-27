@@ -933,12 +933,10 @@ const TokenPage = () => {
       {/* Main Content - Only show if no error and token data exists */}
       {!error && tokenData && (
         <div
-          className={`grid grid-cols-1 lg:grid-cols-12 gap-1 p-1 ${
-            isMobile ? "pb-20" : ""
-          }`}
+          className={`grid grid-cols-1 lg:grid-cols-12 gap-1 ${isMobile ? "pb-20" : "p-1"}`}
         >
           {/* Left Column - Stock Overview */}
-          <div className="col-span-12 lg:col-span-8 space-y-1">
+          <div className={`col-span-12 lg:col-span-8 ${isMobile ? "" : "space-y-1"}`}>
             {/* Search Bar - Mobile Only */}
             {isMobile && (
               <div className={`${
@@ -953,40 +951,40 @@ const TokenPage = () => {
                 </button>
               </div>
             )}
-            {/* Stock Header */}
+            {/* Header Row - matches market page structure */}
             <div
               ref={headerRef}
               className={`${
                 isMobile ? "bg-bg-main" : "bg-bg-main border border-gray-700"
-              } p-2 overflow-hidden`}
+              } ${isMobile ? "" : "p-2"} overflow-hidden`}
             >
-              {isMobile ? (
-                /* Mobile Layout - New Design */
-                <div className="space-y-2">
-                  {/* Back Button and Timer Row */}
-                  <div className="flex items-center justify-between py-2">
-                    {/* Back Button */}
-                    <button
-                      onClick={() => navigate(-1)}
-                      className="p-2 bg-transparent hover:opacity-70 transition-opacity"
-                      aria-label="Go back"
-                    >
-                      <ArrowLeft className="w-5 h-5 text-[#FAFAFA]" />
-                    </button>
+              {/* Back Button and Timer Row - matches "Now trending" row position */}
+              <div className="flex items-center justify-between py-2 px-2">
+                {/* Back Button */}
+                <button
+                  onClick={() => navigate(-1)}
+                  className="p-2 bg-transparent hover:opacity-70 transition-opacity"
+                  aria-label="Go back"
+                >
+                  <ArrowLeft className="w-5 h-5 text-[#FAFAFA]" />
+                </button>
 
-                    {/* Timer */}
-                    <div className="text-[#FAFAFA] font-mono text-base">
-                      {currentTime.toLocaleTimeString("en-US", {
-                        hour12: false,
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        second: "2-digit",
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Logo and Token Info Row */}
-                  <div className="flex items-start gap-3">
+                {/* Timer */}
+                <div className="text-[#FAFAFA] font-mono text-base">
+                  {currentTime.toLocaleTimeString("en-US", {
+                    hour12: false,
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                  })}
+                </div>
+              </div>
+            </div>
+            {/* Token Info Section - Mobile */}
+            {isMobile ? (
+              <div>
+                {/* Logo and Token Info Row - aligned with trending card logos */}
+                <div className="flex items-start gap-3 px-3">
                     {/* Token Logo */}
                     <div className="flex-shrink-0">
                       {tokenData?.logoUrl ? (
@@ -1071,10 +1069,10 @@ const TokenPage = () => {
                     </div>
                   </div>
 
-                  {/* Spacer div for future use */}
-                  <div className="h-12"></div>
+                {/* Spacer div for future use */}
+                <div className="h-12"></div>
 
-                  {/* Market Cap / Liquidity and Price Change - Combined container */}
+                {/* Market Cap / Liquidity and Price Change - Combined container */}
                   <div className="flex flex-col gap-0">
                     {/* Market Cap / Liquidity Row with Star and Share */}
                     <div className="flex items-baseline justify-between">
@@ -1195,7 +1193,7 @@ const TokenPage = () => {
                       {tokenData.price.priceChange24h.toFixed(2)}%) Past 24h
                     </div>
                   </div>
-                </div>
+              </div>
               ) : (
                 /* Desktop Layout - Keep Original */
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 min-w-0">
@@ -1432,7 +1430,6 @@ const TokenPage = () => {
                   </div>
                 </div>
               )}
-            </div>
 
             {/* Price Chart */}
             <div

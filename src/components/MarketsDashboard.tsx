@@ -476,13 +476,19 @@ export function MarketsDashboard() {
             </button>
           </div>
         )}
-        {/* Trending Section - Horizontal Scroll */}
-        <div>
+        {/* Header Row - matches token page structure */}
+        <div className={`${
+          isMobile ? "bg-bg-main" : "bg-bg-main border border-gray-700"
+        } ${isMobile ? "" : "p-2"} overflow-hidden`}>
+          {/* Now trending text - matches back arrow/time row from token page */}
           <div className="flex items-center justify-between py-2 px-2">
-            <h2 className="text-white font-bold text-base font-sans">
+            <h2 className="text-white font-bold text-base font-sans pl-4">
               Now trending <span className="rocket-blink">🚀</span>
             </h2>
           </div>
+        </div>
+        {/* Trending Cards Section */}
+        <div>
           <div
             className="overflow-x-auto pb-3 px-3"
             style={{
