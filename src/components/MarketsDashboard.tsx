@@ -11,6 +11,7 @@ import {
   Filter,
   ArrowUp,
   ArrowDown,
+  Search,
 } from "lucide-react";
 import { getAllTokens, getTrendingTokens } from "@/api/token";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -18,6 +19,10 @@ import { Chain, TokenMarketOverview } from "@/types";
 import { useMarketsUpdates } from "@/hooks/useMarketsUpdate";
 import { useWatchlist } from "@/hooks/useWatchlist";
 import { useAppKitAccount } from "@reown/appkit/react";
+import { useAtom } from "jotai";
+import { isSearchModalOpenAtom } from "@/state/app";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const DEFAULT_CHAIN: Chain = "SEP";
 
@@ -188,6 +193,7 @@ export function MarketsDashboard() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [tokens, setTokens] = useState<TokenMarketOverview[]>([]);
   const [trendingTokens, setTrendingTokens] = useState<TokenMarketOverview[]>([]);
+  const [isLoadingTrending, setIsLoadingTrending] = useState(true);
   const [bondingCurveVolumeData, setBondingCurveVolumeData] = useState<any[]>(
     []
   );
@@ -228,6 +234,8 @@ export function MarketsDashboard() {
   const navigate = useNavigate();
   const { address, isConnected } = useAppKitAccount({ namespace: "eip155" });
   const { isInWatchlist, toggleWatchlist } = useWatchlist(address);
+  const isMobile = useIsMobile();
+  const [isSearchModalOpen, setIsSearchModalOpen] = useAtom(isSearchModalOpenAtom);
 
   const handleFilterChange = (filter: FilterType) => {
     // Preserve existing search params (like view) and update filter
@@ -339,10 +347,14 @@ export function MarketsDashboard() {
   useEffect(() => {
     const fetchTrending = async () => {
       try {
+        setIsLoadingTrending(true);
         const trending = await getTrendingTokens(chainId, 10);
         setTrendingTokens(trending);
       } catch (error) {
         console.error("Error fetching trending tokens:", error);
+        setTrendingTokens([]);
+      } finally {
+        setIsLoadingTrending(false);
       }
     };
 
@@ -450,9 +462,23 @@ export function MarketsDashboard() {
     <div className="text-gray-100 text-xs">
       {/* MOBILE VIEW */}
       <div className="lg:hidden">
+        {/* Search Bar - Mobile Only */}
+        {isMobile && (
+          <div className={`${
+            isMobile ? "bg-bg-main" : "bg-bg-main border border-gray-700"
+          } p-2 overflow-hidden`}>
+            <button
+              onClick={() => setIsSearchModalOpen(true)}
+              className="w-full flex items-center gap-3 px-4 py-3 bg-[#1F2023] rounded-lg text-left hover:bg-[#2C2C2C] transition-colors"
+            >
+              <Search className="w-5 h-5 text-[#8F8F8F] flex-shrink-0" />
+              <span className="text-[#8F8F8F] text-sm font-mono" style={{ fontSize: '14px' }}>Search...</span>
+            </button>
+          </div>
+        )}
         {/* Trending Section - Horizontal Scroll */}
         <div>
-          <div className="flex items-center justify-between p-3">
+          <div className="flex items-center justify-between py-2 px-2">
             <h2 className="text-white font-bold text-base font-sans">
               Now trending <span className="rocket-blink">🚀</span>
             </h2>
@@ -478,104 +504,145 @@ export function MarketsDashboard() {
               }
             `}</style>
             <div className="flex gap-3 trending-scroll">
-              {getTrendingTokensDisplay().map((token) => (
-                <div
-                  key={token.tokenAddress}
-                  onClick={() => handleTokenClick(token)}
-                  className="flex-shrink-0 w-[280px] bg-bg-card rounded-lg overflow-hidden cursor-pointer hover:bg-bg-card-hover transition-colors"
-                >
-                  {/* Token Image */}
-                  <div className="relative h-[140px] bg-gray-800">
-                    {token.logoUrl ? (
-                      <img
-                        src={token.logoUrl}
-                        alt={token.tokenSymbol}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none";
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Circle className="w-16 h-16 text-blue-400" />
+              {isLoadingTrending ? (
+                // Skeleton cards that match exact dimensions
+                Array.from({ length: 5 }).map((_, index) => (
+                  <div
+                    key={`skeleton-${index}`}
+                    className="flex-shrink-0 w-[280px] bg-bg-card rounded-lg overflow-hidden"
+                  >
+                    {/* Token Image Skeleton */}
+                    <div className="relative h-[140px] bg-gray-800">
+                      <Skeleton className="w-full h-full" />
+                      {/* Volume and Price Change overlay skeleton */}
+                      <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-xs font-sans flex items-center gap-2">
+                        <Skeleton className="h-3 w-16 bg-gray-700" />
+                        <Skeleton className="h-3 w-12 bg-gray-700" />
                       </div>
-                    )}
-                    {/* Volume and Price Change overlay */}
-                    <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-xs font-sans flex items-center gap-2">
+                    </div>
+                    {/* Token Info Skeleton */}
+                    <div className="p-3">
+                      <div className="mb-1">
+                        <Skeleton className="h-4 w-24 bg-gray-700" />
+                      </div>
+                      {/* Deployer Info + Age Skeleton */}
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <Skeleton className="w-4 h-4 rounded-full bg-gray-700" />
+                        <Skeleton className="h-3 w-16 bg-gray-700" />
+                        <Skeleton className="h-3 w-1 bg-gray-700" />
+                        <Skeleton className="h-3 w-12 bg-gray-700" />
+                      </div>
+                      {/* Description Skeleton */}
+                      <div className="mb-2">
+                        <Skeleton className="h-3 w-full bg-gray-700 mb-1" />
+                        <Skeleton className="h-3 w-3/4 bg-gray-700" />
+                      </div>
                       <div>
-                        <span className="text-gray-400">vol: </span>
-                        <span className="text-white font-bold">
-                          ${formatNumber((token.buyVolume1h || 0) + (token.sellVolume1h || 0))}
-                        </span>
+                        <Skeleton className="h-3 w-32 bg-gray-700" />
                       </div>
-                      {token.priceChange1h !== undefined && token.priceChange1h !== null && (
-                        <div className={`flex items-center gap-0.5 ${
-                          token.priceChange1h >= 0 ? "text-green-400" : "text-red-400"
-                        }`}>
-                          {token.priceChange1h >= 0 ? (
-                            <ArrowUp className="w-3 h-3" />
-                          ) : (
-                            <ArrowDown className="w-3 h-3" />
-                          )}
-                          <span className="font-bold">
-                            {token.priceChange1h >= 0 ? "+" : ""}{token.priceChange1h.toFixed(2)}%
-                          </span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                getTrendingTokensDisplay().map((token) => (
+                  <div
+                    key={token.tokenAddress}
+                    onClick={() => handleTokenClick(token)}
+                    className="flex-shrink-0 w-[280px] bg-bg-card rounded-lg overflow-hidden cursor-pointer hover:bg-bg-card-hover transition-colors"
+                  >
+                    {/* Token Image */}
+                    <div className="relative h-[140px] bg-gray-800">
+                      {token.logoUrl ? (
+                        <img
+                          src={token.logoUrl}
+                          alt={token.tokenSymbol}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Circle className="w-16 h-16 text-blue-400" />
                         </div>
                       )}
-                    </div>
-                  </div>
-                  {/* Token Info */}
-                  <div className="p-3">
-                    <div className="mb-1">
-                      <span className="text-white-soft font-bold text-sm font-sans truncate">
-                        {token.tokenName && token.tokenName.length > 12
-                          ? `${token.tokenName.slice(0, 12)}...`
-                          : token.tokenName}
-                      </span>
-                    </div>
-                    {/* Deployer Info + Age */}
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <img
-                        src={token.pfp || "/default-pfp-clear.png"}
-                        alt="Deployer"
-                        className="w-4 h-4 rounded-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.src = "/default-pfp-clear.png";
-                        }}
-                      />
-                      <a
-                        href={`/profile/${token.deployerAddress || ""}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-gray-400 text-xs font-sans truncate underline hover:text-white"
-                      >
-                        {token.username ||
-                          (token.deployerAddress
-                            ? formatAddress(token.deployerAddress)
-                            : "Unknown")}
-                      </a>
-                      <span className="text-gray-400 text-xs">•</span>
-                      <span className="text-white-soft text-xs font-sans">
-                        {formatTokenAge(
-                          token.deploymentTimestamp || "",
-                          currentTime
+                      {/* Volume and Price Change overlay */}
+                      <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-xs font-sans flex items-center gap-2">
+                        <div>
+                          <span className="text-gray-400">vol: </span>
+                          <span className="text-white font-bold">
+                            ${formatNumber((token.buyVolume1h || 0) + (token.sellVolume1h || 0))}
+                          </span>
+                        </div>
+                        {token.priceChange1h !== undefined && token.priceChange1h !== null && (
+                          <div className={`flex items-center gap-0.5 ${
+                            token.priceChange1h >= 0 ? "text-green-400" : "text-red-400"
+                          }`}>
+                            {token.priceChange1h >= 0 ? (
+                              <ArrowUp className="w-3 h-3" />
+                            ) : (
+                              <ArrowDown className="w-3 h-3" />
+                            )}
+                            <span className="font-bold">
+                              {token.priceChange1h >= 0 ? "+" : ""}{token.priceChange1h.toFixed(2)}%
+                            </span>
+                          </div>
                         )}
-                      </span>
-                    </div>
-                    {/* Description */}
-                    {token.description && (
-                      <div className="text-gray-400 text-xs font-sans mb-2 line-clamp-2">
-                        {token.description}
                       </div>
-                    )}
-                    <div className="text-gray-400 text-xs font-sans mb-2">
-                      <span className="text-orange-400">market cap: </span>
-                      <span className="text-white-soft font-bold">
-                        ${formatNumber(token.currentPrice * 1_000_000_000)}
-                      </span>
+                    </div>
+                    {/* Token Info */}
+                    <div className="p-3">
+                      <div className="mb-1">
+                        <span className="text-white-soft font-bold text-sm font-sans truncate">
+                          {token.tokenName && token.tokenName.length > 12
+                            ? `${token.tokenName.slice(0, 12)}...`
+                            : token.tokenName}
+                        </span>
+                      </div>
+                      {/* Deployer Info + Age */}
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <img
+                          src={token.pfp || "/default-pfp-clear.png"}
+                          alt="Deployer"
+                          className="w-4 h-4 rounded-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = "/default-pfp-clear.png";
+                          }}
+                        />
+                        <a
+                          href={`/profile/${token.deployerAddress || ""}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-gray-400 text-xs font-sans truncate underline hover:text-white"
+                        >
+                          {token.username ||
+                            (token.deployerAddress
+                              ? formatAddress(token.deployerAddress)
+                              : "Unknown")}
+                        </a>
+                        <span className="text-gray-400 text-xs">•</span>
+                        <span className="text-white-soft text-xs font-sans">
+                          {formatTokenAge(
+                            token.deploymentTimestamp || "",
+                            currentTime
+                          )}
+                        </span>
+                      </div>
+                      {/* Description */}
+                      {token.description && (
+                        <div className="text-gray-400 text-xs font-sans mb-2 line-clamp-2">
+                          {token.description}
+                        </div>
+                      )}
+                      <div className="text-gray-400 text-xs font-sans mb-2">
+                        <span className="text-orange-400">market cap: </span>
+                        <span className="text-white-soft font-bold">
+                          ${formatNumber(token.currentPrice * 1_000_000_000)}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>
