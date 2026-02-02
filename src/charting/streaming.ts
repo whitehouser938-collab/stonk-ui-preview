@@ -1,10 +1,21 @@
 import { wsManager } from "@/services/websocket";
 import { resolutionMap } from "./datafeed";
-import { BarData, BarUpdateMessage, SUBSCRIPTION_TYPES } from "@/types";
+import { BarData, BarUpdateMessage, Chain, SUBSCRIPTION_TYPES } from "@/types";
+import { TVAsset, TVMode } from "./helpers";
+
+interface BasicSymbolInfo {
+  chain: Chain,
+  symbol: string,
+  address: string,
+  tokenSupply: number,
+  asset: TVAsset,
+  mode: TVMode,
+}
 
 interface SubscriptionItem {
   subscriberUID: string;
   channel: string;
+  symbolInfo: BasicSymbolInfo;
   lastBar: BarData | null;
   handlers: any[];
 }
@@ -17,10 +28,26 @@ const handleBarUpdate = (data: BarUpdateMessage)=>{
     return;
   }
 
-  const bar = !subscriptionItem.lastBar ? data.bar : 
+  // transform bar based on mode (price/mcap) and asset (USD/WETH)
+  const assetMultiplier = subscriptionItem.symbolInfo.asset === "USD" ? 1 : 1/data.bar.assetUsdPrice;
+  const modeMultiplier = subscriptionItem.symbolInfo.mode === "mcap" ? subscriptionItem.symbolInfo.tokenSupply : 1;
+
+  const multiplier = assetMultiplier * modeMultiplier;
+
+  const newBar: BarData = {
+    open: data.bar.open * multiplier,
+    close: data.bar.close * multiplier,
+    high: data.bar.high * multiplier,
+    low: data.bar.low * multiplier,
+    volume: data.bar.volume,
+    time: Number(data.bar.time),
+    assetUsdPrice: data.bar.assetUsdPrice,
+  }
+
+  const bar = !subscriptionItem.lastBar ? newBar : 
                   data.bar.time === subscriptionItem.lastBar.time ? 
-                      { ...data.bar, ...{ open: subscriptionItem.lastBar.open} } : 
-                      { ...data.bar, ...{ open: subscriptionItem.lastBar.close} };
+                      { ...newBar, ...{ open: subscriptionItem.lastBar.open} } : 
+                      { ...newBar, ...{ open: subscriptionItem.lastBar.close} };
 
   subscriptionItem.lastBar = {...bar};
 
@@ -31,7 +58,7 @@ const handleBarUpdate = (data: BarUpdateMessage)=>{
 }
 
 export function subscribeOnStream(
-  symbolInfo: { chain: string, symbol: string, address: string },
+  symbolInfo: BasicSymbolInfo,
   resolution: string,
   onRealtimeCallback: (bar: any) => void,
   subscriberUID: string,
@@ -47,11 +74,14 @@ export function subscribeOnStream(
   if (subscriptionItem) {
     // Already subscribed to the channel, use the existing subscription
     subscriptionItem.handlers.push(handler);
+    subscriptionItem.symbolInfo = symbolInfo;
+    subscriptionItem.lastBar = lastBar;
     return;
   }
   subscriptionItem = {
     subscriberUID,
     channel: channelString,
+    symbolInfo,
     lastBar,
     handlers: [handler],
   };

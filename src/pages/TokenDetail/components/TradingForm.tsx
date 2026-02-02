@@ -255,10 +255,10 @@ const TradingForm = (props: TradingFormProps) => {
       setPendingTxHash(null);
       setPendingTradeType(null);
       void fetchBalancesNow();
-    }, 60000); // 60 second timeout
+    }, 30_000); // 60 second timeout
 
     return () => clearTimeout(timeoutId);
-  }, [pendingTxHash, toast, fetchBalancesNow]);
+  }, [pendingTxHash]);
 
   // Register callback with parent to receive trade confirmations
   React.useEffect(() => {

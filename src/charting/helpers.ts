@@ -46,7 +46,7 @@ export function parseTvSymbol(tvSymbol: string) {
     tokenAddress,
     tokenSupply: Number(tokenSupply),
     chain: chain as Chain,
-    mode: mode as "price" | "mcap",
-    asset: asset as "usd" | "weth",
+    mode: mode as TVMode,
+    asset: asset as TVAsset,
   };
 }

@@ -79,9 +79,9 @@ function getLiquidityWeth(tokenData: TokenFullData): string {
   }
 
   // For graduated tokens, show Uniswap liquidity
-  if (tokenData.isGraduated && tokenData.uniswapLiquidity?.wethReserve) {
+  if (tokenData.isGraduated && tokenData.uniswapLiquidity?.assetReserve) {
     const wethAmount =
-      parseFloat(tokenData.uniswapLiquidity.wethReserve) / 1e18;
+      parseFloat(tokenData.uniswapLiquidity.assetReserve) / 1e18;
     return wethAmount.toFixed(4);
   }
 
@@ -323,6 +323,7 @@ const TokenPage = () => {
         ...prev,
         price: freshMarketOverview,
         // Update bonding curve and liquidity data from market overview
+        isGraduated: freshMarketOverview.graduated,
         bondingCurve: freshMarketOverview.bondingCurve,
         uniswapLiquidity: freshMarketOverview.uniswapLiquidity,
         // Update progress if available
@@ -863,10 +864,10 @@ const TokenPage = () => {
           <td className={`p-1 text-left font-sans ${isMobile ? "pl-1" : "pl-4"}`} style={{ 
             color: trade.tradeType === "BUY" ? '#22c55e' : '#ef4444' 
           }}>
-            {abbreviateTokenAmount(trade.baseAmount)}
+            {abbreviateTokenAmount(trade.tokenAmount)}
           </td>
           <td className={`p-1 text-left font-sans ${isMobile ? "pl-1" : "pl-6"}`} style={{ color: '#F8FAFC' }}>
-            {abbreviateTokenAmount(trade.quoteAmount)}
+            {abbreviateTokenAmount(trade.assetAmount)}
           </td>
           <td className="p-1 text-center">
             <a

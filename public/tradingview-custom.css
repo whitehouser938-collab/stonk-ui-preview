@@ -1,173 +1,54 @@
-/* Custom CSS for TradingView chart header/toolbar styling */
-/* Target the header bar with time frames and chart type buttons */
-
-/* Override TradingView CSS variables */
+/* ============================
+   TRADINGVIEW THEME OVERRIDES
+   ============================ */
 :root {
-  --tv-color-pane-background: #121216 !important;
-  --themed-color-pane-bg: #121216 !important;
-}
+  /* ===== Platform / Header ===== */
+  --tv-color-platform-background: #121216;
+  --tv-color-pane-background: #121216;
 
-/* Main header/toolbar background - use very broad selectors */
-div[class*="header"],
-div[class*="Header"],
-div[class*="toolbar"],
-div[class*="Toolbar"],
-.tv-header,
-.headerContainer,
-.header-container,
-[data-name="header"],
-[data-name="toolbar"] {
-  background-color: #121216 !important;
-  background: #121216 !important;
-}
+  --tv-color-toolbar-divider-background: rgba(255, 255, 255, 0.06);
 
-/* Target any element with header/toolbar in class name */
-[class*="header"],
-[class*="Header"],
-[class*="toolbar"],
-[class*="Toolbar"] {
-  background-color: #121216 !important;
-  background: #121216 !important;
-}
+  /* Toolbar buttons */
+  --tv-color-toolbar-button-background-hover: rgba(255, 255, 255, 0.06);
+  --tv-color-toolbar-button-background-expanded: rgba(255, 255, 255, 0.08);
+  --tv-color-toolbar-button-background-active: rgba(255, 255, 255, 0.10);
+  --tv-color-toolbar-button-background-active-hover: rgba(255, 255, 255, 0.14);
 
-/* Target elements that use the CSS variable for background */
-[style*="--tv-color-pane-background"],
-[style*="--themed-color-pane-bg"],
-[style*="background-color: var(--tv-color-pane-background"],
-[style*="background-color: var(--themed-color-pane-bg"] {
-  background-color: #121216 !important;
-  background: #121216 !important;
-}
+  --tv-color-toolbar-button-text: #e5e7eb;
+  --tv-color-toolbar-button-text-hover: #ffffff;
+  --tv-color-toolbar-button-text-active: #ffffff;
+  --tv-color-toolbar-button-text-active-hover: #ffffff;
 
-/* Target flex containers that hold buttons (based on the CSS you provided) */
-div[style*="display: flex"][style*="align-items: center"],
-div[style*="display:flex"][style*="align-items:center"] {
-  background-color: #121216 !important;
-  background: #121216 !important;
-}
+  --tv-color-item-active-text: #ffffff;
 
-/* Target the top bar that contains custom buttons (Price/MCap, USD/WETH) */
-/* This is the main header bar container */
-div:has(button),
-div:has([class*="button"]),
-header,
-header div,
-[role="toolbar"],
-[role="banner"] {
-  background-color: #121216 !important;
-  background: #121216 !important;
-}
+  --tv-color-toolbar-toggle-button-background-active: rgba(255, 255, 255, 0.14);
+  --tv-color-toolbar-toggle-button-background-active-hover: rgba(255, 255, 255, 0.18);
 
-/* Target separator elements (the | characters) */
-[class*="separator"],
-[class*="Separator"],
-[class*="divider"],
-[class*="Divider"],
-span[style*="color"][style*="#666"],
-span[style*="color:#666"] {
-  background-color: transparent !important;
-  background: transparent !important;
-}
+  --tv-color-toolbar-save-layout-loader: #f97316;
 
-/* Parent containers of buttons */
-button,
-[class*="button"],
-[class*="Button"] {
-  background-color: transparent !important;
-  background: transparent !important;
-}
+  /* ===== Popups / Dropdowns ===== */
+  --tv-color-popup-background: #18181d;
 
-/* Parent elements of buttons should have #121216 background */
-button~*,
-[class*="button"]~* {
-  background-color: #121216 !important;
-}
+  --tv-color-popup-element-text: #e5e7eb;
+  --tv-color-popup-element-secondary-text: #9ca3af;
+  --tv-color-popup-element-hint-text: #9ca3af;
 
-/* Time frame buttons area */
-[class*="timeframe"],
-[class*="Timeframe"],
-[class*="time-frame"],
-[class*="TimeFrame"] {
-  background-color: transparent !important;
-  background: transparent !important;
-}
+  --tv-color-popup-element-text-hover: #ffffff;
+  --tv-color-popup-element-text-active: #ffffff;
 
-/* Chart type buttons area */
-[class*="chart-type"],
-[class*="ChartType"],
-[class*="chartStyle"],
-[class*="ChartStyle"],
-[class*="chart-style"],
-[class*="ChartStyle"] {
-  background-color: transparent !important;
-  background: transparent !important;
-}
+  --tv-color-popup-element-background-hover: rgba(255, 255, 255, 0.08);
+  --tv-color-popup-element-background-active: rgba(255, 255, 255, 0.12);
 
-/* All buttons in header */
-button[class*="button"],
-button[class*="Button"],
-[class*="button"][class*="header"],
-[class*="Button"][class*="Header"] {
-  background-color: transparent !important;
-  background: transparent !important;
-}
+  --tv-color-popup-element-divider-background: rgba(255, 255, 255, 0.06);
 
-/* Active/selected state - ONLY for our custom buttons (Price/MCap, USD/WETH) */
-/* These are handled by JavaScript, so we don't need broad selectors here */
-.tv-opt-price,
-.tv-opt-mcap,
-.tv-opt-asset-usd,
-.tv-opt-asset-weth {
-  /* Color is set inline by JavaScript */
-}
+  /* Toolbox menus */
+  --tv-color-popup-element-toolbox-text: #e5e7eb;
+  --tv-color-popup-element-toolbox-text-hover: #ffffff;
+  --tv-color-popup-element-toolbox-text-active-hover: #ffffff;
 
-/* Bottom toolbar elements (date range, %, log, auto) should NOT be orange */
-/* Override any orange styling that might be applied */
-[class*="time"] [class*="active"],
-[class*="time"] [class*="Active"],
-[class*="time"] [class*="selected"],
-[class*="time"] [class*="Selected"],
-[class*="scale"] [class*="active"],
-[class*="scale"] [class*="Active"],
-[class*="scale"] [class*="selected"],
-[class*="scale"] [class*="Selected"],
-[class*="axis"] [class*="active"],
-[class*="axis"] [class*="Active"],
-[class*="axis"] [class*="selected"],
-[class*="axis"] [class*="Selected"],
-[class*="bottom"] [class*="active"],
-[class*="bottom"] [class*="Active"],
-[class*="bottom"] [class*="selected"],
-[class*="bottom"] [class*="Selected"],
-[class*="footer"] [class*="active"],
-[class*="footer"] [class*="Active"],
-[class*="footer"] [class*="selected"],
-[class*="footer"] [class*="Selected"],
-[class*="timeframe"] [class*="active"],
-[class*="timeframe"] [class*="Active"],
-[class*="timeframe"] [class*="selected"],
-[class*="timeframe"] [class*="Selected"] {
-  color: inherit !important;
-  background-color: transparent !important;
-}
+  --tv-color-popup-element-toolbox-background-hover: rgba(255, 255, 255, 0.08);
+  --tv-color-popup-element-toolbox-background-active-hover: rgba(255, 255, 255, 0.12);
 
-/* Hover state */
-button:hover,
-[class*="button"]:hover {
-  background-color: rgba(255, 255, 255, 0.05) !important;
-}
-
-/* Force all top-level containers in header to have #121216 */
-body>div:first-child,
-iframe body>div:first-child,
-iframe body header,
-iframe body [class*="header"]:first-of-type {
-  background-color: #121216 !important;
-  background: #121216 !important;
-}
-
-/* Target any element with the specific background color variable */
-* {
-  --tv-color-pane-background: #121216 !important;
-  --themed-color-pane-bg: #121216 !important;
+  /* Tooltips */
+  --tv-color-bar-mark-background-color: #18181d;
 }

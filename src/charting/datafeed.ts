@@ -1,5 +1,5 @@
 import { BarData, Chain } from "@/types";
-import { getTradeLimitForResolution, parseTvSymbol } from "./helpers";
+import { getTradeLimitForResolution, parseTvSymbol, TVAsset, TVMode } from "./helpers";
 import { subscribeOnStream, unsubscribeFromStream } from "./streaming";
 import {
   ResolutionString,
@@ -18,8 +18,8 @@ interface ExtendedSymbolInfo extends LibrarySymbolInfo {
   tokenSymbol: string,
   tokenSupply: number,
   chain: Chain,
-  asset: string,
-  mode: string,
+  asset: TVAsset,
+  mode: TVMode,
 }
 
 // Define the types for symbols and configuration
@@ -136,80 +136,77 @@ const getBars = async (
   onHistoryCallback: (bars: any[], meta: { noData: boolean }) => void,
   onErrorCallback: (error: any) => void
 ): Promise<void> => {
-  const { from, to, firstDataRequest } = periodParams;
+  let called = false;
+
+  const safeHistory = (bars: any[], meta: { noData: boolean }) => {
+    if (called) return;
+    called = true;
+    onHistoryCallback(bars, meta);
+  };
+
+  const safeError = (err: any) => {
+    if (called) return;
+    called = true;
+    onErrorCallback(err);
+  };
+
+  console.log(periodParams);
+  const { to, firstDataRequest, countBack } = periodParams;
 
   const cacheKey = `${symbolInfo.tokenAddress}:${symbolInfo.chain}:${resolution}`;
 
   if (firstDataRequest) {
-    prevBarsCache.delete(cacheKey);
     lastBarsCache.delete(cacheKey);
     endOfDataCache.delete(cacheKey);
+  }else{
+    if (endOfDataCache.has(cacheKey) && endOfDataCache.get(cacheKey)){
+      safeHistory([], { noData: true });
+      return;
+    }
   }
-  // If we've already reached the end, don't make another request
-  if (endOfDataCache.has(cacheKey) && endOfDataCache.get(cacheKey) === true) {
-    onHistoryCallback([], { noData: true });
-    return;
-  }
-
+  
   try {
-    const data: {end: boolean, bars: BarData[]} = await getTokenOHLCVBars(
+    const limit = firstDataRequest ? 501 : countBack;
+    const toMs = to * 1000;
+
+    const data: { bars: BarData[] } = await getTokenOHLCVBars(
       symbolInfo.tokenAddress,
-      to,
-      from,
       symbolInfo.chain,
-      getTradeLimitForResolution(resolution),
       resolutionMap[resolution as keyof typeof resolutionMap],
-      symbolInfo.asset === "USD"
+      limit,
+      firstDataRequest ? undefined : toMs
     );
 
-    if (symbolInfo.mode === "mcap"){
-      data.bars = data.bars.map((bar: BarData) => {
-        const newBar: BarData = {
-          open: bar.open * symbolInfo.tokenSupply,
-          close: bar.close * symbolInfo.tokenSupply,
-          high: bar.high * symbolInfo.tokenSupply,
-          low: bar.low * symbolInfo.tokenSupply,
-          volume: bar.volume,
-          time: bar.time
-        }
-        return newBar;
-      });
-    }
-    
-    if (!data.bars || data.bars.length <= 0) {
-      endOfDataCache.set(cacheKey, true);
+    if (!data || !data.bars || data.bars.length === 0) {
       onHistoryCallback([], { noData: true });
       return;
     }
-    const newBars = [...data.bars];
-    if (data.bars.length > 0) {
-      const prevBar = prevBarsCache.get(cacheKey);
 
-      // This whole block basically tries to fix chart discontinuity by bridging a gap if there are any between bars (Probably won't be an issue in prod, it's here as a fail safe)
-      if (
-        prevBar &&
-        prevBar.close !== data.bars[data.bars.length - 1].close
-      ) {
-        const connectingBar = {
-          ...data.bars[data.bars.length - 1],
-          close: prevBar.open,
-        };
-        newBars.push(connectingBar);
+    const bars = data.bars.map((bar: BarData) => {
+      const assetMultiplier = symbolInfo.asset === "USD" ? 1 : 1/bar.assetUsdPrice;
+      const modeMultiplier = symbolInfo.mode === "mcap" ? symbolInfo.tokenSupply : 1;
+
+      const multiplier = assetMultiplier * modeMultiplier;
+      const newBar = {
+        open: bar.open * multiplier,
+        close: bar.close * multiplier,
+        high: bar.high * multiplier,
+        low: bar.low * multiplier,
+        volume: Number(bar.volume),
+        time: Number(bar.time),
       }
-      if (!lastBarsCache.has(cacheKey))
-        lastBarsCache.set(cacheKey, data.bars[data.bars.length - 1]);
-      prevBarsCache.set(cacheKey, data.bars[0]);
-    }
+      return newBar;
+    });
+    console.log("[getBars]: Retrieved bars for ", symbolInfo.name, bars);
 
-    console.log(
-      `Returning ${newBars.length} bar(s) for the requested period.`
-    );
+    bars.sort((a, b) => a.time - b.time);
 
-    if (data.end) endOfDataCache.set(cacheKey, true);
-  
-    onHistoryCallback(newBars, { noData: data.end });
+    const noMoreData = limit > bars.length;
+    endOfDataCache.set(cacheKey, noMoreData);
+
+    safeHistory(bars, { noData: false });
   } catch (error) {
-    onErrorCallback(error);
+    safeError(error);
   }
 }
 
@@ -228,7 +225,10 @@ const subscribeBars = (
     {
       chain: symbolInfo.chain,
       symbol: symbolInfo.tokenSymbol, 
-      address: symbolInfo.tokenAddress
+      address: symbolInfo.tokenAddress,
+      tokenSupply: symbolInfo.tokenSupply,
+      mode: symbolInfo.mode,
+      asset: symbolInfo.asset,
     },
     resolution,
     onRealtimeCallback,

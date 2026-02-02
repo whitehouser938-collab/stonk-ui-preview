@@ -193,16 +193,14 @@ export const getTokenTrades = async (
 
 export const getTokenOHLCVBars = async (
   tokenAddress: string,
-  time_to: number,
-  time_from: number,
   chain: Chain,
-  limit: number,
   resolution: string,
-  isUsd: boolean,
+  limit: number,
+  to?: number
 ): Promise<any> => {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/token/bars/${tokenAddress}?time_to=${time_to}&time_from=${time_from}&chain=${chain}&limit=${limit}&resolution=${resolution}&to_usd=${isUsd}`
+      `${API_BASE_URL}/token/bars/${tokenAddress}?chain=${chain}&resolution=${resolution}&limit=${limit}${to ? `&to=${to}` : ''}`
     );
     if (!response.ok) {
       throw new Error("Failed to fetch token trades");
@@ -421,28 +419,29 @@ export const getTokenPreciseVolume = async (
   }
 };
 
-export const getAllTokensPreciseVolume = async (
-  chain?: string
-): Promise<any[]> => {
-  try {
-    const url = chain
-      ? `${API_BASE_URL}/token/volume/all?chain=${chain}`
-      : `${API_BASE_URL}/token/volume/all`;
+// Endpoint removed
+// export const getAllTokensPreciseVolume = async (
+//   chain?: string
+// ): Promise<any[]> => {
+//   try {
+//     const url = chain
+//       ? `${API_BASE_URL}/token/volume/all?chain=${chain}`
+//       : `${API_BASE_URL}/token/volume/all`;
 
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error("Failed to fetch all tokens precise volume");
-    }
-    const data = await response.json();
-    if (!data || !data.success || !data.data.tokens) {
-      return [];
-    }
-    return data.data.tokens;
-  } catch (error) {
-    console.error("Error fetching all tokens precise volume:", error);
-    return [];
-  }
-};
+//     const response = await fetch(url);
+//     if (!response.ok) {
+//       throw new Error("Failed to fetch all tokens precise volume");
+//     }
+//     const data = await response.json();
+//     if (!data || !data.success || !data.data.tokens) {
+//       return [];
+//     }
+//     return data.data.tokens;
+//   } catch (error) {
+//     console.error("Error fetching all tokens precise volume:", error);
+//     return [];
+//   }
+// };
 
 export const getAggregatedVolumeStats = async (): Promise<any> => {
   try {

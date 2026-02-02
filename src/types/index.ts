@@ -38,6 +38,9 @@ interface TokenVolumeSummary extends VolumeData {
   latestTradeTimestamp?: number;
 }
 
+/**
+ * @TODO change shape to have a price key of type volume data 
+ */ 
 export interface TokenMarketOverview extends TokenVolumeSummary {
   graduated: boolean;
   graduationTimestamp: string | null;
@@ -57,7 +60,7 @@ export interface TokenMarketOverview extends TokenVolumeSummary {
     progress: number;
   } | null;
   uniswapLiquidity?: {
-    wethReserve: string;
+    assetReserve: string;
     tokenReserve: string;
   } | null;
 }
@@ -93,7 +96,7 @@ export interface TokenFullData{
     progress: number;
   } | null;
   uniswapLiquidity?: {
-    wethReserve: string;
+    assetReserve: string;
     tokenReserve: string;
   } | null;
   price: VolumeData
@@ -106,8 +109,8 @@ export interface TradeData {
   marketType: string;
   maker: string;
   tradeType: "BUY" | "SELL";
-  baseAmount: string;
-  quoteAmount: string;
+  tokenAmount: string;
+  assetAmount: string;
   price: string;
   usdPrice: string;
   usdVolume: string;
@@ -121,6 +124,7 @@ export interface BarData {
   high: number;
   low: number;
   volume: number;
+  assetUsdPrice: number;
 }
 
 export interface TradeUpdateMessage {
@@ -148,6 +152,7 @@ export interface MarketsUpdateMessage {
 }
 
 export type Chain = "SEP";
+export type Launchpads = "SEP";
 
 export const SUBSCRIPTION_TYPES = {
   bars: {
@@ -155,27 +160,27 @@ export const SUBSCRIPTION_TYPES = {
     subscribeType: "subscribeBars",
     unsubscribeType: "unsubscribeBars",
     channelFormatter: (address: string, chain: string, resolution: string) => 
-      `token_bars:${chain}:${address}:${resolution}`,
+      `token_bars:${chain.toUpperCase()}:${address.toLowerCase()}:${resolution}`,
   },
   trades: {
     prefix: "token_trades",
     subscribeType: "subscribeTrades",
     unsubscribeType: "unsubscribeTrades",
     channelFormatter: (address: string, chain: string) => 
-      `token_trades:${chain}:${address}`,
+      `token_trades:${chain.toUpperCase()}:${address.toLowerCase()}`,
   },
   tokenMarketOverview: {
     prefix: "token_market_overview",
     subscribeType: "subscribeTokenMarketOverview",
     unsubscribeType: "unsubscribeTokenMarketOverview",
     channelFormatter: (address: string, chain: string) => 
-      `token_market_overview:${chain}:${address}`,
+      `token_market_overview:${chain.toUpperCase()}:${address.toLowerCase()}`,
   },
   marketsOverview: {
     prefix: "markets_overview",
     subscribeType: "subscribeMarketsOverview",
     unsubscribeType: "unsubscribeMarketsOverview",
     channelFormatter: (chain: string) => 
-      `markets_overview:${chain}`,
+      `markets_overview:${chain.toUpperCase()}`,
   },
 } as const;

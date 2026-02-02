@@ -26,8 +26,6 @@ interface TradingViewChartProps {
   isMobile?: boolean;
 }
 const formatTinyPrice = (price: number) => {
-    if (price <= 0 || !isFinite(price)) return price.toString();
-
     if (price >= 0.01) {
         return price.toString();
     }
@@ -95,7 +93,7 @@ const customFormatters = {
             format: (price: number, signPositive: any) => {
                 const absPrice = Math.abs(price);
                 
-                if (absPrice > 0 && absPrice < 0.001) {
+                if (absPrice > -0.001 && absPrice < 0.001) {
                     return formatTinyPrice(price);
                 }
 
@@ -196,7 +194,7 @@ function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000
         ],
 
         datafeed: Datafeed,
-        debug: false,
+        debug: true,
         library_path: "/charting_library/",
         toolbar_bg: "#121216",
         custom_css_url: "/tradingview-custom.css",
@@ -373,180 +371,7 @@ function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000
           // Separator
           "paneProperties.separatorColor": "rgba(255, 255, 255, 0.1)",
         });
-
-        // Style the header/toolbar directly via iframe
-        setTimeout(() => {
-          try {
-            const iframe = widget._iFrame as HTMLIFrameElement;
-            if (iframe && iframe.contentDocument) {
-              const doc = iframe.contentDocument;
-              const root = doc.documentElement;
-              
-              // Override CSS variables at the root level
-              root.style.setProperty('--tv-color-pane-background', '#121216', 'important');
-              root.style.setProperty('--themed-color-pane-bg', '#121216', 'important');
-              
-              const style = doc.createElement('style');
-              style.textContent = `
-                /* Override CSS variables globally */
-                :root {
-                  --tv-color-pane-background: #121216 !important;
-                  --themed-color-pane-bg: #121216 !important;
-                }
-                
-                * {
-                  --tv-color-pane-background: #121216 !important;
-                  --themed-color-pane-bg: #121216 !important;
-                }
-                
-                /* Header and toolbar background - very aggressive targeting */
-                body > div:first-child,
-                body > header,
-                body > div[class*="header"],
-                body > div[class*="Header"],
-                .tv-header,
-                [class*="header"],
-                [class*="Header"],
-                [class*="toolbar"],
-                [class*="Toolbar"],
-                div[class*="header"],
-                div[class*="Header"],
-                header,
-                [role="toolbar"],
-                [role="banner"] {
-                  background-color: #121216 !important;
-                  background: #121216 !important;
-                }
-                
-                /* Target elements using CSS variables */
-                [style*="background-color: var(--tv-color-pane-background"],
-                [style*="background-color: var(--themed-color-pane-bg"] {
-                  background-color: #121216 !important;
-                  background: #121216 !important;
-                }
-                
-                /* Target flex containers (button containers) */
-                div[style*="display: flex"],
-                div[style*="display:flex"] {
-                  background-color: #121216 !important;
-                  background: #121216 !important;
-                }
-                
-                /* Target separator elements */
-                [class*="separator"],
-                [class*="Separator"],
-                span[style*="color:#666"] {
-                  background-color: transparent !important;
-                  background: transparent !important;
-                }
-                
-                /* Target parent containers of buttons */
-                button,
-                [class*="button"],
-                [class*="Button"] {
-                  background-color: transparent !important;
-                  background: transparent !important;
-                }
-                
-                /* Time frame buttons container */
-                [class*="timeframe"],
-                [class*="Timeframe"],
-                [class*="button-group"],
-                [class*="ButtonGroup"] {
-                  background-color: transparent !important;
-                }
-                
-                /* Chart type buttons container */
-                [class*="chart-type"],
-                [class*="ChartType"],
-                [class*="chartStyle"],
-                [class*="ChartStyle"] {
-                  background-color: transparent !important;
-                }
-                
-                /* All buttons in header */
-                [class*="button"],
-                [class*="Button"],
-                button {
-                  background-color: transparent !important;
-                }
-                
-                /* Bottom toolbar elements (date range, %, log, auto) should NOT be orange */
-                /* Override any orange styling that might be applied */
-                [class*="time"] [class*="active"],
-                [class*="time"] [class*="Active"],
-                [class*="time"] [class*="selected"],
-                [class*="time"] [class*="Selected"],
-                [class*="scale"] [class*="active"],
-                [class*="scale"] [class*="Active"],
-                [class*="scale"] [class*="selected"],
-                [class*="scale"] [class*="Selected"],
-                [class*="axis"] [class*="active"],
-                [class*="axis"] [class*="Active"],
-                [class*="axis"] [class*="selected"],
-                [class*="axis"] [class*="Selected"],
-                [class*="bottom"] [class*="active"],
-                [class*="bottom"] [class*="Active"],
-                [class*="bottom"] [class*="selected"],
-                [class*="bottom"] [class*="Selected"],
-                [class*="footer"] [class*="active"],
-                [class*="footer"] [class*="Active"],
-                [class*="footer"] [class*="selected"],
-                [class*="footer"] [class*="Selected"],
-                [class*="timeframe"] [class*="active"],
-                [class*="timeframe"] [class*="Active"],
-                [class*="timeframe"] [class*="selected"],
-                [class*="timeframe"] [class*="Selected"] {
-                  color: inherit !important;
-                  background-color: transparent !important;
-                }
-              `;
-              doc.head.appendChild(style);
-              
-              // Also try to directly find and style the header elements
-              const allDivs = doc.querySelectorAll('div');
-              allDivs.forEach((div: Element) => {
-                const htmlDiv = div as HTMLElement;
-                const className = htmlDiv.className?.toLowerCase() || '';
-                const computedStyle = window.getComputedStyle(htmlDiv);
-                const bgColor = computedStyle.backgroundColor;
-                
-                // Check if it has the wrong background color or uses CSS variables
-                if (className.includes('header') || 
-                    className.includes('toolbar') ||
-                    bgColor.includes('rgb(19, 23, 34)') || // #131722 in rgb
-                    bgColor.includes('19, 23, 34') ||
-                    htmlDiv.style.backgroundColor?.includes('var(--tv-color-pane-background') ||
-                    htmlDiv.style.backgroundColor?.includes('var(--themed-color-pane-bg')) {
-                  htmlDiv.style.backgroundColor = '#121216';
-                  htmlDiv.style.background = '#121216';
-                }
-              });
-              
-              // Find header element
-              const header = doc.querySelector('header');
-              if (header) {
-                (header as HTMLElement).style.backgroundColor = '#121216';
-                (header as HTMLElement).style.background = '#121216';
-              }
-              
-              // Find all elements with inline styles using the CSS variable
-              const allElements = doc.querySelectorAll('*');
-              allElements.forEach((el: Element) => {
-                const htmlEl = el as HTMLElement;
-                if (htmlEl.style.backgroundColor?.includes('var(--tv-color-pane-background') ||
-                    htmlEl.style.backgroundColor?.includes('var(--themed-color-pane-bg')) {
-                  htmlEl.style.backgroundColor = '#121216';
-                  htmlEl.style.background = '#121216';
-                }
-              });
-            }
-          } catch (e) {
-            // Cross-origin restrictions might prevent this, CSS file will handle it
-            console.log('Could not inject styles directly, using CSS file');
-          }
-        }, 500);
-
+        
         initializingRef.current = false;
       });
     };

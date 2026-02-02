@@ -100,7 +100,9 @@ class WebSocketManager {
   private normalizeChannel(channel: string): string {
     // Normalize channel by converting to lowercase
     // This ensures consistent matching between server (lowercase) and client
-    return channel.toLowerCase();
+    // return channel.toLowerCase();
+    // Channel formatting is strict, should not be changed as server is expecting the format specified in the channel formater config
+    return channel; 
   }
 
   private handleMessage(message: any) {

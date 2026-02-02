@@ -1,5 +1,5 @@
 import { ICOLaunchData } from "../components/ICOLaunchpad";
-import { ethers } from "ethers";
+import { ethers, TransactionResponse } from "ethers";
 import TokenFactory from "@/abi/evm/TokenFactory.json";
 import { Contract, EventLog } from "ethers";
 
@@ -38,7 +38,7 @@ export const deployTokenETH = async (
       // console.log("Deployment fee:", ethers.formatEther(fee), "ETH");
       // console.log("Fee in wei:", fee.toString());
 
-      let tx;
+      let tx: TransactionResponse;
 
       // Check if initial buy amount is provided
       if (tokenData.initialBuyAmount && parseFloat(tokenData.initialBuyAmount) > 0) {
@@ -102,7 +102,10 @@ export const deployTokenETH = async (
       let tokenAddress: string;
       let bondingCurveAddress: string;
       if (eventLog) {
-        [tokenAddress, bondingCurveAddress] = eventLog.args;
+        // [tokenAddress, bondingCurveAddress] = eventLog.args;
+        // For the new contract token address is bonding curve address
+        [tokenAddress] = eventLog.args;
+        bondingCurveAddress = tokenAddress;
       } else {
         throw new Error("TokenDeployed event not found");
       }
@@ -118,7 +121,7 @@ export const deployTokenETH = async (
       };
       return response;
     } catch (error) {
-      console.error("Error deploying BASE token:", error);
+      console.error("Error deploying token:", error);
       return {
         transactionHash: "",
         tokenAddress: "",
