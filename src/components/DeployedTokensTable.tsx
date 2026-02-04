@@ -17,6 +17,7 @@ interface DeployedToken {
 
 interface DeployedTokensTableProps {
   tokens: DeployedToken[];
+  viewMode?: "card" | "list";
 }
 
 type SortField = "symbol" | "price" | "marketCap" | "priceChange24h" | "status" | "deploymentTimestamp";
@@ -24,6 +25,7 @@ type SortDirection = "asc" | "desc";
 
 const DeployedTokensTable: React.FC<DeployedTokensTableProps> = ({
   tokens,
+  viewMode = "list",
 }) => {
   const [sortField, setSortField] = useState<SortField>("marketCap");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
@@ -148,11 +150,114 @@ const DeployedTokensTable: React.FC<DeployedTokensTableProps> = ({
     });
   }, [tokens, sortField, sortDirection]);
 
+  // Card view rendering
+  if (viewMode === "card") {
+    if (tokens.length === 0) {
+      return (
+        <div className="bg-bg-card p-3">
+          <div className="text-orange-400 text-xs mb-2 font-sans">
+            DEPLOYED TOKENS
+          </div>
+          <div className="text-center py-4 text-gray-400 text-xs font-sans">
+            No tokens deployed yet
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-bg-card p-3">
+        <div className="text-orange-400 text-xs mb-2 font-sans">
+          DEPLOYED TOKENS
+        </div>
+        <div className="grid grid-cols-1 gap-3">
+          {sortedTokens.map((token, index) => (
+            <Link
+              key={index}
+              to={`/token/SEP/${token.tokenAddress}`}
+              className="border-b border-gray-800 last:border-0 pb-3 last:pb-0 hover:opacity-80 transition-opacity"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                {token.logo ? (
+                  <img
+                    src={token.logo}
+                    alt={token.symbol}
+                    className="w-8 h-8 rounded object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                      e.currentTarget.nextElementSibling?.classList.remove(
+                        "hidden"
+                      );
+                    }}
+                  />
+                ) : null}
+                <Circle
+                  className={`w-8 h-8 text-blue-400 ${
+                    token.logo ? "hidden" : ""
+                  }`}
+                />
+                <div className="flex-1">
+                  <div className="text-white font-bold text-sm font-sans">
+                    {token.symbol}
+                  </div>
+                  <div className="text-gray-400 text-xs font-sans">SEP</div>
+                </div>
+                <div>
+                  {token.isGraduated ? (
+                    <span className="text-green-400 text-xs font-mono">
+                      bond
+                    </span>
+                  ) : (
+                    <span className="bg-purple-600 text-black px-1 py-0.5 rounded text-xs font-mono">
+                      BOND
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <span className="text-gray-400 font-sans">Price: </span>
+                  <span className="text-gray-400 font-mono">
+                    {formatPrice(token.currentPrice)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-400 font-sans">MCap: </span>
+                  <span className="text-gray-400 font-mono">
+                    {formatMarketCap(token.marketCap)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-400 font-sans">24h: </span>
+                  <span
+                    className={`font-mono ${getPriceChangeColor(
+                      token.priceChange24h
+                    )}`}
+                  >
+                    {formatPriceChange(token.priceChange24h)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-400 font-sans">Age: </span>
+                  <span className="text-gray-400 font-mono">
+                    {formatDeploymentTime(token.deploymentTimestamp)}
+                  </span>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   if (tokens.length === 0) {
     return (
-      <div className="bg-gray-900 border border-gray-700 p-1">
-        <div className="text-orange-400 text-xs mb-1">DEPLOYED TOKENS</div>
-        <div className="text-center py-4 text-gray-400 text-xs">
+      <div className="bg-bg-card p-1">
+        <div className="text-orange-400 text-xs mb-2 font-sans">
+          DEPLOYED TOKENS
+        </div>
+        <div className="text-center py-4 text-gray-400 text-xs font-sans">
           No tokens deployed yet
         </div>
       </div>
@@ -160,8 +265,8 @@ const DeployedTokensTable: React.FC<DeployedTokensTableProps> = ({
   }
 
   return (
-    <div className="bg-gray-900 border border-gray-700 p-1">
-      <div className="text-orange-500 text-xs mb-1">DEPLOYED TOKENS</div>
+    <div className="bg-bg-card p-1">
+      <div className="text-orange-400 text-xs mb-2 font-sans">DEPLOYED TOKENS</div>
       <div className="overflow-x-auto">
         <table className="w-full text-xs min-w-[500px]">
           <thead className="bg-gray-800 sticky top-0">

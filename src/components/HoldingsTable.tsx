@@ -6,6 +6,7 @@ import { Holding } from "@/api/user";
 
 interface HoldingsTableProps {
   holdings: Holding[];
+  viewMode?: "card" | "list";
 }
 
 type SortField =
@@ -17,7 +18,10 @@ type SortField =
   | "priceChange";
 type SortDirection = "asc" | "desc";
 
-const HoldingsTable: React.FC<HoldingsTableProps> = ({ holdings }) => {
+const HoldingsTable: React.FC<HoldingsTableProps> = ({
+  holdings,
+  viewMode = "list",
+}) => {
   const [sortField, setSortField] = useState<SortField>("amount");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
@@ -154,11 +158,101 @@ const HoldingsTable: React.FC<HoldingsTableProps> = ({ holdings }) => {
     (holding) => getTokenAmount(holding.amount, holding.decimals) >= 1
   );
 
+  // Card view rendering
+  if (viewMode === "card") {
+    if (filteredHoldings.length === 0) {
+      return (
+        <div className="bg-bg-card p-3">
+          <div className="text-orange-400 text-xs mb-2 font-sans">HOLDINGS</div>
+          <div className="text-center py-4 text-gray-400 text-xs font-sans">
+            No holdings yet
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-bg-card p-3">
+        <div className="text-orange-400 text-xs mb-2 font-sans">HOLDINGS</div>
+        <div className="grid grid-cols-1 gap-3">
+          {filteredHoldings.map((holding, index) => (
+            <Link
+              key={index}
+              to={`/token/${holding.chain}/${toChecksumAddress(
+                holding.tokenAddress
+              )}`}
+              className="border-b border-gray-800 last:border-0 pb-3 last:pb-0 hover:opacity-80 transition-opacity"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                {holding.logo ? (
+                  <img
+                    src={holding.logo}
+                    alt={holding.symbol}
+                    className="w-8 h-8 rounded object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                      e.currentTarget.nextElementSibling?.classList.remove(
+                        "hidden"
+                      );
+                    }}
+                  />
+                ) : null}
+                <Circle
+                  className={`w-8 h-8 text-blue-400 ${
+                    holding.logo ? "hidden" : ""
+                  }`}
+                />
+                <div>
+                  <div className="text-white font-bold text-sm font-sans">
+                    {holding.symbol}
+                  </div>
+                  <div className="text-gray-400 text-xs font-sans">
+                    {holding.chain}
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <span className="text-gray-400 font-sans">Amount: </span>
+                  <span className="text-white font-mono">
+                    {formatTokenAmount(holding.amount, holding.decimals)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-400 font-sans">Value: </span>
+                  <span className="text-white font-mono">
+                    {formatCurrency(holding.totalValue)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-400 font-sans">Price: </span>
+                  <span className="text-gray-400 font-mono">
+                    {formatPrice(holding.currentPrice)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-400 font-sans">24h: </span>
+                  <span
+                    className={`font-mono ${getPriceChangeColor(
+                      holding.priceChange24h
+                    )}`}
+                  >
+                    {formatPriceChange(holding.priceChange24h)}
+                  </span>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   if (filteredHoldings.length === 0) {
     return (
-      <div className="bg-gray-900 border border-gray-700 p-1">
-        <div className="text-orange-400 text-xs mb-1">HOLDINGS</div>
-        <div className="text-center py-4 text-gray-400 text-xs">
+      <div className="bg-bg-card p-1">
+        <div className="text-orange-400 text-xs mb-2 font-sans">HOLDINGS</div>
+        <div className="text-center py-4 text-gray-400 text-xs font-sans">
           No holdings yet
         </div>
       </div>
@@ -166,8 +260,8 @@ const HoldingsTable: React.FC<HoldingsTableProps> = ({ holdings }) => {
   }
 
   return (
-    <div className="bg-gray-900 border border-gray-700 p-1">
-      <div className="text-orange-400 text-xs mb-1">HOLDINGS</div>
+    <div className="bg-bg-card p-1">
+      <div className="text-orange-400 text-xs mb-2 font-sans">HOLDINGS</div>
       <div className="overflow-x-auto">
         <table className="w-full text-xs min-w-[800px]">
           <thead className="bg-gray-800 sticky top-0">

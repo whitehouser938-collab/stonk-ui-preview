@@ -1084,22 +1084,8 @@ export function MarketsDashboard() {
       <div className="hidden lg:block h-screen overflow-auto">
         {/* Main Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 p-1 h-full">
-          {/* Left Column - Terminal Placeholder - Desktop only, order-last on mobile */}
-          <div className="lg:col-span-3 space-y-1 order-last lg:order-first">
-            <MobileCollapsibleSection title="TERMINAL">
-              <div className="bg-bg-card p-4 h-full flex flex-col items-center justify-center">
-                <div className="text-orange-400 text-lg font-bold mb-2 lg:block hidden">
-                  TERMINAL
-                </div>
-                <div className="text-gray-500 text-xs text-center">
-                  Coming Soon
-                </div>
-              </div>
-            </MobileCollapsibleSection>
-          </div>
-
           {/* Center Column - Main Trading Data */}
-          <div className="lg:col-span-6 bg-bg-card order-first lg:order-none">
+          <div className="lg:col-span-9 bg-bg-card order-first lg:order-none">
             <div className="text-orange-400 text-xs p-1">
               ACTIVE TRADING PAIRS
             </div>

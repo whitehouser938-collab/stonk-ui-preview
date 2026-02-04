@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useWatchlist } from "@/hooks/useWatchlist";
 import { WatchlistToken } from "@/api/watchlist";
+import { ViewToggle } from "@/components/ViewToggle";
 
 function formatNumber(num: number | null): string {
   if (num === null) return "N/A";
@@ -45,6 +46,7 @@ export function WatchlistDashboard() {
     null
   );
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [viewMode, setViewMode] = useState<"card" | "list">("list");
 
   const handleTokenClick = (token: WatchlistToken) => {
     navigate(`/token/${token.chain}/${token.tokenAddress}`);
@@ -95,11 +97,11 @@ export function WatchlistDashboard() {
 
   if (!isConnected) {
     return (
-      <div className="h-screen overflow-auto text-gray-100 text-xs font-mono flex items-center justify-center">
+      <div className="h-screen overflow-auto text-gray-100 text-xs flex items-center justify-center">
         <div className="text-center p-8 bg-bg-card border border-gray-700 rounded max-w-md">
           <AlertCircle className="w-12 h-12 text-orange-400 mx-auto mb-4" />
-          <h2 className="text-lg text-white mb-2 font-mono">Connect Your Wallet</h2>
-          <p className="text-gray-400 font-mono">
+          <h2 className="text-lg text-white mb-2 font-sans">Connect Your Wallet</h2>
+          <p className="text-gray-400 font-sans">
             Please connect your wallet to view your watchlist
           </p>
         </div>
@@ -108,27 +110,145 @@ export function WatchlistDashboard() {
   }
 
   return (
-    <div className="h-screen overflow-auto text-gray-100 text-xs font-mono">
-      <div className="p-4">
-        <div className="bg-bg-card border border-gray-700">
-          <div className="text-orange-400 text-sm p-2 border-b border-gray-700 flex items-center justify-between">
-            <span className="font-mono">MY WATCHLIST</span>
+    <div className="h-screen overflow-auto text-gray-100 text-xs">
+      <div className="p-3 lg:p-1">
+        <div className="bg-bg-card">
+          <div className="text-orange-400 text-sm p-3 lg:p-1 border-b border-gray-700 flex items-center justify-between">
+            <span className="font-sans">MY WATCHLIST</span>
             <span className="text-gray-400 font-mono">
               {watchlist.length} {watchlist.length === 1 ? "token" : "tokens"}
             </span>
           </div>
 
+          {/* View Toggle Control Bar */}
+          <div className="sticky top-0 z-20 bg-bg-card px-3 py-2 lg:px-1 lg:py-1 border-b border-gray-800">
+            <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+          </div>
+
           {isLoading ? (
-            <div className="text-center p-8 text-gray-400 font-mono">
+            <div className="text-center p-8 text-gray-400 font-sans">
               Loading watchlist...
             </div>
           ) : watchlist.length === 0 ? (
             <div className="text-center p-8">
               <Star className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-              <p className="text-gray-400 mb-2 font-mono">Your watchlist is empty</p>
-              <p className="text-gray-500 text-xs font-mono">
+              <p className="text-gray-400 mb-2 font-sans">Your watchlist is empty</p>
+              <p className="text-gray-500 text-xs font-sans">
                 Click the star icon on any token to add it to your watchlist
               </p>
+            </div>
+          ) : viewMode === "card" ? (
+            <div className="grid grid-cols-1 gap-3 p-3">
+              {sortedWatchlist.map((token) => (
+                <div
+                  key={token.tokenAddress}
+                  onClick={() => handleTokenClick(token)}
+                  className="bg-bg-card rounded-lg p-3 cursor-pointer hover:bg-gray-800/30 transition-colors"
+                >
+                  <div className="flex gap-3">
+                    {/* Token Image */}
+                    <div className="flex-shrink-0">
+                      {token.logoUrl ? (
+                        <img
+                          src={token.logoUrl}
+                          alt={token.tokenSymbol}
+                          className="w-16 h-16 rounded object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                            e.currentTarget.nextElementSibling?.classList.remove(
+                              "hidden"
+                            );
+                          }}
+                        />
+                      ) : null}
+                      <Circle
+                        className={`w-16 h-16 text-blue-400 ${
+                          token.logoUrl ? "hidden" : ""
+                        }`}
+                      />
+                    </div>
+
+                    {/* Token Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-white font-bold text-sm font-sans">
+                          {token.tokenSymbol}
+                        </span>
+                        <span className="text-gray-400 text-xs font-sans">
+                          {token.chain}
+                        </span>
+                        {token.graduated && (
+                          <span className="text-green-400 text-xs font-mono">
+                            bond
+                          </span>
+                        )}
+                        {!token.graduated && (
+                          <span className="bg-purple-600 text-black px-1 py-0.5 rounded text-xs font-mono">
+                            BOND
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-gray-400 text-xs font-sans mb-2 truncate">
+                        {token.tokenName}
+                      </div>
+
+                      {/* Stats Grid */}
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                          <span className="text-gray-400 font-sans">Price: </span>
+                          <span className="text-white font-mono">
+                            ${formatNumber(token.currentPrice)}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-gray-400 font-sans">MCap: </span>
+                          <span className="text-white font-mono">
+                            $
+                            {token.marketCap
+                              ? formatNumber(Number(token.marketCap))
+                              : "N/A"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-gray-400 font-sans">24h: </span>
+                          <span
+                            className={`font-mono ${
+                              token.priceChange24h && token.priceChange24h > 0
+                                ? "text-green-400"
+                                : "text-red-400"
+                            }`}
+                          >
+                            {token.priceChange24h !== null
+                              ? `${token.priceChange24h > 0 ? "+" : ""}${token.priceChange24h.toFixed(2)}%`
+                              : "N/A"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-gray-400 font-sans">Vol: </span>
+                          <span className="text-white font-mono">
+                            {formatNumber(token.totalVolume)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Star Button */}
+                    <button
+                      onClick={(e) =>
+                        handleRemoveFromWatchlist(
+                          e,
+                          token.tokenAddress,
+                          token.chain
+                        )
+                      }
+                      className="flex-shrink-0 hover:scale-110 transition-transform"
+                      title="Remove from watchlist"
+                    >
+                      <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -137,78 +257,96 @@ export function WatchlistDashboard() {
                   <tr className="text-gray-400">
                     <th className="text-center p-2 w-8"></th>
                     <th
-                      className="text-left p-2 cursor-pointer hover:text-white"
+                      className="text-left p-2 cursor-pointer hover:text-white font-sans"
                       onClick={() => handleSort("tokenSymbol")}
                     >
                       Symbol{" "}
-                      {sortColumn === "tokenSymbol" &&
-                        (sortDirection === "asc" ? "↑" : "↓")}
+                      <span className="font-mono">
+                        {sortColumn === "tokenSymbol" &&
+                          (sortDirection === "asc" ? "↑" : "↓")}
+                      </span>
                     </th>
                     <th
-                      className="text-left p-2 hidden md:table-cell cursor-pointer hover:text-white"
+                      className="text-left p-2 hidden md:table-cell cursor-pointer hover:text-white font-sans"
                       onClick={() => handleSort("tokenName")}
                     >
                       Name{" "}
-                      {sortColumn === "tokenName" &&
-                        (sortDirection === "asc" ? "↑" : "↓")}
+                      <span className="font-mono">
+                        {sortColumn === "tokenName" &&
+                          (sortDirection === "asc" ? "↑" : "↓")}
+                      </span>
                     </th>
                     <th
-                      className="text-right p-2 cursor-pointer hover:text-white"
+                      className="text-right p-2 cursor-pointer hover:text-white font-sans"
                       onClick={() => handleSort("currentPrice")}
                     >
                       PRICE{" "}
-                      {sortColumn === "currentPrice" &&
-                        (sortDirection === "asc" ? "↑" : "↓")}
+                      <span className="font-mono">
+                        {sortColumn === "currentPrice" &&
+                          (sortDirection === "asc" ? "↑" : "↓")}
+                      </span>
                     </th>
                     <th
-                      className="text-right p-2 cursor-pointer hover:text-white"
+                      className="text-right p-2 cursor-pointer hover:text-white font-sans"
                       onClick={() => handleSort("marketCap")}
                     >
                       MCAP{" "}
-                      {sortColumn === "marketCap" &&
-                        (sortDirection === "asc" ? "↑" : "↓")}
+                      <span className="font-mono">
+                        {sortColumn === "marketCap" &&
+                          (sortDirection === "asc" ? "↑" : "↓")}
+                      </span>
                     </th>
                     <th
-                      className="text-right p-2 cursor-pointer hover:text-white"
+                      className="text-right p-2 cursor-pointer hover:text-white font-sans"
                       onClick={() => handleSort("priceChange24h")}
                     >
                       24H{" "}
-                      {sortColumn === "priceChange24h" &&
-                        (sortDirection === "asc" ? "↑" : "↓")}
+                      <span className="font-mono">
+                        {sortColumn === "priceChange24h" &&
+                          (sortDirection === "asc" ? "↑" : "↓")}
+                      </span>
                     </th>
                     <th
-                      className="text-right p-2 cursor-pointer hover:text-white"
+                      className="text-right p-2 cursor-pointer hover:text-white font-sans"
                       onClick={() => handleSort("priceChange6h")}
                     >
                       6H{" "}
-                      {sortColumn === "priceChange6h" &&
-                        (sortDirection === "asc" ? "↑" : "↓")}
+                      <span className="font-mono">
+                        {sortColumn === "priceChange6h" &&
+                          (sortDirection === "asc" ? "↑" : "↓")}
+                      </span>
                     </th>
                     <th
-                      className="text-right p-2 cursor-pointer hover:text-white"
+                      className="text-right p-2 cursor-pointer hover:text-white font-sans"
                       onClick={() => handleSort("priceChange1h")}
                     >
                       1H{" "}
-                      {sortColumn === "priceChange1h" &&
-                        (sortDirection === "asc" ? "↑" : "↓")}
+                      <span className="font-mono">
+                        {sortColumn === "priceChange1h" &&
+                          (sortDirection === "asc" ? "↑" : "↓")}
+                      </span>
                     </th>
                     <th
-                      className="text-right p-2 cursor-pointer hover:text-white"
+                      className="text-right p-2 cursor-pointer hover:text-white font-sans"
                       onClick={() => handleSort("priceChange5m")}
                     >
                       5M{" "}
-                      {sortColumn === "priceChange5m" &&
-                        (sortDirection === "asc" ? "↑" : "↓")}
+                      <span className="font-mono">
+                        {sortColumn === "priceChange5m" &&
+                          (sortDirection === "asc" ? "↑" : "↓")}
+                      </span>
                     </th>
                     <th
-                      className="text-right p-2 cursor-pointer hover:text-white"
+                      className="text-right p-2 hidden md:table-cell cursor-pointer hover:text-white font-sans"
                       onClick={() => handleSort("totalVolume")}
                     >
                       VOL{" "}
-                      {sortColumn === "totalVolume" &&
-                        (sortDirection === "asc" ? "↑" : "↓")}
+                      <span className="font-mono">
+                        {sortColumn === "totalVolume" &&
+                          (sortDirection === "asc" ? "↑" : "↓")}
+                      </span>
                     </th>
-                    <th className="text-right p-2 hidden md:table-cell">
+                    <th className="text-right p-2 hidden md:table-cell font-sans">
                       AGE
                     </th>
                   </tr>
@@ -329,10 +467,10 @@ export function WatchlistDashboard() {
                           ? `${token.priceChange5m > 0 ? "+" : ""}${token.priceChange5m.toFixed(2)}%`
                           : "N/A"}
                       </td>
-                      <td className="p-2 text-right text-gray-400">
+                      <td className="p-2 text-right text-gray-400 font-mono hidden md:table-cell">
                         {formatNumber(token.totalVolume)}
                       </td>
-                      <td className="p-2 text-right text-gray-400 hidden md:table-cell">
+                      <td className="p-2 text-right text-gray-400 font-mono hidden md:table-cell">
                         {formatTokenAge(token.deploymentTimestamp)}
                       </td>
                     </tr>

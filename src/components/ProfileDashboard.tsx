@@ -1,12 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAppKitAccount } from "@reown/appkit/react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { ViewToggle } from "@/components/ViewToggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -106,6 +100,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [viewMode, setViewMode] = useState<"card" | "list">("list");
 
   const openEditModal = () => {
     setEditForm({
@@ -673,8 +668,8 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
   // Show wallet connection prompt if not connected and viewing own profile (and wallet state has loaded)
   if (!isConnected && !walletLoading && isOwnProfile) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div>
+        <div className="flex items-center justify-between mb-3 lg:mb-1">
           <h1 className="text-3xl font-bold text-orange-400 font-mono">Profile</h1>
         </div>
         <WalletConnectionPrompt
@@ -689,12 +684,12 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
   // Show minimal loading while wallet state is initializing
   if (walletLoading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div>
+        <div className="flex items-center justify-between mb-3 lg:mb-1">
           <h1 className="text-3xl font-bold text-orange-400 font-mono">Profile</h1>
         </div>
         <div className="flex items-center justify-center py-12">
-          <div className="text-gray-400 font-mono">Loading...</div>
+          <div className="text-gray-400 font-sans">Loading...</div>
         </div>
       </div>
     );
@@ -703,31 +698,23 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
   // Show loading state only when wallet is connected and we're loading user data
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div>
+        <div className="flex items-center justify-between mb-3 lg:mb-1">
           <h1 className="text-3xl font-bold text-orange-400 font-mono">Profile</h1>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 space-y-6">
-            <Card>
-              <CardContent className="p-6">
-                <div className="animate-pulse space-y-4">
-                  <div className="h-4 bg-gray-700 rounded w-3/4"></div>
-                  <div className="h-4 bg-gray-700 rounded w-1/2"></div>
-                  <div className="h-4 bg-gray-700 rounded w-5/6"></div>
-                </div>
-              </CardContent>
-            </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-1">
+          <div className="bg-bg-card p-3 lg:p-1">
+            <div className="animate-pulse space-y-4">
+              <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+              <div className="h-4 bg-gray-700 rounded w-1/2"></div>
+              <div className="h-4 bg-gray-700 rounded w-5/6"></div>
+            </div>
           </div>
-          <div className="space-y-6">
-            <Card>
-              <CardContent className="p-6">
-                <div className="animate-pulse space-y-4">
-                  <div className="h-4 bg-gray-700 rounded w-1/2"></div>
-                  <div className="h-4 bg-gray-700 rounded w-3/4"></div>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="bg-bg-card p-3 lg:p-1">
+            <div className="animate-pulse space-y-4">
+              <div className="h-4 bg-gray-700 rounded w-1/2"></div>
+              <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -735,8 +722,8 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div>
+      <div className="flex items-center justify-between mb-3 lg:mb-1">
         <h1 className="text-3xl font-bold text-orange-400 font-mono">
           {isOwnProfile
             ? ""
@@ -837,10 +824,9 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
         </div>
       )}
 
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto">
         {/* Top section: Combined user info and stats */}
-        <Card>
-          <CardContent className="p-6">
+        <div className="bg-bg-card p-3 lg:p-1 mb-3 lg:mb-1">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               {/* User Info */}
               <div className="flex items-center space-x-4">
@@ -1006,32 +992,30 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                 </Button>
               </div>
             )}
-          </CardContent>
-        </Card>
+        </div>
+
+        {/* View Toggle Control Bar */}
+        <div className="sticky top-0 z-20 bg-bg-card px-3 py-2 lg:px-1 lg:py-1 mb-3 lg:mb-1">
+          <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+        </div>
 
         {/* Bottom section: Two columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-1 mb-3 lg:mb-1">
           {/* Left column: Deployed Tokens and Holdings */}
-          <div className="lg:col-span-2">
-            <Card>
-              <CardContent className="p-6 space-y-6">
-                <DeployedTokensTable tokens={userTokens} />
-                <HoldingsTable holdings={userHoldings} />
-              </CardContent>
-            </Card>
+          <div className="space-y-3 lg:space-y-1">
+            <DeployedTokensTable tokens={userTokens} viewMode={viewMode} />
+            <HoldingsTable holdings={userHoldings} viewMode={viewMode} />
           </div>
 
           {/* Right column: Comments, Replies, Likes */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-3 lg:space-y-1">
             {/* Comments by User */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <MessageSquareHeart className="w-5 h-5" />
-                  <span className="font-mono">Comments</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+            <div className="bg-bg-card p-3 lg:p-1">
+              <div className="flex items-center space-x-2 mb-3 text-orange-400">
+                <MessageSquareHeart className="w-5 h-5" />
+                <span className="font-sans">Comments</span>
+              </div>
+              <div>
                 {profileComments.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     <MessageCircle className="w-12 h-12 mx-auto mb-3 text-gray-600" />
@@ -1165,18 +1149,16 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                     ))}
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Recent Replies by User */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <MessageCircle className="w-5 h-5" />
-                  <span className="font-mono">Replies</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+            <div className="bg-bg-card p-3 lg:p-1">
+              <div className="flex items-center space-x-2 mb-3 text-orange-400">
+                <MessageCircle className="w-5 h-5" />
+                <span className="font-sans">Replies</span>
+              </div>
+              <div>
                 {profileReplies.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     <MessageCircle className="w-12 h-12 mx-auto mb-3 text-gray-600" />
@@ -1292,8 +1274,8 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                     ))}
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </div>
       </div>
