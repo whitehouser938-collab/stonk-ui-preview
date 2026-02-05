@@ -1,3 +1,5 @@
+import { apiClient } from "@/services/apiClient";
+
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 // Normalize to ensure we always target the /api prefix exactly once
 const BASE = (API_BASE_URL || "").replace(/\/$/, "");
@@ -278,33 +280,21 @@ export const setUsername = async (
   username: string
 ): Promise<User> => {
   try {
-    const response = await fetch(`${API_ROOT}/user/${walletAddress}/username`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      if (response.status === 409) {
-        throw new Error("Username already taken");
-      } else if (response.status === 404) {
-        throw new Error("User not found");
-      } else {
-        throw new Error(data.message || "Failed to update username");
-      }
-    }
+    const data = await apiClient.put(`/user/${walletAddress}/username`, { username });
 
     if (!data || !data.success) {
       throw new Error(data.message || "Username update unsuccessful");
     }
 
     return normalizeUser(data.data);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error setting username:", error);
+    // Handle specific error messages from the backend
+    if (error.message?.includes("already taken")) {
+      throw new Error("Username already taken");
+    } else if (error.message?.includes("not found")) {
+      throw new Error("User not found");
+    }
     throw error;
   }
 };

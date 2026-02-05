@@ -5,6 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { WagmiProvider } from "wagmi";
 import { UserProvider } from "@/contexts/UserContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { apiClient } from "@/services/apiClient";
+import { useEffect } from "react";
 import Index from "./pages/Index";
 
 //Reown imports
@@ -56,32 +59,55 @@ const appKit = createAppKit({
   },
 });
 
+// AppContent component that sets up apiClient with auth handlers
+const AppContent = () => {
+  const { sessionToken } = useAuth();
+
+  useEffect(() => {
+    // Configure apiClient with auth handlers
+    apiClient.setAuthHandlers(
+      () => sessionToken,
+      async () => {
+        // Token refresh is handled internally by AuthContext
+        // This is called when a 401 is received
+        console.log("Token expired, attempting refresh...");
+      }
+    );
+  }, [sessionToken]);
+
+  return (
+    <UserProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Markets />} />
+            <Route path="/:chainId" element={<Markets />} />
+            <Route path="/research" element={<Research />} />
+            <Route
+              path="/token/:chainId/:tokenAddress"
+              element={<TokenDetail />}
+            />
+            <Route path="/launchpad" element={<Launchpad />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/:walletAddress" element={<Profile />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </UserProvider>
+  );
+};
+
 const App = () => (
   <WagmiProvider config={wagmiAdapter.wagmiConfig}>
     <QueryClientProvider client={queryClient}>
-      <UserProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Markets />} />
-              <Route path="/:chainId" element={<Markets />} />
-              <Route path="/research" element={<Research />} />
-              <Route
-                path="/token/:chainId/:tokenAddress"
-                element={<TokenDetail />}
-              />
-              <Route path="/launchpad" element={<Launchpad />} />
-              <Route path="/leaderboard" element={<Leaderboard />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/profile/:walletAddress" element={<Profile />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </UserProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </QueryClientProvider>
   </WagmiProvider>
 );

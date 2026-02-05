@@ -1,3 +1,5 @@
+import { apiClient } from "@/services/apiClient";
+
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 // Normalize to ensure we always target the /api prefix exactly once
 const BASE = (API_BASE_URL || "").replace(/\/$/, "");
@@ -54,6 +56,7 @@ export interface WatchlistActionResponse {
 
 /**
  * Get user's watchlist with enriched token data
+ * Public endpoint - requires wallet address parameter
  */
 export const getUserWatchlist = async (
   walletAddress: string
@@ -82,33 +85,17 @@ export const getUserWatchlist = async (
 
 /**
  * Add token to user's watchlist
+ * Authenticated endpoint - wallet address comes from JWT
  */
 export const addToWatchlist = async (
-  walletAddress: string,
   tokenAddress: string,
   chain: string
 ): Promise<boolean> => {
   try {
-    const url = `${API_ROOT}/watchlist`;
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        walletAddress,
-        tokenAddress,
-        chain,
-      }),
+    const data: WatchlistActionResponse = await apiClient.post("/watchlist", {
+      tokenAddress,
+      chain,
     });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Failed to add to watchlist:", errorData.message);
-      return false;
-    }
-
-    const data: WatchlistActionResponse = await response.json();
     return data.success;
   } catch (error) {
     console.error("Error adding to watchlist:", error);
@@ -118,33 +105,20 @@ export const addToWatchlist = async (
 
 /**
  * Remove token from user's watchlist
+ * Authenticated endpoint - wallet address comes from JWT
  */
 export const removeFromWatchlist = async (
-  walletAddress: string,
   tokenAddress: string,
   chain: string
 ): Promise<boolean> => {
   try {
-    const url = `${API_ROOT}/watchlist`;
-    const response = await fetch(url, {
+    const data: WatchlistActionResponse = await apiClient.request("/watchlist", {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        walletAddress,
+      body: {
         tokenAddress,
         chain,
-      }),
+      },
     });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Failed to remove from watchlist:", errorData.message);
-      return false;
-    }
-
-    const data: WatchlistActionResponse = await response.json();
     return data.success;
   } catch (error) {
     console.error("Error removing from watchlist:", error);
@@ -154,21 +128,16 @@ export const removeFromWatchlist = async (
 
 /**
  * Check if token is in user's watchlist
+ * Authenticated endpoint - wallet address comes from JWT
  */
 export const checkWatchlist = async (
-  walletAddress: string,
   tokenAddress: string,
   chain: string
 ): Promise<boolean> => {
   try {
-    const url = `${API_ROOT}/watchlist/check?walletAddress=${walletAddress}&tokenAddress=${tokenAddress}&chain=${chain}`;
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      return false;
-    }
-
-    const data: WatchlistCheckResponse = await response.json();
+    const data: WatchlistCheckResponse = await apiClient.get(
+      `/watchlist/check?tokenAddress=${tokenAddress}&chain=${chain}`
+    );
     return data.success && data.data.inWatchlist;
   } catch (error) {
     console.error("Error checking watchlist:", error);

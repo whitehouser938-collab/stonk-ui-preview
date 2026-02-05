@@ -117,7 +117,7 @@ const TradingForm = (props: TradingFormProps) => {
   const [slippagePercent, setSlippagePercent] = useState(1); // Default 1% slippage
   const [customSlippage, setCustomSlippage] = useState(""); // For custom slippage input
   const { isLoading, startLoading, stopLoading } = useLoading();
-  const { getETHSigner } = useETHWalletSigner();
+  const { getETHSigner, isProviderReady } = useETHWalletSigner();
   const getETHSignerRef = React.useRef(getETHSigner);
   React.useEffect(() => {
     getETHSignerRef.current = getETHSigner;
@@ -160,7 +160,7 @@ const TradingForm = (props: TradingFormProps) => {
   const lastBalanceFetchRef = React.useRef<number>(0);
   const balanceFetchInFlightRef = React.useRef<boolean>(false);
   const fetchBalancesNow = React.useCallback(async () => {
-    if (!isEthConnected || !userAddress || !props.tokenAddress) return;
+    if (!isEthConnected || !userAddress || !props.tokenAddress || !isProviderReady) return;
     if (balanceFetchInFlightRef.current) return;
     balanceFetchInFlightRef.current = true;
     try {
@@ -224,7 +224,7 @@ const TradingForm = (props: TradingFormProps) => {
     } finally {
       balanceFetchInFlightRef.current = false;
     }
-  }, [isEthConnected, userAddress, props.tokenAddress, getETHSigner]);
+  }, [isEthConnected, userAddress, props.tokenAddress, isProviderReady]);
 
   const fetchBalancesDebounced = React.useCallback(() => {
     const now = Date.now();
@@ -947,7 +947,7 @@ const TradingForm = (props: TradingFormProps) => {
           BigInt(wethAllowance) < ethers.parseEther(amount) ? (
             <button
               type="button"
-              disabled={isApproving || !isWalletConnected || !amount}
+              disabled={isApproving || !isWalletConnected || !amount || !isProviderReady}
               onClick={handleApprove}
               className="w-full py-2 text-xs font-bold transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
             >
@@ -967,7 +967,7 @@ const TradingForm = (props: TradingFormProps) => {
             })() ? (
             <button
               type="button"
-              disabled={isApproving || !isWalletConnected || !amount}
+              disabled={isApproving || !isWalletConnected || !amount || !isProviderReady}
               onClick={handleTokenApprove}
               className="w-full py-2 text-xs font-bold transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
             >
@@ -980,7 +980,7 @@ const TradingForm = (props: TradingFormProps) => {
         <div className="p-2 border-t border-gray-700">
           <button
             type="submit"
-            disabled={isLoading || pendingTxHash !== null}
+            disabled={isLoading || pendingTxHash !== null || !isProviderReady}
             className={`w-full py-2 text-sm font-bold transition-all duration-200 rounded-lg ${
               isBuy
                 ? "bg-orange-400 hover:bg-orange-500 text-black"
@@ -1297,7 +1297,7 @@ const TradingForm = (props: TradingFormProps) => {
       BigInt(wethAllowance) < ethers.parseEther(amount) ? (
         <button
           type="button"
-          disabled={isApproving || !isWalletConnected || !amount}
+          disabled={isApproving || !isWalletConnected || !amount || !isProviderReady}
           onClick={handleApprove}
           className="w-full p-3 text-sm font-bold transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white rounded"
         >
@@ -1319,7 +1319,7 @@ const TradingForm = (props: TradingFormProps) => {
         })() ? (
         <button
           type="button"
-          disabled={isApproving || !isWalletConnected || !amount}
+          disabled={isApproving || !isWalletConnected || !amount || !isProviderReady}
           onClick={handleTokenApprove}
           className="w-full p-3 text-sm font-bold transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white rounded"
         >
@@ -1330,7 +1330,7 @@ const TradingForm = (props: TradingFormProps) => {
         !props.lockMode && (
           <button
             type="submit"
-            disabled={isLoading || pendingTxHash !== null}
+            disabled={isLoading || pendingTxHash !== null || !isProviderReady}
             className={`w-full p-3 text-sm font-bold transition-all duration-200 rounded ${
               isBuy
                 ? "bg-green-600 hover:bg-green-700 text-black"

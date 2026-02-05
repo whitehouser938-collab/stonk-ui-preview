@@ -193,7 +193,7 @@ const TokenPage = () => {
   const { toast } = useToast();
   const { address, isConnected } = useAppKitAccount({ namespace: "eip155" });
   const { isInWatchlist, toggleWatchlist } = useWatchlist(address);
-  const { getETHSigner } = useETHWalletSigner();
+  const { getETHSigner, isProviderReady } = useETHWalletSigner();
 
   // Token balance for mobile button logic
   const [userTokenBalance, setUserTokenBalance] = useState<string>("0");
@@ -245,7 +245,8 @@ const TokenPage = () => {
 
   // Fetch user token balance on page load (for mobile button logic)
   const fetchUserTokenBalance = useCallback(async () => {
-    if (!isConnected || !address || !tokenAddress) {
+    // Add isProviderReady check
+    if (!isConnected || !address || !tokenAddress || !isProviderReady) {
       setUserTokenBalance("0");
       return;
     }
@@ -263,7 +264,7 @@ const TokenPage = () => {
       console.error("Error fetching user token balance:", error);
       setUserTokenBalance("0");
     }
-  }, [isConnected, address, tokenAddress, getETHSigner]);
+  }, [isConnected, address, tokenAddress, isProviderReady]); // Remove getETHSigner from deps
 
   // Refresh balance when trades are confirmed
   const handleTradeUpdate = useCallback((newTrades: TradeData[]) => {

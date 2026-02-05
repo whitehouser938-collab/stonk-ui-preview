@@ -1083,9 +1083,9 @@ export function MarketsDashboard() {
       {/* DESKTOP VIEW */}
       <div className="hidden lg:block h-screen overflow-auto">
         {/* Main Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 p-1 h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-9 gap-1 p-1 h-full">
           {/* Center Column - Main Trading Data */}
-          <div className="lg:col-span-9 bg-bg-card order-first lg:order-none">
+          <div className="lg:col-span-6 bg-bg-card order-first lg:order-none">
             <div className="text-orange-400 text-xs p-1">
               ACTIVE TRADING PAIRS
             </div>
