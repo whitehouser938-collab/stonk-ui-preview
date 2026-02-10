@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useAppKitAccount, useDisconnect } from "@reown/appkit/react";
 import { useWalletClient } from "wagmi";
+import { logger } from "@/utils/logger";
+import { env } from "@/utils/env";
 
 interface User {
   id: string;
@@ -72,7 +74,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       // 1. Request nonce from auth service
-      const nonceRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/auth/nonce?address=${address}`);
+      const nonceRes = await fetch(`${env.VITE_AUTH_URL}/auth/nonce?address=${address}`, {
+        credentials: 'include',
+      });
       if (!nonceRes.ok) throw new Error("Failed to get nonce");
       const { nonce, expiresAt } = await nonceRes.json();
 
@@ -83,9 +87,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const signature = await walletClient.signMessage({ message });
 
       // 4. Verify signature with auth service
-      const verifyRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/auth/verify`, {
+      const verifyRes = await fetch(`${env.VITE_AUTH_URL}/auth/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: 'include',
         body: JSON.stringify({
           walletAddress: address,
           signature,
@@ -98,16 +103,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error(error.message || "Signature verification failed");
       }
 
-      const { sessionToken: newSession, refreshToken: newRefresh, user: userData } = await verifyRes.json();
+      const response = await verifyRes.json();
+      
+      // TODO: Backend should set httpOnly cookies instead of returning tokens
+      // For now, we still support the old flow but prepare for cookie-based auth
+      const { sessionToken: newSession, refreshToken: newRefresh, user: userData } = response;
 
-      // 5. Store tokens
-      setSessionToken(newSession);
-      setRefreshToken(newRefresh);
-      setUser(userData);
-      localStorage.setItem("auth:sessionToken", newSession);
-      localStorage.setItem("auth:refreshToken", newRefresh);
+      // 5. Store tokens (TEMPORARY - will be removed when backend uses httpOnly cookies)
+      // Backend should set cookies, and we should not store tokens in localStorage
+      if (newSession && newRefresh) {
+        setSessionToken(newSession);
+        setRefreshToken(newRefresh);
+        setUser(userData);
+        // SECURITY WARNING: localStorage is XSS vulnerable
+        // This will be removed once backend implements httpOnly cookies
+        localStorage.setItem("auth:sessionToken", newSession);
+        localStorage.setItem("auth:refreshToken", newRefresh);
+      } else if (userData) {
+        // If backend returns only user (cookie-based auth), just set user
+        setUser(userData);
+      }
     } catch (error: any) {
-      console.error("Sign in error:", error);
+      logger.error("Sign in error:", error);
 
       // Handle user rejection
       if (error.code === 4001 || error.message?.includes("User rejected")) {
@@ -123,9 +140,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!refreshToken) return;
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_AUTH_URL}/auth/refresh`, {
+      const res = await fetch(`${env.VITE_AUTH_URL}/auth/refresh`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: 'include',
         body: JSON.stringify({ refreshToken }),
       });
 
@@ -135,14 +153,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
-      const { sessionToken: newSession, refreshToken: newRefresh } = await res.json();
+      const response = await res.json();
+      
+      // TODO: Backend should set httpOnly cookies instead of returning tokens
+      const { sessionToken: newSession, refreshToken: newRefresh } = response;
 
-      setSessionToken(newSession);
-      setRefreshToken(newRefresh);
-      localStorage.setItem("auth:sessionToken", newSession);
-      localStorage.setItem("auth:refreshToken", newRefresh);
+      if (newSession && newRefresh) {
+        setSessionToken(newSession);
+        setRefreshToken(newRefresh);
+        // SECURITY WARNING: localStorage is XSS vulnerable
+        localStorage.setItem("auth:sessionToken", newSession);
+        localStorage.setItem("auth:refreshToken", newRefresh);
+      }
     } catch (error) {
-      console.error("Token refresh error:", error);
+      logger.error("Token refresh error:", error);
       signOut();
     }
   };
@@ -151,13 +175,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (refreshToken) {
       // Invalidate on auth service
       try {
-        await fetch(`${import.meta.env.VITE_AUTH_URL}/auth/logout`, {
+        await fetch(`${env.VITE_AUTH_URL}/auth/logout`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: 'include',
           body: JSON.stringify({ refreshToken }),
         });
       } catch (error) {
-        console.error("Logout error:", error);
+        logger.error("Logout error:", error);
       }
     }
 

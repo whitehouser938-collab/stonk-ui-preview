@@ -1,3 +1,6 @@
+import { logger } from "@/utils/logger";
+import { env } from "@/utils/env";
+
 interface ApiClientOptions {
   method?: string;
   headers?: Record<string, string>;
@@ -35,12 +38,15 @@ class ApiClient {
     const config: RequestInit = {
       method: options.method || "GET",
       headers,
+      // Include credentials for cookie-based auth (when backend supports it)
+      credentials: 'include',
     };
 
     if (options.body) {
       config.body = JSON.stringify(options.body);
     }
 
+    logger.api(`${options.method || "GET"} ${endpoint}`);
     let response = await fetch(`${this.baseUrl}${endpoint}`, config);
 
     // Handle token expiration
@@ -81,4 +87,4 @@ class ApiClient {
   }
 }
 
-export const apiClient = new ApiClient(import.meta.env.VITE_API_URL || "http://localhost:3000");
+export const apiClient = new ApiClient(env.VITE_API_URL);

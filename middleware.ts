@@ -1,3 +1,5 @@
+import DOMPurify from 'isomorphic-dompurify';
+
 const API_URL = 'https://api.stonkmarket.xyz';
 
 interface TokenData {
@@ -34,18 +36,34 @@ async function fetchTokenData(chainId: string, tokenAddress: string): Promise<To
 }
 
 function injectMetaTags(html: string, tokenData: TokenData, requestUrl: string): string {
-  const tokenSymbol = tokenData.symbol || tokenData.name || 'Token';
-  const title = `${tokenSymbol} on Stonk Market`;
-  const description = `View ${tokenSymbol} on Stonk Market`;
+  // Sanitize all user-provided data to prevent XSS
+  const tokenSymbol = DOMPurify.sanitize(tokenData.symbol || tokenData.name || 'Token');
+  const title = DOMPurify.sanitize(`${tokenSymbol} on Stonk Market`);
+  const description = DOMPurify.sanitize(`View ${tokenSymbol} on Stonk Market`);
 
-  // Use the Google Cloud Storage URL directly
+  // Validate and sanitize image URL
   let imageUrl = tokenData.logoUrl || 'https://stonkmarket.xyz/default-pfp.jpeg';
 
-  // If it's still a relative URL, make it absolute
-  if (!imageUrl.startsWith('http')) {
-    const url = new URL(requestUrl);
-    imageUrl = `${url.origin}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+  // Prevent javascript: and data: URI injection
+  if (imageUrl.startsWith('javascript:') || imageUrl.startsWith('data:')) {
+    imageUrl = 'https://stonkmarket.xyz/default-pfp.jpeg';
   }
+
+  // Validate it's a proper HTTP/HTTPS URL
+  try {
+    const parsedUrl = new URL(imageUrl);
+    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+      imageUrl = 'https://stonkmarket.xyz/default-pfp.jpeg';
+    }
+  } catch {
+    // If it's a relative URL, make it absolute
+    if (!imageUrl.startsWith('http')) {
+      const url = new URL(requestUrl);
+      imageUrl = `${url.origin}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+    }
+  }
+
+  imageUrl = DOMPurify.sanitize(imageUrl);
 
   console.log('Meta tags:', { title, imageUrl });
 
@@ -72,16 +90,17 @@ function injectMetaTags(html: string, tokenData: TokenData, requestUrl: string):
       `<meta property="og:image" content="${imageUrl}" />`
     );
 
-  // Add or update og:url
+  // Add or update og:url (sanitize request URL)
+  const sanitizedRequestUrl = DOMPurify.sanitize(requestUrl);
   if (html.includes('property="og:url"')) {
     modifiedHtml = modifiedHtml.replace(
       /<meta property="og:url" content=".*?".*?\/>/,
-      `<meta property="og:url" content="${requestUrl}" />`
+      `<meta property="og:url" content="${sanitizedRequestUrl}" />`
     );
   } else {
     modifiedHtml = modifiedHtml.replace(
       /<meta property="og:type" content="website" \/>/,
-      `<meta property="og:type" content="website" />\n    <meta property="og:url" content="${requestUrl}" />`
+      `<meta property="og:type" content="website" />\n    <meta property="og:url" content="${sanitizedRequestUrl}" />`
     );
   }
 

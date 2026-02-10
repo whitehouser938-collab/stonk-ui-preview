@@ -8,6 +8,7 @@ import { useETHWalletSigner } from "@/hooks/signers/useWalletSigner";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ethers } from "ethers";
+import { logger } from "@/utils/logger";
 import {
   WalletConnectionPrompt,
   WalletRequiredAlert,
@@ -607,7 +608,7 @@ const TradingForm = (props: TradingFormProps) => {
           // Note: slippage is now hardcoded to match working script's 5% tolerance
         };
 
-        console.log("[UI SELL PARAMS]", {
+        logger.trade("[UI SELL PARAMS]", {
           tokenAddress: props.tokenAddress,
           amount: amount,
           actualAmountUsed: tradeData.amount,
@@ -615,11 +616,10 @@ const TradingForm = (props: TradingFormProps) => {
           deadline: tradeData.deadline,
           from: userAddress,
           isBuy: false,
-          tradeData,
         });
 
         // Debug the current balance and decimals state
-        console.log("[FORM STATE DEBUG]", {
+        logger.debug("[FORM STATE DEBUG]", {
           tokenBalance,
           tokenDecimals,
           tokenBalanceFormatted: ethers.formatUnits(

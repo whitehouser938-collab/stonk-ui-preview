@@ -9,6 +9,9 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { apiClient } from "@/services/apiClient";
 import { useEffect } from "react";
 import Index from "./pages/Index";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { env } from "@/utils/env";
+import { logger } from "@/utils/logger";
 
 //Reown imports
 import { createAppKit } from "@reown/appkit/react";
@@ -25,10 +28,10 @@ import NotFound from "./pages/NotFound";
 import TokenDetail from "./pages/TokenDetail/TokenDetail";
 
 const queryClient = new QueryClient();
-const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID;
+const projectId = env.VITE_WALLETCONNECT_PROJECT_ID;
 
 if (!projectId) {
-  throw new Error("VITE_WALLETCONNECT_PROJECT_ID is not set");
+  throw new Error("VITE_WALLETCONNECT_PROJECT_ID is not set. Check your environment variables.");
 }
 
 const metadata = {
@@ -70,7 +73,7 @@ const AppContent = () => {
       async () => {
         // Token refresh is handled internally by AuthContext
         // This is called when a 401 is received
-        console.log("Token expired, attempting refresh...");
+        logger.debug("Token expired, attempting refresh...");
       }
     );
   }, [sessionToken]);
@@ -103,13 +106,15 @@ const AppContent = () => {
 };
 
 const App = () => (
-  <WagmiProvider config={wagmiAdapter.wagmiConfig}>
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </QueryClientProvider>
-  </WagmiProvider>
+  <ErrorBoundary>
+    <WagmiProvider config={wagmiAdapter.wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
+  </ErrorBoundary>
 );
 
 export default App;

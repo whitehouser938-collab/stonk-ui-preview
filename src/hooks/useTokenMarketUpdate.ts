@@ -1,6 +1,7 @@
 import { useEffect, useCallback, useRef } from "react";
 import { wsManager } from "../services/websocket.ts";
 import { SUBSCRIPTION_TYPES, TokenMarketOverview, TokenMarketUpdateMessage } from "@/types/index.ts";
+import { logger } from "@/utils/logger";
 
 export function useTokenMarketUpdates(
   chainId: string | undefined,
@@ -16,22 +17,20 @@ export function useTokenMarketUpdates(
   }, [onTokenMarketUpdate]);
 
   const handleTokenMarketUpdate = useCallback((data: TokenMarketUpdateMessage) => {
-    console.log(`[useTokenMarketUpdate] Received market update:`, data);
+    logger.debug("Received market update:", data);
     if (
       data.type === "tokenMarketOverview"
     ) {
-      console.log(`[useTokenMarketUpdate] Processing ${data.tokenMarketOverview}`);
+      logger.debug("Processing token market overview");
       onTokenMarketUpdateRef.current(data.tokenMarketOverview);
     } else {
-      console.log(`[useTokenMarketUpdate] Invalid trade data:`, data);
+      logger.warn("Invalid market data:", data);
     }
   }, []);
 
   useEffect(() => {
     if (chainId && tokenAddress) {
-      console.log(
-        `[useTokenMarketUpdate] Subscribing to market update for ${tokenAddress} on ${chainId}`
-      );
+      logger.debug(`Subscribing to market update for ${tokenAddress} on ${chainId}`);
 
       const channelString = SUBSCRIPTION_TYPES.tokenMarketOverview.channelFormatter(tokenAddress, chainId);
       const unsubscribe = wsManager.subscribe("tokenMarketOverview", handleTokenMarketUpdate, channelString);
@@ -40,11 +39,7 @@ export function useTokenMarketUpdates(
     }
     return () => {
       if (unsubscribeRef.current) {
-        console.log(
-          `[useTokenMarketUpdate] Unsubscribing from market update for ${
-            tokenAddress || "N/A"
-          } on ${chainId || "N/A"}`
-        );
+        logger.debug(`Unsubscribing from market update for ${tokenAddress || "N/A"} on ${chainId || "N/A"}`);
         unsubscribeRef.current();
         unsubscribeRef.current = null;
       }

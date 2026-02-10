@@ -2,6 +2,7 @@ import { wsManager } from "@/services/websocket";
 import { resolutionMap } from "./datafeed";
 import { BarData, BarUpdateMessage, Chain, SUBSCRIPTION_TYPES } from "@/types";
 import { TVAsset, TVMode } from "./helpers";
+import { logger } from "@/utils/logger";
 
 interface BasicSymbolInfo {
   chain: Chain,
@@ -86,7 +87,7 @@ export function subscribeOnStream(
     handlers: [handler],
   };
   channelToSubscription.set(channelString, subscriptionItem);
-  console.log(
+  logger.debug(
     "[subscribeBars]: Subscribe to streaming. Channel:",
     channelString,
   );
@@ -107,7 +108,7 @@ export function unsubscribeFromStream(subscriberUID: string) {
 
       if (subscriptionItem.handlers.length === 0) {
         // Unsubscribe from the channel if it was the last handler
-        console.log(
+        logger.debug(
           "[unsubscribeBars]: Unsubscribe from streaming. Channel:",
           channelString,
         );

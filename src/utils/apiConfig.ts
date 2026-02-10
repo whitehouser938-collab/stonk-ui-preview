@@ -1,34 +1,19 @@
 // API Configuration utility
+import { env } from "./env";
+import { logger } from "./logger";
+
 export const getApiBaseUrl = (): string => {
-  const apiUrl = import.meta.env.VITE_API_URL;
-
-  if (!apiUrl) {
-    console.warn(
-      "VITE_API_URL environment variable is not set. Using fallback URL."
-    );
-    return "http://localhost:3000"; // Fallback URL
-  }
-
-  return apiUrl;
+  return env.VITE_API_URL;
 };
 
 export const getWebSocketUrl = (): string => {
-  const wsUrl = import.meta.env.VITE_WEBSOCKET_URL;
-
   // If explicitly set, use it
-  if (wsUrl) {
-    return wsUrl;
+  if (env.VITE_WEBSOCKET_URL) {
+    return env.VITE_WEBSOCKET_URL;
   }
 
   // Otherwise, derive from API URL
-  const apiUrl = import.meta.env.VITE_API_URL;
-
-  if (!apiUrl) {
-    console.warn(
-      "Neither VITE_WEBSOCKET_URL nor VITE_API_URL is set. Using fallback WebSocket URL."
-    );
-    return "ws://localhost:3003";
-  }
+  const apiUrl = env.VITE_API_URL;
 
   // Convert HTTP(S) API URL to WS(S) WebSocket URL
   try {
@@ -38,24 +23,17 @@ export const getWebSocketUrl = (): string => {
     const wsPath = url.pathname.replace(/\/api\/?$/, "") + "/ws";
     return `${wsProtocol}//${url.host}${wsPath}`;
   } catch (error) {
-    console.error("Failed to derive WebSocket URL from API URL:", apiUrl);
-    return "ws://localhost:3003";
+    logger.error("Failed to derive WebSocket URL from API URL:", apiUrl);
+    throw new Error("Invalid API URL configuration");
   }
 };
 
 export const validateApiConfig = (): boolean => {
-  const apiUrl = import.meta.env.VITE_API_URL;
-
-  if (!apiUrl) {
-    console.error("VITE_API_URL environment variable is required but not set.");
-    return false;
-  }
-
   try {
-    new URL(apiUrl);
+    new URL(env.VITE_API_URL);
     return true;
   } catch (error) {
-    console.error("VITE_API_URL is not a valid URL:", apiUrl);
+    logger.error("VITE_API_URL is not a valid URL:", env.VITE_API_URL);
     return false;
   }
 };

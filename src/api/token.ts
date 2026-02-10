@@ -1,6 +1,7 @@
 import { BarData, Chain } from "@/types";
 
 import { getApiBaseUrl } from "@/utils/apiConfig";
+import { logger } from "@/utils/logger";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -31,10 +32,10 @@ export const addToken = async (tokenData: any) => {
     if (!resData || !resData.success) {
       throw new Error("Token addition unsuccessful");
     }
-    console.log("Token added successfully:", resData);
+    logger.debug("Token added successfully");
     return resData.data;
   } catch (error) {
-    console.error("Error adding token:", error);
+    logger.error("Error adding token:", error);
     throw error;
   }
 };
@@ -44,9 +45,11 @@ export const getToken = async (chainId: string, tokenAddress: string) => {
     // Use the new merged endpoint that combines Graph + Postgres data
     const response = await fetch(
       // `${API_BASE_URL}/token/${tokenAddress}?chain=${chainId}`
-      `${API_BASE_URL}/token/find?address=${tokenAddress}&chain=${chainId}`
+      `${API_BASE_URL}/token/find?address=${tokenAddress}&chain=${chainId}`,
+      {
+        credentials: 'include',
+      }
     );
-    console.log(response);
     if (!response.ok) {
       throw new Error("Failed to fetch token data");
     }
@@ -56,7 +59,7 @@ export const getToken = async (chainId: string, tokenAddress: string) => {
     }
     return tokenData.data;
   } catch (error) {
-    console.error("Error fetching token:", error);
+    logger.error("Error fetching token:", error);
     throw error;
   }
 };
@@ -72,9 +75,6 @@ export const uploadTokenLogo = async (
   formData.append("tokenId", tokenId);
   formData.append("tokenName", tokenName);
   formData.append("tokenSymbol", tokenSymbol);
-  console.log("++++++");
-  console.log(formData);
-  console.log("++++++");
 
   try {
     const response = await fetch(`${API_BASE_URL}/upload/token-logo`, {
@@ -92,7 +92,7 @@ export const uploadTokenLogo = async (
     }
     return resData.url;
   } catch (error) {
-    console.error("Error uploading token logo:", error);
+    logger.error("Error uploading token logo:", error);
     throw error;
   }
 };
@@ -115,7 +115,7 @@ export const updateTokenLogoUrl = async (tokenId: string, logoUrl: string) => {
     }
     return resData.data;
   } catch (error) {
-    console.error("Error updating token logo URL:", error);
+    logger.error("Error updating token logo URL:", error);
     throw error;
   }
 };
@@ -160,7 +160,7 @@ export const searchTokens = async (
     }
     return searchData;
   } catch (error) {
-    console.error("Error searching tokens:", error);
+    logger.error("Error searching tokens:", error);
     throw error;
   }
 };
@@ -173,7 +173,7 @@ export const getTokenTrades = async (
 ): Promise<any[]> => {
   try {
     const cursorIdQuery = cursorId ? `&cursorId=${cursorId}` : "";
-    console.log(cursorIdQuery, " Cur id query");
+    logger.debug("Cursor ID query:", cursorIdQuery);
     const response = await fetch(
       `${API_BASE_URL}/token/trades/${tokenAddress}?chain=${chainId}&limit=${limit}${cursorIdQuery}`
     );
@@ -186,7 +186,7 @@ export const getTokenTrades = async (
     }
     return data.data.trades;
   } catch (error) {
-    console.error("Error fetching token trades:", error);
+    logger.error("Error fetching token trades:", error);
     return [];
   }
 };
@@ -211,7 +211,7 @@ export const getTokenOHLCVBars = async (
     }
     return data;
   } catch (error) {
-    console.error("Error fetching token trades:", error);
+    logger.error("Error fetching token trades:", error);
     return { end: true, bars: [] };
   }
 };
@@ -253,7 +253,7 @@ export const getAllTokens = async (
       pagination: data.data.pagination,
     };
   } catch (error) {
-    console.error("Error fetching all tokens:", error);
+    logger.error("Error fetching all tokens:", error);
     return { tokens: [], pagination: null };
   }
 };
@@ -279,7 +279,7 @@ export const getTrendingTokens = async (
     }
     return data.data.tokens;
   } catch (error) {
-    console.error("Error fetching trending tokens:", error);
+    logger.error("Error fetching trending tokens:", error);
     return [];
   }
 };
@@ -302,7 +302,7 @@ export const getBondingCurveVolumeData = async (
     }
     return data.data.tokens;
   } catch (error) {
-    console.error("Error fetching bonding curve volume data:", error);
+    logger.error("Error fetching bonding curve volume data:", error);
     return [];
   }
 };
@@ -324,7 +324,7 @@ export const getGraduationPercentage = async (chain?: string): Promise<any> => {
     }
     return data.data;
   } catch (error) {
-    console.error("Error fetching graduation percentage:", error);
+    logger.error("Error fetching graduation percentage:", error);
     return null;
   }
 };
@@ -345,7 +345,7 @@ export const getTotalTokensCreated = async (chain?: string): Promise<any> => {
     }
     return data.data;
   } catch (error) {
-    console.error("Error fetching total tokens created:", error);
+    logger.error("Error fetching total tokens created:", error);
     return null;
   }
 };
@@ -368,7 +368,7 @@ export const getTotalBondingCurveVolume = async (
     }
     return data.data;
   } catch (error) {
-    console.error("Error fetching total bonding curve volume:", error);
+    logger.error("Error fetching total bonding curve volume:", error);
     return null;
   }
 };
@@ -389,7 +389,7 @@ export const getTopTokenMarketCap = async (chain?: string): Promise<any> => {
     }
     return data.data;
   } catch (error) {
-    console.error("Error fetching top token market cap:", error);
+    logger.error("Error fetching top token market cap:", error);
     return null;
   }
 };
@@ -414,7 +414,7 @@ export const getTokenPreciseVolume = async (
     }
     return data.data;
   } catch (error) {
-    console.error("Error fetching token precise volume:", error);
+    logger.error("Error fetching token precise volume:", error);
     return null;
   }
 };
@@ -455,7 +455,7 @@ export const getAggregatedVolumeStats = async (): Promise<any> => {
     }
     return data.data;
   } catch (error) {
-    console.error("Error fetching aggregated volume stats:", error);
+    logger.error("Error fetching aggregated volume stats:", error);
     return null;
   }
 };
@@ -502,7 +502,7 @@ export const getMarketOverview = async (): Promise<any> => {
     }
     return data.data;
   } catch (error) {
-    console.error("Error fetching market overview:", error);
+    logger.error("Error fetching market overview:", error);
     return null;
   }
 };
@@ -570,7 +570,7 @@ export const getTokenHolders = async (
     }
     return data;
   } catch (error) {
-    console.error("Error fetching token holders:", error);
+    logger.error("Error fetching token holders:", error);
     throw error;
   }
 };

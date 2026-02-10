@@ -1,5 +1,7 @@
 import { SUBSCRIPTION_TYPES } from "@/types";
 import { getWebSocketUrl } from "@/utils/apiConfig";
+import { logger } from "@/utils/logger";
+import { validateWebSocketMessage } from "@/utils/websocketValidation";
 
 class WebSocketManager {
   private ws: WebSocket | null = null;
@@ -40,12 +42,12 @@ class WebSocketManager {
 
       try {
         const wsUrl = getWebSocketUrl();
-        console.log("[WebSocket] Connecting to:", wsUrl);
+        logger.websocket("Connecting to:", wsUrl);
         this.ws = new WebSocket(wsUrl);
 
         this.ws.onopen = () => {
-          console.log("WebSocket connected");
-          console.log("WebSocket ready state:", this.ws?.readyState);
+          logger.websocket("Connected");
+          logger.debug("WebSocket ready state:", this.ws?.readyState);
           this.reconnectAttempts = 0;
           this.isConnecting = false;
           this.connectionState = "connected";
@@ -68,25 +70,33 @@ class WebSocketManager {
           try {
             // Only handle JSON messages - browser handles ping/pong automatically
             if (typeof event.data === "string") {
-              const message = JSON.parse(event.data);
-              console.log("[WebSocket] Received message:", message);
-              this.handleMessage(message);
+              const rawMessage = JSON.parse(event.data);
+              
+              // Validate message before processing
+              const validatedMessage = validateWebSocketMessage(rawMessage);
+              if (!validatedMessage) {
+                logger.warn("Invalid WebSocket message received, ignoring");
+                return;
+              }
+              
+              logger.websocket("Received message:", validatedMessage);
+              this.handleMessage(validatedMessage);
             }
           } catch (error) {
-            console.error("Failed to parse WebSocket message:", error);
+            logger.error("Failed to parse WebSocket message:", error);
           }
         };
 
         this.ws.onclose = (event) => {
-          console.log("WebSocket disconnected:", event.code, event.reason);
-          console.log("Close was clean:", event.wasClean);
+          logger.websocket("Disconnected:", event.code, event.reason);
+          logger.debug("Close was clean:", event.wasClean);
           this.isConnecting = false;
           this.connectionState = "disconnected";
           this.handleReconnection();
         };
 
         this.ws.onerror = (error) => {
-          console.error("WebSocket error:", error);
+          logger.error("WebSocket error:", error);
           this.isConnecting = false;
           this.connectionState = "disconnected";
           reject(error);
@@ -108,27 +118,24 @@ class WebSocketManager {
   private handleMessage(message: any) {
     // Handle heartbeat acknowledgments
     if (message.type === "heartbeat_ack") {
-      console.log("[WebSocket] Received heartbeat acknowledgment from server");
+      logger.debug("Received heartbeat acknowledgment from server");
       return;
-    }else if (message.type === "subscribed"){
-      console.log(`[WebSocket] Subscribed to channel: ${message.channel}`);
+    } else if (message.type === "subscribed") {
+      logger.websocket(`Subscribed to channel: ${message.channel}`);
       return;
     }
 
     // Normalize the channel from the server message
     const normalizedChannel = this.normalizeChannel(message.channel);
-    console.log("[WebSocket] Handling message for channel:", message.channel, "->", normalizedChannel);
+    logger.debug("Handling message for channel:", message.channel, "->", normalizedChannel);
 
     const handler = this.messageHandlers.get(normalizedChannel);
     if (handler) {
-      console.log("[WebSocket] Found handler for channel:", normalizedChannel);
+      logger.debug("Found handler for channel:", normalizedChannel);
       handler(message);
     } else {
-      console.log("[WebSocket] No handler found for channel:", normalizedChannel);
-      console.log(
-        "[WebSocket] Available handlers:",
-        Array.from(this.messageHandlers.keys())
-      );
+      logger.warn("No handler found for channel:", normalizedChannel);
+      logger.debug("Available handlers:", Array.from(this.messageHandlers.keys()));
     }
   }
 
@@ -142,19 +149,14 @@ class WebSocketManager {
         // Send a simple heartbeat message to verify server responsiveness
         try {
           this.ws.send(JSON.stringify({ type: "heartbeat" }));
-          console.log("[WebSocket] Health check: Sent heartbeat");
+          logger.debug("Health check: Sent heartbeat");
         } catch (error) {
-          console.log(
-            "[WebSocket] Health check: Failed to send heartbeat, connection dead"
-          );
+          logger.warn("Health check: Failed to send heartbeat, connection dead");
           this.connectionState = "disconnected";
           this.handleReconnection();
         }
       } else {
-        console.log(
-          "[WebSocket] Health check: Connection is dead, state:",
-          this.ws?.readyState
-        );
+        logger.debug("Health check: Connection is dead, state:", this.ws?.readyState);
         this.connectionState = "disconnected";
         this.handleReconnection();
       }
@@ -178,21 +180,17 @@ class WebSocketManager {
         30000 // Max 30 second delay
       );
 
-      console.log(
-        `Attempting to reconnect in ${delay}ms (attempt ${this.reconnectAttempts})`
-      );
+      logger.info(`Attempting to reconnect in ${delay}ms (attempt ${this.reconnectAttempts})`);
 
       setTimeout(() => {
         this.connect().catch((error) => {
-          console.error("Reconnection failed:", error);
+          logger.error("Reconnection failed:", error);
           // Continue trying even if this attempt fails
           this.handleReconnection();
         });
       }, delay);
     } else {
-      console.error(
-        "Max reconnection attempts reached, will retry in 60 seconds"
-      );
+      logger.warn("Max reconnection attempts reached, will retry in 60 seconds");
       // Reset attempts after 60 seconds to allow for network recovery
       setTimeout(() => {
         this.reconnectAttempts = 0;
@@ -228,7 +226,7 @@ class WebSocketManager {
     const config = SUBSCRIPTION_TYPES[subscriptionKey];
     const normalizedChannel = this.normalizeChannel(channel);
 
-    console.log(`[WebSocket] Subscribing to ${subscriptionKey} on channel: ${channel} -> ${normalizedChannel}`);
+    logger.websocket(`Subscribing to ${subscriptionKey} on channel: ${channel} -> ${normalizedChannel}`);
 
     this.connect()
       .then((ws) => {
@@ -240,7 +238,7 @@ class WebSocketManager {
         this.subscriptions.add(normalizedChannel);
         this.messageHandlers.set(normalizedChannel, onUpdate);
       })
-      .catch(console.error);
+      .catch((error) => logger.error("WebSocket subscription error:", error));
 
     return () => this.unsubscribe(subscriptionKey, channel);
   }
@@ -262,7 +260,7 @@ class WebSocketManager {
     // Delete using normalized channel
     this.subscriptions.delete(normalizedChannel);
     this.messageHandlers.delete(normalizedChannel);
-    console.log(`[WebSocket] Unsubscribed from ${subscriptionKey} on channel: ${channel} -> ${normalizedChannel}`);
+    logger.websocket(`Unsubscribed from ${subscriptionKey} on channel: ${channel} -> ${normalizedChannel}`);
   }
 
   disconnect() {

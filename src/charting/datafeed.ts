@@ -7,6 +7,7 @@ import {
   IBasicDataFeed,
 } from "../../public/charting_library/charting_library";
 import { getTokenOHLCVBars } from "@/api/token";
+import { logger } from "@/utils/logger";
 
 
 const lastBarsCache: Map<string, BarData> = new Map();
@@ -91,7 +92,7 @@ const resolveSymbol = async (
   const tvSymbol = parseTvSymbol(symbolString);
 
   if (!tvSymbol.tokenSymbol || !tvSymbol.chain || !tvSymbol.tokenAddress) {
-    console.log("[resolveSymbol]: Cannot resolve symbol", symbolString);
+    logger.warn("[resolveSymbol]: Cannot resolve symbol", symbolString);
     onResolveErrorCallback("Cannot resolve symbol");
     return;
   }
@@ -124,7 +125,7 @@ const resolveSymbol = async (
     asset: tvSymbol.asset,
     mode: tvSymbol.mode,
   };
-  console.log("[resolveSymbol]: Symbol resolved", symbolString);
+  logger.debug("[resolveSymbol]: Symbol resolved", symbolString);
 
   onSymbolResolvedCallback(symbolInfo);
 }
@@ -150,7 +151,7 @@ const getBars = async (
     onErrorCallback(err);
   };
 
-  console.log(periodParams);
+  logger.debug("Period params:", periodParams);
   const { to, firstDataRequest, countBack } = periodParams;
 
   const cacheKey = `${symbolInfo.tokenAddress}:${symbolInfo.chain}:${resolution}`;
@@ -197,7 +198,7 @@ const getBars = async (
       }
       return newBar;
     });
-    console.log("[getBars]: Retrieved bars for ", symbolInfo.name, bars);
+    logger.debug("[getBars]: Retrieved bars for", symbolInfo.name);
 
     bars.sort((a, b) => a.time - b.time);
 
@@ -217,7 +218,7 @@ const subscribeBars = (
   subscriberUID: string,
   onResetCacheNeededCallback: () => void
 ) => {
-  console.log(
+  logger.debug(
     "[subscribeBars]: Method call with subscriberUID:",
     subscriberUID
   );
@@ -241,7 +242,7 @@ const subscribeBars = (
 }
 
 const unsubscribeBars = (subscriberUID: string) => {
-  console.log(
+  logger.debug(
     "[unsubscribeBars]: Method call with subscriberUID:",
     subscriberUID
   );

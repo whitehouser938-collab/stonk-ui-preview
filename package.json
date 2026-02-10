@@ -5,10 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node scripts/validate-env.js",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "validate-env": "node scripts/validate-env.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -52,6 +54,7 @@
     "embla-carousel-react": "^8.3.0",
     "ethers": "^6.14.3",
     "input-otp": "^1.2.4",
+    "isomorphic-dompurify": "^2.36.0",
     "jotai": "^2.12.5",
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",
