@@ -1,5 +1,6 @@
 import { ICOLaunchData } from "../components/ICOLaunchpad";
 import { addToken } from "@/api/token";
+import { logger } from "@/utils/logger";
 export const addTokenToDb = async (
   tokenData: ICOLaunchData,
   deployerAddress: string,
@@ -23,7 +24,7 @@ export const addTokenToDb = async (
     deploymentBlock,
   };
   const addedToken = await addToken(tokenDataMap);
-  console.log("Added token to database:", addedToken);
+  logger.debug("Added token to database:", addedToken);
   if (!addedToken) {
     throw new Error("Failed to add token to database");
   }

@@ -21,6 +21,7 @@ import { Button } from "./ui/button";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useDisconnect } from "wagmi";
 import { isSearchModalOpenAtom } from "@/state/app";
+import { logger } from "@/utils/logger";
 
 const navItems = [
   { path: "/", label: "Markets", icon: BarChart },
@@ -88,7 +89,7 @@ export function Layout({ children }: LayoutProps) {
     try {
       await disconnect();
     } catch (error) {
-      console.error("Error disconnecting wallet:", error);
+      logger.error("Error disconnecting wallet:", error);
     } finally {
       setDisconnecting(false);
     }
@@ -160,7 +161,7 @@ export function Layout({ children }: LayoutProps) {
                 STONK EXCHANGE
               </h1>
             </Link>
-            <nav className="flex space-x-1">
+            <nav className="flex space-x-1" aria-label="Main navigation">
               {navItems.map((item) => {
                 const isActive = location.pathname === item.path;
                 return (

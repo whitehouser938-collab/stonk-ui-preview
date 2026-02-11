@@ -4,6 +4,7 @@ import { useAtom } from "jotai";
 import { searchTermAtom } from "@/state/app";
 import { useNavigate } from "react-router-dom";
 import { searchTokens as apiSearchTokens } from "@/api/token";
+import { logger } from "@/utils/logger";
 
 interface TokenSearchResult {
   id: string;
@@ -70,7 +71,7 @@ const SearchBar = () => {
         setSelectedIndex(-1);
       }
     } catch (error) {
-      console.error("Search error:", error);
+      logger.error("Search error:", error);
       setSearchResults([]);
     } finally {
       setIsLoading(false);
@@ -123,7 +124,7 @@ const SearchBar = () => {
       selectToken(searchResults[0]);
     } else if (storedSearchTerm.trim()) {
       // If no results but there's a search term, clear and blur
-      console.log("Searching for:", storedSearchTerm);
+      logger.debug("Searching for:", storedSearchTerm);
       setStoredSearchTerm("");
       setShowPreview(false);
       setSelectedIndex(-1);
@@ -144,6 +145,8 @@ const SearchBar = () => {
           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3" />
           <input
             ref={inputRef}
+            type="search"
+            aria-label="Search tokens by ticker or name"
             placeholder="Search ticker or name..."
             value={storedSearchTerm}
             onChange={(e) => setStoredSearchTerm(e.target.value)}

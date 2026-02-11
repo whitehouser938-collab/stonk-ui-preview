@@ -1,6 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { logger } from '@/utils/logger';
+import { env } from '@/utils/env';
 
 interface Props {
   children: ReactNode;
@@ -25,15 +26,22 @@ export class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     logger.error('ErrorBoundary caught:', error, errorInfo);
 
-    // Error tracking integration
-    // To enable Sentry, uncomment and configure:
-    // if (import.meta.env.PROD && window.Sentry) {
-    //   window.Sentry.captureException(error, { contexts: { react: errorInfo } });
-    // }
-    
-    // Alternative: Send to your error tracking service
-    if (import.meta.env.PROD) {
-      // Example: fetch('/api/errors', { method: 'POST', body: JSON.stringify({ error, errorInfo }) })
+    if (import.meta.env.PROD && env.VITE_ERROR_REPORTING_URL) {
+      try {
+        fetch(env.VITE_ERROR_REPORTING_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'omit',
+          body: JSON.stringify({
+            message: error.message,
+            name: error.name,
+            stack: error.stack,
+            componentStack: errorInfo.componentStack,
+          }),
+        }).catch(() => {});
+      } catch {
+        // ignore
+      }
     }
   }
 

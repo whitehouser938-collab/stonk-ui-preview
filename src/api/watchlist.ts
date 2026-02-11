@@ -1,6 +1,8 @@
 import { apiClient } from "@/services/apiClient";
+import { env } from "@/utils/env";
+import { logger } from "@/utils/logger";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = env.VITE_API_URL;
 // Normalize to ensure we always target the /api prefix exactly once
 const BASE = (API_BASE_URL || "").replace(/\/$/, "");
 const API_ROOT = BASE.endsWith("/api") ? BASE : `${BASE}/api`;
@@ -66,7 +68,7 @@ export const getUserWatchlist = async (
     const response = await fetch(url);
 
     if (!response.ok) {
-      console.error("Failed to fetch watchlist");
+      logger.error("Failed to fetch watchlist");
       return [];
     }
 
@@ -78,7 +80,7 @@ export const getUserWatchlist = async (
 
     return data.data.tokens;
   } catch (error) {
-    console.error("Error fetching watchlist:", error);
+    logger.error("Error fetching watchlist:", error);
     return [];
   }
 };
@@ -98,7 +100,7 @@ export const addToWatchlist = async (
     });
     return data.success;
   } catch (error) {
-    console.error("Error adding to watchlist:", error);
+    logger.error("Error adding to watchlist:", error);
     return false;
   }
 };
@@ -121,7 +123,7 @@ export const removeFromWatchlist = async (
     });
     return data.success;
   } catch (error) {
-    console.error("Error removing from watchlist:", error);
+    logger.error("Error removing from watchlist:", error);
     return false;
   }
 };
@@ -140,7 +142,7 @@ export const checkWatchlist = async (
     );
     return data.success && data.data.inWatchlist;
   } catch (error) {
-    console.error("Error checking watchlist:", error);
+    logger.error("Error checking watchlist:", error);
     return false;
   }
 };

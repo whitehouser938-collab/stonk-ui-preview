@@ -2,6 +2,8 @@ import { TokenTradeData } from "../components/TradingForm";
 import { ethers } from "ethers";
 import Router from "@/abi/evm/Router.json";
 import { Contract, EventLog } from "ethers";
+import { env } from "@/utils/env";
+import { logger } from "@/utils/logger";
 import {
   calculateBuyPrice,
   getTokenDecimals,
@@ -37,7 +39,7 @@ export const buyTokens = async (
   }
 
   try {
-    const routerAddress = import.meta.env.VITE_EVM_ROUTER_ADDRESS;
+    const routerAddress = env.VITE_EVM_ROUTER_ADDRESS;
     const router = new Contract(routerAddress, Router.abi, signer);
 
     // Validate amount before parsing
@@ -106,7 +108,7 @@ export const buyTokens = async (
     const minTokenAmount =
       (expectedTokenAmount * BigInt(10000 - slippageBps)) / BigInt(10000);
 
-    console.log("[BUY PARAMS]", {
+    logger.trade("[BUY PARAMS]", {
       tokenAddress: tradeData.tokenAddress,
       paymentMethod: tradeData.currency,
       assetAmount: assetAmount.toString(),
@@ -140,7 +142,7 @@ export const buyTokens = async (
       );
     }
 
-    console.log("[BUY] Transaction sent:", tx.hash);
+    logger.trade("[BUY] Transaction sent:", tx.hash);
 
     // Don't wait for confirmation - let backend/WebSocket handle that
     // This eliminates RPC dependency and matches backend timing
@@ -153,7 +155,7 @@ export const buyTokens = async (
       pending: true, // Mark as pending since not confirmed yet
     };
   } catch (error) {
-    console.error(
+    logger.error(
       `Error purchasing ${tradeData.symbol} on ${tradeData.chain}`,
       error
     );
@@ -187,7 +189,7 @@ export const sellTokens = async (
   }
 
   try {
-    const routerAddress = import.meta.env.VITE_EVM_ROUTER_ADDRESS;
+    const routerAddress = env.VITE_EVM_ROUTER_ADDRESS;
     const router = new Contract(routerAddress, Router.abi, signer);
 
     // Validate amount before parsing
@@ -244,7 +246,7 @@ export const sellTokens = async (
       provider
     );
 
-    console.log("[SELL PROCEEDS DEBUG]", {
+    logger.trade("[SELL PROCEEDS DEBUG]", {
       tokenAddress: tradeData.tokenAddress,
       tokenAmount: tokenAmount.toString(),
       proceedsData,
@@ -264,7 +266,7 @@ export const sellTokens = async (
 
     const expectedAssetAmount = BigInt(proceedsData.data.assetAmount);
 
-    console.log("[SELL PROCEEDS CALCULATION]", {
+    logger.trade("[SELL PROCEEDS CALCULATION]", {
       expectedAssetAmount: expectedAssetAmount.toString(),
       isZero: expectedAssetAmount === 0n,
       tokenAmount: tokenAmount.toString(),
@@ -290,7 +292,7 @@ export const sellTokens = async (
     // Use the same deadline calculation as the working script
     const deadline = Math.floor(Date.now() / 1000) + 300; // 5 minutes
 
-    console.log("[SELL PARAMS]", {
+    logger.trade("[SELL PARAMS]", {
       tokenAddress: tradeData.tokenAddress,
       tokenAmount: tokenAmount.toString(),
       expectedAssetAmount: expectedAssetAmount.toString(),
@@ -302,18 +304,16 @@ export const sellTokens = async (
     // Token approval is now handled in the UI (TradingForm) before calling this function
     // This eliminates double wallet popups - users see a clear "Approve Token" button first
 
-    let tx;
-
     // Always use sellTokens (returns WETH) - consistent with working script
     // The router handles the internal conversion logic
-    tx = await router.sellTokens(
+    const tx = await router.sellTokens(
       tradeData.tokenAddress,
       tokenAmount,
       minAssetAmount,
       deadline
     );
 
-    console.log("[SELL] Transaction sent:", tx.hash);
+    logger.trade("[SELL] Transaction sent:", tx.hash);
 
     // Don't wait for confirmation - let backend/WebSocket handle that
     // This eliminates RPC dependency and matches backend timing
@@ -326,7 +326,7 @@ export const sellTokens = async (
       pending: true, // Mark as pending since not confirmed yet
     };
   } catch (error) {
-    console.error(
+    logger.error(
       `Error selling ${tradeData.symbol} on ${tradeData.chain}`,
       error
     );

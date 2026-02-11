@@ -4,6 +4,7 @@ import { useUser } from "@/contexts/UserContext";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/utils/logger";
 
 export const WalletConnectButton: React.FC = () => {
   const { address, isConnected } = useAccount();
@@ -38,7 +39,7 @@ export const WalletConnectButton: React.FC = () => {
                   variant: "default",
                 });
               } catch (error) {
-                console.error("Failed to copy address:", error);
+                logger.error("Failed to copy address:", error);
                 toast({
                   title: "Copy Failed",
                   description: "Failed to copy address to clipboard",

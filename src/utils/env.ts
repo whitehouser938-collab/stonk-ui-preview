@@ -5,17 +5,35 @@
 
 import { logger } from './logger';
 
-interface EnvConfig {
+const ETH_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
+
+function isEthAddress(value: string): boolean {
+  return ETH_ADDRESS_REGEX.test(value);
+}
+
+export interface EnvConfig {
   VITE_API_URL: string;
   VITE_AUTH_URL: string;
   VITE_WALLETCONNECT_PROJECT_ID: string;
   VITE_WEBSOCKET_URL?: string;
+  VITE_EVM_ROUTER_ADDRESS: string;
+  VITE_EVM_TOKEN_FACTORY_ADDRESS: string;
+  VITE_EVILWETH_ADDRESS: string;
+  VITE_BASE_VAULT_ADDRESS?: string;
+  VITE_DEPLOYMENT_FEE_ETH: string;
+  /** Optional: POST errors to this URL in production (e.g. /api/errors or Sentry ingest) */
+  VITE_ERROR_REPORTING_URL?: string;
 }
 
 function validateEnv(): EnvConfig {
   const apiUrl = import.meta.env.VITE_API_URL;
   const authUrl = import.meta.env.VITE_AUTH_URL;
   const walletConnectProjectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID;
+  const routerAddress = import.meta.env.VITE_EVM_ROUTER_ADDRESS;
+  const tokenFactoryAddress = import.meta.env.VITE_EVM_TOKEN_FACTORY_ADDRESS;
+  const wethAddress = import.meta.env.VITE_EVILWETH_ADDRESS;
+  const baseVaultAddress = import.meta.env.VITE_BASE_VAULT_ADDRESS;
+  const deploymentFeeEth = import.meta.env.VITE_DEPLOYMENT_FEE_ETH;
 
   const errors: string[] = [];
 
@@ -43,14 +61,30 @@ function validateEnv(): EnvConfig {
     errors.push('VITE_WALLETCONNECT_PROJECT_ID is required');
   }
 
+  if (!routerAddress) {
+    errors.push('VITE_EVM_ROUTER_ADDRESS is required');
+  } else if (!isEthAddress(routerAddress)) {
+    errors.push('VITE_EVM_ROUTER_ADDRESS must be a valid 0x-prefixed 40-char hex address');
+  }
+
+  if (!tokenFactoryAddress) {
+    errors.push('VITE_EVM_TOKEN_FACTORY_ADDRESS is required');
+  } else if (!isEthAddress(tokenFactoryAddress)) {
+    errors.push('VITE_EVM_TOKEN_FACTORY_ADDRESS must be a valid 0x-prefixed 40-char hex address');
+  }
+
+  if (!wethAddress) {
+    errors.push('VITE_EVILWETH_ADDRESS is required');
+  } else if (!isEthAddress(wethAddress)) {
+    errors.push('VITE_EVILWETH_ADDRESS must be a valid 0x-prefixed 40-char hex address');
+  }
+
   if (errors.length > 0) {
     const errorMessage = `Environment validation failed:\n${errors.join('\n')}`;
-    
+
     if (import.meta.env.PROD) {
-      // In production, throw error to fail build
       throw new Error(errorMessage);
     } else {
-      // In development, warn but don't fail
       logger.warn(errorMessage);
       logger.warn('Using fallback values. Set environment variables in .env file');
     }
@@ -61,6 +95,12 @@ function validateEnv(): EnvConfig {
     VITE_AUTH_URL: authUrl || 'http://localhost:3001',
     VITE_WALLETCONNECT_PROJECT_ID: walletConnectProjectId || '',
     VITE_WEBSOCKET_URL: import.meta.env.VITE_WEBSOCKET_URL,
+    VITE_EVM_ROUTER_ADDRESS: routerAddress || '',
+    VITE_EVM_TOKEN_FACTORY_ADDRESS: tokenFactoryAddress || '',
+    VITE_EVILWETH_ADDRESS: wethAddress || '',
+    VITE_BASE_VAULT_ADDRESS: baseVaultAddress,
+    VITE_DEPLOYMENT_FEE_ETH: deploymentFeeEth ?? '0',
+    VITE_ERROR_REPORTING_URL: import.meta.env.VITE_ERROR_REPORTING_URL,
   };
 }
 

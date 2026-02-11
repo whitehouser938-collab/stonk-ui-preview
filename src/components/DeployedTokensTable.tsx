@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Circle, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { logger } from "@/utils/logger";
 
 interface DeployedToken {
   name: string;
@@ -31,7 +32,7 @@ const DeployedTokensTable: React.FC<DeployedTokensTableProps> = ({
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
   // Debug logging
-  console.log("DeployedTokensTable received tokens:", tokens);
+  logger.debug("DeployedTokensTable received tokens:", tokens);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {

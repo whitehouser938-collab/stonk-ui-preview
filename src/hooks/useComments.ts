@@ -13,6 +13,7 @@ import {
   updateComment,
   updateReply,
 } from "@/api/comment";
+import { logger } from "@/utils/logger";
 
 interface UseCommentsProps {
   tokenId: string;
@@ -43,11 +44,11 @@ export const useComments = ({
   // Fetch comments
   const fetchComments = useCallback(async () => {
     if (!tokenId) {
-      console.log("useComments: No tokenId, skipping fetch");
+      logger.debug("useComments: No tokenId, skipping fetch");
       return;
     }
 
-    console.log("useComments: Fetching comments for tokenId:", tokenId);
+    logger.debug("useComments: Fetching comments for tokenId:", tokenId);
     setLoading(true);
     setError(null);
 
@@ -60,7 +61,7 @@ export const useComments = ({
         sortOrder: "desc",
       });
 
-      console.log("useComments: API response:", response);
+      logger.debug("useComments: API response:", response);
 
       if (response.success && response.data) {
         setComments(response.data.items || []);
@@ -74,26 +75,26 @@ export const useComments = ({
             hasPrev: false,
           }
         );
-        console.log(
+        logger.debug(
           "useComments: Comments loaded successfully:",
           response.data.items?.length || 0,
           "comments"
         );
         retryCountRef.current = 0; // Reset retry count on success
       } else {
-        console.error("useComments: API returned error:", response.message);
+        logger.error("useComments: API returned error:", response.message);
         setComments([]);
         setError(response.message || "Failed to fetch comments");
       }
     } catch (err) {
-      console.error("useComments: Error fetching comments:", err);
+      logger.error("useComments: Error fetching comments:", err);
 
       // Retry logic for network errors
       if (
         retryCountRef.current < 2 &&
         (err instanceof TypeError || err.message?.includes("fetch"))
       ) {
-        console.log(
+        logger.debug(
           `useComments: Retrying fetch (attempt ${retryCountRef.current + 1}/2)`
         );
         retryCountRef.current += 1;
@@ -130,7 +131,7 @@ export const useComments = ({
         setError(
           err instanceof Error ? err.message : "Failed to create comment"
         );
-        console.error("Error creating comment:", err);
+        logger.error("Error creating comment:", err);
         throw err;
       }
     },
@@ -165,7 +166,7 @@ export const useComments = ({
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to create reply");
-        console.error("Error creating reply:", err);
+        logger.error("Error creating reply:", err);
         throw err;
       }
     },
@@ -232,7 +233,7 @@ export const useComments = ({
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to toggle like");
-        console.error("Error toggling like:", err);
+        logger.error("Error toggling like:", err);
         throw err;
       }
     },
@@ -256,7 +257,7 @@ export const useComments = ({
         setError(
           err instanceof Error ? err.message : "Failed to delete comment"
         );
-        console.error("Error deleting comment:", err);
+        logger.error("Error deleting comment:", err);
         throw err;
       }
     },
@@ -287,7 +288,7 @@ export const useComments = ({
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to delete reply");
-        console.error("Error deleting reply:", err);
+        logger.error("Error deleting reply:", err);
         throw err;
       }
     },
@@ -320,7 +321,7 @@ export const useComments = ({
         setError(
           err instanceof Error ? err.message : "Failed to update comment"
         );
-        console.error("Error updating comment:", err);
+        logger.error("Error updating comment:", err);
         throw err;
       }
     },
@@ -358,7 +359,7 @@ export const useComments = ({
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to update reply");
-        console.error("Error updating reply:", err);
+        logger.error("Error updating reply:", err);
         throw err;
       }
     },
@@ -407,7 +408,7 @@ export const useComments = ({
           });
         });
       } catch (err) {
-        console.error("Error loading like statuses:", err);
+        logger.error("Error loading like statuses:", err);
       }
     },
     [userId]

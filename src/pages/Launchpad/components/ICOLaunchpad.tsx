@@ -11,6 +11,7 @@ import LoadingScreen from "@/components/ui/loading";
 import { updateTokenLogoUrl, uploadTokenLogo } from "@/api/token";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { WalletConnectionPrompt } from "@/components/WalletConnectionPrompt";
+import { logger } from "@/utils/logger";
 
 export interface ICOLaunchData {
   name: string;
@@ -323,7 +324,7 @@ export function ICOLaunchpad() {
     startLoading();
 
     try {
-      console.log("Form Data:", formData);
+      logger.debug("Form Data:", formData);
 
       // Step 1: Create token on blockchain first
       if (formData.launchpad === "SEP") {
@@ -334,7 +335,7 @@ export function ICOLaunchpad() {
         );
 
         if (deployResponse.success === false) {
-          console.error("Token deployment failed:", deployResponse);
+          logger.error("Token deployment failed:", deployResponse);
           toast({
             title: "Error",
             description: "Token deployment failed. Please try again.",
@@ -344,7 +345,7 @@ export function ICOLaunchpad() {
           return;
         }
 
-        console.log("Token deployed successfully:", deployResponse);
+        logger.debug("Token deployed successfully:", deployResponse);
 
         // Step 2: Add token to database (after successful blockchain transaction)
         const addTokenResponse = await addTokenToDb(
@@ -356,12 +357,12 @@ export function ICOLaunchpad() {
           deployResponse.deploymentBlock
         );
 
-        console.log("Token added to database:", addTokenResponse);
+        logger.debug("Token added to database:", addTokenResponse);
 
         // Step 3: Upload image only after successful blockchain transaction and database entry
         if (formData.logoFile) {
           try {
-            console.log(
+            logger.debug(
               "Uploading logo after successful blockchain transaction..."
             );
             const logoUrl = await uploadTokenLogo(
@@ -370,13 +371,13 @@ export function ICOLaunchpad() {
               addTokenResponse.name,
               addTokenResponse.symbol
             );
-            console.log("Logo uploaded successfully:", logoUrl);
+            logger.debug("Logo uploaded successfully:", logoUrl);
 
             // Step 4: Update token with logo URL
             await updateTokenLogoUrl(addTokenResponse.id, logoUrl);
-            console.log("Logo URL updated successfully");
+            logger.debug("Logo URL updated successfully");
           } catch (uploadError) {
-            console.error("Failed to upload logo:", uploadError);
+            logger.error("Failed to upload logo:", uploadError);
             toast({
               title: "Warning",
               description:
@@ -426,7 +427,7 @@ export function ICOLaunchpad() {
       stopLoading();
       resetFormData();
     } catch (error) {
-      console.error("Error during form submission:", error);
+      logger.error("Error during form submission:", error);
       toast({
         title: "Error",
         description: "An error occurred during submission. Please try again.",

@@ -1,6 +1,8 @@
 import { apiClient } from "@/services/apiClient";
+import { env } from "@/utils/env";
+import { logger } from "@/utils/logger";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = env.VITE_API_URL;
 // Normalize to ensure we always target the /api prefix exactly once
 const BASE = (API_BASE_URL || "").replace(/\/$/, "");
 const API_ROOT = BASE.endsWith("/api") ? BASE : `${BASE}/api`;
@@ -130,7 +132,7 @@ export const getAllUsers = async (
 
     return data;
   } catch (error) {
-    console.error("Error fetching users:", error);
+    logger.error("Error fetching users:", error);
     throw error;
   }
 };
@@ -158,7 +160,7 @@ export const searchUsers = async (
 
     return data;
   } catch (error) {
-    console.error("Error searching users:", error);
+    logger.error("Error searching users:", error);
     throw error;
   }
 };
@@ -178,7 +180,7 @@ export const getUserStats = async (): Promise<UserStats> => {
 
     return data.data;
   } catch (error) {
-    console.error("Error fetching user stats:", error);
+    logger.error("Error fetching user stats:", error);
     throw error;
   }
 };
@@ -202,7 +204,7 @@ export const checkUsernameAvailability = async (
 
     return data;
   } catch (error) {
-    console.error("Error checking username availability:", error);
+    logger.error("Error checking username availability:", error);
     throw error;
   }
 };
@@ -224,7 +226,7 @@ export const getUserByUsername = async (username: string): Promise<User> => {
 
     return normalizeUser(data.data);
   } catch (error) {
-    console.error("Error fetching user by username:", error);
+    logger.error("Error fetching user by username:", error);
     throw error;
   }
 };
@@ -246,7 +248,7 @@ export const getUserByWalletAddress = async (
 
     return normalizeUser(data.data);
   } catch (error) {
-    console.error("Error fetching user by wallet address:", error);
+    logger.error("Error fetching user by wallet address:", error);
     throw error;
   }
 };
@@ -269,7 +271,7 @@ export const getUserTokens = async (walletAddress: string): Promise<any[]> => {
 
     return data.data.deployedTokens || [];
   } catch (error) {
-    console.error("Error fetching user tokens:", error);
+    logger.error("Error fetching user tokens:", error);
     return [];
   }
 };
@@ -288,7 +290,7 @@ export const setUsername = async (
 
     return normalizeUser(data.data);
   } catch (error: any) {
-    console.error("Error setting username:", error);
+    logger.error("Error setting username:", error);
     // Handle specific error messages from the backend
     if (error.message?.includes("already taken")) {
       throw new Error("Username already taken");
@@ -326,7 +328,7 @@ export const uploadUserProfileImage = async (
 
     return uploadedUrl;
   } catch (error) {
-    console.error("Error uploading profile image:", error);
+    logger.error("Error uploading profile image:", error);
     throw error;
   }
 };
@@ -358,7 +360,7 @@ export const createUser = async (walletAddress: string): Promise<User> => {
 
     return normalizeUser(data.data);
   } catch (error) {
-    console.error("Error creating user:", error);
+    logger.error("Error creating user:", error);
     throw error;
   }
 };
@@ -376,7 +378,7 @@ export const deleteUser = async (walletAddress: string): Promise<boolean> => {
     const data = await response.json();
     return data.success || false;
   } catch (error) {
-    console.error("Error deleting user:", error);
+    logger.error("Error deleting user:", error);
     throw error;
   }
 };
@@ -408,7 +410,7 @@ export const upsertUser = async (payload: {
 
     return normalizeUser(data.data);
   } catch (error) {
-    console.error("Error upserting user:", error);
+    logger.error("Error upserting user:", error);
     throw error;
   }
 };
@@ -641,7 +643,7 @@ export const getUserHoldings = async (
       totalTokens: data.data.totalTokens || transformedHoldings.length,
     };
   } catch (error) {
-    console.error("Error fetching user holdings:", error);
+    logger.error("Error fetching user holdings:", error);
     throw error;
   }
 };

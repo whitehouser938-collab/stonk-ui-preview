@@ -1,8 +1,10 @@
 import { ethers, Contract, Provider } from "ethers";
 import Router from "@/abi/evm/Router.json";
 import Token from "@/abi/evm/Token.json";
+import { env } from "@/utils/env";
+import { logger } from "@/utils/logger";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = env.VITE_API_URL;
 
 export interface BalancesResponse {
   success: boolean;
@@ -119,7 +121,7 @@ export const calculateBuyPrice = async (
     if (!provider) {
       throw new Error("Provider is required for calculateBuyPrice");
     }
-    const routerAddress = import.meta.env.VITE_EVM_ROUTER_ADDRESS;
+    const routerAddress = env.VITE_EVM_ROUTER_ADDRESS;
     const router = new Contract(routerAddress, Router.abi, provider);
 
     // Convert asset amount to wei
@@ -137,7 +139,7 @@ export const calculateBuyPrice = async (
       },
     };
   } catch (error) {
-    console.error("Error calculating buy price from contract:", error);
+    logger.error("Error calculating buy price from contract:", error);
     return {
       success: false,
       data: {
@@ -191,7 +193,7 @@ export const getTokenDecimals = async (
       },
     };
   } catch (error) {
-    console.error("Error getting token decimals from contract:", error);
+    logger.error("Error getting token decimals from contract:", error);
     return {
       success: false,
       data: {
@@ -252,7 +254,7 @@ export const calculateSellProceeds = async (
     if (!provider) {
       throw new Error("Provider is required for calculateSellProceeds");
     }
-    const routerAddress = import.meta.env.VITE_EVM_ROUTER_ADDRESS;
+    const routerAddress = env.VITE_EVM_ROUTER_ADDRESS;
     const router = new Contract(routerAddress, Router.abi, provider);
 
     // Call calculateSellProceeds on the router contract
@@ -268,7 +270,7 @@ export const calculateSellProceeds = async (
       },
     };
   } catch (error) {
-    console.error("Error calculating sell proceeds from contract:", error);
+    logger.error("Error calculating sell proceeds from contract:", error);
     return {
       success: false,
       data: {
@@ -308,7 +310,7 @@ export const getTokenAllowance = async (
       },
     };
   } catch (error) {
-    console.error("Error getting token allowance from contract:", error);
+    logger.error("Error getting token allowance from contract:", error);
     return {
       success: false,
       data: {

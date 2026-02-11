@@ -7,6 +7,7 @@ import {
 } from "../../public/charting_library/charting_library";
 import { Chain } from "@/types";
 import { buildTvSymbol } from "@/charting/helpers";
+import { logger } from "@/utils/logger";
 
 declare global {
   interface Window {
@@ -343,7 +344,7 @@ function TradingViewChart({ tokenSymbol, tokenAddress, tokenSupply=1_000_000_000
               }
             }
           } catch (e) {
-            console.log("Could not hide toolbar programmatically", e);
+            logger.debug("Could not hide toolbar programmatically", e);
           }
         }, 100);
 

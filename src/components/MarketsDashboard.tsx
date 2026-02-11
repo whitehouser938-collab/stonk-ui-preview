@@ -14,6 +14,7 @@ import {
   Search,
 } from "lucide-react";
 import { getAllTokens, getTrendingTokens } from "@/api/token";
+import { logger } from "@/utils/logger";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Chain, TokenMarketOverview } from "@/types";
 import { useMarketsUpdates } from "@/hooks/useMarketsUpdate";
@@ -332,7 +333,7 @@ export function MarketsDashboard() {
         setTokens(tokenData);
         setPagination(paginationData);
       } catch (error) {
-        console.error("Error fetching tokens:", error);
+        logger.error("Error fetching tokens:", error);
         setTokens([]);
         setBondingCurveVolumeData([]);
       } finally {
@@ -351,7 +352,7 @@ export function MarketsDashboard() {
         const trending = await getTrendingTokens(chainId, 10);
         setTrendingTokens(trending);
       } catch (error) {
-        console.error("Error fetching trending tokens:", error);
+        logger.error("Error fetching trending tokens:", error);
         setTrendingTokens([]);
       } finally {
         setIsLoadingTrending(false);

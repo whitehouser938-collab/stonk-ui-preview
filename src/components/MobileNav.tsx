@@ -7,6 +7,7 @@ import { LogOut } from "lucide-react";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useDisconnect } from "wagmi";
 import { useState } from "react";
+import { logger } from "@/utils/logger";
 
 interface NavItem {
   path: string;
@@ -37,7 +38,7 @@ export function MobileNav({
       await disconnect();
       onClose(); // Close mobile nav after disconnect
     } catch (error) {
-      console.error("Error disconnecting wallet:", error);
+      logger.error("Error disconnecting wallet:", error);
     } finally {
       setDisconnecting(false);
     }

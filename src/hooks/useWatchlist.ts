@@ -7,6 +7,7 @@ import {
   WatchlistToken,
 } from "@/api/watchlist";
 import { toast } from "@/hooks/use-toast";
+import { logger } from "@/utils/logger";
 
 interface UseWatchlistReturn {
   watchlist: WatchlistToken[];
@@ -49,7 +50,7 @@ export const useWatchlist = (
       const tokens = await getUserWatchlist(walletAddress);
       setWatchlist(tokens);
     } catch (error) {
-      console.error("Error fetching watchlist:", error);
+      logger.error("Error fetching watchlist:", error);
       setWatchlist([]);
     } finally {
       setIsLoading(false);

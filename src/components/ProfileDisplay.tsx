@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getUserByWalletAddress, User as UserType } from "@/api/user";
 import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/utils/logger";
 
 export function ProfileDisplay() {
   const { address, isConnected } = useAppKitAccount({ namespace: "eip155" });
@@ -102,7 +103,7 @@ export function ProfileDisplay() {
                     variant: "default",
                   });
                 } catch (error) {
-                  console.error("Failed to copy address:", error);
+                  logger.error("Failed to copy address:", error);
                   toast({
                     title: "Copy Failed",
                     description: "Failed to copy address to clipboard",
@@ -134,7 +135,7 @@ export function ProfileDisplay() {
                     variant: "default",
                   });
                 } catch (error) {
-                  console.error("Failed to copy address:", error);
+                  logger.error("Failed to copy address:", error);
                   toast({
                     title: "Copy Failed",
                     description: "Failed to copy address to clipboard",

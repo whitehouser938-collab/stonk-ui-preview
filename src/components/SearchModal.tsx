@@ -4,6 +4,7 @@ import { useAtom } from "jotai";
 import { searchTermAtom, isSearchModalOpenAtom } from "@/state/app";
 import { useNavigate } from "react-router-dom";
 import { searchTokens as apiSearchTokens } from "@/api/token";
+import { logger } from "@/utils/logger";
 
 interface TokenSearchResult {
   id: string;
@@ -88,7 +89,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
         setSelectedIndex(-1);
       }
     } catch (error) {
-      console.error("Search error:", error);
+      logger.error("Search error:", error);
       setSearchResults([]);
     } finally {
       setIsLoading(false);
@@ -155,6 +156,8 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
             <Search className="text-orange-400 w-5 h-5 flex-shrink-0" />
             <input
               ref={inputRef}
+              type="search"
+              aria-label="Search tokens by ticker or name"
               placeholder="Search ticker or name..."
               value={storedSearchTerm}
               onChange={(e) => setStoredSearchTerm(e.target.value)}
@@ -162,10 +165,12 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
               className="flex-1 bg-transparent border-none text-white text-base font-mono focus:outline-none placeholder-gray-500"
             />
             <button
+              type="button"
               onClick={handleClose}
+              aria-label="Close search"
               className="p-1 hover:bg-gray-800 rounded transition-colors"
             >
-              <X className="w-5 h-5 text-gray-400" />
+              <X className="w-5 h-5 text-gray-400" aria-hidden />
             </button>
           </div>
 

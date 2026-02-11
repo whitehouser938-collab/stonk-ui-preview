@@ -1,3 +1,5 @@
+import { logger } from "@/utils/logger";
+
 const MAX_HISTORY = 50;
 const STORAGE_PREFIX = "search:history:";
 
@@ -35,7 +37,7 @@ export class SearchHistoryManager {
     try {
       localStorage.setItem(key, JSON.stringify(updatedHistory));
     } catch (error) {
-      console.error("Failed to save search history:", error);
+      logger.error("Failed to save search history:", error);
     }
   }
 
@@ -53,7 +55,7 @@ export class SearchHistoryManager {
     try {
       return JSON.parse(stored);
     } catch (error) {
-      console.error("Failed to parse search history:", error);
+      logger.error("Failed to parse search history:", error);
       return [];
     }
   }
@@ -67,7 +69,7 @@ export class SearchHistoryManager {
     try {
       localStorage.removeItem(key);
     } catch (error) {
-      console.error("Failed to clear search history:", error);
+      logger.error("Failed to clear search history:", error);
     }
   }
 
@@ -81,7 +83,7 @@ export class SearchHistoryManager {
     try {
       localStorage.setItem(key, JSON.stringify(filtered));
     } catch (error) {
-      console.error("Failed to remove search history entry:", error);
+      logger.error("Failed to remove search history entry:", error);
     }
   }
 

@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ethers } from "ethers";
 import { logger } from "@/utils/logger";
+import { env } from "@/utils/env";
 import {
   WalletConnectionPrompt,
   WalletRequiredAlert,
@@ -46,8 +47,8 @@ export interface TokenTradeData {
 const presetAmounts = [0.1, 0.25, 0.5, 1]; // Preset amounts for quick selection
 const slippageOptions = [0.5, 1, 2.5, 5]; // Slippage options in percentage
 
-const EVILWETH_ADDRESS = import.meta.env.VITE_EVILWETH_ADDRESS;
-const ROUTER_ADDRESS = import.meta.env.VITE_EVM_ROUTER_ADDRESS;
+const EVILWETH_ADDRESS = env.VITE_EVILWETH_ADDRESS;
+const ROUTER_ADDRESS = env.VITE_EVM_ROUTER_ADDRESS;
 
 // Utility function to robustly detect user rejection errors
 function isUserRejectedError(error: any): boolean {
@@ -93,7 +94,7 @@ function abbreviateTokenAmount(raw: string | number, decimals = 18): string {
     if (value > 0) return value.toPrecision(2);
     return "0";
   } catch (error) {
-    console.error("Error formatting token amount:", error);
+    logger.error("Error formatting token amount:", error);
     return "0";
   }
 }
@@ -216,7 +217,7 @@ const TradingForm = (props: TradingFormProps) => {
 
       lastBalanceFetchRef.current = Date.now();
     } catch (error) {
-      console.error("Error fetching balances:", error);
+      logger.error("Error fetching balances:", error);
       setEvilWETHBalance("0");
       setEthBalance("0");
       setTokenBalance("0");
@@ -245,7 +246,7 @@ const TradingForm = (props: TradingFormProps) => {
     if (!pendingTxHash) return;
 
     const timeoutId = setTimeout(() => {
-      console.log(
+      logger.debug(
         "[TradingForm] Transaction confirmation timeout - clearing pending state"
       );
       toast({
@@ -265,7 +266,7 @@ const TradingForm = (props: TradingFormProps) => {
   React.useEffect(() => {
     if (props.onTradeConfirmed) {
       props.onTradeConfirmed((txHash: string, tradeType: "BUY" | "SELL") => {
-        console.log(
+        logger.debug(
           "[TradingForm] Trade confirmed via WebSocket:",
           txHash,
           tradeType
@@ -336,7 +337,7 @@ const TradingForm = (props: TradingFormProps) => {
         );
         setExpectedTokenAmount(tokenAmount.toString());
       } catch (error) {
-        console.error("Error calculating expected token amount:", error);
+        logger.error("Error calculating expected token amount:", error);
         setExpectedTokenAmount("0");
       }
     };
@@ -384,7 +385,7 @@ const TradingForm = (props: TradingFormProps) => {
         const truncatedAmount = parseFloat(amount).toFixed(decimalsNum);
         const tokenAmount = ethers.parseUnits(truncatedAmount, tokenDecimals);
 
-        console.log("[SELL CONVERSION]", {
+        logger.debug("[SELL CONVERSION]", {
           amount,
           truncatedAmount,
           tokenDecimals,
@@ -400,7 +401,7 @@ const TradingForm = (props: TradingFormProps) => {
         // For graduated tokens (isBondingCurve = false), fee should be 0
         const netAmount = isBondingCurve ? assetAmount - fee : assetAmount;
         setExpectedWethAmount(netAmount.toString());
-        console.log("[SELL CONVERSION SUCCESS]", {
+        logger.debug("[SELL CONVERSION SUCCESS]", {
           amount,
           netAmount: netAmount.toString(),
           fee: fee.toString(),
@@ -408,7 +409,7 @@ const TradingForm = (props: TradingFormProps) => {
         });
       } catch (error) {
         if (cancelled) return;
-        console.error("Error calculating expected WETH amount:", error, {
+        logger.error("Error calculating expected WETH amount:", error, {
           amount,
           truncatedAmount: parseFloat(amount).toFixed(Number(tokenDecimals)),
           tokenDecimals,
@@ -539,7 +540,7 @@ const TradingForm = (props: TradingFormProps) => {
       const limitedPrecision = parseFloat(tokenBalanceFormatted).toFixed(6); // Limit to 6 decimal places
       setAmount(limitedPrecision);
 
-      console.log("[MAX BUTTON DEBUG]", {
+      logger.debug("[MAX BUTTON DEBUG]", {
         tokenBalance,
         tokenDecimals,
         tokenBalanceFormatted,
@@ -632,23 +633,23 @@ const TradingForm = (props: TradingFormProps) => {
         try {
           tradeResponse = await sellTokenETH(tradeData, signer);
         } catch (sellError) {
-          console.error("[SELL ERROR - FULL OBJECT]", sellError);
+          logger.error("[SELL ERROR - FULL OBJECT]", sellError);
           throw sellError;
         }
       }
-      console.log("Trade response:", tradeResponse);
+      logger.debug("Trade response:", tradeResponse);
       if (tradeResponse && tradeResponse.success) {
         if (tradeResponse.pending) {
           // Transaction sent but not confirmed - store tx hash and type
           // Toast will be shown when WebSocket confirms it
-          console.log(
+          logger.debug(
             "[TradingForm] Setting pending state for tx:",
             tradeResponse.transactionHash,
             isBuy ? "BUY" : "SELL"
           );
           setPendingTxHash(tradeResponse.transactionHash);
           setPendingTradeType(isBuy ? "BUY" : "SELL");
-          console.log(
+          logger.debug(
             "[TradingForm] Pending state set. Waiting for WebSocket confirmation..."
           );
         } else {
@@ -697,7 +698,7 @@ const TradingForm = (props: TradingFormProps) => {
         });
       }
     } catch (error) {
-      console.error("Error submitting trade:", error);
+      logger.error("Error submitting trade:", error);
 
       // Check if user rejected the transaction
       if (isUserRejectedError(error)) {
@@ -1246,7 +1247,7 @@ const TradingForm = (props: TradingFormProps) => {
                 key={percentage}
                 type="button"
                 onClick={() => {
-                  console.log("[PERCENTAGE SELL DEBUG]", {
+                  logger.debug("[PERCENTAGE SELL DEBUG]", {
                     percentage,
                     tokenBalance,
                     tokenDecimals,
@@ -1267,7 +1268,7 @@ const TradingForm = (props: TradingFormProps) => {
                     .toFixed(6)
                     .replace(/\.?0+$/, "");
 
-                  console.log("[PERCENTAGE SELL CALCULATION]", {
+                  logger.debug("[PERCENTAGE SELL CALCULATION]", {
                     percentage,
                     tokenBalanceNum,
                     sellAmount,

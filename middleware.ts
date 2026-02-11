@@ -1,7 +1,7 @@
 import DOMPurify from 'isomorphic-dompurify';
 
-// Use environment variable for API URL to support different environments
-const API_URL = process.env.VITE_API_URL || 'https://api.stonkmarket.xyz';
+// Use environment variable for API URL (Vercel injects at runtime; fallback for local)
+const API_URL = process.env.VITE_API_URL ?? process.env.API_URL ?? 'https://api.stonkmarket.xyz';
 
 interface TokenData {
   symbol?: string;
@@ -21,7 +21,8 @@ async function fetchTokenData(chainId: string, tokenAddress: string): Promise<To
     );
 
     if (!response.ok) {
-      console.error('Failed to fetch token data:', response.status);
+      // Minimal server-side log for debugging token meta injection
+      console.error('[middleware] Failed to fetch token data:', response.status);
       return null;
     }
 
@@ -31,7 +32,7 @@ async function fetchTokenData(chainId: string, tokenAddress: string): Promise<To
     }
     return null;
   } catch (error) {
-    console.error('Error fetching token data:', error);
+    console.error('[middleware] Error fetching token data:', error);
     return null;
   }
 }
@@ -65,8 +66,6 @@ function injectMetaTags(html: string, tokenData: TokenData, requestUrl: string):
   }
 
   imageUrl = DOMPurify.sanitize(imageUrl);
-
-  console.log('Meta tags:', { title, imageUrl });
 
   // Replace default meta tags with token-specific ones
   let modifiedHtml = html
@@ -146,7 +145,7 @@ export default async function middleware(request: Request) {
   const { pathname } = url;
 
   // Check if this is a token page request
-  const tokenPageMatch = pathname.match(/^\/token\/([^\/]+)\/([^\/]+)/);
+  const tokenPageMatch = pathname.match(/^\/token\/([^/]+)\/([^/]+)/);
 
   if (!tokenPageMatch) {
     return;
@@ -180,7 +179,7 @@ export default async function middleware(request: Request) {
       },
     });
   } catch (error) {
-    console.error('Error in middleware:', error);
+    console.error('[middleware] Error in middleware:', error);
     return;
   }
 }

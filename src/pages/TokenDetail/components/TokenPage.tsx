@@ -18,6 +18,7 @@ import {
   calculatePercentage,
   abbreviateAddress,
 } from "@/lib/utils";
+import { logger } from "@/utils/logger";
 
 import {
   Globe,
@@ -261,14 +262,14 @@ const TokenPage = () => {
       const balance = await token.balanceOf(address);
       setUserTokenBalance(balance.toString());
     } catch (error) {
-      console.error("Error fetching user token balance:", error);
+      logger.error("Error fetching user token balance:", error);
       setUserTokenBalance("0");
     }
   }, [isConnected, address, tokenAddress, isProviderReady]); // Remove getETHSigner from deps
 
   // Refresh balance when trades are confirmed
   const handleTradeUpdate = useCallback((newTrades: TradeData[]) => {
-    console.log(
+    logger.debug(
       `[TokenPage] Received trade update at ${Date.now()}:`,
       newTrades
     );
@@ -350,7 +351,7 @@ const TokenPage = () => {
           throw new Error("Chain ID and token address are required");
         }
         const data = await getToken(chainId, tokenAddress);
-        console.log("Fetched token data:", data);
+        logger.debug("Fetched token data:", data);
 
         if (!data) {
           throw new Error("Token not found");
@@ -358,7 +359,7 @@ const TokenPage = () => {
 
         setTokenData(data);
       } catch (error) {
-        console.error("Error fetching token data:", error);
+        logger.error("Error fetching token data:", error);
         setError(
           error instanceof Error ? error.message : "Failed to fetch token data"
         );
@@ -441,13 +442,13 @@ const TokenPage = () => {
       document.title = "Stonk Market";
       const defaultImage = `${window.location.origin}/default-pfp.jpeg`;
 
-      let ogTitle = document.querySelector('meta[property="og:title"]');
+      const ogTitle = document.querySelector('meta[property="og:title"]');
       if (ogTitle) ogTitle.setAttribute("content", "Stonk Market");
 
-      let ogImage = document.querySelector('meta[property="og:image"]');
+      const ogImage = document.querySelector('meta[property="og:image"]');
       if (ogImage) ogImage.setAttribute("content", defaultImage);
 
-      let twitterImage = document.querySelector('meta[name="twitter:image"]');
+      const twitterImage = document.querySelector('meta[name="twitter:image"]');
       if (twitterImage) twitterImage.setAttribute("content", defaultImage);
     }
   }, [tokenData]);
@@ -473,7 +474,7 @@ const TokenPage = () => {
         }
         setTrades(initialTrades);
       } catch (error) {
-        console.error("Error fetching trades:", error);
+        logger.error("Error fetching trades:", error);
         setTrades([]);
         setHasMoreTrades(false);
       }
@@ -533,7 +534,7 @@ const TokenPage = () => {
       // Holder count should only include regular holders, not special addresses
       setHoldersCount(regularHolders.length);
     } catch (error) {
-      console.error("Error fetching holders:", error);
+      logger.error("Error fetching holders:", error);
       setHoldersData([]);
       setBurntData(null);
       setUniswapData(null);
@@ -559,7 +560,7 @@ const TokenPage = () => {
         setCommentsCount(response.data.pagination.total);
       }
     } catch (error) {
-      console.error("Error fetching comments count:", error);
+      logger.error("Error fetching comments count:", error);
       setCommentsCount(0);
     }
   }, [tokenAddress]);
@@ -593,7 +594,7 @@ const TokenPage = () => {
       container.clientHeight + 20;
     if (isAtBottom) {
       try {
-        console.log(
+        logger.debug(
           `[Scroll] Reached bottom. Fetching trades after ${lastTrade.transactionHash}...`
         );
         setIsFetchingMoreTrades(true);
@@ -605,7 +606,7 @@ const TokenPage = () => {
           cursorId
         );
 
-        console.log(`[Scroll] Fetched ${moreTrades.length} trades`);
+        logger.debug(`[Scroll] Fetched ${moreTrades.length} trades`);
 
         // Check for duplicates before updating state - use functional update to avoid stale closure
         setTrades((prevTrades) => {
@@ -618,7 +619,7 @@ const TokenPage = () => {
               )
           );
 
-          console.log(
+          logger.debug(
             `[Scroll] ${uniqueNewTrades.length} unique new trades out of ${moreTrades.length}`
           );
 
@@ -627,7 +628,7 @@ const TokenPage = () => {
             moreTrades.length < TRADE_PAGE_SIZE ||
             uniqueNewTrades.length === 0
           ) {
-            console.log(
+            logger.debug(
               `[Scroll] Stopping pagination (moreTrades: ${moreTrades.length}, unique: ${uniqueNewTrades.length})`
             );
             setHasMoreTrades(false);
@@ -641,7 +642,7 @@ const TokenPage = () => {
           return prevTrades;
         });
       } catch (error) {
-        console.error("Error fetching more trades:", error);
+        logger.error("Error fetching more trades:", error);
         setHasMoreTrades(false);
       } finally {
         setIsFetchingMoreTrades(false);
@@ -1135,7 +1136,7 @@ const TokenPage = () => {
                                   variant: "default",
                                 });
                               } catch (error) {
-                                console.error("Error toggling watchlist:", error);
+                                logger.error("Error toggling watchlist:", error);
                                 toast({
                                   title: "Error",
                                   description: "Failed to update watchlist",
@@ -2668,7 +2669,7 @@ const TokenPage = () => {
                       variant: "default",
                     });
                   } catch (error) {
-                    console.error("Error toggling watchlist:", error);
+                    logger.error("Error toggling watchlist:", error);
                     toast({
                       title: "Error",
                       description: "Failed to update watchlist",

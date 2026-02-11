@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { logger } from "@/utils/logger";
 
 interface User {
   id: string;
@@ -39,7 +40,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       try {
         setUser(JSON.parse(savedUser));
       } catch (error) {
-        console.error("Error parsing saved user:", error);
+        logger.error("Error parsing saved user:", error);
         localStorage.removeItem("user");
       }
     }

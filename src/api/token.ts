@@ -483,7 +483,7 @@ export const getVolumeWithIntervals = async (
     }
     return data.data.tokens;
   } catch (error) {
-    console.error("Error fetching volume data with intervals:", error);
+    logger.error("Error fetching volume data with intervals:", error);
     return [];
   }
 };
@@ -523,7 +523,7 @@ export const getVolumeLeaders = async (limit?: number): Promise<any[]> => {
     }
     return data.data;
   } catch (error) {
-    console.error("Error fetching volume leaders:", error);
+    logger.error("Error fetching volume leaders:", error);
     return [];
   }
 };

@@ -64,7 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!isConnected && user) {
       signOut();
     }
-  }, [isConnected]);
+  }, [isConnected, user, signOut]);
 
   // ------------------------------------------------------------------
   // Helpers

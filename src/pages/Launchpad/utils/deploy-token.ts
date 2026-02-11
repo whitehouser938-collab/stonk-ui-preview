@@ -2,6 +2,8 @@ import { ICOLaunchData } from "../components/ICOLaunchpad";
 import { ethers, TransactionResponse } from "ethers";
 import TokenFactory from "@/abi/evm/TokenFactory.json";
 import { Contract, EventLog } from "ethers";
+import { env } from "@/utils/env";
+import { logger } from "@/utils/logger";
 
 export interface DeployTokenResponse {
   transactionHash: string;
@@ -25,8 +27,7 @@ export const deployTokenETH = async (
 ) => {
   if (tokenData.launchpad === "SEP") {
     try {
-      const tokenFactoryAddress = import.meta.env
-        .VITE_EVM_TOKEN_FACTORY_ADDRESS;
+      const tokenFactoryAddress = env.VITE_EVM_TOKEN_FACTORY_ADDRESS;
       const tokenFactory = new Contract(
         tokenFactoryAddress,
         TokenFactory.abi,
@@ -50,22 +51,22 @@ export const deployTokenETH = async (
 
         // If using WETH, check and approve allowance first
         if (!useETH) {
-          const wethAddress = import.meta.env.VITE_EVILWETH_ADDRESS;
+          const wethAddress = env.VITE_EVILWETH_ADDRESS;
           const wethContract = new Contract(wethAddress, ERC20_ABI, signer);
           const userAddress = await signer.getAddress();
 
           // Check current allowance
           const currentAllowance = await wethContract.allowance(userAddress, tokenFactoryAddress);
-          console.log("Current WETH allowance:", ethers.formatEther(currentAllowance), "WETH");
+          logger.debug("Current WETH allowance:", ethers.formatEther(currentAllowance), "WETH");
 
           // If allowance is insufficient, approve
           if (currentAllowance < initialBuyAmountWei) {
-            console.log("Approving WETH spending...");
+            logger.debug("Approving WETH spending...");
             const approveTx = await wethContract.approve(tokenFactoryAddress, initialBuyAmountWei);
             await approveTx.wait();
-            console.log("WETH approved successfully");
+            logger.debug("WETH approved successfully");
           } else {
-            console.log("Sufficient WETH allowance already exists");
+            logger.debug("Sufficient WETH allowance already exists");
           }
         }
 
@@ -78,7 +79,7 @@ export const deployTokenETH = async (
           useETH ? { value: initialBuyAmountWei } : {} // Only send ETH value if using ETH
         );
 
-        console.log("Deploying with initial buy of", tokenData.initialBuyAmount, useETH ? "ETH" : "WETH");
+        logger.debug("Deploying with initial buy of", tokenData.initialBuyAmount, useETH ? "ETH" : "WETH");
       } else {
         // Deploy token without initial buy (original function)
         tx = await tokenFactory.deployToken(
@@ -87,11 +88,11 @@ export const deployTokenETH = async (
           // { value: fee }
         );
 
-        console.log("Deploying without initial buy");
+        logger.debug("Deploying without initial buy");
       }
 
       const receipt = await tx.wait(); // Wait for the transaction to be mined
-      console.log("Transaction mined:", tx);
+      logger.debug("Transaction mined:", tx);
 
       if (!receipt) throw new Error("Transaction receipt is null");
       const eventLog = receipt.logs.find(
@@ -121,7 +122,7 @@ export const deployTokenETH = async (
       };
       return response;
     } catch (error) {
-      console.error("Error deploying token:", error);
+      logger.error("Error deploying token:", error);
       return {
         transactionHash: "",
         tokenAddress: "",

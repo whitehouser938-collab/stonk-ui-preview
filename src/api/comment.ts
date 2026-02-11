@@ -1,4 +1,5 @@
 import { apiClient } from "@/services/apiClient";
+import { logger } from "@/utils/logger";
 
 // Types for comment API
 export interface Comment {
@@ -85,7 +86,7 @@ export const createComment = async (data: {
   try {
     return await apiClient.post("/comment", data);
   } catch (error) {
-    console.error("Error creating comment:", error);
+    logger.error("Error creating comment:", error);
     throw error;
   }
 };
@@ -109,7 +110,7 @@ export const getComments = async (params: {
 
     return await apiClient.get(`/comment?${searchParams.toString()}`);
   } catch (error) {
-    console.error("Error fetching comments:", error);
+    logger.error("Error fetching comments:", error);
     throw error;
   }
 };
@@ -120,7 +121,7 @@ export const getCommentById = async (
   try {
     return await apiClient.get(`/comment/${id}`);
   } catch (error) {
-    console.error("Error fetching comment:", error);
+    logger.error("Error fetching comment:", error);
     throw error;
   }
 };
@@ -132,7 +133,7 @@ export const updateComment = async (
   try {
     return await apiClient.put(`/comment/${id}`, data);
   } catch (error) {
-    console.error("Error updating comment:", error);
+    logger.error("Error updating comment:", error);
     throw error;
   }
 };
@@ -143,7 +144,7 @@ export const deleteComment = async (
   try {
     return await apiClient.delete(`/comment/${id}`);
   } catch (error) {
-    console.error("Error deleting comment:", error);
+    logger.error("Error deleting comment:", error);
     throw error;
   }
 };
@@ -156,7 +157,7 @@ export const createReply = async (data: {
   try {
     return await apiClient.post("/comment/reply", data);
   } catch (error) {
-    console.error("Error creating reply:", error);
+    logger.error("Error creating reply:", error);
     throw error;
   }
 };
@@ -178,7 +179,7 @@ export const getReplies = async (params: {
 
     return await apiClient.get(`/comment/reply?${searchParams.toString()}`);
   } catch (error) {
-    console.error("Error fetching replies:", error);
+    logger.error("Error fetching replies:", error);
     throw error;
   }
 };
@@ -187,7 +188,7 @@ export const getReplyById = async (id: string): Promise<ApiResponse<Reply>> => {
   try {
     return await apiClient.get(`/comment/reply/${id}`);
   } catch (error) {
-    console.error("Error fetching reply:", error);
+    logger.error("Error fetching reply:", error);
     throw error;
   }
 };
@@ -199,7 +200,7 @@ export const updateReply = async (
   try {
     return await apiClient.put(`/comment/reply/${id}`, data);
   } catch (error) {
-    console.error("Error updating reply:", error);
+    logger.error("Error updating reply:", error);
     throw error;
   }
 };
@@ -210,7 +211,7 @@ export const deleteReply = async (
   try {
     return await apiClient.delete(`/comment/reply/${id}`);
   } catch (error) {
-    console.error("Error deleting reply:", error);
+    logger.error("Error deleting reply:", error);
     throw error;
   }
 };
@@ -223,7 +224,7 @@ export const toggleLike = async (data: {
   try {
     return await apiClient.post("/comment/like", data);
   } catch (error) {
-    console.error("Error toggling like:", error);
+    logger.error("Error toggling like:", error);
     throw error;
   }
 };
@@ -241,7 +242,7 @@ export const getLikeStatus = async (params: {
 
     return await apiClient.get(`/comment/like/status?${searchParams.toString()}`);
   } catch (error) {
-    console.error("Error fetching like status:", error);
+    logger.error("Error fetching like status:", error);
     throw error;
   }
 };
@@ -253,7 +254,7 @@ export const getCommentStats = async (
   try {
     return await apiClient.get(`/comment/stats/${tokenId}`);
   } catch (error) {
-    console.error("Error fetching comment stats:", error);
+    logger.error("Error fetching comment stats:", error);
     throw error;
   }
 };

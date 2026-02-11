@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAppKitAccount } from "@reown/appkit/react";
+import { logger } from "@/utils/logger";
 import { ViewToggle } from "@/components/ViewToggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,7 +72,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
         variant: "default",
       });
     } catch (error) {
-      console.error("Error disconnecting wallet:", error);
+      logger.error("Error disconnecting wallet:", error);
       toast({
         title: "Disconnect Failed",
         description: "Failed to disconnect. Please try again.",
@@ -137,7 +138,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
       }
       // Refresh
       if (typeof loadOverview === "function") {
-        // @ts-ignore
+        // @ts-expect-error loadOverview may be a legacy callback with different signature
         await loadOverview();
       } else {
         const refreshed = await getUserByWalletAddress(targetAddress);
@@ -146,7 +147,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
       setShowEditModal(false);
       toast({ title: "Profile updated" });
     } catch (e) {
-      console.error("Failed to save profile edits", e);
+      logger.error("Failed to save profile edits", e);
       toast({ title: "Update failed", variant: "destructive" });
     } finally {
       setLoading(false);
@@ -260,7 +261,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                 )
               );
             } catch (e) {
-              console.error("Failed to load replies for comment", commentId, e);
+              logger.error("Failed to load replies for comment", commentId, e);
             }
           })();
         }
@@ -336,7 +337,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
         userData = await getUserByWalletAddress(targetAddress);
       } catch (error) {
         // If user doesn't exist, create one on-the-fly (for any profile, not just own)
-        console.log("User not found, creating new user on-the-fly...");
+        logger.debug("User not found, creating new user on-the-fly...");
         userData = await createUser(targetAddress);
         if (isOwnProfile) {
           toast({
@@ -372,7 +373,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
         profileImage: userData.profileImage || "",
       });
     } catch (error) {
-      console.error("Error loading user data:", error);
+      logger.error("Error loading user data:", error);
       toast({
         title: "Error",
         description: "Failed to load user data",
@@ -467,7 +468,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
         },
       });
     } catch (e) {
-      console.error("Failed to load user overview", e);
+      logger.error("Failed to load user overview", e);
     }
   };
 
@@ -530,7 +531,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
         description: "Profile updated successfully",
       });
     } catch (error) {
-      console.error("Error updating user:", error);
+      logger.error("Error updating user:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Failed to update profile";
 
@@ -866,7 +867,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                             variant: "default",
                           });
                         } catch (error) {
-                          console.error("Failed to copy address:", error);
+                          logger.error("Failed to copy address:", error);
                           toast({
                             title: "Copy Failed",
                             description: "Failed to copy address to clipboard",
