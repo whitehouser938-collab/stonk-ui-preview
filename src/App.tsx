@@ -26,6 +26,7 @@ import Leaderboard from "./pages/Leaderboard";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import TokenDetail from "./pages/TokenDetail/TokenDetail";
+import { SentryTestButton } from "./components/SentryTestButton";
 
 const queryClient = new QueryClient();
 const projectId = env.VITE_WALLETCONNECT_PROJECT_ID;
@@ -92,6 +93,7 @@ const AppContent = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <SentryTestButton />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Markets />} />
