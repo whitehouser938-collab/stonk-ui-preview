@@ -15,6 +15,10 @@ class WebSocketManager {
     "disconnected";
   private healthCheckInterval: NodeJS.Timeout | null = null;
 
+  // Authentication is handled via httpOnly cookies – the browser sends
+  // them automatically with the WebSocket upgrade request.  No manual
+  // token management is needed on the client side.
+
   connect(): Promise<WebSocket> {
     return new Promise((resolve, reject) => {
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
@@ -42,6 +46,8 @@ class WebSocketManager {
 
       try {
         const wsUrl = getWebSocketUrl();
+
+        // httpOnly cookies are sent automatically with the upgrade request
         logger.websocket("Connecting to:", wsUrl);
         this.ws = new WebSocket(wsUrl);
 

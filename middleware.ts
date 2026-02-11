@@ -1,6 +1,7 @@
 import DOMPurify from 'isomorphic-dompurify';
 
-const API_URL = 'https://api.stonkmarket.xyz';
+// Use environment variable for API URL to support different environments
+const API_URL = process.env.VITE_API_URL || 'https://api.stonkmarket.xyz';
 
 interface TokenData {
   symbol?: string;

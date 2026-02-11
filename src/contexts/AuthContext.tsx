@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { useAppKitAccount, useDisconnect } from "@reown/appkit/react";
 import { useWalletClient } from "wagmi";
 import { logger } from "@/utils/logger";
@@ -15,9 +15,10 @@ interface AuthContextValue {
   user: User | null;
   isAuthenticated: boolean;
   isAuthenticating: boolean;
+  /** true while the initial /auth/me check is in flight */
+  isLoading: boolean;
   signIn: () => Promise<void>;
   signOut: () => Promise<void>;
-  sessionToken: string | null;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -28,43 +29,115 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { disconnect } = useDisconnect();
 
   const [user, setUser] = useState<User | null>(null);
-  const [sessionToken, setSessionToken] = useState<string | null>(null);
-  const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Load stored tokens on mount
+  // Ref to avoid stale closures in the refresh interval
+  const userRef = useRef(user);
+  userRef.current = user;
+
+  // ------------------------------------------------------------------
+  // Check auth status on mount via /auth/me (cookies sent automatically)
+  // ------------------------------------------------------------------
   useEffect(() => {
-    const storedSession = localStorage.getItem("auth:sessionToken");
-    const storedRefresh = localStorage.getItem("auth:refreshToken");
-
-    if (storedSession) {
-      setSessionToken(storedSession);
-      // Optionally validate token with backend
-    }
-    if (storedRefresh) {
-      setRefreshToken(storedRefresh);
-    }
+    checkAuthStatus();
   }, []);
 
-  // Auto-refresh token before expiry
+  // ------------------------------------------------------------------
+  // Auto-refresh the session cookie before it expires (15 min TTL).
+  // We refresh at 13 min to leave a comfortable buffer.
+  // ------------------------------------------------------------------
   useEffect(() => {
-    if (!sessionToken) return;
+    if (!user) return;
 
-    // JWT expires in 15 min, refresh at 14 min
     const refreshInterval = setInterval(async () => {
       await handleRefreshToken();
-    }, 14 * 60 * 1000);
+    }, 13 * 60 * 1000);
 
     return () => clearInterval(refreshInterval);
-  }, [sessionToken]);
+  }, [user]);
 
-  // Clear auth on wallet disconnect
+  // ------------------------------------------------------------------
+  // Clear auth when the wallet is disconnected
+  // ------------------------------------------------------------------
   useEffect(() => {
     if (!isConnected && user) {
       signOut();
     }
   }, [isConnected]);
 
+  // ------------------------------------------------------------------
+  // Helpers
+  // ------------------------------------------------------------------
+
+  const checkAuthStatus = async () => {
+    try {
+      const res = await fetch(`${env.VITE_AUTH_URL}/auth/me`, {
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.authenticated && data.user) {
+          setUser(data.user);
+          return;
+        }
+      }
+
+      // If the session cookie is expired, try refreshing once
+      if (res.status === 401) {
+        const refreshed = await handleRefreshToken();
+        if (refreshed) {
+          // Retry /auth/me with the fresh session cookie
+          const retryRes = await fetch(`${env.VITE_AUTH_URL}/auth/me`, {
+            credentials: "include",
+          });
+          if (retryRes.ok) {
+            const data = await retryRes.json();
+            if (data.authenticated && data.user) {
+              setUser(data.user);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      logger.error("Auth status check failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Attempt to refresh the session using the httpOnly refresh cookie.
+   * Returns true if the refresh succeeded.
+   */
+  const handleRefreshToken = async (): Promise<boolean> => {
+    try {
+      const res = await fetch(`${env.VITE_AUTH_URL}/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        // No body needed – the refresh token lives in an httpOnly cookie
+      });
+
+      if (!res.ok) {
+        // Refresh failed – user must re-authenticate
+        setUser(null);
+        return false;
+      }
+
+      // New cookies are set automatically by the response
+      return true;
+    } catch (error) {
+      logger.error("Token refresh error:", error);
+      setUser(null);
+      return false;
+    }
+  };
+
+  // ------------------------------------------------------------------
+  // Sign in (SIWE flow)
+  // ------------------------------------------------------------------
   const signIn = useCallback(async () => {
     if (!address || !walletClient) {
       throw new Error("Wallet not connected");
@@ -75,10 +148,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       // 1. Request nonce from auth service
       const nonceRes = await fetch(`${env.VITE_AUTH_URL}/auth/nonce?address=${address}`, {
-        credentials: 'include',
+        credentials: "include",
       });
       if (!nonceRes.ok) throw new Error("Failed to get nonce");
-      const { nonce, expiresAt } = await nonceRes.json();
+      const { nonce } = await nonceRes.json();
 
       // 2. Generate SIWE message
       const message = generateSIWEMessage(address, nonce);
@@ -87,10 +160,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const signature = await walletClient.signMessage({ message });
 
       // 4. Verify signature with auth service
+      //    The backend sets httpOnly cookies on success and returns user data.
       const verifyRes = await fetch(`${env.VITE_AUTH_URL}/auth/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify({
           walletAddress: address,
           signature,
@@ -103,26 +177,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error(error.message || "Signature verification failed");
       }
 
-      const response = await verifyRes.json();
-      
-      // TODO: Backend should set httpOnly cookies instead of returning tokens
-      // For now, we still support the old flow but prepare for cookie-based auth
-      const { sessionToken: newSession, refreshToken: newRefresh, user: userData } = response;
-
-      // 5. Store tokens (TEMPORARY - will be removed when backend uses httpOnly cookies)
-      // Backend should set cookies, and we should not store tokens in localStorage
-      if (newSession && newRefresh) {
-        setSessionToken(newSession);
-        setRefreshToken(newRefresh);
-        setUser(userData);
-        // SECURITY WARNING: localStorage is XSS vulnerable
-        // This will be removed once backend implements httpOnly cookies
-        localStorage.setItem("auth:sessionToken", newSession);
-        localStorage.setItem("auth:refreshToken", newRefresh);
-      } else if (userData) {
-        // If backend returns only user (cookie-based auth), just set user
-        setUser(userData);
-      }
+      const { user: userData } = await verifyRes.json();
+      setUser(userData);
     } catch (error: any) {
       logger.error("Sign in error:", error);
 
@@ -136,76 +192,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [address, walletClient]);
 
-  const handleRefreshToken = async () => {
-    if (!refreshToken) return;
-
+  // ------------------------------------------------------------------
+  // Sign out
+  // ------------------------------------------------------------------
+  const signOut = useCallback(async () => {
     try {
-      const res = await fetch(`${env.VITE_AUTH_URL}/auth/refresh`, {
+      // Tell the backend to invalidate the refresh token and clear cookies
+      await fetch(`${env.VITE_AUTH_URL}/auth/logout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: 'include',
-        body: JSON.stringify({ refreshToken }),
+        credentials: "include",
+        // No body needed – the refresh token is in the httpOnly cookie
       });
-
-      if (!res.ok) {
-        // Refresh token invalid/expired - force re-auth
-        signOut();
-        return;
-      }
-
-      const response = await res.json();
-      
-      // TODO: Backend should set httpOnly cookies instead of returning tokens
-      const { sessionToken: newSession, refreshToken: newRefresh } = response;
-
-      if (newSession && newRefresh) {
-        setSessionToken(newSession);
-        setRefreshToken(newRefresh);
-        // SECURITY WARNING: localStorage is XSS vulnerable
-        localStorage.setItem("auth:sessionToken", newSession);
-        localStorage.setItem("auth:refreshToken", newRefresh);
-      }
     } catch (error) {
-      logger.error("Token refresh error:", error);
-      signOut();
-    }
-  };
-
-  const signOut = useCallback(async () => {
-    if (refreshToken) {
-      // Invalidate on auth service
-      try {
-        await fetch(`${env.VITE_AUTH_URL}/auth/logout`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: 'include',
-          body: JSON.stringify({ refreshToken }),
-        });
-      } catch (error) {
-        logger.error("Logout error:", error);
-      }
+      logger.error("Logout error:", error);
     }
 
     // Clear local state
     setUser(null);
-    setSessionToken(null);
-    setRefreshToken(null);
-    localStorage.removeItem("auth:sessionToken");
-    localStorage.removeItem("auth:refreshToken");
 
     // Optionally clear search history
     if (address) {
       localStorage.removeItem(`search:history:${address.toLowerCase()}`);
     }
-  }, [refreshToken, address]);
+  }, [address]);
 
+  // ------------------------------------------------------------------
+  // Context value
+  // ------------------------------------------------------------------
   const value: AuthContextValue = {
     user,
-    isAuthenticated: !!user && !!sessionToken,
+    isAuthenticated: !!user,
     isAuthenticating,
+    isLoading,
     signIn,
     signOut,
-    sessionToken,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

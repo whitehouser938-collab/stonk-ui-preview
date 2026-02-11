@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { WagmiProvider } from "wagmi";
 import { UserProvider } from "@/contexts/UserContext";
-import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { apiClient } from "@/services/apiClient";
 import { useEffect } from "react";
 import Index from "./pages/Index";
@@ -62,21 +62,30 @@ const appKit = createAppKit({
   },
 });
 
-// AppContent component that sets up apiClient with auth handlers
+/**
+ * AppContent – wires up the apiClient auth-error handler.
+ *
+ * With httpOnly cookies there is no need to pass tokens around in JS.
+ * - REST requests: cookies are sent automatically via `credentials: "include"`
+ * - WebSocket:     the browser sends cookies with the WS upgrade request
+ */
 const AppContent = () => {
-  const { sessionToken } = useAuth();
-
   useEffect(() => {
-    // Configure apiClient with auth handlers
-    apiClient.setAuthHandlers(
-      () => sessionToken,
-      async () => {
-        // Token refresh is handled internally by AuthContext
-        // This is called when a 401 is received
-        logger.debug("Token expired, attempting refresh...");
+    // When the API returns a 401, try to silently refresh the session cookie
+    apiClient.setOnAuthError(async () => {
+      try {
+        const res = await fetch(`${env.VITE_AUTH_URL}/auth/refresh`, {
+          method: "POST",
+          credentials: "include",
+        });
+        if (!res.ok) {
+          logger.warn("Session refresh failed during API retry");
+        }
+      } catch (error) {
+        logger.error("Token refresh failed:", error);
       }
-    );
-  }, [sessionToken]);
+    });
+  }, []);
 
   return (
     <UserProvider>

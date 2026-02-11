@@ -9,16 +9,18 @@ interface ApiClientOptions {
 
 class ApiClient {
   private baseUrl: string;
-  private getSessionToken: (() => string | null) | null = null;
-  private onTokenExpired: (() => Promise<void>) | null = null;
+  private onAuthError: (() => Promise<void>) | null = null;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
   }
 
-  setAuthHandlers(getToken: () => string | null, onExpired: () => Promise<void>) {
-    this.getSessionToken = getToken;
-    this.onTokenExpired = onExpired;
+  /**
+   * Register a handler that is called when a 401 response is received.
+   * Typically used to trigger a token refresh via the auth service.
+   */
+  setOnAuthError(handler: () => Promise<void>) {
+    this.onAuthError = handler;
   }
 
   async request<T = any>(endpoint: string, options: ApiClientOptions = {}): Promise<T> {
@@ -27,19 +29,11 @@ class ApiClient {
       ...options.headers,
     };
 
-    // Inject auth token
-    if (this.getSessionToken) {
-      const token = this.getSessionToken();
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-    }
-
+    // No manual Authorization header – httpOnly cookies are sent automatically
     const config: RequestInit = {
       method: options.method || "GET",
       headers,
-      // Include credentials for cookie-based auth (when backend supports it)
-      credentials: 'include',
+      credentials: "include", // Send httpOnly cookies with every request
     };
 
     if (options.body) {
@@ -49,17 +43,11 @@ class ApiClient {
     logger.api(`${options.method || "GET"} ${endpoint}`);
     let response = await fetch(`${this.baseUrl}${endpoint}`, config);
 
-    // Handle token expiration
-    if (response.status === 401 && this.onTokenExpired) {
-      // Try to refresh token
-      await this.onTokenExpired();
-
-      // Retry request with new token
-      const newToken = this.getSessionToken?.();
-      if (newToken) {
-        headers["Authorization"] = `Bearer ${newToken}`;
-        response = await fetch(`${this.baseUrl}${endpoint}`, { ...config, headers });
-      }
+    // On 401, try to refresh the session cookie and retry once
+    if (response.status === 401 && this.onAuthError) {
+      await this.onAuthError();
+      // Retry with the (hopefully) refreshed cookie
+      response = await fetch(`${this.baseUrl}${endpoint}`, config);
     }
 
     if (!response.ok) {
