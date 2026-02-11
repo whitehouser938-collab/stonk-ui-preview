@@ -37,36 +37,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   userRef.current = user;
 
   // ------------------------------------------------------------------
-  // Check auth status on mount via /auth/me (cookies sent automatically)
-  // ------------------------------------------------------------------
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
-
-  // ------------------------------------------------------------------
-  // Auto-refresh the session cookie before it expires (15 min TTL).
-  // We refresh at 13 min to leave a comfortable buffer.
-  // ------------------------------------------------------------------
-  useEffect(() => {
-    if (!user) return;
-
-    const refreshInterval = setInterval(async () => {
-      await handleRefreshToken();
-    }, 13 * 60 * 1000);
-
-    return () => clearInterval(refreshInterval);
-  }, [user]);
-
-  // ------------------------------------------------------------------
-  // Clear auth when the wallet is disconnected
-  // ------------------------------------------------------------------
-  useEffect(() => {
-    if (!isConnected && user) {
-      signOut();
-    }
-  }, [isConnected, user, signOut]);
-
-  // ------------------------------------------------------------------
   // Helpers
   // ------------------------------------------------------------------
 
@@ -216,6 +186,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem(`search:history:${address.toLowerCase()}`);
     }
   }, [address]);
+
+  // ------------------------------------------------------------------
+  // Effects
+  // ------------------------------------------------------------------
+
+  // Check auth status on mount via /auth/me (cookies sent automatically)
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
+  // Auto-refresh the session cookie before it expires (15 min TTL).
+  // We refresh at 13 min to leave a comfortable buffer.
+  useEffect(() => {
+    if (!user) return;
+
+    const refreshInterval = setInterval(async () => {
+      await handleRefreshToken();
+    }, 13 * 60 * 1000);
+
+    return () => clearInterval(refreshInterval);
+  }, [user]);
+
+  // Clear auth when the wallet is disconnected
+  useEffect(() => {
+    if (!isConnected && user) {
+      signOut();
+    }
+  }, [isConnected, user, signOut]);
 
   // ------------------------------------------------------------------
   // Context value
