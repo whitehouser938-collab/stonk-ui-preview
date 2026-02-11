@@ -28,7 +28,7 @@ export class ErrorBoundary extends Component<Props, State> {
     logger.error('ErrorBoundary caught:', error, errorInfo);
 
     // Send error to Sentry with React component context
-    if (env.VITE_ERROR_REPORTING_URL) {
+    if (import.meta.env.PROD && env.VITE_ERROR_REPORTING_URL) {
       Sentry.withScope((scope) => {
         scope.setContext('react', {
           componentStack: errorInfo.componentStack,
