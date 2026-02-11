@@ -11,8 +11,8 @@ import { env } from './env';
  * Call this once at app startup before rendering
  */
 export function initSentry() {
-  // Only initialize in production with a valid DSN
-  if (!import.meta.env.PROD || !env.VITE_ERROR_REPORTING_URL) {
+  // Only initialize with a valid DSN
+  if (!env.VITE_ERROR_REPORTING_URL) {
     return;
   }
 
@@ -61,7 +61,7 @@ export function initSentry() {
  * Manually capture an exception
  */
 export function captureException(error: Error | unknown, context?: Record<string, any>) {
-  if (!import.meta.env.PROD || !env.VITE_ERROR_REPORTING_URL) {
+  if (!env.VITE_ERROR_REPORTING_URL) {
     return;
   }
 
@@ -79,7 +79,7 @@ export function captureException(error: Error | unknown, context?: Record<string
  * Manually capture a message
  */
 export function captureMessage(message: string, level: Sentry.SeverityLevel = 'info') {
-  if (!import.meta.env.PROD || !env.VITE_ERROR_REPORTING_URL) {
+  if (!env.VITE_ERROR_REPORTING_URL) {
     return;
   }
 
@@ -90,7 +90,7 @@ export function captureMessage(message: string, level: Sentry.SeverityLevel = 'i
  * Set user context for error reports
  */
 export function setUser(user: { id: string; email?: string; username?: string } | null) {
-  if (!import.meta.env.PROD || !env.VITE_ERROR_REPORTING_URL) {
+  if (!env.VITE_ERROR_REPORTING_URL) {
     return;
   }
 
@@ -101,7 +101,7 @@ export function setUser(user: { id: string; email?: string; username?: string } 
  * Add breadcrumb for debugging
  */
 export function addBreadcrumb(message: string, data?: Record<string, any>) {
-  if (!import.meta.env.PROD || !env.VITE_ERROR_REPORTING_URL) {
+  if (!env.VITE_ERROR_REPORTING_URL) {
     return;
   }
 
