@@ -233,9 +233,14 @@ export const getUserByUsername = async (username: string): Promise<User> => {
 
 export const getUserByWalletAddress = async (
   walletAddress: string
-): Promise<User> => {
+): Promise<User | null> => {
   try {
     const response = await fetch(`${API_ROOT}/user/${walletAddress}`);
+
+    // 404 means the wallet hasn't registered yet — not an error
+    if (response.status === 404) {
+      return null;
+    }
 
     if (!response.ok) {
       throw new Error("Failed to fetch user by wallet address");
@@ -243,7 +248,7 @@ export const getUserByWalletAddress = async (
 
     const data = await response.json();
     if (!data || !data.success) {
-      throw new Error("User not found");
+      return null;
     }
 
     return normalizeUser(data.data);

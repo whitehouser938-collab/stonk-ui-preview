@@ -32,7 +32,6 @@ import {
   getUserTokens,
   updateUser,
   uploadUserProfileImage,
-  createUser,
   getUserOverview,
   getUserHoldings,
   User as UserType,
@@ -331,22 +330,8 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
 
     setLoading(true);
     try {
-      let userData;
-      try {
-        // Try to get existing user
-        userData = await getUserByWalletAddress(targetAddress);
-      } catch (error) {
-        // If user doesn't exist, create one on-the-fly (for any profile, not just own)
-        logger.debug("User not found, creating new user on-the-fly...");
-        userData = await createUser(targetAddress);
-        if (isOwnProfile) {
-          toast({
-            title: "Welcome!",
-            description: "Your profile has been created successfully",
-            variant: "default",
-          });
-        }
-      }
+      // Fetch user (returns null if wallet hasn't signed in yet — that's fine)
+      const userData = await getUserByWalletAddress(targetAddress);
 
       const tokensData = await getUserTokens(targetAddress);
       const holdingsData = await getUserHoldings(targetAddress);
@@ -367,10 +352,10 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
         },
       }));
 
-      // Initialize edit form with current user data
+      // Initialize edit form with current user data (if user exists)
       setEditForm({
-        username: userData.username || "",
-        profileImage: userData.profileImage || "",
+        username: userData?.username || "",
+        profileImage: userData?.profileImage || "",
       });
     } catch (error) {
       logger.error("Error loading user data:", error);
