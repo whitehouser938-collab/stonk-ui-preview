@@ -7,24 +7,34 @@ export const getApiBaseUrl = (): string => {
 };
 
 export const getWebSocketUrl = (): string => {
-  // If explicitly set, use it
+  let url: string;
+
   if (env.VITE_WEBSOCKET_URL) {
-    return env.VITE_WEBSOCKET_URL;
+    url = env.VITE_WEBSOCKET_URL;
+  } else {
+    // Derive from API URL
+    const apiUrl = env.VITE_API_URL;
+    try {
+      const parsed = new URL(apiUrl);
+      const wsProtocol = parsed.protocol === "https:" ? "wss:" : "ws:";
+      const wsPath = parsed.pathname.replace(/\/api\/?$/, "") + "/ws";
+      url = `${wsProtocol}//${parsed.host}${wsPath}`;
+    } catch (error) {
+      logger.error("Failed to derive WebSocket URL from API URL:", apiUrl);
+      throw new Error("Invalid API URL configuration");
+    }
   }
 
-  // Otherwise, derive from API URL
-  const apiUrl = env.VITE_API_URL;
-
-  // Convert HTTP(S) API URL to WS(S) WebSocket URL
+  // Production ingress serves WebSocket at /ws; ensure path is present
   try {
-    const url = new URL(apiUrl);
-    const wsProtocol = url.protocol === "https:" ? "wss:" : "ws:";
-    // Remove /api suffix if present and add /ws
-    const wsPath = url.pathname.replace(/\/api\/?$/, "") + "/ws";
-    return `${wsProtocol}//${url.host}${wsPath}`;
-  } catch (error) {
-    logger.error("Failed to derive WebSocket URL from API URL:", apiUrl);
-    throw new Error("Invalid API URL configuration");
+    const parsed = new URL(url);
+    if (!parsed.pathname || parsed.pathname === "/") {
+      parsed.pathname = "/ws";
+      return parsed.toString();
+    }
+    return url;
+  } catch {
+    return url;
   }
 };
 
