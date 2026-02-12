@@ -84,7 +84,9 @@ export const deployTokenETH = async (
         // Deploy token without initial buy (original function)
         tx = await tokenFactory.deployToken(
           tokenData.name,
-          tokenData.symbol
+          tokenData.symbol,
+          0,
+          false
           // { value: fee }
         );
 
