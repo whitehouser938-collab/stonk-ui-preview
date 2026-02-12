@@ -17,7 +17,7 @@ interface AuthContextValue {
   isAuthenticating: boolean;
   /** true while the initial /auth/me check is in flight */
   isLoading: boolean;
-  signIn: () => Promise<void>;
+  signIn: (options?: { isManual?: boolean }) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -35,6 +35,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Ref to avoid stale closures in the refresh interval
   const userRef = useRef(user);
   userRef.current = user;
+
+  // Track which addresses we've attempted to sign in (to prevent infinite loops)
+  const attemptedSignInRef = useRef<Set<string>>(new Set());
 
   // ------------------------------------------------------------------
   // Helpers
@@ -108,29 +111,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // ------------------------------------------------------------------
   // Sign in (SIWE flow)
   // ------------------------------------------------------------------
-  const signIn = useCallback(async () => {
+  const signIn = useCallback(async (options?: { isManual?: boolean }) => {
     if (!address || !walletClient) {
       throw new Error("Wallet not connected");
+    }
+
+    // For manual sign-in, always clear the tracking to allow retry
+    if (options?.isManual && address) {
+      logger.info("Manual sign-in requested, clearing tracking", { address });
+      attemptedSignInRef.current.delete(address.toLowerCase());
     }
 
     setIsAuthenticating(true);
 
     try {
       // 1. Request nonce from auth service
+      logger.info("Requesting nonce", { address });
       const nonceRes = await fetch(`${env.VITE_AUTH_URL}/auth/nonce?address=${address}`, {
         credentials: "include",
       });
-      if (!nonceRes.ok) throw new Error("Failed to get nonce");
+      if (!nonceRes.ok) {
+        logger.error("Failed to get nonce", { status: nonceRes.status });
+        throw new Error("Failed to get nonce");
+      }
       const { nonce } = await nonceRes.json();
+      logger.info("Nonce received", { nonce });
 
       // 2. Generate SIWE message
       const message = generateSIWEMessage(address, nonce);
+      logger.info("Generated SIWE message", { messagePreview: message.substring(0, 100) });
 
       // 3. Request signature from wallet
+      logger.info("Requesting signature from wallet...");
       const signature = await walletClient.signMessage({ message });
+      logger.info("Signature received", { signatureLength: signature.length });
 
       // 4. Verify signature with auth service
       //    The backend sets httpOnly cookies on success and returns user data.
+      logger.info("Sending verify request", { address });
       const verifyRes = await fetch(`${env.VITE_AUTH_URL}/auth/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -142,18 +160,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }),
       });
 
+      logger.info("Verify response received", {
+        status: verifyRes.status,
+        statusText: verifyRes.statusText,
+        ok: verifyRes.ok
+      });
+
       if (!verifyRes.ok) {
         const error = await verifyRes.json();
+        logger.error("Verify request failed", { error });
         throw new Error(error.message || "Signature verification failed");
       }
 
-      const { user: userData } = await verifyRes.json();
+      const responseData = await verifyRes.json();
+      logger.info("Verify response data", {
+        hasUser: !!responseData.user,
+        userData: responseData.user,
+        responseKeys: Object.keys(responseData)
+      });
+
+      const { user: userData } = responseData;
+
+      if (!userData) {
+        logger.error("No user data in verify response", { responseData });
+        throw new Error("Authentication succeeded but no user data received");
+      }
+
+      logger.info("Setting user data", { userData });
       setUser(userData);
     } catch (error: any) {
-      logger.error("Sign in error:", error);
+      logger.error("Sign in error:", {
+        message: error.message,
+        code: error.code,
+        name: error.name,
+        stack: error.stack
+      });
 
       // Handle user rejection
-      if (error.code === 4001 || error.message?.includes("User rejected")) {
+      if (error.code === 4001 || error.message?.includes("User rejected") || error.message?.includes("rejected")) {
+        logger.warn("User rejected signature request");
         throw new Error("Signature request rejected");
       }
       throw error;
@@ -208,10 +253,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => clearInterval(refreshInterval);
   }, [user]);
 
+  // Auto-authenticate when wallet connects (if not already authenticated)
+  useEffect(() => {
+    if (isConnected && address && !user && !isAuthenticating && !isLoading) {
+      // Don't retry if we've already attempted sign-in for this address
+      if (attemptedSignInRef.current.has(address.toLowerCase())) {
+        logger.info("Already attempted sign-in for this address, skipping", { address });
+        return;
+      }
+
+      logger.info("Wallet connected, triggering auto sign-in", { address });
+      attemptedSignInRef.current.add(address.toLowerCase());
+
+      signIn().catch((error) => {
+        logger.error("Auto sign-in failed:", error);
+        // Don't remove from attempted set - we don't want to retry automatically
+      });
+    }
+  }, [isConnected, address, user, isAuthenticating, isLoading, signIn]);
+
   // Clear auth when the wallet is disconnected
   useEffect(() => {
-    if (!isConnected && user) {
-      signOut();
+    if (!isConnected) {
+      if (user) {
+        signOut();
+      }
+      // Clear attempted sign-in tracking when wallet disconnects
+      attemptedSignInRef.current.clear();
     }
   }, [isConnected, user, signOut]);
 

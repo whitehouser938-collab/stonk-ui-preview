@@ -108,7 +108,7 @@ export interface UserUpdateData {
 // API Functions
 
 export const getAllUsers = async (
-  params?: UserListParams
+  params?: UserListParams,
 ): Promise<UserListResponse> => {
   try {
     const searchParams = new URLSearchParams();
@@ -138,7 +138,7 @@ export const getAllUsers = async (
 };
 
 export const searchUsers = async (
-  params: UserSearchParams
+  params: UserSearchParams,
 ): Promise<UserSearchResponse> => {
   try {
     const searchParams = new URLSearchParams({
@@ -186,11 +186,11 @@ export const getUserStats = async (): Promise<UserStats> => {
 };
 
 export const checkUsernameAvailability = async (
-  username: string
+  username: string,
 ): Promise<UsernameAvailabilityResponse> => {
   try {
     const response = await fetch(
-      `${API_ROOT}/user/username/available?q=${encodeURIComponent(username)}`
+      `${API_ROOT}/user/username/available?q=${encodeURIComponent(username)}`,
     );
 
     if (!response.ok) {
@@ -212,7 +212,7 @@ export const checkUsernameAvailability = async (
 export const getUserByUsername = async (username: string): Promise<User> => {
   try {
     const response = await fetch(
-      `${API_ROOT}/user/username/${encodeURIComponent(username)}`
+      `${API_ROOT}/user/username/${encodeURIComponent(username)}`,
     );
 
     if (!response.ok) {
@@ -232,7 +232,7 @@ export const getUserByUsername = async (username: string): Promise<User> => {
 };
 
 export const getUserByWalletAddress = async (
-  walletAddress: string
+  walletAddress: string,
 ): Promise<User | null> => {
   try {
     const response = await fetch(`${API_ROOT}/user/${walletAddress}`);
@@ -262,7 +262,7 @@ export const getUserByWalletAddress = async (
 export const getUserTokens = async (walletAddress: string): Promise<any[]> => {
   try {
     const response = await fetch(
-      `${API_ROOT}/user/${walletAddress}/deployed-tokens`
+      `${API_ROOT}/user/${walletAddress}/deployed-tokens`,
     );
 
     if (!response.ok) {
@@ -284,10 +284,12 @@ export const getUserTokens = async (walletAddress: string): Promise<any[]> => {
 // New endpoint: set/update username for a user
 export const setUsername = async (
   walletAddress: string,
-  username: string
+  username: string,
 ): Promise<User> => {
   try {
-    const data = await apiClient.put(`/user/${walletAddress}/username`, { username });
+    const data = await apiClient.put(`/user/${walletAddress}/username`, {
+      username,
+    });
 
     if (!data || !data.success) {
       throw new Error(data.message || "Username update unsuccessful");
@@ -309,7 +311,7 @@ export const setUsername = async (
 // Upload a user's profile image and return the hosted URL
 export const uploadUserProfileImage = async (
   walletAddress: string,
-  file: File
+  file: File,
 ): Promise<string> => {
   const formData = new FormData();
   formData.append("file", file);
@@ -423,7 +425,7 @@ export const upsertUser = async (payload: {
 // Backward-compat adapter: updateUser now uses the new endpoints
 export const updateUser = async (
   walletAddress: string,
-  userData: UserUpdateData
+  userData: UserUpdateData,
 ): Promise<User> => {
   // If only username provided, use the new PUT /api/user/:wallet/username
   if (userData.username && !userData.profileImage) {
@@ -524,7 +526,7 @@ export interface GetUserOverviewResponse {
 }
 
 export const getUserOverview = async (
-  walletAddress: string
+  walletAddress: string,
 ): Promise<GetUserOverviewResponse["data"]> => {
   if (!walletAddress) throw new Error("wallet is required");
   const response = await fetch(`${API_ROOT}/user/${walletAddress}/overview`);
@@ -564,7 +566,7 @@ export interface UserHoldingsResponse {
 }
 
 export const getUserHoldings = async (
-  walletAddress: string
+  walletAddress: string,
 ): Promise<UserHoldingsResponse["data"]> => {
   if (!walletAddress) throw new Error("wallet address is required");
 
@@ -639,7 +641,7 @@ export const getUserHoldings = async (
               ? priceChange24h
               : parseFloat(priceChange24h) || 0,
         };
-      }
+      },
     );
 
     return {

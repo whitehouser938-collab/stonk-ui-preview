@@ -95,7 +95,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(
-    null
+    null,
   );
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
@@ -210,7 +210,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
   });
 
   const [expandedComments, setExpandedComments] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
 
   const toggleExpandReplies = (commentId: string) => {
@@ -256,8 +256,8 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                           _count: { likes: r._count?.likes || 0 },
                         })),
                       }
-                    : c
-                )
+                    : c,
+                ),
               );
             } catch (e) {
               logger.error("Failed to load replies for comment", commentId, e);
@@ -302,12 +302,12 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
               _count: {
                 likes: Math.max(
                   0,
-                  (r._count?.likes || 0) + (r.isLiked ? -1 : 1)
+                  (r._count?.likes || 0) + (r.isLiked ? -1 : 1),
                 ),
               },
             }
-          : r
-      )
+          : r,
+      ),
     );
   };
 
@@ -342,7 +342,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
 
       // Update deployer stats from actual tokens data
       const graduatedCount = tokensData.filter(
-        (token: any) => token.isGraduated || token.graduated
+        (token: any) => token.isGraduated || token.graduated,
       ).length;
       setProfileStats((prev) => ({
         ...prev,
@@ -480,7 +480,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
       }
       if (!allowedTypes.includes(file.type)) {
         setFileError(
-          "Please upload a valid image file (JPEG, PNG, GIF, or WebP)"
+          "Please upload a valid image file (JPEG, PNG, GIF, or WebP)",
         );
         return;
       }
@@ -616,12 +616,12 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
               _count: {
                 likes: Math.max(
                   0,
-                  (c._count?.likes || 0) + (c.isLiked ? -1 : 1)
+                  (c._count?.likes || 0) + (c.isLiked ? -1 : 1),
                 ),
               },
             }
-          : c
-      )
+          : c,
+      ),
     );
   };
 
@@ -639,15 +639,15 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                       _count: {
                         likes: Math.max(
                           0,
-                          (r._count?.likes || 0) + (r.isLiked ? -1 : 1)
+                          (r._count?.likes || 0) + (r.isLiked ? -1 : 1),
                         ),
                       },
                     }
-                  : r
+                  : r,
               ),
             }
-          : c
-      )
+          : c,
+      ),
     );
   };
 
@@ -656,7 +656,9 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
     return (
       <div>
         <div className="flex items-center justify-between mb-3 lg:mb-1">
-          <h1 className="text-3xl font-bold text-orange-400 font-mono">Profile</h1>
+          <h1 className="text-3xl font-bold text-orange-400 font-mono">
+            Profile
+          </h1>
         </div>
         <WalletConnectionPrompt
           title="Sign In"
@@ -672,7 +674,9 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
     return (
       <div>
         <div className="flex items-center justify-between mb-3 lg:mb-1">
-          <h1 className="text-3xl font-bold text-orange-400 font-mono">Profile</h1>
+          <h1 className="text-3xl font-bold text-orange-400 font-mono">
+            Profile
+          </h1>
         </div>
         <div className="flex items-center justify-center py-12">
           <div className="text-gray-400 font-sans">Loading...</div>
@@ -686,7 +690,9 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
     return (
       <div>
         <div className="flex items-center justify-between mb-3 lg:mb-1">
-          <h1 className="text-3xl font-bold text-orange-400 font-mono">Profile</h1>
+          <h1 className="text-3xl font-bold text-orange-400 font-mono">
+            Profile
+          </h1>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-1">
           <div className="bg-bg-card p-3 lg:p-1">
@@ -766,12 +772,16 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                     className="w-full p-2 bg-black border text-white text-xs font-mono file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-orange-500 file:text-black hover:file:bg-orange-700 border-gray-600"
                   />
                   {fileError && (
-                    <div className="text-red-400 text-xs font-mono">{fileError}</div>
+                    <div className="text-red-400 text-xs font-mono">
+                      {fileError}
+                    </div>
                   )}
                   {/* Image Preview */}
                   {(selectedFile || user?.profileImage) && (
                     <div className="mt-3">
-                      <div className="text-xs text-gray-400 mb-2 font-mono">Preview:</div>
+                      <div className="text-xs text-gray-400 mb-2 font-mono">
+                        Preview:
+                      </div>
                       <div className="w-20 h-20 rounded overflow-hidden border-2 border-gray-600">
                         <img
                           src={
@@ -799,10 +809,18 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
             </div>
 
             <div className="flex items-center justify-end gap-2 mt-6">
-              <Button variant="outline" onClick={closeEditModal} className="font-mono">
+              <Button
+                variant="outline"
+                onClick={closeEditModal}
+                className="font-mono"
+              >
                 Cancel
               </Button>
-              <Button onClick={saveProfileEdits} disabled={loading} className="font-mono">
+              <Button
+                onClick={saveProfileEdits}
+                disabled={loading}
+                className="font-mono"
+              >
                 {loading ? "Saving..." : "Save"}
               </Button>
             </div>
@@ -813,171 +831,176 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
       <div className="max-w-6xl mx-auto">
         {/* Top section: Combined user info and stats */}
         <div className="bg-bg-card p-3 lg:p-1 mb-3 lg:mb-1">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              {/* User Info */}
-              <div className="flex items-center space-x-4">
-                <Avatar className="w-16 h-16">
-                  <AvatarImage
-                    src={
-                      user?.profileImage && user.profileImage.length > 0
-                        ? user.profileImage
-                        : "/default-pfp.jpeg"
-                    }
-                    alt="Profile"
-                  />
-                  <AvatarFallback>
-                    <User className="w-8 h-8" />
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold text-gray-200 font-mono">
-                    {user?.username || "Anonymous User"}
-                  </h3>
-                  <p className="text-gray-400 flex items-center space-x-2 font-mono">
-                    <Wallet className="w-4 h-4" />
-                    <span className="font-mono">
-                      {formatAddress(targetAddress || "")}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={async () => {
-                        try {
-                          await navigator.clipboard.writeText(
-                            targetAddress || ""
-                          );
-                          toast({
-                            title: "Address Copied",
-                            description: "Wallet address copied to clipboard",
-                            variant: "default",
-                          });
-                        } catch (error) {
-                          logger.error("Failed to copy address:", error);
-                          toast({
-                            title: "Copy Failed",
-                            description: "Failed to copy address to clipboard",
-                            variant: "destructive",
-                          });
-                        }
-                      }}
-                      className="hover:text-orange-400 transition-colors"
-                    >
-                      <Copy className="w-4 h-4" />
-                    </Button>
-                  </p>
-                  <div className="flex items-center space-x-4 text-sm text-gray-400 mt-1 font-mono">
-                    <span className="flex items-center space-x-1">
-                      <Calendar className="w-4 h-4" />
-                      <span>Joined {formatDate(user?.createdAt || "")}</span>
-                    </span>
-                  </div>
-                </div>
-                {/* Desktop Actions */}
-                {isOwnProfile && (
-                  <div className="hidden md:flex items-center gap-2">
-                    <Button
-                      onClick={openEditModal}
-                      variant="outline"
-                      size="sm"
-                      className="text-orange-400"
-                    >
-                      <Edit3 className="w-4 h-4 mr-2 text-orange-400" />
-                      <span className="font-mono">Edit Profile</span>
-                    </Button>
-                    <Button
-                      onClick={handleDisconnect}
-                      disabled={disconnecting}
-                      variant="outline"
-                      size="sm"
-                      className="text-red-400 border-red-500/30 hover:bg-red-900/20 hover:border-red-400/50 disabled:opacity-50 font-mono"
-                    >
-                      <LogOut className="w-4 h-4 mr-2" />
-                      {disconnecting ? "Disconnecting..." : "Disconnect"}
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              {/* Stats (desktop) */}
-              <div className="hidden md:flex space-x-8">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-400 font-mono">
-                    {profileStats.deployer.tokensDeployed}
-                  </div>
-                  <div className="text-sm text-gray-400 font-mono">Tokens Deployed</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-400 font-mono">
-                    {profileStats.deployer.graduatedTokens}
-                  </div>
-                  <div className="text-sm text-gray-400 font-mono">Graduated</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-400 font-mono">
-                    {profileStats.social.likesReceived}
-                  </div>
-                  <div className="text-sm text-gray-400 font-mono">Likes Received</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-400 font-mono">
-                    {profileStats.social.commentsMade}
-                  </div>
-                  <div className="text-sm text-gray-400 font-mono">Comments</div>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            {/* User Info */}
+            <div className="flex items-center space-x-4">
+              <Avatar className="w-16 h-16">
+                <AvatarImage
+                  src={
+                    user?.profileImage && user.profileImage.length > 0
+                      ? user.profileImage
+                      : "/default-pfp.jpeg"
+                  }
+                  alt="Profile"
+                />
+                <AvatarFallback>
+                  <User className="w-8 h-8" />
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <h3 className="text-xl font-semibold text-gray-200 font-mono">
+                  {user?.username || "Anonymous User"}
+                </h3>
+                <p className="text-gray-400 flex items-center space-x-2 font-mono">
+                  <Wallet className="w-4 h-4" />
+                  <span className="font-mono">
+                    {formatAddress(targetAddress || "")}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(
+                          targetAddress || "",
+                        );
+                        toast({
+                          title: "Address Copied",
+                          description: "Wallet address copied to clipboard",
+                          variant: "default",
+                        });
+                      } catch (error) {
+                        logger.error("Failed to copy address:", error);
+                        toast({
+                          title: "Copy Failed",
+                          description: "Failed to copy address to clipboard",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                    className="hover:text-orange-400 transition-colors"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </p>
+                <div className="flex items-center space-x-4 text-sm text-gray-400 mt-1 font-mono">
+                  <span className="flex items-center space-x-1">
+                    <Calendar className="w-4 h-4" />
+                    <span>Joined {formatDate(user?.createdAt || "")}</span>
+                  </span>
                 </div>
               </div>
+              {/* Desktop Actions */}
+              {isOwnProfile && (
+                <div className="hidden md:flex items-center gap-2">
+                  <Button
+                    onClick={openEditModal}
+                    variant="outline"
+                    size="sm"
+                    className="text-orange-400"
+                  >
+                    <Edit3 className="w-4 h-4 mr-2 text-orange-400" />
+                    <span className="font-mono">Edit Profile</span>
+                  </Button>
+                  <Button
+                    onClick={handleDisconnect}
+                    disabled={disconnecting}
+                    variant="outline"
+                    size="sm"
+                    className="text-red-400 border-red-500/30 hover:bg-red-900/20 hover:border-red-400/50 disabled:opacity-50 font-mono"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    {disconnecting ? "Disconnecting..." : "Disconnect"}
+                  </Button>
+                </div>
+              )}
             </div>
 
-            {/* Stats (mobile) */}
-            <div className="mt-4 grid grid-cols-2 gap-4 md:hidden">
+            {/* Stats (desktop) */}
+            <div className="hidden md:flex space-x-8">
               <div className="text-center">
-                <div className="text-xl font-bold text-orange-400 font-mono">
+                <div className="text-2xl font-bold text-orange-400 font-mono">
                   {profileStats.deployer.tokensDeployed}
                 </div>
-                <div className="text-xs text-gray-400 font-mono">Tokens</div>
+                <div className="text-sm text-gray-400 font-mono">
+                  Tokens Deployed
+                </div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-orange-400 font-mono">
+                <div className="text-2xl font-bold text-orange-400 font-mono">
                   {profileStats.deployer.graduatedTokens}
                 </div>
-                <div className="text-xs text-gray-400 font-mono">Graduated</div>
+                <div className="text-sm text-gray-400 font-mono">Graduated</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-orange-400 font-mono">
+                <div className="text-2xl font-bold text-orange-400 font-mono">
                   {profileStats.social.likesReceived}
                 </div>
-                <div className="text-xs text-gray-400 font-mono">Likes</div>
+                <div className="text-sm text-gray-400 font-mono">
+                  Likes Received
+                </div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-orange-400 font-mono">
+                <div className="text-2xl font-bold text-orange-400 font-mono">
                   {profileStats.social.commentsMade}
                 </div>
-                <div className="text-xs text-gray-400 font-mono">Comments</div>
+                <div className="text-sm text-gray-400 font-mono">Comments</div>
               </div>
             </div>
+          </div>
 
-            {/* Actions (mobile only) */}
-            {isOwnProfile && (
-              <div className="mt-4 flex md:hidden gap-2">
-                <Button
-                  onClick={openEditModal}
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 text-orange-400"
-                >
-                  <Edit3 className="w-4 h-4 mr-2" /> <span className="font-mono">Edit</span>
-                </Button>
-                <Button
-                  onClick={handleDisconnect}
-                  disabled={disconnecting}
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 text-red-400 border-red-500/30 hover:bg-red-900/20 hover:border-red-400/50 disabled:opacity-50 font-mono"
-                >
-                  <LogOut className="w-4 h-4 mr-2" />{" "}
-                  {disconnecting ? "..." : "Disconnect"}
-                </Button>
+          {/* Stats (mobile) */}
+          <div className="mt-4 grid grid-cols-2 gap-4 md:hidden">
+            <div className="text-center">
+              <div className="text-xl font-bold text-orange-400 font-mono">
+                {profileStats.deployer.tokensDeployed}
               </div>
-            )}
+              <div className="text-xs text-gray-400 font-mono">Tokens</div>
+            </div>
+            <div className="text-center">
+              <div className="text-xl font-bold text-orange-400 font-mono">
+                {profileStats.deployer.graduatedTokens}
+              </div>
+              <div className="text-xs text-gray-400 font-mono">Graduated</div>
+            </div>
+            <div className="text-center">
+              <div className="text-xl font-bold text-orange-400 font-mono">
+                {profileStats.social.likesReceived}
+              </div>
+              <div className="text-xs text-gray-400 font-mono">Likes</div>
+            </div>
+            <div className="text-center">
+              <div className="text-xl font-bold text-orange-400 font-mono">
+                {profileStats.social.commentsMade}
+              </div>
+              <div className="text-xs text-gray-400 font-mono">Comments</div>
+            </div>
+          </div>
+
+          {/* Actions (mobile only) */}
+          {isOwnProfile && (
+            <div className="mt-4 flex md:hidden gap-2">
+              <Button
+                onClick={openEditModal}
+                variant="outline"
+                size="sm"
+                className="flex-1 text-orange-400"
+              >
+                <Edit3 className="w-4 h-4 mr-2" />{" "}
+                <span className="font-mono">Edit</span>
+              </Button>
+              <Button
+                onClick={handleDisconnect}
+                disabled={disconnecting}
+                variant="outline"
+                size="sm"
+                className="flex-1 text-red-400 border-red-500/30 hover:bg-red-900/20 hover:border-red-400/50 disabled:opacity-50 font-mono"
+              >
+                <LogOut className="w-4 h-4 mr-2" />{" "}
+                {disconnecting ? "..." : "Disconnect"}
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* View Toggle Control Bar */}
@@ -1032,7 +1055,9 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                               ) : (
                                 <Coins className="w-3.5 h-3.5 text-orange-400" />
                               )}
-                              <span className="font-mono">{c.token.symbol}</span>
+                              <span className="font-mono">
+                                {c.token.symbol}
+                              </span>
                             </Link>
                             <span className="text-gray-500 font-mono">
                               {formatTimeAgo(c.createdAt)}
@@ -1101,7 +1126,9 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                                             r.isLiked ? "fill-current" : ""
                                           }`}
                                         />
-                                        <span className="font-mono">{r._count?.likes || 0}</span>
+                                        <span className="font-mono">
+                                          {r._count?.likes || 0}
+                                        </span>
                                       </button>
                                     </div>
                                   </div>
@@ -1109,7 +1136,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                                     {r.content}
                                   </div>
                                 </div>
-                              )
+                              ),
                             )}
 
                             {!expandedComments.has(c.id) && (
@@ -1160,7 +1187,9 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                         {/* Original comment with token indicator at top-left */}
                         <div className="p-4">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-gray-400 text-xs font-mono">On</span>
+                            <span className="text-gray-400 text-xs font-mono">
+                              On
+                            </span>
                             <Link
                               to={`/token/SEP/${r.token.address}`}
                               className="px-2 py-0.5 rounded bg-orange-400/10 text-orange-400 border border-orange-400/30 hover:bg-orange-500/10 flex items-center gap-1 text-xs font-mono"
@@ -1194,7 +1223,7 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                                 >
                                   {r.parentCommentUser.username ||
                                     formatAddress(
-                                      r.parentCommentUser.walletAddress
+                                      r.parentCommentUser.walletAddress,
                                     )}
                                 </Link>
                                 {r.parentCommentCreatedAt && (
@@ -1245,7 +1274,9 @@ const ProfileDashboard = ({ walletAddress }: ProfileDashboardProps) => {
                                       r.isLiked ? "fill-current" : ""
                                     }`}
                                   />
-                                  <span className="font-mono">{r._count?.likes || 0}</span>
+                                  <span className="font-mono">
+                                    {r._count?.likes || 0}
+                                  </span>
                                 </button>
                               </div>
                               <div className="text-gray-200 text-sm mt-1 font-mono">
