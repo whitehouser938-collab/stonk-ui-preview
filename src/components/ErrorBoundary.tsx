@@ -1,8 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import * as Sentry from '@sentry/react';
 import { Button } from '@/components/ui/button';
 import { logger } from '@/utils/logger';
-import { env } from '@/utils/env';
 
 interface Props {
   children: ReactNode;
@@ -26,16 +24,6 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     logger.error('ErrorBoundary caught:', error, errorInfo);
-
-    // Send error to Sentry with React component context
-    if (import.meta.env.PROD && env.VITE_ERROR_REPORTING_URL) {
-      Sentry.withScope((scope) => {
-        scope.setContext('react', {
-          componentStack: errorInfo.componentStack,
-        });
-        Sentry.captureException(error);
-      });
-    }
   }
 
   handleReset = () => {

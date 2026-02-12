@@ -21,8 +21,6 @@ export interface EnvConfig {
   VITE_EVILWETH_ADDRESS: string;
   VITE_BASE_VAULT_ADDRESS?: string;
   VITE_DEPLOYMENT_FEE_ETH: string;
-  /** Optional: POST errors to this URL in production (e.g. /api/errors or Sentry ingest) */
-  VITE_ERROR_REPORTING_URL?: string;
 }
 
 function validateEnv(): EnvConfig {
@@ -100,7 +98,6 @@ function validateEnv(): EnvConfig {
     VITE_EVILWETH_ADDRESS: wethAddress || '',
     VITE_BASE_VAULT_ADDRESS: baseVaultAddress,
     VITE_DEPLOYMENT_FEE_ETH: deploymentFeeEth ?? '0',
-    VITE_ERROR_REPORTING_URL: import.meta.env.VITE_ERROR_REPORTING_URL,
   };
 }
 
