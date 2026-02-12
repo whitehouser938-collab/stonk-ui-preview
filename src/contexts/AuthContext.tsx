@@ -262,7 +262,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Auto-authenticate when wallet connects (if not already authenticated)
   useEffect(() => {
-    if (isConnected && address && !user && !isAuthenticating && !isLoading) {
+    // CRITICAL: Wait for walletClient to be ready before attempting auto sign-in
+    if (isConnected && address && walletClient && !user && !isAuthenticating && !isLoading) {
       // Don't retry if we've already attempted sign-in for this address
       if (attemptedSignInRef.current.has(address.toLowerCase())) {
         logger.info("Already attempted sign-in for this address, skipping", { address });
@@ -274,10 +275,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       signIn().catch((error) => {
         logger.error("Auto sign-in failed:", error);
-        // Don't remove from attempted set - we don't want to retry automatically
+        // Remove from attempted set so user can manually retry
+        attemptedSignInRef.current.delete(address.toLowerCase());
       });
     }
-  }, [isConnected, address, user, isAuthenticating, isLoading, signIn]);
+  }, [isConnected, address, walletClient, user, isAuthenticating, isLoading, signIn]);
 
   // Clear auth when the wallet is disconnected
   useEffect(() => {
