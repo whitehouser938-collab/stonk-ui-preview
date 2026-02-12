@@ -58,7 +58,7 @@ const appKit = createAppKit({
   projectId,
   metadata,
   features: {
-    analytics: true,
+    analytics: false, // Disabled to prevent IndexedDB errors in browsers with strict privacy settings
   },
 });
 
