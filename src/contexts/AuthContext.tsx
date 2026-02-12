@@ -3,6 +3,7 @@ import { useAppKitAccount, useDisconnect } from "@reown/appkit/react";
 import { useWalletClient } from "wagmi";
 import { logger } from "@/utils/logger";
 import { env } from "@/utils/env";
+import { toast } from "@/hooks/use-toast";
 
 interface User {
   id: string;
@@ -188,6 +189,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       logger.info("Setting user data", { userData });
       setUser(userData);
+
+      // Show success notification
+      toast({
+        title: "Signed In Successfully",
+        description: `Welcome back${userData.username ? ", " + userData.username : ""}!`,
+      });
     } catch (error: any) {
       logger.error("Sign in error:", {
         message: error.message,

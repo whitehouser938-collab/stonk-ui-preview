@@ -8,6 +8,25 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    // Proxy configuration for local development
+    // This solves the cookie issue where different origins (ports) prevent
+    // cookies from being sent with fetch requests.
+    //
+    // How it works:
+    // 1. Frontend runs on localhost:8080
+    // 2. Auth service runs on localhost:3001
+    // 3. Vite proxies /auth/* requests to :3001
+    // 4. Cookies are set for localhost:8080 (same origin)
+    // 5. Subsequent requests include cookies automatically
+    //
+    // Production doesn't use proxy - uses full URLs with CORS + sameSite='none'
+    proxy: mode === 'development' ? {
+      '/auth': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+      }
+    } : undefined,
   },
   plugins: [
     react(),

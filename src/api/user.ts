@@ -119,7 +119,7 @@ export const getAllUsers = async (
     if (params?.search) searchParams.append("search", params.search);
 
     const url = `${API_ROOT}/user/?${searchParams.toString()}`;
-    const response = await fetch(url);
+    const response = await fetch(url, { credentials: "include" });
 
     if (!response.ok) {
       throw new Error("Failed to fetch users");
@@ -147,7 +147,7 @@ export const searchUsers = async (
     });
 
     const url = `${API_ROOT}/user/search?${searchParams.toString()}`;
-    const response = await fetch(url);
+    const response = await fetch(url, { credentials: "include" });
 
     if (!response.ok) {
       throw new Error("Failed to search users");
@@ -167,7 +167,7 @@ export const searchUsers = async (
 
 export const getUserStats = async (): Promise<UserStats> => {
   try {
-    const response = await fetch(`${API_ROOT}/user/stats`);
+    const response = await fetch(`${API_ROOT}/user/stats`, { credentials: "include" });
 
     if (!response.ok) {
       throw new Error("Failed to fetch user stats");
@@ -191,6 +191,7 @@ export const checkUsernameAvailability = async (
   try {
     const response = await fetch(
       `${API_ROOT}/user/username/available?q=${encodeURIComponent(username)}`,
+      { credentials: "include" }
     );
 
     if (!response.ok) {
@@ -235,7 +236,7 @@ export const getUserByWalletAddress = async (
   walletAddress: string,
 ): Promise<User | null> => {
   try {
-    const response = await fetch(`${API_ROOT}/user/${walletAddress}`);
+    const response = await fetch(`${API_ROOT}/user/${walletAddress}`, { credentials: "include" });
 
     // 404 means the wallet hasn't registered yet — not an error
     if (response.status === 404) {
@@ -529,7 +530,7 @@ export const getUserOverview = async (
   walletAddress: string,
 ): Promise<GetUserOverviewResponse["data"]> => {
   if (!walletAddress) throw new Error("wallet is required");
-  const response = await fetch(`${API_ROOT}/user/${walletAddress}/overview`);
+  const response = await fetch(`${API_ROOT}/user/${walletAddress}/overview`, { credentials: "include" });
   if (!response.ok) {
     const message = `Failed to fetch user overview (${response.status})`;
     throw new Error(message);
@@ -571,7 +572,7 @@ export const getUserHoldings = async (
   if (!walletAddress) throw new Error("wallet address is required");
 
   try {
-    const response = await fetch(`${API_ROOT}/user/${walletAddress}/holdings`);
+    const response = await fetch(`${API_ROOT}/user/${walletAddress}/holdings`, { credentials: "include" });
 
     if (!response.ok) {
       throw new Error(`Failed to fetch user holdings (${response.status})`);
