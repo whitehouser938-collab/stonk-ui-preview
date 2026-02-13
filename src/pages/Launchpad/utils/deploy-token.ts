@@ -25,6 +25,26 @@ export const deployTokenETH = async (
   tokenData: ICOLaunchData,
   signer: ethers.Signer
 ) => {
+  // Mock deployment mode: skip on-chain transaction, return fake deployment data.
+  // Enable by setting VITE_MOCK_DEPLOY=true in .env.development
+  if (import.meta.env.VITE_MOCK_DEPLOY === "true") {
+    logger.info("[MOCK] Skipping on-chain deployment, returning mock data");
+    const randomHex = (len: number) =>
+      Array.from({ length: len }, () =>
+        Math.floor(Math.random() * 16).toString(16)
+      ).join("");
+    const mockAddress = "0x" + randomHex(40);
+    return {
+      transactionHash: "0x" + randomHex(64),
+      tokenAddress: mockAddress,
+      bondingCurveAddress: mockAddress,
+      deployerAddress: await signer.getAddress(),
+      deploymentTimestamp: new Date().toISOString(),
+      deploymentBlock: "99999999",
+      success: true,
+    } as DeployTokenResponse;
+  }
+
   if (tokenData.launchpad === "SEP") {
     try {
       const tokenFactoryAddress = env.VITE_EVM_TOKEN_FACTORY_ADDRESS;
