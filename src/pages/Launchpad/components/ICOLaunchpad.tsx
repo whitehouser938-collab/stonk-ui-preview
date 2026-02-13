@@ -365,17 +365,14 @@ export function ICOLaunchpad() {
             logger.debug(
               "Uploading logo after successful blockchain transaction..."
             );
+            logger.debug("Token response from database:", addTokenResponse);
             const logoUrl = await uploadTokenLogo(
-              addTokenResponse.tokenAddress,
+              addTokenResponse.id,
               formData.logoFile,
               addTokenResponse.name,
               addTokenResponse.symbol
             );
             logger.debug("Logo uploaded successfully:", logoUrl);
-
-            // Step 4: Update token with logo URL
-            await updateTokenLogoUrl(addTokenResponse.id, logoUrl);
-            logger.debug("Logo URL updated successfully");
           } catch (uploadError) {
             logger.error("Failed to upload logo:", uploadError);
             toast({

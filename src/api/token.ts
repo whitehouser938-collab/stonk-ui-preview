@@ -90,7 +90,7 @@ export const uploadTokenLogo = async (
     if (!resData || !resData.success) {
       throw new Error("Logo upload unsuccessful");
     }
-    return resData.url;
+    return resData.data.logoUrl;
   } catch (error) {
     logger.error("Error uploading token logo:", error);
     throw error;
