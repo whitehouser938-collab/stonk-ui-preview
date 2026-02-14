@@ -12,9 +12,22 @@ import dotenv from 'dotenv';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
 
-// Load .env first, then .env.production as fallback
+// Load .env files
 dotenv.config({ path: path.resolve(root, '.env') });
 dotenv.config({ path: path.resolve(root, '.env.production') });
+
+// Also manually load .env.production if env vars still not set (for Vercel)
+const fs = await import('fs');
+const envProdPath = path.resolve(root, '.env.production');
+if (fs.existsSync(envProdPath)) {
+  const envContent = fs.readFileSync(envProdPath, 'utf8');
+  envContent.split('\n').forEach(line => {
+    const match = line.match(/^([^#\s=]+)\s*=\s*(.*)$/);
+    if (match && !process.env[match[1]]) {
+      process.env[match[1]] = match[2].replace(/^["']|["']$/g, '');
+    }
+  });
+}
 
 const requiredEnvVars = [
   'VITE_API_URL',
