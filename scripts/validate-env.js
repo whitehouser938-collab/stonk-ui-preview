@@ -11,7 +11,10 @@ import dotenv from 'dotenv';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
+
+// Load .env first, then .env.production as fallback
 dotenv.config({ path: path.resolve(root, '.env') });
+dotenv.config({ path: path.resolve(root, '.env.production') });
 
 const requiredEnvVars = [
   'VITE_API_URL',
