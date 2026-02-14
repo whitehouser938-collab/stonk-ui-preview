@@ -42,6 +42,11 @@ function validateEnv() {
   for (const varName of requiredEnvVars) {
     const value = process.env[varName];
     if (!value) {
+      // Allow placeholder for WALLETCONNECT in preview builds
+      if (varName === 'VITE_WALLETCONNECT_PROJECT_ID') {
+        warnings.push(`${varName} not set - using placeholder (wallet features disabled)`);
+        continue;
+      }
       errors.push(`${varName} is required but not set`);
     } else if (varName.includes('URL')) {
       try {
