@@ -1,0 +1,54 @@
+/* ============================
+   TRADINGVIEW THEME OVERRIDES
+   ============================ */
+:root {
+  /* ===== Platform / Header ===== */
+  --tv-color-platform-background: #121216;
+  --tv-color-pane-background: #121216;
+
+  --tv-color-toolbar-divider-background: rgba(255, 255, 255, 0.06);
+
+  /* Toolbar buttons */
+  --tv-color-toolbar-button-background-hover: rgba(255, 255, 255, 0.06);
+  --tv-color-toolbar-button-background-expanded: rgba(255, 255, 255, 0.08);
+  --tv-color-toolbar-button-background-active: rgba(255, 255, 255, 0.10);
+  --tv-color-toolbar-button-background-active-hover: rgba(255, 255, 255, 0.14);
+
+  --tv-color-toolbar-button-text: #e5e7eb;
+  --tv-color-toolbar-button-text-hover: #ffffff;
+  --tv-color-toolbar-button-text-active: #ffffff;
+  --tv-color-toolbar-button-text-active-hover: #ffffff;
+
+  --tv-color-item-active-text: #ffffff;
+
+  --tv-color-toolbar-toggle-button-background-active: rgba(255, 255, 255, 0.14);
+  --tv-color-toolbar-toggle-button-background-active-hover: rgba(255, 255, 255, 0.18);
+
+  --tv-color-toolbar-save-layout-loader: #f97316;
+
+  /* ===== Popups / Dropdowns ===== */
+  --tv-color-popup-background: #18181d;
+
+  --tv-color-popup-element-text: #e5e7eb;
+  --tv-color-popup-element-secondary-text: #9ca3af;
+  --tv-color-popup-element-hint-text: #9ca3af;
+
+  --tv-color-popup-element-text-hover: #ffffff;
+  --tv-color-popup-element-text-active: #ffffff;
+
+  --tv-color-popup-element-background-hover: rgba(255, 255, 255, 0.08);
+  --tv-color-popup-element-background-active: rgba(255, 255, 255, 0.12);
+
+  --tv-color-popup-element-divider-background: rgba(255, 255, 255, 0.06);
+
+  /* Toolbox menus */
+  --tv-color-popup-element-toolbox-text: #e5e7eb;
+  --tv-color-popup-element-toolbox-text-hover: #ffffff;
+  --tv-color-popup-element-toolbox-text-active-hover: #ffffff;
+
+  --tv-color-popup-element-toolbox-background-hover: rgba(255, 255, 255, 0.08);
+  --tv-color-popup-element-toolbox-background-active-hover: rgba(255, 255, 255, 0.12);
+
+  /* Tooltips */
+  --tv-color-bar-mark-background-color: #18181d;
+}

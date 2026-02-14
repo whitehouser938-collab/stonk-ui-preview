@@ -1,0 +1,159 @@
+import { ICOLaunchData } from "../components/ICOLaunchpad";
+import { ethers, TransactionResponse } from "ethers";
+import TokenFactory from "@/abi/evm/TokenFactory.json";
+import { Contract, EventLog } from "ethers";
+import { env } from "@/utils/env";
+import { logger } from "@/utils/logger";
+
+export interface DeployTokenResponse {
+  transactionHash: string;
+  tokenAddress: string;
+  bondingCurveAddress: string;
+  deployerAddress: string;
+  deploymentTimestamp: string;
+  deploymentBlock: string;
+  success: boolean;
+}
+
+// Minimal ERC20 ABI for approve function
+const ERC20_ABI = [
+  "function approve(address spender, uint256 amount) public returns (bool)",
+  "function allowance(address owner, address spender) public view returns (uint256)"
+];
+
+export const deployTokenETH = async (
+  tokenData: ICOLaunchData,
+  signer: ethers.Signer
+) => {
+  // Mock deployment mode: skip on-chain transaction, return fake deployment data.
+  // Enable by setting VITE_MOCK_DEPLOY=true in .env.development
+  if (import.meta.env.VITE_MOCK_DEPLOY === "true") {
+    logger.info("[MOCK] Skipping on-chain deployment, returning mock data");
+    const randomHex = (len: number) =>
+      Array.from({ length: len }, () =>
+        Math.floor(Math.random() * 16).toString(16)
+      ).join("");
+    const mockAddress = "0x" + randomHex(40);
+    return {
+      transactionHash: "0x" + randomHex(64),
+      tokenAddress: mockAddress,
+      bondingCurveAddress: mockAddress,
+      deployerAddress: await signer.getAddress(),
+      deploymentTimestamp: new Date().toISOString(),
+      deploymentBlock: "99999999",
+      success: true,
+    } as DeployTokenResponse;
+  }
+
+  if (tokenData.launchpad === "SEP") {
+    try {
+      const tokenFactoryAddress = env.VITE_EVM_TOKEN_FACTORY_ADDRESS;
+      const tokenFactory = new Contract(
+        tokenFactoryAddress,
+        TokenFactory.abi,
+        signer
+      );
+
+      // Get the fee price and log it
+      // const fee = await tokenFactory.feePrice();
+      // console.log("Deployment fee:", ethers.formatEther(fee), "ETH");
+      // console.log("Fee in wei:", fee.toString());
+
+      let tx: TransactionResponse;
+
+      // Check if initial buy amount is provided
+      if (tokenData.initialBuyAmount && parseFloat(tokenData.initialBuyAmount) > 0) {
+        // Convert initial buy amount to Wei
+        const initialBuyAmountWei = ethers.parseEther(tokenData.initialBuyAmount);
+
+        // Determine if using ETH (default to true if not specified)
+        const useETH = tokenData.useETH !== undefined ? tokenData.useETH : true;
+
+        // If using WETH, check and approve allowance first
+        if (!useETH) {
+          const wethAddress = env.VITE_EVILWETH_ADDRESS;
+          const wethContract = new Contract(wethAddress, ERC20_ABI, signer);
+          const userAddress = await signer.getAddress();
+
+          // Check current allowance
+          const currentAllowance = await wethContract.allowance(userAddress, tokenFactoryAddress);
+          logger.debug("Current WETH allowance:", ethers.formatEther(currentAllowance), "WETH");
+
+          // If allowance is insufficient, approve
+          if (currentAllowance < initialBuyAmountWei) {
+            logger.debug("Approving WETH spending...");
+            const approveTx = await wethContract.approve(tokenFactoryAddress, initialBuyAmountWei);
+            await approveTx.wait();
+            logger.debug("WETH approved successfully");
+          } else {
+            logger.debug("Sufficient WETH allowance already exists");
+          }
+        }
+
+        // Deploy token with initial buy
+        tx = await tokenFactory.deployToken(
+          tokenData.name,
+          tokenData.symbol,
+          initialBuyAmountWei,
+          useETH, // useETH from form data
+          useETH ? { value: initialBuyAmountWei } : {} // Only send ETH value if using ETH
+        );
+
+        logger.debug("Deploying with initial buy of", tokenData.initialBuyAmount, useETH ? "ETH" : "WETH");
+      } else {
+        // Deploy token without initial buy (original function)
+        tx = await tokenFactory.deployToken(
+          tokenData.name,
+          tokenData.symbol,
+          0,
+          false
+          // { value: fee }
+        );
+
+        logger.debug("Deploying without initial buy");
+      }
+
+      const receipt = await tx.wait(); // Wait for the transaction to be mined
+      logger.debug("Transaction mined:", tx);
+
+      if (!receipt) throw new Error("Transaction receipt is null");
+      const eventLog = receipt.logs.find(
+        (log): log is EventLog =>
+          log instanceof EventLog && log.fragment?.name === "TokenDeployed"
+      );
+
+      let tokenAddress: string;
+      let bondingCurveAddress: string;
+      if (eventLog) {
+        // [tokenAddress, bondingCurveAddress] = eventLog.args;
+        // For the new contract token address is bonding curve address
+        [tokenAddress] = eventLog.args;
+        bondingCurveAddress = tokenAddress;
+      } else {
+        throw new Error("TokenDeployed event not found");
+      }
+
+      const response = {
+        transactionHash: tx.hash,
+        tokenAddress: tokenAddress,
+        bondingCurveAddress: bondingCurveAddress,
+        deployerAddress: await signer.getAddress(),
+        deploymentTimestamp: new Date().toISOString(),
+        deploymentBlock: receipt.blockNumber.toString(),
+        success: true,
+      };
+      return response;
+    } catch (error) {
+      logger.error("Error deploying token:", error);
+      return {
+        transactionHash: "",
+        tokenAddress: "",
+        bondingCurveAddress: "",
+        deployerAddress: "",
+        deploymentTimestamp: "",
+        deploymentBlock: "",
+        success: false,
+      };
+    }
+  }
+};
