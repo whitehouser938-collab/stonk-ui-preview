@@ -85,71 +85,40 @@ export function ProfileDisplay() {
           <User className="w-4 h-4" />
         </AvatarFallback>
       </Avatar>
-      <div className="flex flex-col items-start">
-        <div className="flex items-center space-x-1">
-          <span className="text-sm font-medium text-gray-200 group-hover:text-orange-400 transition-colors font-mono">
-            {user?.username || formatAddress(address || "")}
-          </span>
-          {!user?.username && (
-            <button
-              onClick={async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                try {
-                  await navigator.clipboard.writeText(address || "");
-                  toast({
-                    title: "Address Copied",
-                    description: "Wallet address copied to clipboard",
-                    variant: "default",
-                  });
-                } catch (error) {
-                  logger.error("Failed to copy address:", error);
-                  toast({
-                    title: "Copy Failed",
-                    description: "Failed to copy address to clipboard",
-                    variant: "destructive",
-                  });
-                }
-              }}
-              className="text-gray-500 hover:text-orange-400 transition-colors"
-              title="Copy wallet address"
-            >
-              <Copy className="w-3 h-3" />
-            </button>
-          )}
-        </div>
+      <div className="flex items-center gap-1.5">
+        <span className="text-sm font-medium text-gray-200 group-hover:text-orange-400 transition-colors font-mono whitespace-nowrap">
+          {user?.username || formatAddress(address || "")}
+        </span>
         {user?.username && (
-          <div className="flex items-center space-x-1">
-            <span className="text-xs text-gray-500 font-mono">
-              {formatAddress(address || "")}
-            </span>
-            <button
-              onClick={async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                try {
-                  await navigator.clipboard.writeText(address || "");
-                  toast({
-                    title: "Address Copied",
-                    description: "Wallet address copied to clipboard",
-                    variant: "default",
-                  });
-                } catch (error) {
-                  logger.error("Failed to copy address:", error);
-                  toast({
-                    title: "Copy Failed",
-                    description: "Failed to copy address to clipboard",
-                    variant: "destructive",
-                  });
-                }
-              }}
-              className="text-gray-500 hover:text-orange-400 transition-colors"
-              title="Copy wallet address"
-            >
-              <Copy className="w-3 h-3" />
-            </button>
-          </div>
+          <span className="text-xs text-gray-500 font-mono whitespace-nowrap">
+            {formatAddress(address || "")}
+          </span>
         )}
+        <button
+          onClick={async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            try {
+              await navigator.clipboard.writeText(address || "");
+              toast({
+                title: "Address Copied",
+                description: "Wallet address copied to clipboard",
+                variant: "default",
+              });
+            } catch (error) {
+              logger.error("Failed to copy address:", error);
+              toast({
+                title: "Copy Failed",
+                description: "Failed to copy address to clipboard",
+                variant: "destructive",
+              });
+            }
+          }}
+          className="text-gray-500 hover:text-orange-400 transition-colors"
+          title="Copy wallet address"
+        >
+          <Copy className="w-3 h-3" />
+        </button>
       </div>
     </Link>
   );

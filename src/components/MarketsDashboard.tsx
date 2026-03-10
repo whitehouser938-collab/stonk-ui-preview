@@ -262,8 +262,8 @@ export function MarketsDashboard() {
 
     const handleScroll = () => {
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      // Check if scrolled past the initial position (approximately when trending section is out of view)
-      const isSticky = scrollTop > 200;
+      // Check if scrolled past the initial position
+      const isSticky = scrollTop > 60;
       setIsStickyRowActive(isSticky);
       // Auto-collapse filters when scrolling back to top
       if (!isSticky && isFiltersExpanded) {
@@ -465,199 +465,21 @@ export function MarketsDashboard() {
       <div className="lg:hidden">
         {/* Search Bar - Mobile Only */}
         {isMobile && (
-          <div className={`${
-            isMobile ? "bg-bg-main" : "bg-bg-main border border-gray-700"
-          } p-2 overflow-hidden`}>
+          <div className="bg-bg-main px-2 py-1 overflow-hidden">
             <button
               onClick={() => setIsSearchModalOpen(true)}
-              className="w-full flex items-center gap-3 px-4 py-3 bg-[#1F2023] rounded-lg text-left hover:bg-[#2C2C2C] transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-2 bg-[#1F2023] rounded-lg text-left hover:bg-[#2C2C2C] transition-colors"
             >
               <Search className="w-5 h-5 text-[#8F8F8F] flex-shrink-0" />
               <span className="text-[#8F8F8F] text-sm font-mono" style={{ fontSize: '14px' }}>Search...</span>
             </button>
           </div>
         )}
-        {/* Header Row - matches token page structure */}
-        <div className={`${
-          isMobile ? "bg-bg-main" : "bg-bg-main border border-gray-700"
-        } ${isMobile ? "" : "p-2"} overflow-hidden`}>
-          {/* Now trending text - matches back arrow/time row from token page */}
-          <div className="flex items-center justify-between py-2 px-2">
-            <h2 className="text-white font-bold text-base font-sans pl-4">
-              Now trending <span className="rocket-blink">🚀</span>
-            </h2>
-          </div>
-        </div>
-        {/* Trending Cards Section */}
-        <div>
-          <div
-            className="overflow-x-auto pb-3 px-3"
-            style={{
-              WebkitOverflowScrolling: "touch",
-              scrollbarWidth: "none",
-              msOverflowStyle: "none",
-            }}
-          >
-            <style>{`
-              .trending-scroll::-webkit-scrollbar {
-                display: none;
-              }
-              @keyframes blink {
-                0%, 49% { opacity: 1; }
-                50%, 100% { opacity: 0; }
-              }
-              .rocket-blink {
-                animation: blink 1s infinite;
-              }
-            `}</style>
-            <div className="flex gap-3 trending-scroll">
-              {isLoadingTrending ? (
-                // Skeleton cards that match exact dimensions
-                Array.from({ length: 5 }).map((_, index) => (
-                  <div
-                    key={`skeleton-${index}`}
-                    className="flex-shrink-0 w-[280px] bg-bg-card rounded-lg overflow-hidden"
-                  >
-                    {/* Token Image Skeleton */}
-                    <div className="relative h-[140px] bg-gray-800">
-                      <Skeleton className="w-full h-full" />
-                      {/* Volume and Price Change overlay skeleton */}
-                      <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-xs font-sans flex items-center gap-2">
-                        <Skeleton className="h-3 w-16 bg-gray-700" />
-                        <Skeleton className="h-3 w-12 bg-gray-700" />
-                      </div>
-                    </div>
-                    {/* Token Info Skeleton */}
-                    <div className="p-3">
-                      <div className="mb-1">
-                        <Skeleton className="h-4 w-24 bg-gray-700" />
-                      </div>
-                      {/* Deployer Info + Age Skeleton */}
-                      <div className="flex items-center gap-1.5 mb-2">
-                        <Skeleton className="w-4 h-4 rounded-full bg-gray-700" />
-                        <Skeleton className="h-3 w-16 bg-gray-700" />
-                        <Skeleton className="h-3 w-1 bg-gray-700" />
-                        <Skeleton className="h-3 w-12 bg-gray-700" />
-                      </div>
-                      {/* Description Skeleton */}
-                      <div className="mb-2">
-                        <Skeleton className="h-3 w-full bg-gray-700 mb-1" />
-                        <Skeleton className="h-3 w-3/4 bg-gray-700" />
-                      </div>
-                      <div>
-                        <Skeleton className="h-3 w-32 bg-gray-700" />
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                getTrendingTokensDisplay().map((token) => (
-                  <div
-                    key={token.tokenAddress}
-                    onClick={() => handleTokenClick(token)}
-                    className="flex-shrink-0 w-[280px] bg-bg-card rounded-lg overflow-hidden cursor-pointer hover:bg-bg-card-hover transition-colors"
-                  >
-                    {/* Token Image */}
-                    <div className="relative h-[140px] bg-gray-800">
-                      {token.logoUrl ? (
-                        <img
-                          src={token.logoUrl}
-                          alt={token.tokenSymbol}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.style.display = "none";
-                          }}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Circle className="w-16 h-16 text-blue-400" />
-                        </div>
-                      )}
-                      {/* Volume and Price Change overlay */}
-                      <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-xs font-sans flex items-center gap-2">
-                        <div>
-                          <span className="text-gray-400">vol: </span>
-                          <span className="text-white font-bold">
-                            ${formatNumber((token.buyVolume1h || 0) + (token.sellVolume1h || 0))}
-                          </span>
-                        </div>
-                        {token.priceChange1h !== undefined && token.priceChange1h !== null && (
-                          <div className={`flex items-center gap-0.5 ${
-                            token.priceChange1h >= 0 ? "text-green-400" : "text-red-400"
-                          }`}>
-                            {token.priceChange1h >= 0 ? (
-                              <ArrowUp className="w-3 h-3" />
-                            ) : (
-                              <ArrowDown className="w-3 h-3" />
-                            )}
-                            <span className="font-bold">
-                              {token.priceChange1h >= 0 ? "+" : ""}{token.priceChange1h.toFixed(2)}%
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    {/* Token Info */}
-                    <div className="p-3">
-                      <div className="mb-1">
-                        <span className="text-white-soft font-bold text-sm font-sans truncate">
-                          {token.tokenName && token.tokenName.length > 12
-                            ? `${token.tokenName.slice(0, 12)}...`
-                            : token.tokenName}
-                        </span>
-                      </div>
-                      {/* Deployer Info + Age */}
-                      <div className="flex items-center gap-1.5 mb-2">
-                        <img
-                          src={token.pfp || "/default-pfp-clear.png"}
-                          alt="Deployer"
-                          className="w-4 h-4 rounded-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.src = "/default-pfp-clear.png";
-                          }}
-                        />
-                        <a
-                          href={`/profile/${token.deployerAddress || ""}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-gray-400 text-xs font-sans truncate underline hover:text-white"
-                        >
-                          {token.username ||
-                            (token.deployerAddress
-                              ? formatAddress(token.deployerAddress)
-                              : "Unknown")}
-                        </a>
-                        <span className="text-gray-400 text-xs">•</span>
-                        <span className="text-white-soft text-xs font-sans">
-                          {formatTokenAge(
-                            token.deploymentTimestamp || "",
-                            currentTime
-                          )}
-                        </span>
-                      </div>
-                      {/* Description */}
-                      {token.description && (
-                        <div className="text-gray-400 text-xs font-sans mb-2 line-clamp-2">
-                          {token.description}
-                        </div>
-                      )}
-                      <div className="text-gray-400 text-xs font-sans mb-2">
-                        <span className="text-orange-400">market cap: </span>
-                        <span className="text-white-soft font-bold">
-                          ${formatNumber(token.currentPrice * 1_000_000_000)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
 
         {/* View Toggle and Filter Buttons - Sticky at Top */}
-        <div 
+        <div
           ref={stickyRowRef}
-          className="sticky top-0 z-20 bg-bg-card px-3 py-2 flex gap-2 items-center overflow-x-auto scrollbar-hide"
+          className="sticky top-0 z-20 bg-bg-card px-3 py-1 flex gap-2 items-center overflow-x-auto scrollbar-hide"
         >
             {/* View Toggle Buttons */}
             <button
@@ -778,7 +600,7 @@ export function MarketsDashboard() {
             <div className="text-center p-8 text-gray-400">No tokens found</div>
           ) : viewMode === "card" ? (
             /* Card Grid View */
-            <div className="grid grid-cols-1 gap-3 p-3 pb-0">
+            <div className="grid grid-cols-1 gap-2 p-2 pb-0">
               {filteredTokens.map((token) => (
                 <div
                   key={token.tokenAddress}

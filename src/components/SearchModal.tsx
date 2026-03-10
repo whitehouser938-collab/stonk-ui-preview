@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Search, X, ExternalLink, TrendingUp } from "lucide-react";
+import { Search, X, ExternalLink, TrendingUp, Clock, Trash2 } from "lucide-react";
 import { useAtom } from "jotai";
 import { searchTermAtom, isSearchModalOpenAtom } from "@/state/app";
 import { useNavigate } from "react-router-dom";
 import { searchTokens as apiSearchTokens } from "@/api/token";
 import { logger } from "@/utils/logger";
+import { SearchHistoryManager, SearchHistoryEntry } from "@/services/searchHistory";
+import { useAppKitAccount } from "@reown/appkit/react";
 
 interface TokenSearchResult {
   id: string;
@@ -28,20 +30,27 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
   const [searchResults, setSearchResults] = useState<TokenSearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [recentSearches, setRecentSearches] = useState<SearchHistoryEntry[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const { address } = useAppKitAccount({ namespace: "eip155" });
   
   // Sync local isOpen prop with global atom
   useEffect(() => {
     setIsSearchModalOpen(isOpen);
   }, [isOpen, setIsSearchModalOpen]);
 
-  // Focus input when modal opens
+  // Focus input and load search history when modal opens
   useEffect(() => {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus();
+    if (isOpen) {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+      if (address) {
+        setRecentSearches(SearchHistoryManager.getRecentSearches(address, 8));
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, address]);
 
   // Debounced search function
   useEffect(() => {
@@ -122,8 +131,23 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
   };
 
   const selectToken = (token: TokenSearchResult) => {
+    if (address && storedSearchTerm.trim()) {
+      SearchHistoryManager.saveSearch(address, storedSearchTerm.trim(), token.id);
+    }
     navigate(`/token/${token.chain}/${token.tokenAddress}`);
     handleClose();
+  };
+
+  const handleHistoryClick = (query: string) => {
+    setStoredSearchTerm(query);
+  };
+
+  const handleRemoveHistoryEntry = (e: React.MouseEvent, query: string) => {
+    e.stopPropagation();
+    if (address) {
+      SearchHistoryManager.removeEntry(address, query);
+      setRecentSearches(SearchHistoryManager.getRecentSearches(address, 8));
+    }
   };
 
   const handleClose = () => {
@@ -150,9 +174,9 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
 
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4">
-        <div className="bg-gray-900 border border-gray-700 rounded-lg w-full max-w-2xl shadow-2xl">
+        <div className="bg-gray-900 border border-neutral-700 rounded-lg w-full max-w-2xl shadow-2xl">
           {/* Search Input Header */}
-          <div className="flex items-center gap-3 p-4 border-b border-gray-700">
+          <div className="flex items-center gap-3 p-4 border-b border-neutral-700">
             <Search className="text-orange-400 w-5 h-5 flex-shrink-0" />
             <input
               ref={inputRef}
@@ -162,7 +186,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
               value={storedSearchTerm}
               onChange={(e) => setStoredSearchTerm(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="flex-1 bg-transparent border-none text-white text-base font-mono focus:outline-none placeholder-gray-500"
+              className="flex-1 bg-transparent border-none text-white text-base font-mono focus:outline-none focus:ring-0 placeholder-gray-500 appearance-none"
             />
             <button
               type="button"
@@ -247,6 +271,31 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
               <div className="p-8 text-center text-gray-400 font-mono">
                 No tokens found for "{storedSearchTerm}"
               </div>
+            ) : recentSearches.length > 0 ? (
+              <div>
+                <div className="px-4 py-2 text-gray-500 text-xs font-mono flex items-center gap-1.5">
+                  <Clock className="w-3 h-3" />
+                  Recent searches
+                </div>
+                {recentSearches.map((entry) => (
+                  <div
+                    key={entry.query}
+                    onClick={() => handleHistoryClick(entry.query)}
+                    className="px-4 py-2.5 cursor-pointer transition-colors border-b border-gray-800 last:border-b-0 hover:bg-gray-800/50 flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Search className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-300 text-sm font-mono">{entry.query}</span>
+                    </div>
+                    <button
+                      onClick={(e) => handleRemoveHistoryEntry(e, entry.query)}
+                      className="p-1 hover:bg-gray-700 rounded transition-colors"
+                    >
+                      <X className="w-3 h-3 text-gray-500" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             ) : (
               <div className="p-8 text-center text-gray-500 font-mono">
                 Start typing to search tokens...
@@ -256,7 +305,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
 
           {/* Footer */}
           {searchResults.length > 0 && (
-            <div className="border-t border-gray-700 px-4 py-3 bg-gray-900/50">
+            <div className="border-t border-neutral-700 px-4 py-3 bg-gray-900/50">
               <div className="text-gray-500 text-xs flex items-center justify-between">
                 <span>↑↓ Navigate • Enter Select • Esc Close</span>
                 <span>

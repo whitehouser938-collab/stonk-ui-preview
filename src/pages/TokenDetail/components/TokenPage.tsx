@@ -985,7 +985,7 @@ const TokenPage = () => {
             </div>
             {/* Token Info Section - Mobile */}
             {isMobile ? (
-              <div>
+              <div className="pt-3">
                 {/* Logo and Token Info Row - aligned with trending card logos */}
                 <div className="flex items-start gap-3 px-3">
                     {/* Token Logo */}
@@ -1072,8 +1072,8 @@ const TokenPage = () => {
                     </div>
                   </div>
 
-                {/* Spacer div for future use */}
-                <div className="h-12"></div>
+                {/* Spacer */}
+                <div className="h-4"></div>
 
                 {/* Market Cap / Liquidity and Price Change - Combined container */}
                   <div className="flex flex-col gap-0">
@@ -2726,29 +2726,28 @@ const TokenPage = () => {
             >
               Log in to trade
             </button>
-          ) : BigInt(userTokenBalance) === 0n ? (
-            /* Signed in but no token balance - Show "Buy" */
-            <button
-              onClick={() => {
-                setTradeMode("buy");
-                setIsTradingModalOpen(true);
-              }}
-              className="w-[90%] bg-orange-400 hover:bg-orange-500 text-black font-bold py-4 px-4 transition-all duration-200 rounded"
-            >
-              Buy
-            </button>
           ) : (
-            /* Signed in with token balance - Show "Trade" */
-            <button
-              onClick={() => {
-                // Default to sell mode if user has tokens
-                setTradeMode("sell");
-                setIsTradingModalOpen(true);
-              }}
-              className="w-[90%] bg-orange-400 hover:bg-orange-500 text-black font-bold py-4 px-4 transition-all duration-200 rounded"
-            >
-              Trade
-            </button>
+            /* Signed in - Show Buy and Sell side by side */
+            <div className="w-[90%] flex gap-2">
+              <button
+                onClick={() => {
+                  setTradeMode("buy");
+                  setIsTradingModalOpen(true);
+                }}
+                className="flex-1 bg-green-500 hover:bg-green-600 text-black font-bold py-4 px-4 transition-all duration-200 rounded"
+              >
+                Buy
+              </button>
+              <button
+                onClick={() => {
+                  setTradeMode("sell");
+                  setIsTradingModalOpen(true);
+                }}
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-4 transition-all duration-200 rounded"
+              >
+                Sell
+              </button>
+            </div>
           )}
         </div>
       )}
